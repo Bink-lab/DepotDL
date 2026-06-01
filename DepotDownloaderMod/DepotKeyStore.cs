@@ -9,13 +9,13 @@ namespace DepotDownloader
 {
     static class DepotKeyStore
     {
-        private static Dictionary<uint, byte[]> depotKeysCache = new Dictionary<uint, byte[]>();
+        private static readonly Dictionary<uint, byte[]> depotKeysCache = new Dictionary<uint, byte[]>();
 
         public static void AddAll(string[] values)
         {
-            foreach (string value in values)
+            foreach (var value in values)
             {
-                string[] split = value.Split(';');
+                var split = value.Split(';');
 
                 if (split.Length != 2)
                 {

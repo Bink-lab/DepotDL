@@ -597,12 +597,12 @@ namespace DepotDownloader
             if (DepotKeyStore.ContainsKey(depotId))
             {
                 depotKey = DepotKeyStore.Get(depotId);
-                steam3.DepotKeys.Add(depotId,depotKey);
+                steam3.DepotKeys.Add(depotId, depotKey);
             }
             else
             {
                 await steam3.RequestDepotKey(depotId, appId);
-            }            
+            }
             if (!steam3.DepotKeys.TryGetValue(depotId, out depotKey))
             {
                 Console.WriteLine("No valid depot key for {0}, unable to download.", depotId);
@@ -1165,9 +1165,9 @@ namespace DepotDownloader
                     lock (depotDownloadCounter)
                     {
                         depotDownloadCounter.sizeDownloaded += file.TotalSize;
-                        double elapsedSec = (DateTime.UtcNow - downloadStartTime).TotalSeconds;
-                        double speedBps = elapsedSec > 0.1 ? (depotDownloadCounter.depotBytesCompressed / elapsedSec) : 0;
-                        string speedStr = speedBps > 0 ? $" ({FormatSpeed(speedBps)})" : "";
+                        var elapsedSec = (DateTime.UtcNow - downloadStartTime).TotalSeconds;
+                        var speedBps = elapsedSec > 0.1 ? (depotDownloadCounter.depotBytesCompressed / elapsedSec) : 0;
+                        var speedStr = speedBps > 0 ? $" ({FormatSpeed(speedBps)})" : "";
                         Console.WriteLine("{0,6:#00.00}% {1}{2}", (depotDownloadCounter.sizeDownloaded / (float)depotDownloadCounter.completeDownloadSize) * 100.0f, fileFinalPath, speedStr);
                     }
 
@@ -1364,9 +1364,9 @@ namespace DepotDownloader
             if (remainingChunks == 0)
             {
                 var fileFinalPath = Path.Combine(depot.InstallDir, file.FileName);
-                double elapsedSec = (DateTime.UtcNow - downloadStartTime).TotalSeconds;
-                double speedBps = elapsedSec > 0.1 ? (depotDownloadCounter.depotBytesCompressed / elapsedSec) : 0;
-                string speedStr = speedBps > 0 ? $" ({FormatSpeed(speedBps)})" : "";
+                var elapsedSec = (DateTime.UtcNow - downloadStartTime).TotalSeconds;
+                var speedBps = elapsedSec > 0.1 ? (depotDownloadCounter.depotBytesCompressed / elapsedSec) : 0;
+                var speedStr = speedBps > 0 ? $" ({FormatSpeed(speedBps)})" : "";
                 Console.WriteLine("{0,6:#00.00}% {1}{2}", (sizeDownloaded / (float)depotDownloadCounter.completeDownloadSize) * 100.0f, fileFinalPath, speedStr);
             }
         }

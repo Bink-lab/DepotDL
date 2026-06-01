@@ -146,19 +146,19 @@ namespace DepotDownloader
                     Console.WriteLine("Warning: Unable to load filelist: {0}", ex);
                 }
             }
-            
-            string depotKeysList = GetParameter<string>(args, "-depotkeys");
+
+            var depotKeysList = GetParameter<string>(args, "-depotkeys");
 
 
             if (depotKeysList != null)
             {
                 try
                 {
-                    string depotKeysListData = File.ReadAllText(depotKeysList);
-                    string[] lines = depotKeysListData.Split(new char[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
+                    var depotKeysListData = File.ReadAllText(depotKeysList);
+                    var lines = depotKeysListData.Split(new char[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
 
                     DepotKeyStore.AddAll(lines);
-                    
+
                     Console.WriteLine("Using depot keys from '{0}'.", depotKeysList);
                 }
                 catch (Exception ex)
