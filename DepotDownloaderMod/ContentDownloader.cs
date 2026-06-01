@@ -31,6 +31,7 @@ namespace DepotDownloader
         private static Steam3Session steam3;
         private static CDNClientPool cdnPool;
         private static DateTime downloadStartTime = DateTime.UtcNow;
+        private static readonly Dictionary<(uint appId, string branch), KeyValue> privateBetaDepotSectionCache = new();
 
         private static string FormatSpeed(double speedBps)
         {
@@ -270,8 +271,12 @@ namespace DepotDownloader
             }
 
             // Got the password, request private depot section
-            // TODO: We're probably repeating this request for every depot?
-            var privateDepotSection = await steam3.GetPrivateBetaDepotSection(appId, branch);
+            var cacheKey = (appId, branch);
+            if (!privateBetaDepotSectionCache.TryGetValue(cacheKey, out var privateDepotSection))
+            {
+                privateDepotSection = await steam3.GetPrivateBetaDepotSection(appId, branch);
+                privateBetaDepotSectionCache[cacheKey] = privateDepotSection;
+            }
 
             // Now repeat the same code to get the manifest gid from depot section
             depotChild = privateDepotSection[depotId.ToString()];

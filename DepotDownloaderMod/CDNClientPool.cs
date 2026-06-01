@@ -84,9 +84,11 @@ namespace DepotDownloader
                 if (servers[nextServer % servers.Count] == server)
                 {
                     nextServer++;
-
-                    // TODO: Add server to ContentServerPenalty
                 }
+
+                AccountSettingsStore.Instance.ContentServerPenalty.TryGetValue(server.Host, out var penalty);
+                AccountSettingsStore.Instance.ContentServerPenalty[server.Host] = penalty + 100;
+                AccountSettingsStore.Save();
             }
         }
     }

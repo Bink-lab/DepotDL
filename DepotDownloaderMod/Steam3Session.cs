@@ -633,9 +633,29 @@ namespace DepotDownloader
                     AccountSettingsStore.Instance.LoginTokens.Remove(logonDetails.Username);
                     AccountSettingsStore.Save();
 
-                    // TODO: Handle gracefully by falling back to password prompt?
-                    Console.WriteLine($"Access token was rejected ({loggedOn.Result}).");
-                    Abort(false);
+                    Console.WriteLine($"Access token was rejected ({loggedOn.Result}). Falling back to password authentication.");
+                    logonDetails.AccessToken = null;
+
+                    Console.Write($"Enter account password for \"{logonDetails.Username}\": ");
+                    if (Console.IsInputRedirected)
+                    {
+                        logonDetails.Password = Console.ReadLine();
+                    }
+                    else
+                    {
+                        logonDetails.Password = Util.ReadPassword();
+                    }
+
+                    if (string.IsNullOrEmpty(logonDetails.Password))
+                    {
+                        Console.WriteLine("\nNo password provided.");
+                        Abort(false);
+                        return;
+                    }
+
+                    Console.WriteLine();
+                    Console.Write("Retrying Steam3 connection...");
+                    Connect();
                     return;
                 }
                 else
