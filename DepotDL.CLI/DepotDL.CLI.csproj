@@ -8,12 +8,20 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Reference Include="SteamKit2">
-      <HintPath>..\third_party\DDMod\SteamKit2.dll</HintPath>
-    </Reference>
-    <None Include="..\third_party\DDMod\**\*.*">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
+    <PackageReference Include="SteamKit2" Version="3.2.0" />
   </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\DepotDownloaderMod\DepotDownloaderMod.csproj">
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
+  </ItemGroup>
+
+  <Target Name="CopyDepotDownloaderModOutput" AfterTargets="Build">
+    <ItemGroup>
+      <_DepotModFiles Include="..\DepotDownloaderMod\bin\$(Configuration)\net9.0\*.*" />
+    </ItemGroup>
+    <Copy SourceFiles="@(_DepotModFiles)" DestinationFolder="$(OutputPath)" SkipUnchangedFiles="true" />
+  </Target>
 
 </Project>
