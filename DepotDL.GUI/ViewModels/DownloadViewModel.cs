@@ -54,8 +54,14 @@ namespace DepotDL.GUI.ViewModels
         [ObservableProperty] private bool _downloadFailed;
         [ObservableProperty] private string _completionMessage = string.Empty;
 
+        public IAsyncRelayCommand FetchFromRyuuAsyncCommand { get; }
+        public IAsyncRelayCommand StartDownloadAsyncCommand { get; }
+
         public DownloadViewModel()
         {
+            FetchFromRyuuAsyncCommand = new AsyncRelayCommand(FetchFromRyuuAsync, () => CanFetchRyuu);
+            StartDownloadAsyncCommand = new AsyncRelayCommand(StartDownloadAsync, () => CanStart);
+
             var settings = _settings.Load();
             ManifestsDir = settings.ManifestsDir ?? string.Empty;
             MaxParallel = settings.MaxParallelDepots;
@@ -69,15 +75,15 @@ namespace DepotDL.GUI.ViewModels
         partial void OnRyuuApiKeyChanged(string value) => UpdateCanFetchRyuu();
         partial void OnIsRyuuBusyChanged(bool value) => UpdateCanFetchRyuu();
 
-        private void UpdateCanFetchRyuu() =>
-            CanFetchRyuu = !IsRyuuBusy &&
-                           !string.IsNullOrWhiteSpace(RyuuAppId) &&
-                           !string.IsNullOrWhiteSpace(RyuuApiKey);
+        private void UpdateCanFetchRyuu()
+        {
+            CanFetchRyuu = !IsRyuuBusy && !string.IsNullOrWhiteSpace(RyuuAppId);
+            if (FetchFromRyuuAsyncCommand is AsyncRelayCommand cmd)
+                cmd.NotifyCanExecuteChanged();
+        }
 
-        [RelayCommand]
         private async Task FetchFromRyuuAsync()
         {
-            if (!CanFetchRyuu) return;
             IsRyuuBusy = true;
             RyuuError = string.Empty;
             try
@@ -204,9 +210,10 @@ namespace DepotDL.GUI.ViewModels
             CanStart = LuaLoaded &&
                        !string.IsNullOrWhiteSpace(OutputDir) &&
                        Depots.Any(d => d.IsSelected);
+            if (StartDownloadAsyncCommand is AsyncRelayCommand cmd)
+                cmd.NotifyCanExecuteChanged();
         }
 
-        [RelayCommand]
         private async Task StartDownloadAsync()
         {
             if (!CanStart) return;
