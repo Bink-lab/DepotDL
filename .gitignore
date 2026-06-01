@@ -1,0 +1,106 @@
+# =========================================================================
+# .gitignore for DepotDL (.NET / C# / Visual Studio & cross-platform)
+# =========================================================================
+
+# -------------------------------------------------------------------------
+# Build & Publish Outputs (bin, obj, publish)
+# -------------------------------------------------------------------------
+[Bb]in/
+[Oo]bj/
+[Ww]in32/
+x64/
+x86/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+bld/
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
+[Ll]og/
+[Ll]ogs/
+publish/
+
+# -------------------------------------------------------------------------
+# Visual Studio IDE & Cache
+# -------------------------------------------------------------------------
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+*.suo.tmp
+
+# Nested VS projects
+*.csproj.user
+*.vcxproj.user
+*.ideaproj.user
+*.sqlproj.user
+
+# -------------------------------------------------------------------------
+# VS Code
+# -------------------------------------------------------------------------
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+!.vscode/code-workspace
+
+# -------------------------------------------------------------------------
+# JetBrains Rider & Other IDEs
+# -------------------------------------------------------------------------
+.idea/
+*.sln.iml
+*.userprefs
+mono_crash.*
+
+# -------------------------------------------------------------------------
+# NuGet / Dependencies
+# -------------------------------------------------------------------------
+*.nupkg
+**/packages/
+!**/packages/build/
+.paket/
+paket-files/
+
+# -------------------------------------------------------------------------
+# ReSharper / Code Analysis / Profiling
+# -------------------------------------------------------------------------
+_ReSharper*/
+*.[Rr]e[Ss]harper
+*.DotSettings.user
+*.NCover
+_NCrunch_*
+.*crunch*.db
+.*crunch*.db-journal
+BenchmarkDotNet.Artifacts/
+
+# -------------------------------------------------------------------------
+# Local / Environment Secrets (Optional)
+# -------------------------------------------------------------------------
+*.env
+*.env.local
+*.env.*.local
+*.usersecrets
+appsettings.local.json
+
+# -------------------------------------------------------------------------
+# OS-Specific (Windows, macOS, Linux)
+# -------------------------------------------------------------------------
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Linux
+*~
+.fuse_hidden*
+.directory
+.Trash-*

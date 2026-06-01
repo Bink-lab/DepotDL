@@ -1,0 +1,331 @@
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.IO;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Windows;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using DepotDL.GUI.Models;
+using DepotDL.GUI.Services;
+
+namespace DepotDL.GUI.ViewModels
+{
+    public enum DownloadStep { SelectFile, ConfigureDepots, Downloading }
+
+    public partial class DownloadViewModel : ViewModelBase
+    {
+        private readonly LuaParserService _parser = new();
+        private readonly DownloadService _downloader = new();
+        private readonly LibraryService _library = new();
+        private readonly SettingsService _settings = new();
+        private readonly RyuuService _ryuu = new();
+        private readonly ZipImportService _zipper = new();
+
+        private CancellationTokenSource? _cts;
+
+        [ObservableProperty] private DownloadStep _currentStep = DownloadStep.SelectFile;
+
+        [ObservableProperty] private string _luaPath = string.Empty;
+        [ObservableProperty] private string _luaFileName = string.Empty;
+        [ObservableProperty] private string _appId = string.Empty;
+        [ObservableProperty] private bool _luaLoaded;
+        [ObservableProperty] private string _parseError = string.Empty;
+
+        [ObservableProperty] private ObservableCollection<DepotSelectionItem> _depots = new();
+        [ObservableProperty] private string _outputDir = string.Empty;
+        [ObservableProperty] private string _manifestsDir = string.Empty;
+        [ObservableProperty] private int _maxParallel = 2;
+        [ObservableProperty] private bool _canStart;
+
+        [ObservableProperty] private string _ryuuAppId = string.Empty;
+        [ObservableProperty] private string _ryuuApiKey = string.Empty;
+        [ObservableProperty] private bool _isRyuuBusy;
+        [ObservableProperty] private string _ryuuError = string.Empty;
+        [ObservableProperty] private bool _canFetchRyuu;
+
+        [ObservableProperty] private ObservableCollection<DepotDownloadState> _downloadStates = new();
+        [ObservableProperty] private double _overallPercent;
+        [ObservableProperty] private string _overallStatus = string.Empty;
+        [ObservableProperty] private bool _isDownloading;
+        [ObservableProperty] private bool _downloadComplete;
+        [ObservableProperty] private bool _downloadFailed;
+        [ObservableProperty] private string _completionMessage = string.Empty;
+
+        public DownloadViewModel()
+        {
+            var settings = _settings.Load();
+            ManifestsDir = settings.ManifestsDir ?? string.Empty;
+            MaxParallel = settings.MaxParallelDepots;
+            RyuuApiKey = settings.RyuuApiKey ?? string.Empty;
+            UpdateCanFetchRyuu();
+        }
+
+        partial void OnOutputDirChanged(string value) => UpdateCanStart();
+        partial void OnDepotsChanged(ObservableCollection<DepotSelectionItem> value) => UpdateCanStart();
+        partial void OnRyuuAppIdChanged(string value) => UpdateCanFetchRyuu();
+        partial void OnRyuuApiKeyChanged(string value) => UpdateCanFetchRyuu();
+        partial void OnIsRyuuBusyChanged(bool value) => UpdateCanFetchRyuu();
+
+        private void UpdateCanFetchRyuu() =>
+            CanFetchRyuu = !IsRyuuBusy &&
+                           !string.IsNullOrWhiteSpace(RyuuAppId) &&
+                           !string.IsNullOrWhiteSpace(RyuuApiKey);
+
+        [RelayCommand]
+        private async Task FetchFromRyuuAsync()
+        {
+            if (!CanFetchRyuu) return;
+            IsRyuuBusy = true;
+            RyuuError = string.Empty;
+            try
+            {
+                var settings = _settings.Load();
+                settings.RyuuApiKey = RyuuApiKey.Trim();
+                _settings.Save(settings);
+
+                var result = await _ryuu.DownloadPackageAsync(RyuuAppId.Trim(), RyuuApiKey.Trim());
+                if (!result.HasZip || string.IsNullOrEmpty(result.ZipPath))
+                {
+                    RyuuError = result.Message;
+                    return;
+                }
+
+                var imported = _zipper.ImportZip(result.ZipPath);
+                try { File.Delete(result.ZipPath); } catch { }
+
+                if (!string.IsNullOrEmpty(imported.ManifestsDir) && imported.ManifestCount > 0)
+                    ManifestsDir = imported.ManifestsDir;
+
+                if (!string.IsNullOrEmpty(imported.FirstLuaPath))
+                    LoadLuaFile(imported.FirstLuaPath);
+                else
+                    RyuuError = "ZIP contained no Lua configuration file.";
+            }
+            catch (Exception ex)
+            {
+                RyuuError = ex.Message;
+            }
+            finally
+            {
+                IsRyuuBusy = false;
+            }
+        }
+
+        [RelayCommand]
+        private void BrowseLuaFile()
+        {
+            var dialog = new Microsoft.Win32.OpenFileDialog
+            {
+                Title = "Select Lua Config File",
+                Filter = "Lua files (*.lua)|*.lua|All files (*.*)|*.*",
+                DefaultExt = ".lua"
+            };
+            if (dialog.ShowDialog() == true)
+                LoadLuaFile(dialog.FileName);
+        }
+
+        public void LoadLuaFile(string path)
+        {
+            if (!File.Exists(path)) return;
+            try
+            {
+                LuaPath = path;
+                LuaFileName = Path.GetFileName(path);
+                ParseError = string.Empty;
+
+                var (appId, depots) = _parser.Parse(path);
+                if (string.IsNullOrEmpty(appId))
+                {
+                    ParseError = "Could not find AppID in Lua file.";
+                    LuaLoaded = false;
+                    return;
+                }
+
+                AppId = appId;
+                Depots = new ObservableCollection<DepotSelectionItem>(
+                    depots.Select(d => new DepotSelectionItem(d)));
+                LuaLoaded = true;
+
+                var settings = _settings.Load();
+                if (!string.IsNullOrWhiteSpace(settings.DownloadBaseDir))
+                    OutputDir = Path.Combine(settings.DownloadBaseDir, $"App_{appId}");
+
+                CurrentStep = DownloadStep.ConfigureDepots;
+                UpdateCanStart();
+            }
+            catch (Exception ex)
+            {
+                ParseError = $"Parse error: {ex.Message}";
+                LuaLoaded = false;
+            }
+        }
+
+        [RelayCommand]
+        private void BrowseOutputDir()
+        {
+            var dialog = new Microsoft.Win32.OpenFolderDialog
+            {
+                Title = "Select Download Output Folder"
+            };
+            if (dialog.ShowDialog() == true)
+                OutputDir = dialog.FolderName;
+        }
+
+        [RelayCommand]
+        private void BrowseManifestsDir()
+        {
+            var dialog = new Microsoft.Win32.OpenFolderDialog
+            {
+                Title = "Select Manifests Cache Folder"
+            };
+            if (dialog.ShowDialog() == true)
+                ManifestsDir = dialog.FolderName;
+        }
+
+        [RelayCommand]
+        private void SelectAllDepots()
+        {
+            foreach (var d in Depots) d.IsSelected = true;
+            UpdateCanStart();
+        }
+
+        [RelayCommand]
+        private void SelectNoDepots()
+        {
+            foreach (var d in Depots) d.IsSelected = false;
+            UpdateCanStart();
+        }
+
+        private void UpdateCanStart()
+        {
+            CanStart = LuaLoaded &&
+                       !string.IsNullOrWhiteSpace(OutputDir) &&
+                       Depots.Any(d => d.IsSelected);
+        }
+
+        [RelayCommand]
+        private async Task StartDownloadAsync()
+        {
+            if (!CanStart) return;
+
+            if (!_downloader.Initialize())
+            {
+                MessageBox.Show(
+                    "Could not find .NET 9 runtime or DepotDownloaderMod.dll.\n" +
+                    "Make sure .NET 9 is installed and DepotDownloaderMod.dll is in the third_party/DDMod folder.",
+                    "Missing Dependencies", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            var selectedDepots = Depots.Where(d => d.IsSelected).Select(d => d.Depot).ToList();
+            var states = selectedDepots.Select(d => new DepotDownloadState
+            {
+                DepotId = d.DepotId,
+                DepotName = d.DisplayName
+            }).ToList();
+
+            Directory.CreateDirectory(OutputDir);
+            DownloadStates = new ObservableCollection<DepotDownloadState>(states);
+            CurrentStep = DownloadStep.Downloading;
+            IsDownloading = true;
+            DownloadComplete = false;
+            DownloadFailed = false;
+            OverallStatus = "Starting...";
+
+            _cts = new CancellationTokenSource();
+
+            _ = Task.Run(async () =>
+            {
+                while (!_cts.IsCancellationRequested && IsDownloading)
+                {
+                    double pct = states.Average(s => s.Percent);
+                    Application.Current.Dispatcher.Invoke(() => OverallPercent = pct);
+                    await Task.Delay(250);
+                }
+            });
+
+            try
+            {
+                await _downloader.RunDownloadsAsync(
+                    AppId, selectedDepots, OutputDir,
+                    string.IsNullOrWhiteSpace(ManifestsDir) ? null : ManifestsDir,
+                    MaxParallel, states, _cts.Token);
+
+                bool anyFailed = states.Any(s => s.Status == DepotStatus.Failed);
+                DownloadComplete = !anyFailed;
+                DownloadFailed = anyFailed;
+                OverallPercent = anyFailed ? OverallPercent : 100;
+                OverallStatus = anyFailed ? "Completed with errors" : "All depots downloaded!";
+                CompletionMessage = anyFailed
+                    ? $"{states.Count(s => s.Status == DepotStatus.Failed)} depot(s) failed."
+                    : $"{states.Count(s => s.Status == DepotStatus.Done)} depot(s) complete.";
+
+                if (!anyFailed)
+                {
+                    string gameName = Path.GetFileNameWithoutExtension(LuaPath);
+                    if (string.IsNullOrWhiteSpace(gameName)) gameName = $"App {AppId}";
+                    var game = new LibraryGame
+                    {
+                        AppId = AppId,
+                        GameName = gameName,
+                        LuaPath = LuaPath,
+                        OutputDir = OutputDir,
+                        DepotIds = selectedDepots.Select(d => d.DepotId).ToList(),
+                        InstallDate = DateTime.Now,
+                        TotalSizeBytes = LibraryService.GetDirectorySize(OutputDir),
+                        IsVerified = true
+                    };
+                    _library.AddOrUpdate(game);
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                OverallStatus = "Download cancelled";
+                CompletionMessage = "Download was cancelled.";
+            }
+            finally
+            {
+                IsDownloading = false;
+            }
+        }
+
+        [RelayCommand]
+        private void CancelDownload()
+        {
+            _cts?.Cancel();
+        }
+
+        [RelayCommand]
+        private void StartNew()
+        {
+            _cts?.Cancel();
+            CurrentStep = DownloadStep.SelectFile;
+            LuaPath = string.Empty;
+            LuaFileName = string.Empty;
+            AppId = string.Empty;
+            LuaLoaded = false;
+            ParseError = string.Empty;
+            Depots.Clear();
+            DownloadStates.Clear();
+            IsDownloading = false;
+            DownloadComplete = false;
+            DownloadFailed = false;
+            OverallPercent = 0;
+        }
+    }
+
+    public partial class DepotSelectionItem : ObservableObject
+    {
+        public DepotInfo Depot { get; }
+        [ObservableProperty] private bool _isSelected = true;
+
+        public string DisplayName => Depot.DisplayName;
+        public string DepotId => Depot.DepotId;
+        public string OsText => string.IsNullOrWhiteSpace(Depot.OsList) ? "—" : Depot.OsList;
+
+        public DepotSelectionItem(DepotInfo depot) => Depot = depot;
+    }
+}

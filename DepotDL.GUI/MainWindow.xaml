@@ -1,0 +1,532 @@
+<Window x:Class="DepotDL.GUI.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:views="clr-namespace:DepotDL.GUI.Views"
+        Title="DepotDL"
+        Width="1080" Height="700"
+        MinWidth="860" MinHeight="560"
+        WindowStartupLocation="CenterScreen"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        ResizeMode="CanResizeWithGrip"
+        Background="Transparent"
+        FontFamily="Segoe UI"
+        TextOptions.TextFormattingMode="Display"
+        TextOptions.TextRenderingMode="ClearType"
+        UseLayoutRounding="True">
+
+    <Window.Resources>
+        <Style x:Key="NavItem" TargetType="Button">
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Margin" Value="0,1"/>
+            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="bg" Background="{TemplateBinding Background}"
+                                CornerRadius="10" Padding="12,9">
+                            <Grid>
+                                <Border x:Name="hoverBg" Background="{StaticResource Border}"
+                                        CornerRadius="10" Margin="-12,-9" Opacity="0"/>
+                                <ContentPresenter Panel.ZIndex="1"/>
+                            </Grid>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Trigger.EnterActions>
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <DoubleAnimation Storyboard.TargetName="hoverBg"
+                                                             Storyboard.TargetProperty="Opacity"
+                                                             To="1" Duration="0:0:0.15"/>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </Trigger.EnterActions>
+                                <Trigger.ExitActions>
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <DoubleAnimation Storyboard.TargetName="hoverBg"
+                                                             Storyboard.TargetProperty="Opacity"
+                                                             To="0" Duration="0:0:0.15"/>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </Trigger.ExitActions>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="ChromeBtn" TargetType="Button">
+            <Setter Property="Width" Value="28"/>
+            <Setter Property="Height" Value="28"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="bg" Background="{TemplateBinding Background}" CornerRadius="8">
+                            <Grid>
+                                <Border x:Name="hoverBg" Background="{StaticResource Border}" CornerRadius="8" Opacity="0"/>
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" Panel.ZIndex="1"/>
+                            </Grid>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Trigger.EnterActions>
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <DoubleAnimation Storyboard.TargetName="hoverBg"
+                                                             Storyboard.TargetProperty="Opacity"
+                                                             To="1" Duration="0:0:0.15"/>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </Trigger.EnterActions>
+                                <Trigger.ExitActions>
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <DoubleAnimation Storyboard.TargetName="hoverBg"
+                                                             Storyboard.TargetProperty="Opacity"
+                                                             To="0" Duration="0:0:0.15"/>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </Trigger.ExitActions>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="FadeInSlideUp" TargetType="FrameworkElement">
+            <Setter Property="RenderTransform">
+                <Setter.Value>
+                    <TranslateTransform Y="0"/>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="Visibility" Value="Visible">
+                    <Trigger.EnterActions>
+                        <BeginStoryboard>
+                            <Storyboard>
+                                <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                                                 From="0" To="1" Duration="0:0:0.35">
+                                    <DoubleAnimation.EasingFunction>
+                                        <CubicEase EasingMode="EaseOut"/>
+                                    </DoubleAnimation.EasingFunction>
+                                </DoubleAnimation>
+                                <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.Y)"
+                                                 From="20" To="0" Duration="0:0:0.35">
+                                    <DoubleAnimation.EasingFunction>
+                                        <CubicEase EasingMode="EaseOut"/>
+                                    </DoubleAnimation.EasingFunction>
+                                </DoubleAnimation>
+                            </Storyboard>
+                        </BeginStoryboard>
+                    </Trigger.EnterActions>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+
+    </Window.Resources>
+
+    <Window.Triggers>
+        <EventTrigger RoutedEvent="Window.Loaded">
+            <BeginStoryboard>
+                <Storyboard>
+                    <DoubleAnimation Storyboard.TargetName="RootBorder"
+                                     Storyboard.TargetProperty="Opacity"
+                                     From="0" To="1" Duration="0:0:0.55">
+                        <DoubleAnimation.EasingFunction>
+                            <CubicEase EasingMode="EaseOut"/>
+                        </DoubleAnimation.EasingFunction>
+                    </DoubleAnimation>
+                    
+                    <DoubleAnimation Storyboard.TargetName="RootBorder"
+                                     Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleX)"
+                                     From="0.95" To="1" Duration="0:0:0.6">
+                        <DoubleAnimation.EasingFunction>
+                            <CubicEase EasingMode="EaseOut"/>
+                        </DoubleAnimation.EasingFunction>
+                    </DoubleAnimation>
+                    
+                    <DoubleAnimation Storyboard.TargetName="RootBorder"
+                                     Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleY)"
+                                     From="0.95" To="1" Duration="0:0:0.6">
+                        <DoubleAnimation.EasingFunction>
+                            <CubicEase EasingMode="EaseOut"/>
+                        </DoubleAnimation.EasingFunction>
+                    </DoubleAnimation>
+                    
+                    <DoubleAnimation Storyboard.TargetName="RootBorder"
+                                     Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[1].(TranslateTransform.Y)"
+                                     From="30" To="0" Duration="0:0:0.55">
+                        <DoubleAnimation.EasingFunction>
+                            <CubicEase EasingMode="EaseOut"/>
+                        </DoubleAnimation.EasingFunction>
+                    </DoubleAnimation>
+                </Storyboard>
+            </BeginStoryboard>
+        </EventTrigger>
+    </Window.Triggers>
+
+    <Border x:Name="RootBorder"
+            CornerRadius="14"
+            Background="{StaticResource BgPage}"
+            BorderBrush="{StaticResource Border}"
+            BorderThickness="1"
+            RenderTransformOrigin="0.5,0.5"
+            Opacity="0">
+        <Border.RenderTransform>
+            <TransformGroup>
+                <ScaleTransform ScaleX="0.95" ScaleY="0.95"/>
+                <TranslateTransform Y="30"/>
+            </TransformGroup>
+        </Border.RenderTransform>
+        <Border.Effect>
+            <DropShadowEffect BlurRadius="40" ShadowDepth="6" Opacity="0.12" Color="#1C1610"/>
+        </Border.Effect>
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="210"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <Border Grid.Column="0"
+                    Background="{StaticResource BgSidebar}"
+                    CornerRadius="14,0,0,14"
+                    BorderThickness="0,0,1,0"
+                    BorderBrush="{StaticResource Border}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="54"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <Border Grid.Row="0" Background="Transparent"
+                            MouseLeftButtonDown="TitleBar_MouseDown"
+                            MouseLeftButtonUp="TitleBar_MouseUp"
+                            MouseMove="TitleBar_MouseMove">
+                        <StackPanel Orientation="Horizontal"
+                                    VerticalAlignment="Center" Margin="16,0">
+                            <Border Width="32" Height="32" CornerRadius="9"
+                                    Background="{StaticResource Accent}" Margin="0,0,10,0">
+                                <TextBlock Text="D" FontSize="16" FontWeight="Bold"
+                                           Foreground="White"
+                                           HorizontalAlignment="Center"
+                                           VerticalAlignment="Center"/>
+                            </Border>
+                            <StackPanel VerticalAlignment="Center">
+                                <TextBlock Text="DepotDL"
+                                           FontSize="14" FontWeight="SemiBold"
+                                           Foreground="{StaticResource TextH}"/>
+                                <TextBlock Text="Game Downloader"
+                                           FontSize="9.5"
+                                           Foreground="{StaticResource TextMuted}"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+
+                    <StackPanel Grid.Row="1" Margin="10,6,10,0">
+
+                        <Button Command="{Binding NavigateLibraryCommand}">
+                            <Button.Style>
+                                <Style TargetType="Button" BasedOn="{StaticResource NavItem}">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsLibraryPage}" Value="True">
+                                            <Setter Property="Background" Value="{StaticResource AccentLight}"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Button.Style>
+                            <StackPanel Orientation="Horizontal">
+                                <Border Width="3" Height="18" CornerRadius="2" Margin="0,0,10,0">
+                                    <Border.Style>
+                                        <Style TargetType="Border">
+                                            <Setter Property="Background" Value="Transparent"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsLibraryPage}" Value="True">
+                                                    <Setter Property="Background" Value="{StaticResource Accent}"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Border.Style>
+                                </Border>
+                                <Canvas Width="16" Height="16" Margin="0,0,10,0">
+                                    <Rectangle Canvas.Left="0" Canvas.Top="0" Width="6.5" Height="6.5" RadiusX="1.5" RadiusY="1.5">
+                                        <Rectangle.Style>
+                                            <Style TargetType="Rectangle">
+                                                <Setter Property="Fill" Value="#9C8E82"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IsLibraryPage}" Value="True">
+                                                        <Setter Property="Fill" Value="#C07840"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Rectangle.Style>
+                                    </Rectangle>
+                                    <Rectangle Canvas.Left="9.5" Canvas.Top="0" Width="6.5" Height="6.5" RadiusX="1.5" RadiusY="1.5">
+                                        <Rectangle.Style>
+                                            <Style TargetType="Rectangle">
+                                                <Setter Property="Fill" Value="#9C8E82"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IsLibraryPage}" Value="True">
+                                                        <Setter Property="Fill" Value="#C07840"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Rectangle.Style>
+                                    </Rectangle>
+                                    <Rectangle Canvas.Left="0" Canvas.Top="9.5" Width="6.5" Height="6.5" RadiusX="1.5" RadiusY="1.5">
+                                        <Rectangle.Style>
+                                            <Style TargetType="Rectangle">
+                                                <Setter Property="Fill" Value="#9C8E82"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IsLibraryPage}" Value="True">
+                                                        <Setter Property="Fill" Value="#C07840"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Rectangle.Style>
+                                    </Rectangle>
+                                    <Rectangle Canvas.Left="9.5" Canvas.Top="9.5" Width="6.5" Height="6.5" RadiusX="1.5" RadiusY="1.5">
+                                        <Rectangle.Style>
+                                            <Style TargetType="Rectangle">
+                                                <Setter Property="Fill" Value="#9C8E82"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IsLibraryPage}" Value="True">
+                                                        <Setter Property="Fill" Value="#C07840"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Rectangle.Style>
+                                    </Rectangle>
+                                </Canvas>
+                                <TextBlock Text="Library" FontSize="13" VerticalAlignment="Center">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Foreground" Value="{StaticResource TextBody}"/>
+                                            <Setter Property="FontWeight" Value="Normal"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsLibraryPage}" Value="True">
+                                                    <Setter Property="Foreground" Value="{StaticResource Accent}"/>
+                                                    <Setter Property="FontWeight" Value="SemiBold"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                            </StackPanel>
+                        </Button>
+
+                        <Button Command="{Binding NavigateDownloadCommand}">
+                            <Button.Style>
+                                <Style TargetType="Button" BasedOn="{StaticResource NavItem}">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsDownloadPage}" Value="True">
+                                            <Setter Property="Background" Value="{StaticResource AccentLight}"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Button.Style>
+                            <StackPanel Orientation="Horizontal">
+                                <Border Width="3" Height="18" CornerRadius="2" Margin="0,0,10,0">
+                                    <Border.Style>
+                                        <Style TargetType="Border">
+                                            <Setter Property="Background" Value="Transparent"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsDownloadPage}" Value="True">
+                                                    <Setter Property="Background" Value="{StaticResource Accent}"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Border.Style>
+                                </Border>
+                                <Viewbox Width="16" Height="16" Margin="0,0,10,0">
+                                    <Canvas Width="24" Height="24">
+                                        <Path Data="M12,4 L12,16 M8,12 L12,16 L16,12 M4,19 L20,19"
+                                              StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round"
+                                              Fill="Transparent">
+                                            <Path.Style>
+                                                <Style TargetType="Path">
+                                                    <Setter Property="Stroke" Value="{StaticResource TextMuted}"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding IsDownloadPage}" Value="True">
+                                                            <Setter Property="Stroke" Value="{StaticResource Accent}"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Path.Style>
+                                        </Path>
+                                    </Canvas>
+                                </Viewbox>
+                                <TextBlock Text="Download" FontSize="13" VerticalAlignment="Center">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Foreground" Value="{StaticResource TextBody}"/>
+                                            <Setter Property="FontWeight" Value="Normal"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsDownloadPage}" Value="True">
+                                                    <Setter Property="Foreground" Value="{StaticResource Accent}"/>
+                                                    <Setter Property="FontWeight" Value="SemiBold"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                            </StackPanel>
+                        </Button>
+
+                    </StackPanel>
+
+                    <StackPanel Grid.Row="2" Margin="10,0,10,14">
+
+                        <Button Command="{Binding NavigateSettingsCommand}" Margin="0,0,0,0">
+                            <Button.Style>
+                                <Style TargetType="Button" BasedOn="{StaticResource NavItem}">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsSettingsPage}" Value="True">
+                                            <Setter Property="Background" Value="{StaticResource AccentLight}"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Button.Style>
+                            <StackPanel Orientation="Horizontal">
+                                <Border Width="3" Height="18" CornerRadius="2" Margin="0,0,10,0">
+                                    <Border.Style>
+                                        <Style TargetType="Border">
+                                            <Setter Property="Background" Value="Transparent"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsSettingsPage}" Value="True">
+                                                    <Setter Property="Background" Value="{StaticResource Accent}"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Border.Style>
+                                </Border>
+                                <Viewbox Width="16" Height="16" Margin="0,0,10,0">
+                                    <Canvas Width="24" Height="24">
+                                        <Path Data="M12,8 A4,4 0 1 0 12,16 A4,4 0 1 0 12,8 M12,2 L12,5 M12,19 L12,22 M4.22,4.22 L6.34,6.34 M17.66,17.66 L19.78,19.78 M2,12 L5,12 M19,12 L22,12 M4.22,19.78 L6.34,17.66 M17.66,6.34 L19.78,4.22"
+                                              StrokeThickness="1.7" StrokeStartLineCap="Round" StrokeEndLineCap="Round"
+                                              Fill="Transparent">
+                                            <Path.Style>
+                                                <Style TargetType="Path">
+                                                    <Setter Property="Stroke" Value="{StaticResource TextMuted}"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding IsSettingsPage}" Value="True">
+                                                            <Setter Property="Stroke" Value="{StaticResource Accent}"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Path.Style>
+                                        </Path>
+                                    </Canvas>
+                                </Viewbox>
+                                <TextBlock Text="Settings" FontSize="13" VerticalAlignment="Center">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Foreground" Value="{StaticResource TextBody}"/>
+                                            <Setter Property="FontWeight" Value="Normal"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsSettingsPage}" Value="True">
+                                                    <Setter Property="Foreground" Value="{StaticResource Accent}"/>
+                                                    <Setter Property="FontWeight" Value="SemiBold"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <Border Grid.Column="1" Background="{StaticResource BgPage}" CornerRadius="0,14,14,0">
+                <Grid>
+                    <Border Height="40" Background="Transparent" VerticalAlignment="Top"
+                            MouseLeftButtonDown="TitleBar_MouseDown"
+                            MouseLeftButtonUp="TitleBar_MouseUp"
+                            MouseMove="TitleBar_MouseMove"/>
+
+                    <StackPanel Orientation="Horizontal"
+                                HorizontalAlignment="Right"
+                                VerticalAlignment="Top"
+                                Margin="0,10,14,0"
+                                Panel.ZIndex="10">
+                        <Button Style="{StaticResource ChromeBtn}" Click="MinimizeBtn_Click">
+                            <Path Data="M0,5 L10,5" Width="10" Height="10" Stretch="Uniform"
+                                  Stroke="{StaticResource TextMuted}" StrokeThickness="1.5"
+                                  StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
+                        </Button>
+                        <Button Style="{StaticResource ChromeBtn}" Click="MaximizeBtn_Click" Margin="4,0">
+                            <Path Data="M1,1 L9,1 L9,9 L1,9 Z" Width="10" Height="10" Stretch="Uniform"
+                                  Stroke="{StaticResource TextMuted}" StrokeThickness="1.5" Fill="Transparent"/>
+                        </Button>
+                        <Button Style="{StaticResource ChromeBtn}" Click="CloseBtn_Click">
+                            <Path Data="M1,1 L9,9 M9,1 L1,9" Width="10" Height="10" Stretch="Uniform"
+                                  Stroke="{StaticResource TextMuted}" StrokeThickness="1.5"
+                                  StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
+                        </Button>
+                    </StackPanel>
+
+                    <views:LibraryView Style="{StaticResource FadeInSlideUp}"
+                                       DataContext="{Binding Library}"
+                                       Visibility="{Binding DataContext.IsLibraryPage,
+                                           RelativeSource={RelativeSource AncestorType=Window},
+                                           Converter={StaticResource BoolToVis}}"/>
+                    <views:DownloadView Style="{StaticResource FadeInSlideUp}"
+                                        DataContext="{Binding Download}"
+                                        Visibility="{Binding DataContext.IsDownloadPage,
+                                            RelativeSource={RelativeSource AncestorType=Window},
+                                            Converter={StaticResource BoolToVis}}"/>
+                    <views:SettingsView Style="{StaticResource FadeInSlideUp}"
+                                        DataContext="{Binding Settings}"
+                                        Visibility="{Binding DataContext.IsSettingsPage,
+                                            RelativeSource={RelativeSource AncestorType=Window},
+                                            Converter={StaticResource BoolToVis}}"/>
+                </Grid>
+            </Border>
+
+            <Border x:Name="SplashOverlay" Grid.ColumnSpan="2" CornerRadius="14" Panel.ZIndex="100" RenderTransformOrigin="0.5,0.5">
+                <Border.Background>
+                    <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                        <GradientStop Color="#FEFCF8" Offset="0"/>                        <GradientStop Color="#F5F0E8" Offset="1"/>                    </LinearGradientBrush>
+                </Border.Background>
+                <Border.RenderTransform>
+                    <TransformGroup>
+                        <ScaleTransform ScaleX="1" ScaleY="1"/>
+                        <TranslateTransform Y="0"/>
+                    </TransformGroup>
+                </Border.RenderTransform>
+                
+                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                    <Border Width="80" Height="80" CornerRadius="40" Background="{StaticResource Accent}" HorizontalAlignment="Center" Margin="0,0,0,24">
+                        <Border.Effect>
+                            <DropShadowEffect Color="#C07840" BlurRadius="25" ShadowDepth="3" Opacity="0.3"/>
+                        </Border.Effect>
+                        <TextBlock Text="D" FontSize="36" FontWeight="Bold" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                    
+                    <TextBlock Text="DepotDL" FontSize="24" FontWeight="Bold" Foreground="{StaticResource TextH}" HorizontalAlignment="Center" Margin="0,0,0,6"/>
+                    
+                    <TextBlock x:Name="SplashStatus" Text="Booting download engine..." FontSize="12" Foreground="{StaticResource TextSecondary}" HorizontalAlignment="Center" Margin="0,0,0,32"/>
+                    
+                    <Border Width="200" Height="3" CornerRadius="1.5" Background="{StaticResource AccentLight}" HorizontalAlignment="Center">
+                        <Border x:Name="SplashProgressBar" Width="0" Height="3" CornerRadius="1.5" Background="{StaticResource Accent}" HorizontalAlignment="Left">
+                            <Border.Effect>
+                                <DropShadowEffect Color="#C07840" BlurRadius="8" ShadowDepth="0" Opacity="0.4"/>
+                            </Border.Effect>
+                        </Border>
+                    </Border>
+                </StackPanel>
+            </Border>
+        </Grid>
+    </Border>
+</Window>
