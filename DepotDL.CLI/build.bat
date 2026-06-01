@@ -1,5 +1,13 @@
 @echo off
 pushd "%~dp0"
+echo Building DepotDownloaderMod...
+dotnet build "..\DepotDownloaderMod\DepotDownloaderMod.csproj" -c Release
+if %ERRORLEVEL% NEQ 0 (
+    echo [ERROR] DepotDownloaderMod build failed!
+    popd
+    if /I not "%CI%"=="true" pause
+    exit /b %ERRORLEVEL%
+)
 echo Publishing DepotDL.CLI as self-contained single-file exe...
 dotnet publish -c Release -r win-x64 --self-contained true /p:PublishSingleFile=true
 if %ERRORLEVEL% NEQ 0 (
@@ -8,7 +16,7 @@ if %ERRORLEVEL% NEQ 0 (
     if /I not "%CI%"=="true" pause
     exit /b %ERRORLEVEL%
 )
-xcopy "..\third_party\DDMod\*" "bin\Release\net9.0\win-x64\publish\" /E /I /Y >nul
+xcopy "..\DepotDownloaderMod\bin\Release\net9.0\*" "bin\Release\net9.0\win-x64\publish\" /E /I /Y >nul
 if %ERRORLEVEL% NEQ 0 (
     echo [ERROR] Failed to copy DepotDownloaderMod files!
     popd
