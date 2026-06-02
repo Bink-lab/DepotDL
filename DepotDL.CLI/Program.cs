@@ -6,6 +6,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace DepotDL.CLI
@@ -26,6 +27,7 @@ namespace DepotDL.CLI
         public double LastPercent { get; set; } = 0;
         public double CurrentSpeedBps { get; set; } = 0;
         public string? SpeedOverrideString { get; set; }
+        public DateTime LastProgressTime { get; set; } = DateTime.MinValue;
     }
 
     public class Program
@@ -340,7 +342,7 @@ namespace DepotDL.CLI
                 for (int i = 0; i < numWorkers; i++)
                 {
                     int slotId = i;
-                    workerTasks.Add(Task.Run(() =>
+                    workerTasks.Add(Task.Run(async () =>
                     {
                         while (depotQueue.TryDequeue(out var depot))
                         {
@@ -351,6 +353,7 @@ namespace DepotDL.CLI
                                 s.Status = "Initializing...";
                                 s.Percent = null;
                                 s.ActiveValidationFile = null;
+                                s.LastProgressTime = DateTime.MinValue;
                                 s.OutputPath = outputPath;
                                 s.TotalUncompressedSize = 0;
                                 s.LastSpeedTotalBytes = 0;
@@ -421,9 +424,10 @@ namespace DepotDL.CLI
                                         _slots[slotId].Status = $"Retrying ({retryCount}/{maxRetries - 1})...";
                                         _slots[slotId].Percent = null;
                                         _slots[slotId].ActiveValidationFile = null;
+                                        _slots[slotId].LastProgressTime = DateTime.MinValue;
                                     }
                                     DrawSlots(force: true);
-                                    System.Threading.Thread.Sleep(2000 * retryCount);
+                                    Thread.Sleep(2000 * retryCount);
                                 }
 
                                 var psi = new ProcessStartInfo
@@ -478,7 +482,68 @@ namespace DepotDL.CLI
                                     process.Start();
                                     process.BeginOutputReadLine();
                                     process.BeginErrorReadLine();
+
+                                    const int WatchdogTimeoutSeconds = 120;
+                                    bool killedByWatchdog = false;
+                                    using var watchdogCts = new CancellationTokenSource();
+                                    var watchdogTask = Task.Run(async () =>
+                                    {
+                                        double seenPct = -1;
+                                        string seenStatus = "";
+                                        while (!watchdogCts.Token.IsCancellationRequested)
+                                        {
+                                            try { await Task.Delay(15_000, watchdogCts.Token); }
+                                            catch (OperationCanceledException) { break; }
+
+                                            double nowPct; string nowStatus; DateTime lastProg;
+                                            lock (_drawLock)
+                                            {
+                                                nowPct    = _slots[slotId].Percent ?? -1;
+                                                nowStatus = _slots[slotId].Status;
+                                                lastProg  = _slots[slotId].LastProgressTime;
+                                            }
+
+                                            if (nowPct > seenPct || nowStatus != seenStatus)
+                                            {
+                                                seenPct    = nowPct;
+                                                seenStatus = nowStatus;
+                                            }
+                                            else if (lastProg != DateTime.MinValue &&
+                                                     (DateTime.UtcNow - lastProg).TotalSeconds > WatchdogTimeoutSeconds)
+                                            {
+                                                killedByWatchdog = true;
+                                                lock (_drawLock) { _slots[slotId].Status = "Stuck — killing..."; }
+                                                DrawSlots(force: true);
+                                                try { process.Kill(entireProcessTree: true); } catch { }
+                                                break;
+                                            }
+                                        }
+                                    });
+
                                     process.WaitForExit();
+                                    watchdogCts.Cancel();
+                                    await watchdogTask;
+
+                                    if (killedByWatchdog)
+                                    {
+                                        depotOk = false;
+                                        retryCount++;
+                                        string wdDepotId = depot.DepotId;
+                                        lock (_drawLock)
+                                        {
+                                            _slots[slotId].Status = $"Retrying ({retryCount}/{maxRetries - 1})...";
+                                            _slots[slotId].Percent = null;
+                                            _slots[slotId].ActiveValidationFile = null;
+                                            _slots[slotId].LastProgressTime = DateTime.MinValue;
+                                            string wdMsg = retryCount < maxRetries
+                                                ? $"Depot {wdDepotId} stuck for {WatchdogTimeoutSeconds}s, killed. Retrying..."
+                                                : $"Depot {wdDepotId} stuck repeatedly — giving up after {maxRetries} attempts";
+                                            _pendingLogs.Enqueue(() => DownloadTui.WriteStatus("Watchdog", wdMsg, ConsoleColor.Yellow));
+                                        }
+                                        DrawSlots(force: true);
+                                        if (retryCount < maxRetries) { Thread.Sleep(2000 * retryCount); continue; }
+                                        break;
+                                    }
 
                                     if (process.ExitCode != 0 || depotOutputErrors.Count > 0)
                                     {
@@ -553,6 +618,7 @@ namespace DepotDL.CLI
                                 s.Status = "Idle";
                                 s.Percent = null;
                                 s.ActiveValidationFile = null;
+                                s.LastProgressTime = DateTime.MinValue;
                                 s.OutputPath = null;
                                 s.TotalUncompressedSize = 0;
                                 s.LastSpeedTotalBytes = 0;
@@ -740,6 +806,7 @@ namespace DepotDL.CLI
                         {
                             _slots[slotId].Status = "Connecting...";
                             _slots[slotId].Percent = null;
+                            _slots[slotId].LastProgressTime = DateTime.UtcNow;
                         }
                         DrawSlots(force: true);
                     }
@@ -750,6 +817,7 @@ namespace DepotDL.CLI
                         {
                             slot.Status = "Pre-allocating...";
                             slot.Percent = null;
+                            slot.LastProgressTime = DateTime.UtcNow;
                         }
                         DrawSlots(force: true);
 
@@ -797,6 +865,7 @@ namespace DepotDL.CLI
                         _slots[slotId].ActiveValidationFile = Path.GetFileName(line.Substring(11).Trim());
                         _slots[slotId].Status = "Validating";
                         _slots[slotId].Percent = null;
+                        _slots[slotId].LastProgressTime = DateTime.UtcNow;
                     }
                     DrawSlots(force: true);
                     return;
@@ -813,6 +882,7 @@ namespace DepotDL.CLI
                             var slot = _slots[slotId];
                             slot.Percent = percentage;
                             slot.Status = "Downloading";
+                            slot.LastProgressTime = DateTime.UtcNow;
 
                             var speedMatch = Regex.Match(line, @"\(([^)]+)\)\s*$");
                             if (speedMatch.Success)
@@ -822,6 +892,19 @@ namespace DepotDL.CLI
                             else
                             {
                                 slot.SpeedOverrideString = null;
+                            }
+
+                            int fileStart = pctMatch.Index + pctMatch.Length;
+                            while (fileStart < line.Length && line[fileStart] == ' ') fileStart++;
+                            int fileEnd = speedMatch.Success ? speedMatch.Index : line.Length;
+                            if (fileStart < fileEnd)
+                            {
+                                var filePart = Path.GetFileName(line[fileStart..fileEnd].Trim());
+                                slot.ActiveValidationFile = string.IsNullOrEmpty(filePart) ? null : filePart;
+                            }
+                            else
+                            {
+                                slot.ActiveValidationFile = null;
                             }
 
                             DateTime now = DateTime.UtcNow;
