@@ -19,8 +19,6 @@
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="20"/>
                 <RowDefinition Height="Auto"/>
-                <RowDefinition Height="20"/>
-                <RowDefinition Height="Auto"/>
                 <RowDefinition Height="24"/>
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
@@ -47,7 +45,7 @@
                         </Grid.ColumnDefinitions>
                         <TextBox Grid.Column="0"
                                  Text="{Binding ManifestsDir, UpdateSourceTrigger=PropertyChanged}"
-                                 Padding="12,8"/>
+                                 />
                         <Button Grid.Column="2"
                                 Style="{StaticResource BtnGhost}"
                                 Command="{Binding BrowseManifestsDirCommand}"
@@ -70,7 +68,7 @@
                         </Grid.ColumnDefinitions>
                         <TextBox Grid.Column="0"
                                  Text="{Binding DownloadBaseDir, UpdateSourceTrigger=PropertyChanged}"
-                                 Padding="12,8"/>
+                                 />
                         <Button Grid.Column="2"
                                 Style="{StaticResource BtnGhost}"
                                 Command="{Binding BrowseDownloadBaseDirCommand}"
@@ -126,7 +124,7 @@
                     <TextBlock Text="Required for downloading game configurations via the Ryuu service."
                                Style="{StaticResource BodyText}" Margin="0,0,0,8"/>
                     <TextBox Text="{Binding RyuuApiKey, UpdateSourceTrigger=PropertyChanged}"
-                             Padding="12,8"/>
+                             />
 
                     <Separator Margin="0,20"/>
 
@@ -135,7 +133,7 @@
                     <TextBlock Text="Required for downloading game configurations via the Hubcap service."
                                Style="{StaticResource BodyText}" Margin="0,0,0,8"/>
                     <TextBox Text="{Binding HubcapApiKey, UpdateSourceTrigger=PropertyChanged}"
-                             Padding="12,8"/>
+                             />
                 </StackPanel>
             </Border>
 
@@ -355,43 +353,8 @@
                 </StackPanel>
             </Border>
 
-            <!-- Smart OS Filter (Beta) -->
-            <Border Grid.Row="12" Style="{StaticResource Card}" Padding="20">
-                <StackPanel>
-                    <StackPanel Orientation="Horizontal" Margin="0,0,0,14">
-                        <TextBlock Text="DOWNLOAD BEHAVIOUR" Style="{StaticResource TextLabel}"/>
-                        <Border Background="{StaticResource Warning}" CornerRadius="4" Padding="5,2"
-                                Margin="10,0,0,0" VerticalAlignment="Center">
-                            <TextBlock Text="BETA" FontSize="9" FontWeight="Bold" Foreground="White"/>
-                        </Border>
-                    </StackPanel>
-
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="24"/>
-                            <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions>
-
-                        <StackPanel VerticalAlignment="Center">
-                            <TextBlock Text="Smart OS Filter"
-                                       Style="{StaticResource TextH3}" Margin="0,0,0,4"/>
-                            <TextBlock Style="{StaticResource BodyText}" TextWrapping="Wrap">
-                                When loading a Lua config, automatically deselect depots marked
-                                exclusively for other operating systems. Depots with no OS tag
-                                are always kept selected.
-                            </TextBlock>
-                        </StackPanel>
-
-                        <CheckBox Grid.Column="2"
-                                  IsChecked="{Binding SmartOsFilter}"
-                                  VerticalAlignment="Center"/>
-                    </Grid>
-                </StackPanel>
-            </Border>
-
             <!-- Update Channel -->
-            <Border Grid.Row="14" Style="{StaticResource Card}" Padding="20">
+            <Border Grid.Row="12" Style="{StaticResource Card}" Padding="20">
                 <StackPanel>
                     <TextBlock Text="UPDATES" Style="{StaticResource TextLabel}" Margin="0,0,0,14"/>
 
@@ -432,7 +395,7 @@
                 </StackPanel>
             </Border>
 
-            <Grid Grid.Row="16">
+            <Grid Grid.Row="14">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>

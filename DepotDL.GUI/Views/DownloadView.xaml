@@ -83,12 +83,10 @@
                                    Style="{StaticResource TextLabel}" Margin="0"/>
 
                         <TextBox Grid.Row="2" Grid.Column="0"
-                                 Text="{Binding RyuuAppId, UpdateSourceTrigger=PropertyChanged}"
-                                 Padding="12,9"/>
+                                 Text="{Binding RyuuAppId, UpdateSourceTrigger=PropertyChanged}"/>
 
                         <TextBox Grid.Row="2" Grid.Column="2"
-                                 Text="{Binding RyuuApiKey, UpdateSourceTrigger=PropertyChanged}"
-                                 Padding="12,9"/>
+                                 Text="{Binding RyuuApiKey, UpdateSourceTrigger=PropertyChanged}"/>
 
                         <Button Grid.Row="2" Grid.Column="4"
                                 Style="{StaticResource BtnPrimary}"
@@ -184,12 +182,10 @@
                                    Style="{StaticResource TextLabel}" Margin="0"/>
 
                         <TextBox Grid.Row="2" Grid.Column="0"
-                                 Text="{Binding HubcapAppId, UpdateSourceTrigger=PropertyChanged}"
-                                 Padding="12,9"/>
+                                 Text="{Binding HubcapAppId, UpdateSourceTrigger=PropertyChanged}"/>
 
                         <TextBox Grid.Row="2" Grid.Column="2"
-                                 Text="{Binding HubcapApiKey, UpdateSourceTrigger=PropertyChanged}"
-                                 Padding="12,9"/>
+                                 Text="{Binding HubcapApiKey, UpdateSourceTrigger=PropertyChanged}"/>
 
                         <Button Grid.Row="2" Grid.Column="4"
                                 Style="{StaticResource BtnPrimary}"
@@ -392,8 +388,7 @@
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
                             <TextBox Grid.Column="0"
-                                     Text="{Binding OutputDir, UpdateSourceTrigger=PropertyChanged}"
-                                     Padding="12,9"/>
+                                     Text="{Binding OutputDir, UpdateSourceTrigger=PropertyChanged}"/>
                             <Button Grid.Column="2"
                                     Style="{StaticResource BtnGhost}"
                                     Command="{Binding BrowseOutputDirCommand}"
@@ -412,8 +407,7 @@
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
                             <TextBox Grid.Column="0"
-                                     Text="{Binding ManifestsDir, UpdateSourceTrigger=PropertyChanged}"
-                                     Padding="12,9"/>
+                                     Text="{Binding ManifestsDir, UpdateSourceTrigger=PropertyChanged}"/>
                             <Button Grid.Column="2"
                                     Style="{StaticResource BtnGhost}"
                                     Command="{Binding BrowseManifestsDirCommand}"

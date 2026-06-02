@@ -132,7 +132,7 @@
         <Setter Property="Foreground" Value="{StaticResource TextH}"/>
         <Setter Property="BorderBrush" Value="{StaticResource Border}"/>
         <Setter Property="BorderThickness" Value="1.5"/>
-        <Setter Property="Padding" Value="12,9"/>
+        <Setter Property="Padding" Value="10,6"/>
         <Setter Property="FontSize" Value="13"/>
         <Setter Property="FontFamily" Value="Segoe UI"/>
         <Setter Property="CaretBrush" Value="{StaticResource Accent}"/>

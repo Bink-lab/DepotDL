@@ -5,14 +5,12 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Windows;
 using System.Windows.Media.Imaging;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using DepotDL.GUI.Helpers;
 using DepotDL.GUI.Models;
 using DepotDL.GUI.Services;
-using DepotDL.GUI.Views;
 
 namespace DepotDL.GUI.ViewModels
 {
@@ -25,6 +23,9 @@ namespace DepotDL.GUI.ViewModels
         [ObservableProperty] private bool _isEmpty;
         [ObservableProperty] private int _gameCount;
         [ObservableProperty] private string _totalSizeText = string.Empty;
+        [ObservableProperty] private bool _isRemoveOverlayVisible;
+        [ObservableProperty] private LibraryGameViewModel? _gameToRemove;
+        [ObservableProperty] private bool _deleteFiles;
 
         partial void OnSearchTextChanged(string value) => FilterGames();
 
@@ -90,23 +91,31 @@ namespace DepotDL.GUI.ViewModels
         private void RemoveGame(LibraryGameViewModel? vm)
         {
             if (vm == null) return;
+            DeleteFiles = false;
+            GameToRemove = vm;
+            IsRemoveOverlayVisible = true;
+        }
 
-            var dialog = new RemoveGameDialog(vm.Game.GameName)
-            {
-                Owner = Application.Current.MainWindow
-            };
+        [RelayCommand]
+        private void ConfirmRemove()
+        {
+            if (GameToRemove == null) return;
+            IsRemoveOverlayVisible = false;
+            string? error = _lib.Remove(GameToRemove.Game.AppId, DeleteFiles ? GameToRemove.Game.OutputDir : null);
+            Games.Remove(GameToRemove);
+            GameToRemove = null;
+            UpdateStats();
+            FilterGames();
+            if (error != null)
+                DialogService.ShowError("Delete Failed",
+                    $"Game removed from library, but files could not be deleted:\n{error}");
+        }
 
-            if (dialog.ShowDialog() == true)
-            {
-                string? error = _lib.Remove(vm.Game.AppId, dialog.DeleteFiles ? vm.Game.OutputDir : null);
-                Games.Remove(vm);
-                UpdateStats();
-                FilterGames();
-
-                if (error != null)
-                    DialogService.ShowError("Delete Failed",
-                        $"Game removed from library, but files could not be deleted:\n{error}");
-            }
+        [RelayCommand]
+        private void CancelRemove()
+        {
+            IsRemoveOverlayVisible = false;
+            GameToRemove = null;
         }
 
         [RelayCommand]

@@ -1,5 +1,8 @@
+using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
+using System.Text.Json;
 using System.Text.RegularExpressions;
 using DepotDL.GUI.Models;
 
@@ -19,8 +22,63 @@ namespace DepotDL.GUI.Services
         public (string AppId, List<DepotInfo> Depots) Parse(string luaPath)
         {
             string content = File.ReadAllText(luaPath);
-            return ParseContent(content);
+            var result = ParseContent(content);
+            if (!string.IsNullOrEmpty(result.AppId))
+                EnrichWithOsMetadata(result.AppId, result.Depots);
+            return result;
         }
+
+        private static void EnrichWithOsMetadata(string appId, List<DepotInfo> depots)
+        {
+            var metadata = LoadOsMetadata(appId);
+            if (metadata.Count == 0) return;
+            foreach (var depot in depots)
+            {
+                if (!metadata.TryGetValue(depot.DepotId, out var meta)) continue;
+                if (string.IsNullOrWhiteSpace(depot.Name)) depot.Name = meta.name;
+                depot.OsList = meta.osList;
+                depot.OsArch = meta.osArch;
+            }
+        }
+
+        private static Dictionary<string, (string name, string osList, string osArch)> LoadOsMetadata(string appId)
+        {
+            var result = new Dictionary<string, (string, string, string)>(StringComparer.OrdinalIgnoreCase);
+            var path = Path.Combine(AppContext.BaseDirectory, "api_cache.json");
+            if (File.Exists(path))
+                LoadFromCacheFile(path, appId, result);
+            return result;
+        }
+
+        private static void LoadFromCacheFile(string path, string appId, Dictionary<string, (string, string, string)> result)
+        {
+            try
+            {
+                using var doc = JsonDocument.Parse(File.ReadAllText(path));
+                if (!doc.RootElement.TryGetProperty($"app_info_{appId}", out var entry) ||
+                    !entry.TryGetProperty("data", out var data) ||
+                    !data.TryGetProperty("depots", out var depots))
+                    return;
+                foreach (var depot in depots.EnumerateObject())
+                {
+                    if (!ulong.TryParse(depot.Name, out _) || depot.Value.ValueKind != JsonValueKind.Object) continue;
+                    var name = ReadStr(depot.Value, "name");
+                    var osList = string.Empty;
+                    var osArch = string.Empty;
+                    if (depot.Value.TryGetProperty("config", out var config) && config.ValueKind == JsonValueKind.Object)
+                    {
+                        osList = ReadStr(config, "oslist");
+                        osArch = ReadStr(config, "osarch");
+                    }
+                    result[depot.Name] = (name, osList, osArch);
+                }
+            }
+            catch (Exception ex) { Debug.WriteLine($"[LuaParserService] api_cache.json parse failed: {ex.Message}"); }
+        }
+
+        private static string ReadStr(JsonElement el, string name) =>
+            el.TryGetProperty(name, out var v) && v.ValueKind == JsonValueKind.String
+                ? v.GetString() ?? string.Empty : string.Empty;
 
         public (string AppId, List<DepotInfo> Depots) ParseContent(string content)
         {

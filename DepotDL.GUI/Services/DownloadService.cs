@@ -105,6 +105,30 @@ namespace DepotDL.GUI.Services
             finally
             {
                 try { File.Delete(keysFile); } catch { }
+                CleanupDepotDownloaderFolders(outputDir);
+            }
+        }
+
+        private void CleanupDepotDownloaderFolders(string outputDir)
+        {
+            var candidates = new List<string>
+            {
+                Path.Combine(outputDir, ".DepotDownloader"),
+                Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ".DepotDownloader"),
+            };
+
+            if (!string.IsNullOrEmpty(DDModPath))
+            {
+                string? ddmodDir = Path.GetDirectoryName(DDModPath);
+                if (!string.IsNullOrEmpty(ddmodDir))
+                    candidates.Add(Path.Combine(ddmodDir, ".DepotDownloader"));
+            }
+
+            foreach (var path in candidates)
+            {
+                if (!Directory.Exists(path)) continue;
+                try { Directory.Delete(path, true); }
+                catch (Exception ex) { Debug.WriteLine($"[DownloadService] cleanup {path} failed: {ex.Message}"); }
             }
         }
 

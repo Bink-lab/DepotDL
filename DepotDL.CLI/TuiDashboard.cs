@@ -1806,11 +1806,29 @@ namespace DepotDL.CLI
 
             session.AllDepots = new List<DepotInfo>(parsedDepots.Values);
             session.SelectedDepots = LibraryManager.FilterDownloadableDepots(session.AllDepots, appId);
+            ApplyOsFilter(session);
 
             string gameName = Path.GetFileNameWithoutExtension(session.LuaPath);
             if (string.IsNullOrEmpty(gameName)) gameName = $"{appId}";
 
             session.OutputDir = BuildOutputDir(session, gameName);
+        }
+
+        private static void ApplyOsFilter(TuiSession session)
+        {
+            string currentOs = OperatingSystem.IsWindows() ? "windows"
+                             : OperatingSystem.IsLinux()   ? "linux"
+                             : OperatingSystem.IsMacOS()   ? "macos"
+                             : string.Empty;
+            if (string.IsNullOrEmpty(currentOs)) return;
+            session.SelectedDepots = session.SelectedDepots
+                .Where(d =>
+                {
+                    if (string.IsNullOrWhiteSpace(d.OsList)) return true;
+                    var tags = d.OsList.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+                    return tags.Any(t => t.Equals(currentOs, StringComparison.OrdinalIgnoreCase));
+                })
+                .ToList();
         }
 
         private static string BuildOutputDir(TuiSession session, string gameName)

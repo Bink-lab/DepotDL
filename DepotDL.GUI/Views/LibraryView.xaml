@@ -4,6 +4,7 @@
              xmlns:vm="clr-namespace:DepotDL.GUI.ViewModels"
              FontFamily="Segoe UI">
 
+    <Grid>
     <Grid Margin="32,28,32,28">
         <Grid.Resources>
             <Style x:Key="PremiumRefreshBtn" TargetType="Button">
@@ -380,5 +381,207 @@
                 </ItemsControl>
             </ScrollViewer>
         </Grid>
+    </Grid>
+
+        <!-- ══ Remove-game confirmation overlay ══════════════════════════ -->
+        <Grid x:Name="RemoveOverlayRoot" Panel.ZIndex="50" Opacity="0"
+              IsHitTestVisible="{Binding IsRemoveOverlayVisible}">
+            <Grid.Style>
+                <Style TargetType="Grid">
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsRemoveOverlayVisible}" Value="True">
+                            <DataTrigger.EnterActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                                                         To="1" Duration="0:0:0.18">
+                                            <DoubleAnimation.EasingFunction>
+                                                <CubicEase EasingMode="EaseOut"/>
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </DataTrigger.EnterActions>
+                            <DataTrigger.ExitActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                                                         To="0" Duration="0:0:0.14"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </DataTrigger.ExitActions>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Grid.Style>
+
+            <!-- Backdrop -->
+            <Rectangle Fill="#1C1610" Opacity="0.72">
+                <Rectangle.InputBindings>
+                    <MouseBinding MouseAction="LeftClick" Command="{Binding CancelRemoveCommand}"/>
+                </Rectangle.InputBindings>
+            </Rectangle>
+
+            <!-- Dialog card -->
+            <Border Width="420"
+                    HorizontalAlignment="Center" VerticalAlignment="Center"
+                    Background="{StaticResource BgCard}"
+                    BorderBrush="{StaticResource Border}"
+                    BorderThickness="1"
+                    CornerRadius="16"
+                    Padding="28">
+                <Border.RenderTransform>
+                    <TranslateTransform/>
+                </Border.RenderTransform>
+                <Border.Style>
+                    <Style TargetType="Border">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsRemoveOverlayVisible}" Value="True">
+                                <DataTrigger.EnterActions>
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <DoubleAnimation
+                                                Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.Y)"
+                                                From="20" To="0" Duration="0:0:0.22">
+                                                <DoubleAnimation.EasingFunction>
+                                                    <CubicEase EasingMode="EaseOut"/>
+                                                </DoubleAnimation.EasingFunction>
+                                            </DoubleAnimation>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </DataTrigger.EnterActions>
+                                <DataTrigger.ExitActions>
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <DoubleAnimation
+                                                Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.Y)"
+                                                To="12" Duration="0:0:0.14">
+                                                <DoubleAnimation.EasingFunction>
+                                                    <CubicEase EasingMode="EaseIn"/>
+                                                </DoubleAnimation.EasingFunction>
+                                            </DoubleAnimation>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </DataTrigger.ExitActions>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Border.Style>
+
+                <StackPanel>
+                    <!-- Icon + title -->
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                        <Border Width="36" Height="36" CornerRadius="10"
+                                Background="{StaticResource ErrorLight}"
+                                Margin="0,0,12,0">
+                            <Viewbox Width="16" Height="16">
+                                <Canvas Width="24" Height="24">
+                                    <Path Data="M3,6 L21,6 M8,6 L8,4 L16,4 L16,6 M19,6 L18,20 A1,1,0,0,1,17,21 L7,21 A1,1,0,0,1,6,20 L5,6"
+                                          Stroke="{StaticResource Error}"
+                                          StrokeThickness="1.8" Fill="Transparent"
+                                          StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
+                                </Canvas>
+                            </Viewbox>
+                        </Border>
+                        <TextBlock Text="Remove Game"
+                                   FontSize="17" FontWeight="SemiBold"
+                                   Foreground="{StaticResource TextPrimary}"
+                                   VerticalAlignment="Center"/>
+                    </StackPanel>
+
+                    <!-- Game name -->
+                    <TextBlock Text="{Binding GameToRemove.Game.GameName}"
+                               FontSize="13" FontWeight="SemiBold"
+                               Foreground="{StaticResource Accent}"
+                               Margin="0,0,0,6"
+                               TextTrimming="CharacterEllipsis"/>
+
+                    <!-- Message -->
+                    <TextBlock Text="Remove this game from your library?"
+                               FontSize="13" Foreground="{StaticResource TextBody}"
+                               TextWrapping="Wrap" Margin="0,0,0,16"/>
+
+                    <!-- Delete files checkbox -->
+                    <Border Background="{StaticResource BgInput}"
+                            BorderBrush="{StaticResource Border}"
+                            BorderThickness="1" CornerRadius="8"
+                            Padding="12,10" Margin="0,0,0,20">
+                        <CheckBox IsChecked="{Binding DeleteFiles}" Cursor="Hand">
+                            <CheckBox.Template>
+                                <ControlTemplate TargetType="CheckBox">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Border Grid.Column="0"
+                                                Width="18" Height="18"
+                                                BorderBrush="{StaticResource Border}"
+                                                BorderThickness="1.5"
+                                                CornerRadius="4"
+                                                Margin="0,0,10,0">
+                                            <Border.Style>
+                                                <Style TargetType="Border">
+                                                    <Setter Property="Background" Value="Transparent"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding IsChecked, RelativeSource={RelativeSource AncestorType=CheckBox}}" Value="True">
+                                                            <Setter Property="Background" Value="{StaticResource Accent}"/>
+                                                            <Setter Property="BorderBrush" Value="{StaticResource Accent}"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Border.Style>
+                                            <TextBlock Text="✓" FontSize="12" FontWeight="Bold"
+                                                       Foreground="White"
+                                                       VerticalAlignment="Center"
+                                                       HorizontalAlignment="Center">
+                                                <TextBlock.Style>
+                                                    <Style TargetType="TextBlock">
+                                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding IsChecked, RelativeSource={RelativeSource AncestorType=CheckBox}}" Value="True">
+                                                                <Setter Property="Visibility" Value="Visible"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                            </TextBlock>
+                                        </Border>
+                                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                            <TextBlock Text="Also delete all game files"
+                                                       FontSize="13" FontWeight="SemiBold"
+                                                       Foreground="{StaticResource TextPrimary}"/>
+                                            <TextBlock Text="This cannot be undone"
+                                                       FontSize="11" Foreground="{StaticResource TextMuted}"
+                                                       Margin="0,2,0,0"/>
+                                        </StackPanel>
+                                    </Grid>
+                                </ControlTemplate>
+                            </CheckBox.Template>
+                        </CheckBox>
+                    </Border>
+
+                    <!-- Buttons -->
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="10"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Button Grid.Column="0"
+                                Content="Cancel"
+                                Command="{Binding CancelRemoveCommand}"
+                                Style="{StaticResource BtnGhost}"
+                                Padding="12,10" FontSize="12" FontWeight="SemiBold"/>
+                        <Button Grid.Column="2"
+                                Content="Remove"
+                                Command="{Binding ConfirmRemoveCommand}"
+                                Style="{StaticResource BtnDanger}"
+                                Padding="12,10" FontSize="12" FontWeight="SemiBold"/>
+                    </Grid>
+                </StackPanel>
+            </Border>
+        </Grid>
+
     </Grid>
 </UserControl>

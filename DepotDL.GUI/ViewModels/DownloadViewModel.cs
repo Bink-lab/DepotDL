@@ -254,8 +254,7 @@ namespace DepotDL.GUI.ViewModels
                 Depots = new ObservableCollection<DepotSelectionItem>(
                     depots.Select(d => new DepotSelectionItem(d)));
 
-                if (_settings.Load().SmartOsFilter)
-                    ApplySmartOsFilter();
+                ApplySmartOsFilter();
 
                 LuaLoaded = true;
 
