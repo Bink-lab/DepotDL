@@ -5,6 +5,7 @@ namespace DepotDL.GUI.Models
         public string? ManifestsDir { get; set; }
         public string? DownloadBaseDir { get; set; }
         public string? RyuuApiKey { get; set; }
+        public string? HubcapApiKey { get; set; }
         public int MaxParallelDepots { get; set; } = 2;
         public int StoreCacheHours { get; set; } = 24;
         public int GpuCacheDays { get; set; } = 7;

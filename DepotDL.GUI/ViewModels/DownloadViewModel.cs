@@ -14,6 +14,7 @@ using DepotDL.GUI.Services;
 namespace DepotDL.GUI.ViewModels
 {
     public enum DownloadStep { SelectFile, ConfigureDepots, Downloading }
+    public enum ManifestProvider { Ryuu, Hubcap }
 
     public partial class DownloadViewModel : ViewModelBase
     {
@@ -22,6 +23,7 @@ namespace DepotDL.GUI.ViewModels
         private readonly LibraryService _library = new();
         private readonly SettingsService _settings = new();
         private readonly RyuuService _ryuu = new();
+        private readonly HubcapService _hubcap = new();
         private readonly ZipImportService _zipper = new();
 
         private CancellationTokenSource? _cts;
@@ -35,6 +37,7 @@ namespace DepotDL.GUI.ViewModels
         [ObservableProperty] private string _appId = string.Empty;
         [ObservableProperty] private bool _luaLoaded;
         [ObservableProperty] private string _parseError = string.Empty;
+        [ObservableProperty] private string _zipError = string.Empty;
 
         [ObservableProperty] private ObservableCollection<DepotSelectionItem> _depots = new();
         [ObservableProperty] private string _outputDir = string.Empty;
@@ -48,6 +51,12 @@ namespace DepotDL.GUI.ViewModels
         [ObservableProperty] private string _ryuuError = string.Empty;
         [ObservableProperty] private bool _canFetchRyuu;
 
+        [ObservableProperty] private string _hubcapAppId = string.Empty;
+        [ObservableProperty] private string _hubcapApiKey = string.Empty;
+        [ObservableProperty] private bool _isHubcapBusy;
+        [ObservableProperty] private string _hubcapError = string.Empty;
+        [ObservableProperty] private bool _canFetchHubcap;
+
         [ObservableProperty] private ObservableCollection<DepotDownloadState> _downloadStates = new();
         [ObservableProperty] private double _overallPercent;
         [ObservableProperty] private double _overallDisplayPercent;
@@ -58,18 +67,22 @@ namespace DepotDL.GUI.ViewModels
         [ObservableProperty] private string _completionMessage = string.Empty;
 
         public IAsyncRelayCommand FetchFromRyuuAsyncCommand { get; }
+        public IAsyncRelayCommand FetchFromHubcapAsyncCommand { get; }
         public IAsyncRelayCommand StartDownloadAsyncCommand { get; }
 
         public DownloadViewModel()
         {
             FetchFromRyuuAsyncCommand = new AsyncRelayCommand(FetchFromRyuuAsync, () => CanFetchRyuu);
+            FetchFromHubcapAsyncCommand = new AsyncRelayCommand(FetchFromHubcapAsync, () => CanFetchHubcap);
             StartDownloadAsyncCommand = new AsyncRelayCommand(StartDownloadAsync, () => CanStart);
 
             var settings = _settings.Load();
             ManifestsDir = settings.ManifestsDir ?? string.Empty;
             MaxParallel = settings.MaxParallelDepots;
             RyuuApiKey = settings.RyuuApiKey ?? string.Empty;
+            HubcapApiKey = settings.HubcapApiKey ?? string.Empty;
             UpdateCanFetchRyuu();
+            UpdateCanFetchHubcap();
         }
 
         partial void OnOutputDirChanged(string value) => UpdateCanStart();
@@ -78,10 +91,21 @@ namespace DepotDL.GUI.ViewModels
         partial void OnRyuuApiKeyChanged(string value) => UpdateCanFetchRyuu();
         partial void OnIsRyuuBusyChanged(bool value) => UpdateCanFetchRyuu();
 
+        partial void OnHubcapAppIdChanged(string value) => UpdateCanFetchHubcap();
+        partial void OnHubcapApiKeyChanged(string value) => UpdateCanFetchHubcap();
+        partial void OnIsHubcapBusyChanged(bool value) => UpdateCanFetchHubcap();
+
         private void UpdateCanFetchRyuu()
         {
             CanFetchRyuu = !IsRyuuBusy && !string.IsNullOrWhiteSpace(RyuuAppId);
             if (FetchFromRyuuAsyncCommand is AsyncRelayCommand cmd)
+                cmd.NotifyCanExecuteChanged();
+        }
+
+        private void UpdateCanFetchHubcap()
+        {
+            CanFetchHubcap = !IsHubcapBusy && !string.IsNullOrWhiteSpace(HubcapAppId);
+            if (FetchFromHubcapAsyncCommand is AsyncRelayCommand cmd)
                 cmd.NotifyCanExecuteChanged();
         }
 
@@ -123,6 +147,44 @@ namespace DepotDL.GUI.ViewModels
             }
         }
 
+        private async Task FetchFromHubcapAsync()
+        {
+            IsHubcapBusy = true;
+            HubcapError = string.Empty;
+            try
+            {
+                var settings = _settings.Load();
+                settings.HubcapApiKey = HubcapApiKey.Trim();
+                _settings.Save(settings);
+
+                var result = await _hubcap.DownloadPackageAsync(HubcapAppId.Trim(), HubcapApiKey.Trim());
+                if (!result.HasZip || string.IsNullOrEmpty(result.ZipPath))
+                {
+                    HubcapError = result.Message;
+                    return;
+                }
+
+                var imported = _zipper.ImportZip(result.ZipPath);
+                try { File.Delete(result.ZipPath); } catch { }
+
+                if (!string.IsNullOrEmpty(imported.ManifestsDir) && imported.ManifestCount > 0)
+                    ManifestsDir = imported.ManifestsDir;
+
+                if (!string.IsNullOrEmpty(imported.FirstLuaPath))
+                    LoadLuaFile(imported.FirstLuaPath);
+                else
+                    HubcapError = "ZIP contained no Lua configuration file.";
+            }
+            catch (Exception ex)
+            {
+                HubcapError = ex.Message;
+            }
+            finally
+            {
+                IsHubcapBusy = false;
+            }
+        }
+
         [RelayCommand]
         private void BrowseLuaFile()
         {
@@ -134,6 +196,41 @@ namespace DepotDL.GUI.ViewModels
             };
             if (dialog.ShowDialog() == true)
                 LoadLuaFile(dialog.FileName);
+        }
+
+        [RelayCommand]
+        private void BrowseZipFile()
+        {
+            var dialog = new Microsoft.Win32.OpenFileDialog
+            {
+                Title = "Select ZIP Archive",
+                Filter = "ZIP archives (*.zip)|*.zip|All files (*.*)|*.*",
+                DefaultExt = ".zip"
+            };
+            if (dialog.ShowDialog() == true)
+                ImportZipFile(dialog.FileName);
+        }
+
+        public void ImportZipFile(string path)
+        {
+            if (!File.Exists(path)) return;
+            ZipError = string.Empty;
+            try
+            {
+                var imported = _zipper.ImportZip(path);
+
+                if (!string.IsNullOrEmpty(imported.ManifestsDir) && imported.ManifestCount > 0)
+                    ManifestsDir = imported.ManifestsDir;
+
+                if (!string.IsNullOrEmpty(imported.FirstLuaPath))
+                    LoadLuaFile(imported.FirstLuaPath);
+                else
+                    ZipError = "ZIP contained no Lua configuration file.";
+            }
+            catch (Exception ex)
+            {
+                ZipError = ex.Message;
+            }
         }
 
         public void LoadLuaFile(string path)
@@ -248,10 +345,9 @@ namespace DepotDL.GUI.ViewModels
 
             if (!_downloader.Initialize())
             {
-                MessageBox.Show(
+                DialogService.ShowError("Missing Dependencies",
                     "Could not find .NET 9 runtime or DepotDownloaderMod.dll.\n" +
-                    "Make sure .NET 9 is installed and DepotDownloaderMod.dll is adjacent to this application.",
-                    "Missing Dependencies", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    "Make sure .NET 9 is installed and DepotDownloaderMod.dll is adjacent to this application.");
                 return;
             }
 
@@ -361,6 +457,7 @@ namespace DepotDL.GUI.ViewModels
             AppId = string.Empty;
             LuaLoaded = false;
             ParseError = string.Empty;
+            ZipError = string.Empty;
             Depots.Clear();
             DownloadStates.Clear();
             IsDownloading = false;
@@ -370,7 +467,7 @@ namespace DepotDL.GUI.ViewModels
             OverallDisplayPercent = 0;
         }
 
-        public void PreFillAppId(string appId)
+        public void PreFillAppId(string appId, ManifestProvider? provider = null)
         {
             if (IsDownloading) return;
             _cts?.Cancel();
@@ -380,6 +477,7 @@ namespace DepotDL.GUI.ViewModels
             AppId = string.Empty;
             LuaLoaded = false;
             ParseError = string.Empty;
+            ZipError = string.Empty;
             RyuuError = string.Empty;
             Depots.Clear();
             DownloadStates.Clear();
@@ -389,12 +487,33 @@ namespace DepotDL.GUI.ViewModels
             OverallDisplayPercent = 0;
 
             RyuuAppId = appId;
+            HubcapAppId = appId;
+            HubcapError = string.Empty;
 
             var settings = _settings.Load();
-            if (!string.IsNullOrWhiteSpace(settings.RyuuApiKey))
+
+            if (provider == ManifestProvider.Ryuu && !string.IsNullOrWhiteSpace(settings.RyuuApiKey))
             {
                 RyuuApiKey = settings.RyuuApiKey;
                 _ = FetchFromRyuuAsync();
+            }
+            else if (provider == ManifestProvider.Hubcap && !string.IsNullOrWhiteSpace(settings.HubcapApiKey))
+            {
+                HubcapApiKey = settings.HubcapApiKey;
+                _ = FetchFromHubcapAsync();
+            }
+            else if (provider == null)
+            {
+                if (!string.IsNullOrWhiteSpace(settings.RyuuApiKey))
+                {
+                    RyuuApiKey = settings.RyuuApiKey;
+                    _ = FetchFromRyuuAsync();
+                }
+                else if (!string.IsNullOrWhiteSpace(settings.HubcapApiKey))
+                {
+                    HubcapApiKey = settings.HubcapApiKey;
+                    _ = FetchFromHubcapAsync();
+                }
             }
         }
     }
@@ -406,7 +525,16 @@ namespace DepotDL.GUI.ViewModels
 
         public string DisplayName => Depot.DisplayName;
         public string DepotId => Depot.DepotId;
-        public string OsText => string.IsNullOrWhiteSpace(Depot.OsList) ? "—" : Depot.OsList;
+        public string OsText
+        {
+            get
+            {
+                if (string.IsNullOrWhiteSpace(Depot.OsList) && string.IsNullOrWhiteSpace(Depot.OsArch))
+                    return string.Empty;
+                var os = string.IsNullOrWhiteSpace(Depot.OsList) ? "any" : Depot.OsList.Replace(",", "/");
+                return string.IsNullOrWhiteSpace(Depot.OsArch) ? os : $"{os} {Depot.OsArch}";
+            }
+        }
 
         public DepotSelectionItem(DepotInfo depot) => Depot = depot;
     }

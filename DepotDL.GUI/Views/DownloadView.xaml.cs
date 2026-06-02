@@ -22,13 +22,19 @@ namespace DepotDL.GUI.Views
             if (!e.Data.GetDataPresent(DataFormats.FileDrop)) return;
             var files = (string[])e.Data.GetData(DataFormats.FileDrop);
             if (files.Length == 0) return;
+            if (DataContext is not DownloadViewModel vm) return;
 
             foreach (var f in files)
             {
-                if (Path.GetExtension(f).Equals(".lua", System.StringComparison.OrdinalIgnoreCase))
+                var ext = Path.GetExtension(f);
+                if (ext.Equals(".zip", System.StringComparison.OrdinalIgnoreCase))
                 {
-                    if (DataContext is DownloadViewModel vm)
-                        vm.LoadLuaFile(f);
+                    vm.ImportZipFile(f);
+                    return;
+                }
+                if (ext.Equals(".lua", System.StringComparison.OrdinalIgnoreCase))
+                {
+                    vm.LoadLuaFile(f);
                     return;
                 }
             }

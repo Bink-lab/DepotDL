@@ -13,6 +13,7 @@ namespace DepotDL.GUI.ViewModels
         [ObservableProperty] private string _manifestsDir = string.Empty;
         [ObservableProperty] private string _downloadBaseDir = string.Empty;
         [ObservableProperty] private string _ryuuApiKey = string.Empty;
+        [ObservableProperty] private string _hubcapApiKey = string.Empty;
         [ObservableProperty] private int _maxParallelDepots = 2;
         [ObservableProperty] private int _storeCacheHours = 24;
         [ObservableProperty] private int _gpuCacheDays = 7;
@@ -29,6 +30,7 @@ namespace DepotDL.GUI.ViewModels
             ManifestsDir = s.ManifestsDir ?? string.Empty;
             DownloadBaseDir = s.DownloadBaseDir ?? string.Empty;
             RyuuApiKey = s.RyuuApiKey ?? string.Empty;
+            HubcapApiKey = s.HubcapApiKey ?? string.Empty;
             MaxParallelDepots = s.MaxParallelDepots;
             StoreCacheHours = s.StoreCacheHours;
             GpuCacheDays = s.GpuCacheDays;
@@ -71,6 +73,7 @@ namespace DepotDL.GUI.ViewModels
                 ManifestsDir = string.IsNullOrWhiteSpace(ManifestsDir) ? null : ManifestsDir,
                 DownloadBaseDir = string.IsNullOrWhiteSpace(DownloadBaseDir) ? null : DownloadBaseDir,
                 RyuuApiKey = string.IsNullOrWhiteSpace(RyuuApiKey) ? null : RyuuApiKey,
+                HubcapApiKey = string.IsNullOrWhiteSpace(HubcapApiKey) ? null : HubcapApiKey,
                 MaxParallelDepots = MaxParallelDepots,
                 StoreCacheHours = StoreCacheHours,
                 GpuCacheDays = GpuCacheDays,

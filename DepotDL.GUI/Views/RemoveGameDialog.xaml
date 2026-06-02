@@ -1,0 +1,140 @@
+<Window x:Class="DepotDL.GUI.Views.RemoveGameDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Remove Game"
+        Width="420" Height="Auto"
+        WindowStartupLocation="CenterOwner"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        Background="Transparent"
+        ShowInTaskbar="False"
+        ResizeMode="NoResize"
+        FontFamily="Segoe UI">
+
+    <Window.Resources>
+        <ResourceDictionary Source="../Styles/Theme.xaml"/>
+    </Window.Resources>
+
+    <Border Background="{StaticResource BgCard}"
+            BorderBrush="{StaticResource Border}"
+            BorderThickness="1"
+            CornerRadius="16"
+            Padding="24">
+        <StackPanel VerticalAlignment="Top">
+            <!-- Title -->
+            <TextBlock Text="Remove Game"
+                       FontSize="18"
+                       FontWeight="SemiBold"
+                       Foreground="{StaticResource TextPrimary}"
+                       Margin="0,0,0,8"/>
+
+            <!-- Game Name -->
+            <TextBlock Text="{Binding GameName}"
+                       FontSize="13"
+                       Foreground="{StaticResource TextMuted}"
+                       Margin="0,0,0,16"
+                       TextTrimming="CharacterEllipsis"/>
+
+            <!-- Message -->
+            <TextBlock Text="Remove this game from your library?"
+                       FontSize="13"
+                       Foreground="{StaticResource TextBody}"
+                       Margin="0,0,0,16"
+                       TextWrapping="Wrap"/>
+
+            <!-- Checkbox -->
+            <Border Background="{StaticResource BgInput}"
+                    BorderBrush="{StaticResource Border}"
+                    BorderThickness="1"
+                    CornerRadius="8"
+                    Padding="12,10"
+                    Margin="0,0,0,16">
+                <CheckBox IsChecked="{Binding DeleteFiles}"
+                          Cursor="Hand">
+                    <CheckBox.Template>
+                        <ControlTemplate TargetType="CheckBox">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <Border Grid.Column="0"
+                                        Width="18" Height="18"
+                                        Background="{TemplateBinding Background}"
+                                        BorderBrush="{StaticResource Border}"
+                                        BorderThickness="1.5"
+                                        CornerRadius="4"
+                                        Margin="0,0,10,0">
+                                    <Border.Style>
+                                        <Style TargetType="Border">
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsChecked, RelativeSource={RelativeSource AncestorType=CheckBox}}" Value="True">
+                                                    <Setter Property="Background" Value="{StaticResource Accent}"/>
+                                                    <Setter Property="BorderBrush" Value="{StaticResource Accent}"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Border.Style>
+                                    <TextBlock Text="✓"
+                                               FontSize="12"
+                                               FontWeight="Bold"
+                                               Foreground="White"
+                                               VerticalAlignment="Center"
+                                               HorizontalAlignment="Center">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IsChecked, RelativeSource={RelativeSource AncestorType=CheckBox}}" Value="True">
+                                                        <Setter Property="Visibility" Value="Visible"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                </Border>
+
+                                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                    <TextBlock Text="Also delete all game files"
+                                               FontSize="13"
+                                               FontWeight="SemiBold"
+                                               Foreground="{StaticResource TextPrimary}"/>
+                                    <TextBlock Text="This cannot be undone"
+                                               FontSize="11"
+                                               Foreground="{StaticResource TextMuted}"
+                                               Margin="0,2,0,0"/>
+                                </StackPanel>
+                            </Grid>
+                        </ControlTemplate>
+                    </CheckBox.Template>
+                </CheckBox>
+            </Border>
+
+            <!-- Buttons -->
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="8"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <Button Grid.Column="0"
+                        Content="Cancel"
+                        Click="CancelButton_Click"
+                        Style="{StaticResource BtnGhost}"
+                        Padding="12,10"
+                        FontSize="12"
+                        FontWeight="SemiBold"/>
+
+                <Button Grid.Column="2"
+                        Content="Remove"
+                        Click="RemoveButton_Click"
+                        Style="{StaticResource BtnDanger}"
+                        Padding="12,10"
+                        FontSize="12"
+                        FontWeight="SemiBold"/>
+            </Grid>
+        </StackPanel>
+    </Border>
+</Window>

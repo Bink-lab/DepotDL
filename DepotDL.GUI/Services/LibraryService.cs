@@ -42,11 +42,25 @@ namespace DepotDL.GUI.Services
             Save(lib);
         }
 
-        public void Remove(string appId)
+        public string? Remove(string appId, string? filePathToDelete = null)
         {
             var lib = Load();
             lib.RemoveAll(g => g.AppId == appId);
             Save(lib);
+
+            if (!string.IsNullOrEmpty(filePathToDelete) && Directory.Exists(filePathToDelete))
+            {
+                try
+                {
+                    Directory.Delete(filePathToDelete, recursive: true);
+                }
+                catch (Exception ex)
+                {
+                    return ex.Message;
+                }
+            }
+
+            return null;
         }
 
         public void VerifyAll(List<LibraryGame> games)

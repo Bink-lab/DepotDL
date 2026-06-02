@@ -5,12 +5,14 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Media.Imaging;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using DepotDL.GUI.Helpers;
 using DepotDL.GUI.Models;
 using DepotDL.GUI.Services;
+using DepotDL.GUI.Views;
 
 namespace DepotDL.GUI.ViewModels
 {
@@ -28,20 +30,7 @@ namespace DepotDL.GUI.ViewModels
 
         private CancellationTokenSource? _imageCts;
 
-        public void Load()
-        {
-            var raw = _lib.Load();
-            _lib.VerifyAll(raw);
-
-            _imageCts?.Cancel();
-            _imageCts = new CancellationTokenSource();
-
-            Games = new ObservableCollection<LibraryGameViewModel>(
-                raw.Select(g => new LibraryGameViewModel(g)));
-            FilterGames();
-            UpdateStats();
-            LoadImagesAsync(_imageCts.Token);
-        }
+        public void Load() => LoadAsync().GetAwaiter().GetResult();
 
         public async Task LoadAsync()
         {
@@ -103,10 +92,23 @@ namespace DepotDL.GUI.ViewModels
         private void RemoveGame(LibraryGameViewModel? vm)
         {
             if (vm == null) return;
-            _lib.Remove(vm.Game.AppId);
-            Games.Remove(vm);
-            UpdateStats();
-            FilterGames();
+
+            var dialog = new RemoveGameDialog(vm.Game.GameName)
+            {
+                Owner = Application.Current.MainWindow
+            };
+
+            if (dialog.ShowDialog() == true)
+            {
+                string? error = _lib.Remove(vm.Game.AppId, dialog.DeleteFiles ? vm.Game.OutputDir : null);
+                Games.Remove(vm);
+                UpdateStats();
+                FilterGames();
+
+                if (error != null)
+                    DialogService.ShowError("Delete Failed",
+                        $"Game removed from library, but files could not be deleted:\n{error}");
+            }
         }
 
         [RelayCommand]

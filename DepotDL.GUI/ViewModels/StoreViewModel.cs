@@ -48,6 +48,29 @@ namespace DepotDL.GUI.ViewModels
         public bool HasGames => TotalGames > 0;
         [ObservableProperty] private StoreGameViewModel? _selectedGame;
         [ObservableProperty] private SteamAppDetail? _selectedDetail;
+
+        [ObservableProperty] private ManifestProvider _selectedProvider = ManifestProvider.Ryuu;
+        [ObservableProperty] private bool _canUseRyuu;
+        [ObservableProperty] private bool _canUseHubcap;
+        [ObservableProperty] private bool _isProviderDropdownOpen;
+
+        public bool IsRyuuSelected => SelectedProvider == ManifestProvider.Ryuu;
+        public bool IsHubcapSelected => SelectedProvider == ManifestProvider.Hubcap;
+        public string SelectedProviderLabel => SelectedProvider == ManifestProvider.Ryuu ? "Ryuu" : "Hubcap";
+
+        partial void OnSelectedProviderChanged(ManifestProvider value)
+        {
+            OnPropertyChanged(nameof(IsRyuuSelected));
+            OnPropertyChanged(nameof(IsHubcapSelected));
+            OnPropertyChanged(nameof(SelectedProviderLabel));
+        }
+
+        [RelayCommand]
+        private void SelectProvider(ManifestProvider provider)
+        {
+            SelectedProvider = provider;
+            IsProviderDropdownOpen = false;
+        }
         [ObservableProperty] private bool _isDetailLoading;
         [ObservableProperty] private bool _isSpecsLoading;
 
@@ -99,7 +122,29 @@ namespace DepotDL.GUI.ViewModels
             {
                 IsReqsExpanded = false;
                 IsDescriptionExpanded = false;
+                return;
             }
+            RefreshProviderAvailability();
+        }
+
+        private void RefreshProviderAvailability()
+        {
+            try
+            {
+                var s = new SettingsService().Load();
+                CanUseRyuu = !string.IsNullOrWhiteSpace(s.RyuuApiKey);
+                CanUseHubcap = !string.IsNullOrWhiteSpace(s.HubcapApiKey);
+            }
+            catch
+            {
+                CanUseRyuu = false;
+                CanUseHubcap = false;
+            }
+
+            if (SelectedProvider == ManifestProvider.Ryuu && !CanUseRyuu && CanUseHubcap)
+                SelectedProvider = ManifestProvider.Hubcap;
+            else if (SelectedProvider == ManifestProvider.Hubcap && !CanUseHubcap && CanUseRyuu)
+                SelectedProvider = ManifestProvider.Ryuu;
         }
 
         public void EnsureLoaded()
@@ -284,7 +329,7 @@ namespace DepotDL.GUI.ViewModels
         {
             if (SelectedGame == null) return;
             OverlayVisible = false;
-            _main.NavigateDownloadWithAppId(SelectedGame.Game.AppId.ToString());
+            _main.NavigateDownloadWithAppId(SelectedGame.Game.AppId.ToString(), SelectedProvider);
         }
 
         [RelayCommand]

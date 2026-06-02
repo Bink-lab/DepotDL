@@ -20,6 +20,7 @@ namespace DepotDL.CLI
         public string? OutputDir { get; set; }
         public string? DownloadBaseDir { get; set; }
         public string? RyuuApiKey { get; set; }
+        public string? HubcapApiKey { get; set; }
         public bool ManifestsDirConfigured { get; set; }
         public int MaxParallelDepots { get; set; } = 2;
         public List<DepotInfo> AllDepots { get; set; } = new();

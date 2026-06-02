@@ -21,6 +21,7 @@ namespace DepotDL.GUI.Services
             s.DownloadBaseDir = Get(values, "paths.download_base_dir")
                 ?? Get(values, "session.download_base_dir");
             s.RyuuApiKey = Get(values, "ryuu.api_key");
+            s.HubcapApiKey = Get(values, "hubcap.api_key");
             if (int.TryParse(Get(values, "settings.max_parallel_depots"), out int mp))
                 s.MaxParallelDepots = Math.Clamp(mp, 1, 8);
 
@@ -61,6 +62,9 @@ namespace DepotDL.GUI.Services
             w.WriteLine();
             w.WriteLine("[ryuu]");
             w.WriteLine($"api_key={Escape(s.RyuuApiKey ?? "")}");
+            w.WriteLine();
+            w.WriteLine("[hubcap]");
+            w.WriteLine($"api_key={Escape(s.HubcapApiKey ?? "")}");
             w.WriteLine();
             w.WriteLine("[settings]");
             w.WriteLine($"max_parallel_depots={s.MaxParallelDepots}");

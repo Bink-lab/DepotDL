@@ -49,9 +49,9 @@ namespace DepotDL.GUI.ViewModels
         public bool IsSettingsPage => CurrentPage == NavPage.Settings;
         public bool IsStorePage    => CurrentPage == NavPage.Store;
 
-        public void NavigateDownloadWithAppId(string appId)
+        public void NavigateDownloadWithAppId(string appId, ManifestProvider? provider = null)
         {
-            Download.PreFillAppId(appId);
+            Download.PreFillAppId(appId, provider);
             CurrentPage = NavPage.Download;
         }
 

@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -8,14 +9,17 @@ using DepotDL.GUI.Models;
 
 namespace DepotDL.GUI.Services
 {
-    public class RyuuService
+    public class HubcapService
     {
         private static readonly HttpClient Http = new() { Timeout = TimeSpan.FromMinutes(5) };
 
         public async Task<ManifestDownloadResult> DownloadPackageAsync(string appId, string apiKey)
         {
-            var url = $"https://generator.ryuu.lol/secure_download?appid={Uri.EscapeDataString(appId)}&auth_code={Uri.EscapeDataString(apiKey)}";
-            using var response = await Http.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
+            var url = $"https://hubcapmanifest.com/api/v1/manifest/{Uri.EscapeDataString(appId)}";
+            using var request = new HttpRequestMessage(HttpMethod.Get, url);
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
+
+            using var response = await Http.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
             var contentType = response.Content.Headers.ContentType?.MediaType ?? string.Empty;
 
             if (contentType.Contains("json", StringComparison.OrdinalIgnoreCase))
@@ -24,20 +28,20 @@ namespace DepotDL.GUI.Services
                 var message = ReadJsonMessage(body);
                 if (!response.IsSuccessStatusCode)
                     throw new InvalidOperationException(message.Length == 0
-                        ? $"Ryuu request failed with HTTP {(int)response.StatusCode}."
-                        : $"Ryuu: {message}");
+                        ? $"Hubcap request failed with HTTP {(int)response.StatusCode}."
+                        : $"Hubcap: {message}");
 
                 return new ManifestDownloadResult
                 {
                     HasZip = false,
-                    Message = message.Length == 0 ? "Ryuu returned JSON without a downloadable ZIP." : $"Ryuu: {message}"
+                    Message = message.Length == 0 ? "Hubcap returned JSON without a downloadable ZIP." : $"Hubcap: {message}"
                 };
             }
 
             if (!response.IsSuccessStatusCode)
-                throw new InvalidOperationException($"Ryuu request failed with HTTP {(int)response.StatusCode}.");
+                throw new InvalidOperationException($"Hubcap request failed with HTTP {(int)response.StatusCode}.");
 
-            var zipPath = Path.Combine(Path.GetTempPath(), $"ryuu_{SanitizeFileName(appId)}_{Guid.NewGuid():N}.zip");
+            var zipPath = Path.Combine(Path.GetTempPath(), $"hubcap_{SanitizeFileName(appId)}_{Guid.NewGuid():N}.zip");
             using (var stream = await response.Content.ReadAsStreamAsync())
             using (var fileStream = new FileStream(zipPath, FileMode.Create, FileAccess.Write, FileShare.None))
             {
@@ -47,7 +51,7 @@ namespace DepotDL.GUI.Services
             if (new FileInfo(zipPath).Length == 0)
             {
                 File.Delete(zipPath);
-                return new ManifestDownloadResult { HasZip = false, Message = "Ryuu returned an empty response." };
+                return new ManifestDownloadResult { HasZip = false, Message = "Hubcap returned an empty response." };
             }
 
             return new ManifestDownloadResult { HasZip = true, ZipPath = zipPath, Message = $"Downloaded package for App {appId}" };

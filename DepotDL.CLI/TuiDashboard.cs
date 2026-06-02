@@ -1417,6 +1417,7 @@ namespace DepotDL.CLI
             {
                 "Use local .zip file",
                 "Request package from Ryuu API",
+                "Request package from Hubcap API",
                 "[Cancel]"
             };
 
@@ -1426,7 +1427,9 @@ namespace DepotDL.CLI
                 return;
             }
 
-            string? zipPath = sourceIndex == 0 ? ResolveLocalZipPath() : RequestRyuuZipPackage(session);
+            string? zipPath = sourceIndex == 0 ? ResolveLocalZipPath()
+                : sourceIndex == 1 ? RequestRyuuZipPackage(session)
+                : RequestHubcapZipPackage(session);
             if (string.IsNullOrEmpty(zipPath))
             {
                 return;
@@ -1511,6 +1514,50 @@ namespace DepotDL.CLI
             catch (Exception ex)
             {
                 PromptText("RYUU API", $"{ex.Message} Press Enter.", "");
+                return null;
+            }
+        }
+
+        private static string? RequestHubcapZipPackage(TuiSession session)
+        {
+            string defaultAppId = session.AppId ?? "";
+            string? appId = PromptText("HUBCAP API", "Enter Steam App ID:", defaultAppId);
+            if (string.IsNullOrWhiteSpace(appId))
+            {
+                return null;
+            }
+
+            string? apiKey = PromptText("HUBCAP API", "Enter Hubcap API key:", session.HubcapApiKey ?? "");
+            if (string.IsNullOrWhiteSpace(apiKey))
+            {
+                PromptText("HUBCAP API", "Hubcap API key is required. Press Enter.", "");
+                return null;
+            }
+
+            session.HubcapApiKey = apiKey.Trim();
+            SaveSession(session);
+
+            Console.Clear();
+            WriteCenteredStatusBox(
+                "HUBCAP API",
+                new[] { $"Requesting ZIP package for App ID {appId.Trim()}..." },
+                ConsoleColor.Cyan);
+
+            try
+            {
+                var result = HubcapApiClient.DownloadPackage(appId.Trim(), session.HubcapApiKey!);
+                if (!result.HasZip || string.IsNullOrEmpty(result.ZipPath))
+                {
+                    PromptText("HUBCAP API", $"{result.Message} Press Enter.", "");
+                    return null;
+                }
+
+                WriteCenteredStatusBox("HUBCAP API", new[] { result.Message }, ConsoleColor.Green);
+                return result.ZipPath;
+            }
+            catch (Exception ex)
+            {
+                PromptText("HUBCAP API", $"{ex.Message} Press Enter.", "");
                 return null;
             }
         }
@@ -2309,17 +2356,21 @@ namespace DepotDL.CLI
                 string maxParallelStr = session.MaxParallelDepots.ToString();
                 string manifestsDirStr = session.ManifestsDir ?? "[Not Configured]";
                 string outputDirStr = session.DownloadBaseDir ?? "[Auto]";
-                string maskedApiKey = string.IsNullOrEmpty(session.RyuuApiKey) 
-                    ? "[Not Configured]" 
+                string maskedRyuuKey = string.IsNullOrEmpty(session.RyuuApiKey)
+                    ? "[Not Configured]"
                     : new string('*', Math.Min(12, session.RyuuApiKey.Length));
+                string maskedHubcapKey = string.IsNullOrEmpty(session.HubcapApiKey)
+                    ? "[Not Configured]"
+                    : new string('*', Math.Min(12, session.HubcapApiKey.Length));
 
                 var menuItems = new List<string>
                 {
                     $"1. Max Parallel Depot Downloads: {maxParallelStr}",
                     $"2. Manifests Cache Folder       : {TuiText.ShortenTail(manifestsDirStr, 40)}",
                     $"3. Download Base Folder         : {TuiText.ShortenTail(outputDirStr, 40)}",
-                    $"4. Ryuu API Key                 : {maskedApiKey}",
-                    "5. Back"
+                    $"4. Ryuu API Key                 : {maskedRyuuKey}",
+                    $"5. Hubcap API Key               : {maskedHubcapKey}",
+                    "6. Back"
                 };
 
                 using (CenterConsoleOutput(80))
@@ -2348,7 +2399,8 @@ namespace DepotDL.CLI
                     DrawSettingRow("Max Parallel Depots:", maxParallelStr, ConsoleColor.Green);
                     DrawSettingRow("Manifests Cache Path:", TuiText.ShortenTail(manifestsDirStr, 44), session.ManifestsDirConfigured ? ConsoleColor.White : ConsoleColor.Yellow);
                     DrawSettingRow("Download Base Path:", TuiText.ShortenTail(outputDirStr, 44), ConsoleColor.White);
-                    DrawSettingRow("Ryuu API Key:", maskedApiKey, string.IsNullOrEmpty(session.RyuuApiKey) ? ConsoleColor.Yellow : ConsoleColor.Green);
+                    DrawSettingRow("Ryuu API Key:", maskedRyuuKey, string.IsNullOrEmpty(session.RyuuApiKey) ? ConsoleColor.Yellow : ConsoleColor.Green);
+                    DrawSettingRow("Hubcap API Key:", maskedHubcapKey, string.IsNullOrEmpty(session.HubcapApiKey) ? ConsoleColor.Yellow : ConsoleColor.Green);
 
                     Console.ForegroundColor = ConsoleColor.DarkGray;
                     Console.WriteLine("╚══════════════════════════════════════════════════════════════════════════════╝");
@@ -2423,6 +2475,15 @@ namespace DepotDL.CLI
                         }
                     }
                     else if (selectedIndex == 4)
+                    {
+                        var input = PromptText("HUBCAP API KEY", "Enter Hubcap API Key:", session.HubcapApiKey ?? "", mask: true);
+                        if (input != null)
+                        {
+                            session.HubcapApiKey = string.IsNullOrWhiteSpace(input) ? null : input.Trim();
+                            SaveSession(session);
+                        }
+                    }
+                    else if (selectedIndex == 5)
                     {
                         SaveSession(session);
                         return;

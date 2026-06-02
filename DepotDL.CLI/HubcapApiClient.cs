@@ -6,7 +6,7 @@ using System.Text.Json;
 
 namespace DepotDL.CLI
 {
-    public static class RyuuApiClient
+    public static class HubcapApiClient
     {
         private static readonly HttpClient Http = new()
         {
@@ -15,36 +15,32 @@ namespace DepotDL.CLI
 
         public static ManifestDownloadResult DownloadPackage(string appId, string apiKey)
         {
-            // Sanitize appId to prevent path traversal
             var sanitizedAppId = SanitizeFileName(appId);
-            var url = $"https://generator.ryuu.lol/secure_download?appid={Uri.EscapeDataString(appId)}&auth_code={Uri.EscapeDataString(apiKey)}";
-            using var response = Http.GetAsync(url, HttpCompletionOption.ResponseHeadersRead).GetAwaiter().GetResult();
+            var url = $"https://hubcapmanifest.com/api/v1/manifest/{Uri.EscapeDataString(appId)}";
+            using var request = new HttpRequestMessage(HttpMethod.Get, url);
+            request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", apiKey);
+
+            using var response = Http.SendAsync(request, HttpCompletionOption.ResponseHeadersRead).GetAwaiter().GetResult();
             var contentType = response.Content.Headers.ContentType?.MediaType ?? string.Empty;
 
-            // Check if response is JSON by content type first
             if (contentType.Contains("json", StringComparison.OrdinalIgnoreCase))
             {
                 var body = response.Content.ReadAsByteArrayAsync().GetAwaiter().GetResult();
                 var message = ReadJsonMessage(body);
                 if (!response.IsSuccessStatusCode)
-                {
-                    throw new InvalidOperationException(message.Length == 0 ? $"Ryuu request failed with HTTP {(int)response.StatusCode}." : $"Ryuu: {message}");
-                }
+                    throw new InvalidOperationException(message.Length == 0 ? $"Hubcap request failed with HTTP {(int)response.StatusCode}." : $"Hubcap: {message}");
 
                 return new ManifestDownloadResult
                 {
                     HasZip = false,
-                    Message = message.Length == 0 ? "Ryuu returned JSON without a downloadable ZIP." : $"Ryuu: {message}"
+                    Message = message.Length == 0 ? "Hubcap returned JSON without a downloadable ZIP." : $"Hubcap: {message}"
                 };
             }
 
             if (!response.IsSuccessStatusCode)
-            {
-                throw new InvalidOperationException($"Ryuu request failed with HTTP {(int)response.StatusCode}.");
-            }
+                throw new InvalidOperationException($"Hubcap request failed with HTTP {(int)response.StatusCode}.");
 
-            // Stream response to file instead of buffering in memory
-            var zipPath = Path.Combine(Path.GetTempPath(), $"ryuu_{sanitizedAppId}_{Guid.NewGuid():N}.zip");
+            var zipPath = Path.Combine(Path.GetTempPath(), $"hubcap_{sanitizedAppId}_{Guid.NewGuid():N}.zip");
             using (var stream = response.Content.ReadAsStreamAsync().GetAwaiter().GetResult())
             using (var fileStream = new FileStream(zipPath, FileMode.Create, FileAccess.Write, FileShare.None))
             {
@@ -54,21 +50,11 @@ namespace DepotDL.CLI
             if (new FileInfo(zipPath).Length == 0)
             {
                 File.Delete(zipPath);
-                return new ManifestDownloadResult
-                {
-                    HasZip = false,
-                    Message = "Ryuu returned an empty response."
-                };
+                return new ManifestDownloadResult { HasZip = false, Message = "Hubcap returned an empty response." };
             }
 
-            return new ManifestDownloadResult
-            {
-                HasZip = true,
-                ZipPath = zipPath,
-                Message = $"Downloaded Ryuu package to {zipPath}"
-            };
+            return new ManifestDownloadResult { HasZip = true, ZipPath = zipPath, Message = $"Downloaded Hubcap package to {zipPath}" };
         }
-
 
         private static string ReadJsonMessage(byte[] body)
         {
@@ -76,21 +62,10 @@ namespace DepotDL.CLI
             {
                 using var doc = JsonDocument.Parse(body);
                 var root = doc.RootElement;
-
-                if (root.TryGetProperty("message", out var message))
-                {
-                    return message.GetString() ?? string.Empty;
-                }
-
-                if (root.TryGetProperty("error", out var error))
-                {
-                    return error.GetString() ?? string.Empty;
-                }
+                if (root.TryGetProperty("message", out var message)) return message.GetString() ?? string.Empty;
+                if (root.TryGetProperty("error", out var error)) return error.GetString() ?? string.Empty;
             }
-            catch
-            {
-            }
-
+            catch { }
             return Encoding.UTF8.GetString(body).Trim();
         }
 
@@ -98,19 +73,13 @@ namespace DepotDL.CLI
         {
             var invalidChars = Path.GetInvalidFileNameChars();
             var sb = new StringBuilder(fileName.Length);
-
             foreach (var c in fileName)
             {
                 if (c == Path.DirectorySeparatorChar || c == Path.AltDirectorySeparatorChar || Array.IndexOf(invalidChars, c) >= 0)
-                {
                     sb.Append('_');
-                }
                 else
-                {
                     sb.Append(c);
-                }
             }
-
             return sb.ToString();
         }
     }

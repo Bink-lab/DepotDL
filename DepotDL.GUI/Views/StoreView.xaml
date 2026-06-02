@@ -14,6 +14,90 @@
             <Setter Property="VerticalAlignment" Value="Center"/>
             <Setter Property="Margin" Value="0,0,6,0"/>
         </Style>
+
+        <!-- Provider dropdown trigger button -->
+        <Style x:Key="ProviderDropBtn" TargetType="ToggleButton">
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+            <Setter Property="Padding" Value="13,8"/>
+            <Setter Property="FontFamily" Value="Segoe UI"/>
+            <Setter Property="FontSize" Value="12.5"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="{StaticResource TextSecondary}"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ToggleButton">
+                        <Border x:Name="bd"
+                                Background="White"
+                                BorderBrush="{StaticResource Border}"
+                                BorderThickness="1.5"
+                                CornerRadius="7"
+                                Padding="{TemplateBinding Padding}">
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <ContentPresenter VerticalAlignment="Center"/>
+                                <Viewbox Width="10" Height="10" Margin="6,1,0,0" VerticalAlignment="Center">
+                                    <Canvas Width="24" Height="24">
+                                        <Path x:Name="chevron"
+                                              Data="M6,9 L12,15 L18,9"
+                                              Stroke="{StaticResource TextSecondary}"
+                                              StrokeThickness="2.5"
+                                              StrokeStartLineCap="Round" StrokeEndLineCap="Round"
+                                              StrokeLineJoin="Round" Fill="Transparent"/>
+                                    </Canvas>
+                                </Viewbox>
+                            </StackPanel>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="bd" Property="Background" Value="{StaticResource AccentVeryLight}"/>
+                                <Setter TargetName="bd" Property="BorderBrush" Value="{StaticResource Accent}"/>
+                                <Setter Property="Foreground" Value="{StaticResource Accent}"/>
+                                <Setter TargetName="chevron" Property="Stroke" Value="{StaticResource Accent}"/>
+                            </Trigger>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="bd" Property="Background" Value="{StaticResource AccentLight}"/>
+                                <Setter TargetName="bd" Property="BorderBrush" Value="{StaticResource Accent}"/>
+                                <Setter Property="Foreground" Value="{StaticResource Accent}"/>
+                                <Setter TargetName="chevron" Property="Stroke" Value="{StaticResource Accent}"/>
+                                <Setter TargetName="chevron" Property="Data" Value="M6,15 L12,9 L18,15"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Provider dropdown item -->
+        <Style x:Key="ProviderDropItem" TargetType="Button">
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{StaticResource TextPrimary}"/>
+            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="bd"
+                                Background="{TemplateBinding Background}"
+                                CornerRadius="5"
+                                Padding="10,9">
+                            <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                              VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="bd" Property="Background" Value="{StaticResource AccentVeryLight}"/>
+                                <Setter Property="Foreground" Value="{StaticResource Accent}"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Foreground" Value="{StaticResource TextMuted}"/>
+                                <Setter Property="Cursor" Value="Arrow"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
     </UserControl.Resources>
 
     <Grid>
@@ -891,6 +975,8 @@
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="10"/>
+                                <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
                             <StackPanel Grid.Column="0" VerticalAlignment="Center">
                                 <TextBlock Text="App ID" Style="{StaticResource TextLabel}" Margin="0"/>
@@ -898,7 +984,100 @@
                                            Foreground="{StaticResource TextSecondary}"
                                            Text="{Binding SelectedGame.Game.AppId}"/>
                             </StackPanel>
-                            <Button Grid.Column="1"
+
+                            <!-- Provider dropdown -->
+                            <Grid Grid.Column="1" VerticalAlignment="Center">
+                                <ToggleButton x:Name="providerToggle"
+                                              Style="{StaticResource ProviderDropBtn}"
+                                              IsChecked="{Binding IsProviderDropdownOpen, Mode=TwoWay}">
+                                    <TextBlock Text="{Binding SelectedProviderLabel}"/>
+                                </ToggleButton>
+
+                                <Popup IsOpen="{Binding IsProviderDropdownOpen, Mode=TwoWay}"
+                                       StaysOpen="False"
+                                       Placement="Bottom"
+                                       PlacementTarget="{Binding ElementName=providerToggle}"
+                                       VerticalOffset="5"
+                                       PopupAnimation="Fade"
+                                       AllowsTransparency="True">
+                                    <Border Background="White"
+                                            CornerRadius="9"
+                                            BorderBrush="{StaticResource Border}"
+                                            BorderThickness="1"
+                                            Padding="4"
+                                            MinWidth="170">
+                                        <Border.Effect>
+                                            <DropShadowEffect BlurRadius="18" ShadowDepth="3" Direction="270"
+                                                              Color="#1C1610" Opacity="0.10"/>
+                                        </Border.Effect>
+                                        <StackPanel>
+                                            <!-- Ryuu option -->
+                                            <Button Style="{StaticResource ProviderDropItem}"
+                                                    Command="{Binding SelectProviderCommand}"
+                                                    CommandParameter="{x:Static vm:ManifestProvider.Ryuu}"
+                                                    IsEnabled="{Binding CanUseRyuu}">
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <StackPanel Grid.Column="0">
+                                                        <TextBlock Text="Ryuu" FontWeight="SemiBold" FontSize="13"/>
+                                                        <TextBlock Text="No API key configured"
+                                                                   FontSize="10.5" Margin="0,1,0,0"
+                                                                   Foreground="{StaticResource TextMuted}"
+                                                                   Visibility="{Binding CanUseRyuu, Converter={StaticResource InvBoolToVis}}"/>
+                                                    </StackPanel>
+                                                    <Viewbox Grid.Column="1" Width="13" Height="13"
+                                                             Margin="14,0,2,0" VerticalAlignment="Center"
+                                                             Visibility="{Binding IsRyuuSelected, Converter={StaticResource BoolToVis}}">
+                                                        <Canvas Width="24" Height="24">
+                                                            <Path Data="M5,12 L10,17 L19,7"
+                                                                  Stroke="{StaticResource Accent}"
+                                                                  StrokeThickness="2.5" Fill="Transparent"
+                                                                  StrokeStartLineCap="Round" StrokeEndLineCap="Round"
+                                                                  StrokeLineJoin="Round"/>
+                                                        </Canvas>
+                                                    </Viewbox>
+                                                </Grid>
+                                            </Button>
+
+                                            <!-- Hubcap option -->
+                                            <Button Style="{StaticResource ProviderDropItem}"
+                                                    Command="{Binding SelectProviderCommand}"
+                                                    CommandParameter="{x:Static vm:ManifestProvider.Hubcap}"
+                                                    IsEnabled="{Binding CanUseHubcap}">
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <StackPanel Grid.Column="0">
+                                                        <TextBlock Text="Hubcap" FontWeight="SemiBold" FontSize="13"/>
+                                                        <TextBlock Text="No API key configured"
+                                                                   FontSize="10.5" Margin="0,1,0,0"
+                                                                   Foreground="{StaticResource TextMuted}"
+                                                                   Visibility="{Binding CanUseHubcap, Converter={StaticResource InvBoolToVis}}"/>
+                                                    </StackPanel>
+                                                    <Viewbox Grid.Column="1" Width="13" Height="13"
+                                                             Margin="14,0,2,0" VerticalAlignment="Center"
+                                                             Visibility="{Binding IsHubcapSelected, Converter={StaticResource BoolToVis}}">
+                                                        <Canvas Width="24" Height="24">
+                                                            <Path Data="M5,12 L10,17 L19,7"
+                                                                  Stroke="{StaticResource Accent}"
+                                                                  StrokeThickness="2.5" Fill="Transparent"
+                                                                  StrokeStartLineCap="Round" StrokeEndLineCap="Round"
+                                                                  StrokeLineJoin="Round"/>
+                                                        </Canvas>
+                                                    </Viewbox>
+                                                </Grid>
+                                            </Button>
+                                        </StackPanel>
+                                    </Border>
+                                </Popup>
+                            </Grid>
+
+                            <Button Grid.Column="3"
                                     Style="{StaticResource BtnPrimary}"
                                     Padding="24,10"
                                     Command="{Binding DownloadGameCommand}">
