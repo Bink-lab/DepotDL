@@ -32,7 +32,7 @@ namespace DepotDownloader
         public static void LoadFromFile(string filename)
         {
             if (Loaded)
-                throw new Exception("Config already loaded");
+                throw new InvalidOperationException("Config already loaded");
 
             if (File.Exists(filename))
             {
@@ -51,11 +51,14 @@ namespace DepotDownloader
         public static void Save()
         {
             if (!Loaded)
-                throw new Exception("Saved config before loading");
+                throw new InvalidOperationException("Saved config before loading");
 
-            using var fs = File.Open(Instance.FileName, FileMode.Create);
-            using var ds = new DeflateStream(fs, CompressionMode.Compress);
-            Serializer.Serialize(ds, Instance);
+            var tmpFile = Instance.FileName + ".tmp";
+            using (var fs = File.Open(tmpFile, FileMode.Create))
+            using (var ds = new DeflateStream(fs, CompressionMode.Compress))
+                Serializer.Serialize(ds, Instance);
+
+            File.Move(tmpFile, Instance.FileName, overwrite: true);
         }
     }
 }

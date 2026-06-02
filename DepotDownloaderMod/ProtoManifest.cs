@@ -139,9 +139,10 @@ namespace DepotDownloader
             using (var ds = new DeflateStream(fs, CompressionMode.Decompress))
                 ds.CopyTo(ms);
 
-            checksum = SHA1.HashData(ms.ToArray());
+            ms.TryGetBuffer(out var buf);
+            checksum = SHA1.HashData(buf.AsSpan(0, (int)ms.Length));
 
-            ms.Seek(0, SeekOrigin.Begin);
+            ms.Position = 0;
             return Serializer.Deserialize<ProtoManifest>(ms);
         }
 
@@ -150,9 +151,10 @@ namespace DepotDownloader
             using var ms = new MemoryStream();
             Serializer.Serialize(ms, this);
 
-            checksum = SHA1.HashData(ms.ToArray());
+            ms.TryGetBuffer(out var buf);
+            checksum = SHA1.HashData(buf.AsSpan(0, (int)ms.Length));
 
-            ms.Seek(0, SeekOrigin.Begin);
+            ms.Position = 0;
 
             using var fs = File.Open(filename, FileMode.Create);
             using var ds = new DeflateStream(fs, CompressionMode.Compress);

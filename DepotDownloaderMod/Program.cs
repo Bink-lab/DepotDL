@@ -76,8 +76,26 @@ namespace DepotDownloader
 
             TokenCFG.useAppToken = HasParameter(args, "-apptoken");
             TokenCFG.usePackageToken = HasParameter(args, "-packagetoken");
-            TokenCFG.appToken = Convert.ToUInt64(GetParameter<string>(args, "-apptoken"));
-            TokenCFG.packageToken = Convert.ToUInt64(GetParameter<string>(args, "-packagetoken"));
+
+            if (TokenCFG.useAppToken)
+            {
+                if (!ulong.TryParse(GetParameter<string>(args, "-apptoken"), out var appToken))
+                {
+                    Console.WriteLine("Error: Invalid value for -apptoken. Expected a numeric token.");
+                    return 1;
+                }
+                TokenCFG.appToken = appToken;
+            }
+
+            if (TokenCFG.usePackageToken)
+            {
+                if (!ulong.TryParse(GetParameter<string>(args, "-packagetoken"), out var packageToken))
+                {
+                    Console.WriteLine("Error: Invalid value for -packagetoken. Expected a numeric token.");
+                    return 1;
+                }
+                TokenCFG.packageToken = packageToken;
+            }
 
             ContentDownloader.Config.RememberPassword = HasParameter(args, "-remember-password");
             ContentDownloader.Config.UseQrCode = HasParameter(args, "-qr");
@@ -143,7 +161,7 @@ namespace DepotDownloader
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine("Warning: Unable to load filelist: {0}", ex);
+                    Console.WriteLine("Warning: Unable to load filelist: {0}", ex.Message);
                 }
             }
 
@@ -482,7 +500,7 @@ namespace DepotDownloader
             {
                 var strParam = args[index];
 
-                if (strParam[0] == '-') break;
+                if (strParam.Length == 0 || strParam[0] == '-') break;
 
                 var converter = TypeDescriptor.GetConverter(typeof(T));
                 if (converter != null)

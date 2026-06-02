@@ -19,10 +19,24 @@ namespace DepotDownloader
 
                 if (split.Length != 2)
                 {
-                    throw new FormatException($"Invalid depot key line: {value}");
+                    Console.WriteLine("Warning: Skipping invalid depot key line: {0}", value);
+                    continue;
                 }
 
-                depotKeysCache.Add(uint.Parse(split[0]), StringToByteArray(split[1]));
+                if (!uint.TryParse(split[0], out var depotId))
+                {
+                    Console.WriteLine("Warning: Skipping depot key line with invalid depot ID: {0}", value);
+                    continue;
+                }
+
+                try
+                {
+                    depotKeysCache.Add(depotId, StringToByteArray(split[1]));
+                }
+                catch (ArgumentException)
+                {
+                    Console.WriteLine("Warning: Duplicate depot ID {0} in depot keys file, skipping.", depotId);
+                }
             }
         }
 

@@ -21,6 +21,7 @@ namespace DepotDownloader
 
         private readonly List<Server> servers = [];
         private int nextServer;
+        private readonly object _serverLock = new();
 
         public CDNClientPool(Steam3Session steamSession, uint appId)
         {
@@ -65,23 +66,20 @@ namespace DepotDownloader
 
         public Server GetConnection()
         {
-            return servers[nextServer % servers.Count];
-        }
-
-        public void ReturnConnection(Server server)
-        {
-            if (server == null) return;
-
-            // nothing to do, maybe remove from ContentServerPenalty?
+            lock (_serverLock)
+            {
+                if (servers.Count == 0) return null;
+                return servers[nextServer % servers.Count];
+            }
         }
 
         public void ReturnBrokenConnection(Server server)
         {
             if (server == null) return;
 
-            lock (servers)
+            lock (_serverLock)
             {
-                if (servers[nextServer % servers.Count] == server)
+                if (servers.Count > 0 && servers[nextServer % servers.Count] == server)
                 {
                     nextServer++;
                 }

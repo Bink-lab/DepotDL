@@ -332,7 +332,9 @@ namespace DepotDownloader
                 return false;
             }
 
-            Task.Run(steam3.TickCallbacks);
+            Task.Run(steam3.TickCallbacks).ContinueWith(
+                t => Console.Error.WriteLine("TickCallbacks faulted: {0}", t.Exception?.GetBaseException().Message),
+                TaskContinuationOptions.OnlyOnFaulted);
 
             return true;
         }
@@ -838,7 +840,6 @@ namespace DepotDownloader
                                 cdnPool.ProxyServer,
                                 cdnToken).ConfigureAwait(false);
 
-                            cdnPool.ReturnConnection(connection);
                         }
                         catch (TaskCanceledException)
                         {
@@ -850,8 +851,6 @@ namespace DepotDownloader
                             if (e.StatusCode == HttpStatusCode.Forbidden && !steam3.CDNAuthTokens.ContainsKey((depot.DepotId, connection.Host)))
                             {
                                 await steam3.RequestCDNAuthToken(depot.AppId, depot.DepotId, connection);
-
-                                cdnPool.ReturnConnection(connection);
 
                                 continue;
                             }
@@ -1266,7 +1265,6 @@ namespace DepotDownloader
                             cdnPool.ProxyServer,
                             cdnToken).ConfigureAwait(false);
 
-                        cdnPool.ReturnConnection(connection);
 
                         break;
                     }
@@ -1283,8 +1281,6 @@ namespace DepotDownloader
                             (!steam3.CDNAuthTokens.TryGetValue((depot.DepotId, connection.Host), out var authTokenCallbackPromise) || !authTokenCallbackPromise.Task.IsCompleted))
                         {
                             await steam3.RequestCDNAuthToken(depot.AppId, depot.DepotId, connection);
-
-                            cdnPool.ReturnConnection(connection);
 
                             continue;
                         }

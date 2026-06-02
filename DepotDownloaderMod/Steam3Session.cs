@@ -44,11 +44,11 @@ namespace DepotDownloader
         readonly CallbackManager callbacks;
 
         readonly bool authenticatedUser;
-        bool bConnecting;
-        bool bAborted;
-        bool bExpectingDisconnectRemote;
-        bool bDidDisconnect;
-        bool bIsConnectionRecovery;
+        volatile bool bConnecting;
+        volatile bool bAborted;
+        volatile bool bExpectingDisconnectRemote;
+        volatile bool bDidDisconnect;
+        volatile bool bIsConnectionRecovery;
         int connectionBackoff;
         int seq; // more hack fixes
         AuthSession authSession;
@@ -420,6 +420,8 @@ namespace DepotDownloader
             {
                 callbacks.RunWaitAllCallbacks(TimeSpan.FromMilliseconds(100));
             }
+
+            abortedToken.Dispose();
         }
 
         private void Reconnect()

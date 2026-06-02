@@ -32,7 +32,7 @@ namespace DepotDownloader
             }
             while (string.IsNullOrEmpty(code));
 
-            return Task.FromResult(code!);
+            return Task.FromResult(code ?? string.Empty);
         }
 
         /// <inheritdoc />
@@ -57,7 +57,7 @@ namespace DepotDownloader
             }
             while (string.IsNullOrEmpty(code));
 
-            return Task.FromResult(code!);
+            return Task.FromResult(code ?? string.Empty);
         }
 
         /// <inheritdoc />

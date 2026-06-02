@@ -214,7 +214,7 @@ namespace DepotDownloader
             var bytes = new byte[chars / 2];
 
             for (var i = 0; i < chars; i += 2)
-                bytes[i / 2] = Convert.ToByte(hex.Substring(i, 2), 16);
+                bytes[i / 2] = byte.Parse(hex.AsSpan(i, 2), System.Globalization.NumberStyles.HexNumber);
 
             return bytes;
         }
