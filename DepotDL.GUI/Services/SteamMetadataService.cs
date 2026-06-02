@@ -1,7 +1,9 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
 using SteamKit2;
 
@@ -16,7 +18,7 @@ namespace DepotDL.GUI.Services
 
     public static class SteamMetadataService
     {
-        private static readonly Dictionary<string, Dictionary<string, SteamDepotMeta>> _cache =
+        private static readonly ConcurrentDictionary<string, Dictionary<string, SteamDepotMeta>> _cache =
             new(StringComparer.OrdinalIgnoreCase);
 
         public static async Task<Dictionary<string, SteamDepotMeta>> GetDepotMetaAsync(string appId)
@@ -28,7 +30,7 @@ namespace DepotDL.GUI.Services
 
             try
             {
-                var fetched = await Task.Run(() => FetchFromSteam(appId));
+                var fetched = await FetchFromSteamAsync(appId);
                 _cache[appId] = fetched;
                 return fetched;
             }
@@ -71,7 +73,8 @@ namespace DepotDL.GUI.Services
             if (!File.Exists(path)) return result;
             try
             {
-                using var doc = JsonDocument.Parse(File.ReadAllText(path));
+                using var stream = File.OpenRead(path);
+                using var doc = JsonDocument.Parse(stream);
                 if (!doc.RootElement.TryGetProperty($"app_info_{appId}", out var entry) ||
                     !entry.TryGetProperty("data", out var data) ||
                     !data.TryGetProperty("depots", out var depots))
@@ -100,7 +103,7 @@ namespace DepotDL.GUI.Services
             el.TryGetProperty(key, out var v) && v.ValueKind == JsonValueKind.String
                 ? v.GetString() ?? string.Empty : string.Empty;
 
-        private static Dictionary<string, SteamDepotMeta> FetchFromSteam(string appId)
+        private static async Task<Dictionary<string, SteamDepotMeta>> FetchFromSteamAsync(string appId)
         {
             if (!uint.TryParse(appId, out var appIdUInt))
                 return new(StringComparer.OrdinalIgnoreCase);
@@ -110,14 +113,18 @@ namespace DepotDL.GUI.Services
             var mgr = new CallbackManager(client);
             var user = client.GetHandler<SteamUser>()!;
             var apps = client.GetHandler<SteamApps>()!;
-            var done = false;
-            Exception? err = null;
+
+            var tcs = new TaskCompletionSource<Dictionary<string, SteamDepotMeta>>(TaskCreationOptions.RunContinuationsAsynchronously);
 
             mgr.Subscribe<SteamClient.ConnectedCallback>(_ => user.LogOnAnonymous());
-            mgr.Subscribe<SteamClient.DisconnectedCallback>(_ => done = true);
+            mgr.Subscribe<SteamClient.DisconnectedCallback>(_ => tcs.TrySetException(new Exception("Disconnected from Steam.")));
             mgr.Subscribe<SteamUser.LoggedOnCallback>(async cb =>
             {
-                if (cb.Result != EResult.OK) { done = true; return; }
+                if (cb.Result != EResult.OK)
+                {
+                    tcs.TrySetException(new Exception($"Steam anonymous logon failed: {cb.Result}"));
+                    return;
+                }
                 try
                 {
                     var req = new SteamApps.PICSRequest(appIdUInt);
@@ -125,24 +132,46 @@ namespace DepotDL.GUI.Services
                     job.Timeout = TimeSpan.FromSeconds(12);
                     var res = await job;
                     if (res.Complete && res.Results != null)
+                    {
                         foreach (var r in res.Results)
                             foreach (var app in r.Apps)
                                 ReadDepots(app.Value.KeyValues, result);
+                    }
+                    tcs.TrySetResult(result);
                 }
-                catch (Exception ex) { err = ex; }
-                finally { done = true; }
+                catch (Exception ex)
+                {
+                    tcs.TrySetException(ex);
+                }
             });
 
             client.Connect();
-            var start = DateTime.UtcNow;
-            while (!done && DateTime.UtcNow - start < TimeSpan.FromSeconds(15))
-                mgr.RunWaitCallbacks(TimeSpan.FromMilliseconds(100));
 
-            try { user.LogOff(); } catch { }
-            try { client.Disconnect(); } catch { }
+            var cts = new CancellationTokenSource(TimeSpan.FromSeconds(15));
+            var pumpTask = Task.Run(() =>
+            {
+                while (!tcs.Task.IsCompleted && !cts.IsCancellationRequested)
+                {
+                    mgr.RunWaitCallbacks(TimeSpan.FromMilliseconds(100));
+                }
+                if (!tcs.Task.IsCompleted)
+                {
+                    tcs.TrySetException(new TimeoutException("Steam PICS request timed out."));
+                }
+            });
 
-            if (err != null) throw err;
-            return result;
+            try
+            {
+                var fetched = await tcs.Task;
+                try { user.LogOff(); } catch { }
+                return fetched;
+            }
+            finally
+            {
+                cts.Cancel();
+                try { client.Disconnect(); } catch { }
+                await pumpTask;
+            }
         }
 
         private static void ReadDepots(KeyValue kv, Dictionary<string, SteamDepotMeta> result)

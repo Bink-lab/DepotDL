@@ -341,11 +341,16 @@ namespace DepotDL.GUI.ViewModels
 
                 await Application.Current.Dispatcher.InvokeAsync(() =>
                 {
+                    if (AppId != appId) return;
                     var settings = _settings.Load();
                     foreach (var item in items)
                     {
                         if (!meta.TryGetValue(item.DepotId, out var m)) continue;
-                        if (string.IsNullOrWhiteSpace(item.Depot.Name)) item.Depot.Name = m.Name;
+                        if (string.IsNullOrWhiteSpace(item.Depot.Name))
+                        {
+                            item.Depot.Name = m.Name;
+                            item.DisplayName = m.Name;
+                        }
                         item.OsList = m.OsList;
                         item.OsArch = m.OsArch;
                     }
@@ -551,8 +556,8 @@ namespace DepotDL.GUI.ViewModels
         [ObservableProperty] private bool _isSelected = true;
         [ObservableProperty] private string _osList = string.Empty;
         [ObservableProperty] private string _osArch = string.Empty;
+        [ObservableProperty] private string _displayName = string.Empty;
 
-        public string DisplayName => Depot.DisplayName;
         public string DepotId => Depot.DepotId;
 
         public string OsText
@@ -574,6 +579,7 @@ namespace DepotDL.GUI.ViewModels
             Depot = depot;
             _osList = depot.OsList;
             _osArch = depot.OsArch;
+            _displayName = depot.DisplayName;
         }
     }
 }

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
@@ -16,7 +17,7 @@ namespace DepotDL.CLI
 
     public static class SteamAppInfoProvider
     {
-        private static readonly Dictionary<string, Dictionary<string, DepotMetadata>> MetadataCache = new(StringComparer.OrdinalIgnoreCase);
+        private static readonly ConcurrentDictionary<string, Dictionary<string, DepotMetadata>> MetadataCache = new(StringComparer.OrdinalIgnoreCase);
 
         public static Dictionary<string, DepotMetadata> LoadDepotMetadata(string appId)
         {
@@ -88,7 +89,8 @@ namespace DepotDL.CLI
 
             try
             {
-                using var doc = JsonDocument.Parse(File.ReadAllText(path));
+                using var stream = File.OpenRead(path);
+                using var doc = JsonDocument.Parse(stream);
                 if (!doc.RootElement.TryGetProperty($"app_info_{appId}", out var entry) ||
                     !entry.TryGetProperty("data", out var data) ||
                     !data.TryGetProperty("depots", out var depots))
@@ -147,9 +149,9 @@ namespace DepotDL.CLI
             var steamApps = steamClient.GetHandler<SteamApps>()!;
             var connected = false;
             var loggedOn = false;
-            var done = false;
             var result = new Dictionary<string, DepotMetadata>(StringComparer.OrdinalIgnoreCase);
-            Exception? error = null;
+
+            var tcs = new TaskCompletionSource<Dictionary<string, DepotMetadata>>(TaskCreationOptions.RunContinuationsAsynchronously);
 
             manager.Subscribe<SteamClient.ConnectedCallback>(_ =>
             {
@@ -159,15 +161,14 @@ namespace DepotDL.CLI
 
             manager.Subscribe<SteamClient.DisconnectedCallback>(_ =>
             {
-                done = true;
+                tcs.TrySetException(new Exception("Disconnected from Steam."));
             });
 
             manager.Subscribe<SteamUser.LoggedOnCallback>(async callback =>
             {
                 if (callback.Result != EResult.OK)
                 {
-                    error = new InvalidOperationException($"Steam anonymous login failed: {callback.Result}");
-                    done = true;
+                    tcs.TrySetException(new InvalidOperationException($"Steam anonymous login failed: {callback.Result}"));
                     return;
                 }
 
@@ -188,34 +189,37 @@ namespace DepotDL.CLI
                             }
                         }
                     }
-                    done = true;
+                    tcs.TrySetResult(result);
                 }
                 catch (Exception ex)
                 {
-                    error = ex;
-                    done = true;
+                    tcs.TrySetException(ex);
                 }
             });
 
             steamClient.Connect();
             var start = DateTime.UtcNow;
-            while (!done && DateTime.UtcNow - start < TimeSpan.FromSeconds(15))
+            while (!tcs.Task.IsCompleted && DateTime.UtcNow - start < TimeSpan.FromSeconds(15))
             {
                 manager.RunWaitCallbacks(TimeSpan.FromMilliseconds(100));
             }
 
             if (connected && loggedOn)
             {
-                steamUser.LogOff();
+                try { steamUser.LogOff(); } catch { }
             }
-            steamClient.Disconnect();
+            try { steamClient.Disconnect(); } catch { }
 
-            if (error != null)
+            if (tcs.Task.IsFaulted)
             {
-                throw error;
+                throw tcs.Task.Exception?.GetBaseException() ?? new Exception("Steam fetch failed.");
+            }
+            if (!tcs.Task.IsCompleted)
+            {
+                throw new TimeoutException("Steam PICS request timed out.");
             }
 
-            return result;
+            return tcs.Task.Result;
         }
 
         private static void ReadDepots(KeyValue appInfo, Dictionary<string, DepotMetadata> result)
