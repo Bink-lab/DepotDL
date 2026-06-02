@@ -11,6 +11,9 @@
 
     <Grid Margin="32,28,32,28">
 
+        <!-- ══════════════════════════════════════════════════════
+             STEP 1 — Select File
+             ══════════════════════════════════════════════════════ -->
         <Grid Visibility="{Binding CurrentStep, Converter={StaticResource EqToVis},
                             ConverterParameter={x:Static vm:DownloadStep.SelectFile}}">
             <Grid.RowDefinitions>
@@ -21,95 +24,43 @@
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
+            <!-- Heading -->
             <StackPanel Grid.Row="0">
                 <TextBlock Style="{StaticResource TextH1}" Text="New Download"/>
                 <TextBlock Style="{StaticResource BodyText}" Margin="0,4,0,0"
-                           Text="Select a Lua configuration file or fetch details directly from the Ryuu API."/>
+                           Text="Enter an App ID to fetch automatically, or load a Lua config file."/>
             </StackPanel>
 
+            <!-- Ryuu API — primary hero card -->
             <Border Grid.Row="2"
-                    x:Name="DropZone"
-                    Background="{StaticResource BgCard}"
-                    CornerRadius="16"
-                    BorderThickness="1"
-                    BorderBrush="{StaticResource Border}">
-                <Border.Effect>
-                    <DropShadowEffect BlurRadius="25" ShadowDepth="4" Opacity="0.04" Color="#1C1610"/>
-                </Border.Effect>
-                <Grid>
-                    <Rectangle Stroke="{StaticResource Accent}"
-                               StrokeDashArray="5 4"
-                               StrokeThickness="1.5"
-                               RadiusX="14" RadiusY="14"
-                               Margin="8"/>
-
-                    <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center"
-                                Margin="40,36">
-
-                        <Border Width="64" Height="64"
-                                CornerRadius="32"
+                    Style="{StaticResource Card}"
+                    Padding="28,24">
+                <StackPanel>
+                    <!-- Card header -->
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
+                        <Border Width="40" Height="40" CornerRadius="20"
                                 Background="{StaticResource AccentVeryLight}"
-                                HorizontalAlignment="Center"
-                                Margin="0,0,0,16">
+                                Margin="0,0,14,0">
                             <Border.Effect>
-                                <DropShadowEffect Color="#C07840" BlurRadius="12" ShadowDepth="2" Opacity="0.15"/>
+                                <DropShadowEffect Color="#C07840" BlurRadius="10" ShadowDepth="1" Opacity="0.2"/>
                             </Border.Effect>
-                            <Viewbox Width="24" Height="24">
+                            <Viewbox Width="18" Height="18">
                                 <Canvas Width="24" Height="24">
-                                    <Path Data="M14,2 L14,8 L20,8 M14,2 L20,8 M20,8 L20,18 A2,2,0,0,1,18,20 L6,20 A2,2,0,0,1,4,18 L4,4 A2,2,0,0,1,6,2 L14,2 M12,10 L12,16 M9,13 L12,16 L15,13"
-                                          Stroke="{StaticResource Accent}"
-                                          StrokeThickness="1.8" Fill="Transparent"
+                                    <Path Data="M12,4 L12,16 M8,12 L12,16 L16,12 M4,19 L20,19"
+                                          Stroke="{StaticResource Accent}" StrokeThickness="2" Fill="Transparent"
                                           StrokeStartLineCap="Round" StrokeEndLineCap="Round"
                                           StrokeLineJoin="Round"/>
                                 </Canvas>
                             </Viewbox>
                         </Border>
-
-                        <TextBlock Text="Drag &amp; Drop Lua File"
-                                   Style="{StaticResource TextH2}"
-                                   HorizontalAlignment="Center"/>
-                        <TextBlock Text="or browse your computer to begin"
-                                   Style="{StaticResource BodyText}"
-                                   HorizontalAlignment="Center"
-                                   Margin="0,4,0,20"/>
-
-                        <Button Style="{StaticResource BtnPrimary}"
-                                Command="{Binding BrowseLuaFileCommand}"
-                                Padding="28,11">
-                            <StackPanel Orientation="Horizontal">
-                                <Viewbox Width="15" Height="15" Margin="0,0,8,0">
-                                    <Canvas Width="24" Height="24">
-                                        <Path Data="M3,7 A2,2,0,0,1,5,5 L10,5 L12,8 L19,8 A2,2,0,0,1,21,10 L21,19 A2,2,0,0,1,19,21 L5,21 A2,2,0,0,1,3,19 Z"
-                                              Stroke="White" StrokeThickness="1.8" Fill="Transparent"
-                                              StrokeStartLineCap="Round" StrokeEndLineCap="Round"
-                                              StrokeLineJoin="Round"/>
-                                    </Canvas>
-                                </Viewbox>
-                                <TextBlock Text="Browse for Lua File" FontSize="12.5" FontWeight="SemiBold"/>
-                            </StackPanel>
-                        </Button>
-
-                        <Border Background="{StaticResource ErrorBg}"
-                                CornerRadius="8" Padding="14,10"
-                                Margin="0,18,0,0"
-                                BorderBrush="#EBC5C1"
-                                BorderThickness="1"
-                                MaxWidth="420"
-                                Visibility="{Binding ParseError, Converter={StaticResource NotEmptyToVis}}">
-                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                <TextBlock Text="⚠ " Foreground="{StaticResource Error}" FontWeight="Bold" FontSize="13" VerticalAlignment="Center" Margin="0,0,6,0"/>
-                                <TextBlock Text="{Binding ParseError}"
-                                           Foreground="{StaticResource Error}"
-                                           FontSize="11.5" TextWrapping="Wrap" VerticalAlignment="Center"/>
-                            </StackPanel>
-                        </Border>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Style="{StaticResource TextH2}" Text="Fetch from Ryuu API"/>
+                            <TextBlock Style="{StaticResource BodyText}" Margin="0,3,0,0"
+                                       Text="Enter an App ID to download the config and manifests automatically."/>
+                        </StackPanel>
                     </StackPanel>
-                </Grid>
-            </Border>
 
-            <Border Grid.Row="4" Style="{StaticResource Card}" Padding="24,20">
-                <StackPanel>
-                    <TextBlock Text="FETCH FROM RYUU API" Style="{StaticResource TextLabel}" Margin="0,0,0,16"/>
+                    <!-- Inputs -->
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
@@ -124,8 +75,10 @@
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
 
-                        <TextBlock Grid.Row="0" Grid.Column="0" Text="App ID" Style="{StaticResource TextLabel}" Margin="0"/>
-                        <TextBlock Grid.Row="0" Grid.Column="2" Text="API Key (Optional)" Style="{StaticResource TextLabel}" Margin="0"/>
+                        <TextBlock Grid.Row="0" Grid.Column="0" Text="App ID"
+                                   Style="{StaticResource TextLabel}" Margin="0"/>
+                        <TextBlock Grid.Row="0" Grid.Column="2" Text="API Key (Optional)"
+                                   Style="{StaticResource TextLabel}" Margin="0"/>
 
                         <TextBox Grid.Row="2" Grid.Column="0"
                                  Text="{Binding RyuuAppId, UpdateSourceTrigger=PropertyChanged}"
@@ -142,7 +95,8 @@
                                 Padding="28,10"
                                 VerticalAlignment="Center">
                             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                <Viewbox Width="14" Height="14" Margin="0,0,8,0" Visibility="{Binding IsRyuuBusy, Converter={StaticResource InvBoolToVis}}">
+                                <Viewbox Width="14" Height="14" Margin="0,0,8,0"
+                                         Visibility="{Binding IsRyuuBusy, Converter={StaticResource InvBoolToVis}}">
                                     <Canvas Width="24" Height="24">
                                         <Path Data="M12,17 L12,3 M8,13 L12,17 L16,13 M4,21 L20,21"
                                               Stroke="White" StrokeThickness="2" Fill="Transparent"
@@ -160,6 +114,7 @@
                         </Button>
                     </Grid>
 
+                    <!-- Ryuu error -->
                     <Border Background="{StaticResource ErrorBg}"
                             CornerRadius="8" Padding="14,10"
                             Margin="0,14,0,0"
@@ -167,8 +122,64 @@
                             BorderThickness="1"
                             Visibility="{Binding RyuuError, Converter={StaticResource NotEmptyToVis}}">
                         <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="⚠ " Foreground="{StaticResource Error}" FontWeight="Bold" FontSize="13" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                            <TextBlock Text="⚠ " Foreground="{StaticResource Error}"
+                                       FontWeight="Bold" FontSize="13" VerticalAlignment="Center" Margin="0,0,6,0"/>
                             <TextBlock Text="{Binding RyuuError}"
+                                       Foreground="{StaticResource Error}"
+                                       FontSize="11.5" TextWrapping="Wrap" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </Border>
+
+            <!-- Lua config — compact secondary strip -->
+            <Border Grid.Row="4" Style="{StaticResource CardFlat}" Padding="20,16">
+                <StackPanel>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="12"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                            <TextBlock Style="{StaticResource TextH3}" Text="Use a config file"/>
+                            <TextBlock Style="{StaticResource BodyText}"
+                                       Foreground="{StaticResource TextMuted}"
+                                       Margin="0,3,0,0"
+                                       Text="Drag a .lua file anywhere in this window, or browse."/>
+                        </StackPanel>
+
+                        <Button Grid.Column="2"
+                                Style="{StaticResource BtnGhost}"
+                                Command="{Binding BrowseLuaFileCommand}"
+                                Padding="18,10"
+                                VerticalAlignment="Center">
+                            <StackPanel Orientation="Horizontal">
+                                <Viewbox Width="13" Height="13" Margin="0,0,7,0">
+                                    <Canvas Width="24" Height="24">
+                                        <Path Data="M3,7 A2,2,0,0,1,5,5 L10,5 L12,8 L19,8 A2,2,0,0,1,21,10 L21,19 A2,2,0,0,1,19,21 L5,21 A2,2,0,0,1,3,19 Z"
+                                              Stroke="{StaticResource TextSecondary}" StrokeThickness="1.8" Fill="Transparent"
+                                              StrokeStartLineCap="Round" StrokeEndLineCap="Round"
+                                              StrokeLineJoin="Round"/>
+                                    </Canvas>
+                                </Viewbox>
+                                <TextBlock Text="Browse…" FontSize="12.5" FontWeight="SemiBold"/>
+                            </StackPanel>
+                        </Button>
+                    </Grid>
+
+                    <!-- Parse error -->
+                    <Border Background="{StaticResource ErrorBg}"
+                            CornerRadius="8" Padding="14,10"
+                            Margin="0,12,0,0"
+                            BorderBrush="#EBC5C1"
+                            BorderThickness="1"
+                            Visibility="{Binding ParseError, Converter={StaticResource NotEmptyToVis}}">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="⚠ " Foreground="{StaticResource Error}"
+                                       FontWeight="Bold" FontSize="13" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                            <TextBlock Text="{Binding ParseError}"
                                        Foreground="{StaticResource Error}"
                                        FontSize="11.5" TextWrapping="Wrap" VerticalAlignment="Center"/>
                         </StackPanel>
@@ -177,199 +188,106 @@
             </Border>
         </Grid>
 
+        <!-- ══════════════════════════════════════════════════════
+             STEP 2 — Configure Depots
+             ══════════════════════════════════════════════════════ -->
         <Grid Visibility="{Binding CurrentStep, Converter={StaticResource EqToVis},
                             ConverterParameter={x:Static vm:DownloadStep.ConfigureDepots}}">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="20"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="20"/>
                 <RowDefinition Height="*"/>
-                <RowDefinition Height="20"/>
+                <RowDefinition Height="16"/>
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
-            <Grid Grid.Row="0">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
-                <StackPanel>
-                    <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+            <!-- Header — title + inline Change Source (no top-right margin hack needed) -->
+            <StackPanel Grid.Row="0">
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <StackPanel Orientation="Horizontal">
                         <TextBlock Text="App " Style="{StaticResource TextH1}"/>
                         <TextBlock Text="{Binding AppId}"
                                    Style="{StaticResource TextH1}"
                                    Foreground="{StaticResource Accent}"/>
                     </StackPanel>
-                    <TextBlock Style="{StaticResource BodyText}"
-                               Text="{Binding LuaFileName}"
-                               Foreground="{StaticResource TextMuted}"/>
+                    <Button Style="{StaticResource BtnGhost}"
+                            Command="{Binding BrowseLuaFileCommand}"
+                            Padding="12,6"
+                            Margin="14,0,0,0"
+                            VerticalAlignment="Center">
+                        <StackPanel Orientation="Horizontal">
+                            <Viewbox Width="11" Height="11" Margin="0,0,5,0">
+                                <Canvas Width="24" Height="24">
+                                    <Path Data="M16,3 L21,8 L19,10 L14,5 Z M12,7 L3,16 L3,21 L8,21 L17,12"
+                                          Stroke="{StaticResource TextSecondary}" StrokeThickness="2" Fill="Transparent"
+                                          StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"/>
+                                </Canvas>
+                            </Viewbox>
+                            <TextBlock Text="Change Source" FontSize="11.5" FontWeight="SemiBold"/>
+                        </StackPanel>
+                    </Button>
                 </StackPanel>
-                <Button Grid.Column="1"
-                        Style="{StaticResource BtnGhost}"
-                        Command="{Binding BrowseLuaFileCommand}"
-                        Padding="14,8"
-                        Margin="0,0,96,0"
-                        VerticalAlignment="Center">
-                    <StackPanel Orientation="Horizontal">
-                        <Viewbox Width="12" Height="12" Margin="0,0,6,0">
-                            <Canvas Width="24" Height="24">
-                                <Path Data="M16,3 L21,8 L19,10 L14,5 Z M12,7 L3,16 L3,21 L8,21 L17,12"
-                                      Stroke="{StaticResource TextSecondary}" StrokeThickness="2" Fill="Transparent"
-                                      StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"/>
-                            </Canvas>
-                        </Viewbox>
-                        <TextBlock Text="Change File" FontSize="11.5" FontWeight="SemiBold"/>
-                    </StackPanel>
-                </Button>
-            </Grid>
+                <TextBlock Style="{StaticResource BodyText}"
+                           Text="{Binding LuaFileName}"
+                           Foreground="{StaticResource TextMuted}"
+                           Margin="0,3,0,0"/>
+            </StackPanel>
 
-            <Border Grid.Row="2" Style="{StaticResource Card}" Padding="24,20">
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="8"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="20"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="8"/>
-                        <RowDefinition Height="Auto"/>
-                    </Grid.RowDefinitions>
-
-                    <TextBlock Grid.Row="0" Text="DEFAULT DOWNLOAD BASE DIRECTORY" Style="{StaticResource TextLabel}"/>
-                    <Grid Grid.Row="2">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="12"/>
-                            <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions>
-                        <TextBox Grid.Column="0"
-                                 Text="{Binding OutputDir, UpdateSourceTrigger=PropertyChanged}"
-                                 Padding="12,9"
-                                 />
-                        <Button Grid.Column="2"
-                                Style="{StaticResource BtnGhost}"
-                                Command="{Binding BrowseOutputDirCommand}"
-                                Padding="16,9">
-                            <TextBlock Text="Browse" FontSize="12.5" FontWeight="SemiBold"/>
-                        </Button>
-                    </Grid>
-
-                    <TextBlock Grid.Row="4" Text="MANIFESTS CACHE DIRECTORY (OPTIONAL)" Style="{StaticResource TextLabel}"/>
-                    <Grid Grid.Row="6">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="12"/>
-                            <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions>
-                        <TextBox Grid.Column="0"
-                                 Text="{Binding ManifestsDir, UpdateSourceTrigger=PropertyChanged}"
-                                 Padding="12,9"
-                                 />
-                        <Button Grid.Column="2"
-                                Style="{StaticResource BtnGhost}"
-                                Command="{Binding BrowseManifestsDirCommand}"
-                                Padding="16,9">
-                            <TextBlock Text="Browse" FontSize="12.5" FontWeight="SemiBold"/>
-                        </Button>
-                    </Grid>
-                </Grid>
-            </Border>
-
-            <Border Grid.Row="4" Style="{StaticResource Card}" Padding="0">
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="*"/>
-                    </Grid.RowDefinitions>
-
-                    <Grid Grid.Row="0" Margin="20,16,20,12">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions>
-                        <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
-                            <TextBlock Text="AVAILABLE DEPOTS" Style="{StaticResource TextLabel}" VerticalAlignment="Center"/>
-                            <Border Margin="8,0,0,0" Padding="6,2" CornerRadius="10" Background="{StaticResource AccentVeryLight}">
-                                <TextBlock FontSize="10.5" FontWeight="Bold" Foreground="{StaticResource Accent}">
-                                    <Run Text="{Binding Depots.Count, Mode=OneWay}"/>
-                                    <Run Text=" Total"/>
-                                </TextBlock>
-                            </Border>
-                        </StackPanel>
-                        <StackPanel Grid.Column="1" Orientation="Horizontal">
-                            <Button Style="{StaticResource BtnGhost}"
-                                    Padding="10,5"
-                                    Command="{Binding SelectAllDepotsCommand}">
-                                <TextBlock Text="Select All" FontSize="11" FontWeight="SemiBold"/>
-                            </Button>
-                            <Button Style="{StaticResource BtnGhost}"
-                                    Padding="10,5" Margin="6,0,0,0"
-                                    Command="{Binding SelectNoDepotsCommand}">
-                                <TextBlock Text="Deselect All" FontSize="11" FontWeight="SemiBold"/>
-                            </Button>
-                        </StackPanel>
-                    </Grid>
-
-                    <Separator Grid.Row="1" Margin="0,0,0,6"/>
-
-                    <ScrollViewer Grid.Row="2" MaxHeight="220"
-                                  VerticalScrollBarVisibility="Auto"
-                                  Padding="16,0,16,16">
-                        <ItemsControl ItemsSource="{Binding Depots}">
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate DataType="{x:Type vm:DepotSelectionItem}">
-                                    <Border Style="{StaticResource DepotListItem}" Padding="12,9" Margin="0,1">
-                                        <Grid>
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="Auto"/>
-                                                <ColumnDefinition Width="14"/>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="Auto"/>
-                                            </Grid.ColumnDefinitions>
-                                            <CheckBox Grid.Column="0"
-                                                      IsChecked="{Binding IsSelected}"
-                                                      VerticalAlignment="Center"/>
-                                            <StackPanel Grid.Column="2" VerticalAlignment="Center">
-                                                <TextBlock Text="{Binding DisplayName}"
-                                                           FontSize="12.5" FontWeight="SemiBold"
-                                                           Foreground="{StaticResource TextPrimary}"/>
-                                                <TextBlock Margin="0,2,0,0"
-                                                           FontSize="10.5"
-                                                           Foreground="{StaticResource TextMuted}"
-                                                           FontFamily="Consolas"
-                                                           Text="{Binding DepotId}"/>
-                                            </StackPanel>
-                                            <Border Grid.Column="3"
-                                                    CornerRadius="6" Padding="8,4"
-                                                    Background="{StaticResource AccentVeryLight}"
-                                                    VerticalAlignment="Center"
-                                                    Visibility="{Binding OsText, Converter={StaticResource NotEmptyToVis}}">
-                                                <TextBlock Text="{Binding OsText}"
-                                                           FontSize="9.5" FontWeight="Bold"
-                                                           Foreground="{StaticResource Accent}"/>
-                                            </Border>
-                                        </Grid>
-                                    </Border>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
-                    </ScrollViewer>
-                </Grid>
-            </Border>
-
-            <Grid Grid.Row="6">
+            <!-- Two-column content -->
+            <Grid Grid.Row="2">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="260"/>
+                    <ColumnDefinition Width="280"/>
+                    <ColumnDefinition Width="20"/>
                     <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
 
-                <Border Grid.Column="0" Style="{StaticResource CardSmall}" Padding="18,14">
+                <!-- Left: unified config card -->
+                <Border Grid.Column="0" Style="{StaticResource Card}" Padding="22,20"
+                        VerticalAlignment="Stretch">
                     <StackPanel>
+                        <TextBlock Text="OUTPUT DIRECTORY" Style="{StaticResource TextLabel}"/>
+                        <Grid Margin="0,0,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="8"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBox Grid.Column="0"
+                                     Text="{Binding OutputDir, UpdateSourceTrigger=PropertyChanged}"
+                                     Padding="12,9"/>
+                            <Button Grid.Column="2"
+                                    Style="{StaticResource BtnGhost}"
+                                    Command="{Binding BrowseOutputDirCommand}"
+                                    Padding="14,9">
+                                <TextBlock Text="Browse" FontSize="12" FontWeight="SemiBold"/>
+                            </Button>
+                        </Grid>
+
+                        <TextBlock Text="MANIFESTS CACHE (OPTIONAL)"
+                                   Style="{StaticResource TextLabel}"
+                                   Margin="0,20,0,0"/>
                         <Grid>
-                            <TextBlock Text="PARALLEL DEPOTS" Style="{StaticResource TextLabel}" VerticalAlignment="Center"/>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="8"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBox Grid.Column="0"
+                                     Text="{Binding ManifestsDir, UpdateSourceTrigger=PropertyChanged}"
+                                     Padding="12,9"/>
+                            <Button Grid.Column="2"
+                                    Style="{StaticResource BtnGhost}"
+                                    Command="{Binding BrowseManifestsDirCommand}"
+                                    Padding="14,9">
+                                <TextBlock Text="Browse" FontSize="12" FontWeight="SemiBold"/>
+                            </Button>
+                        </Grid>
+
+                        <Separator Margin="0,20"/>
+
+                        <Grid>
+                            <TextBlock Text="PARALLEL DEPOTS" Style="{StaticResource TextLabel}"
+                                       VerticalAlignment="Center" Margin="0"/>
                             <TextBlock HorizontalAlignment="Right"
                                        Text="{Binding MaxParallel}"
                                        FontSize="14" FontWeight="Bold"
@@ -379,83 +297,179 @@
                                 TickFrequency="1"
                                 IsSnapToTickEnabled="True"
                                 Value="{Binding MaxParallel}"
-                                Margin="0,12,0,0"/>
+                                Margin="0,10,0,0"/>
                     </StackPanel>
                 </Border>
 
-                <Button Grid.Column="2"
-                        Style="{StaticResource BtnPrimary}"
-                        Command="{Binding StartDownloadAsyncCommand}"
-                        IsEnabled="{Binding CanStart}"
-                        Padding="36,12"
-                        VerticalAlignment="Center"
-                        Height="44">
-                    <Button.Effect>
-                        <DropShadowEffect Color="#C07840" BlurRadius="16" ShadowDepth="3" Opacity="0.3"/>
-                    </Button.Effect>
-                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                        <Viewbox Width="16" Height="16" Margin="0,0,10,0">
-                            <Canvas Width="24" Height="24">
-                                <Path Data="M8,5 L19,12 L8,19 Z"
-                                      Fill="White" Stroke="White" StrokeThickness="1.5"
-                                      StrokeLineJoin="Round" StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
-                            </Canvas>
-                        </Viewbox>
-                        <TextBlock Text="Start Downloading" FontSize="13.5" FontWeight="SemiBold" VerticalAlignment="Center"/>
-                    </StackPanel>
-                </Button>
+                <!-- Right: depot list card (fills height with no MaxHeight cap) -->
+                <Border Grid.Column="2" Style="{StaticResource Card}" Padding="0"
+                        VerticalAlignment="Stretch">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+
+                        <Grid Grid.Row="0" Margin="20,16,20,12">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                                <TextBlock Text="AVAILABLE DEPOTS" Style="{StaticResource TextLabel}"
+                                           VerticalAlignment="Center" Margin="0"/>
+                                <Border Margin="8,0,0,0" Padding="6,2" CornerRadius="10"
+                                        Background="{StaticResource AccentVeryLight}">
+                                    <TextBlock FontSize="10.5" FontWeight="Bold" Foreground="{StaticResource Accent}">
+                                        <Run Text="{Binding Depots.Count, Mode=OneWay}"/>
+                                        <Run Text=" Total"/>
+                                    </TextBlock>
+                                </Border>
+                            </StackPanel>
+                            <StackPanel Grid.Column="1" Orientation="Horizontal">
+                                <Button Style="{StaticResource BtnGhost}"
+                                        Padding="10,5"
+                                        Command="{Binding SelectAllDepotsCommand}">
+                                    <TextBlock Text="Select All" FontSize="11" FontWeight="SemiBold"/>
+                                </Button>
+                                <Button Style="{StaticResource BtnGhost}"
+                                        Padding="10,5" Margin="4,0,0,0"
+                                        Command="{Binding SelectNoDepotsCommand}">
+                                    <TextBlock Text="Deselect All" FontSize="11" FontWeight="SemiBold"/>
+                                </Button>
+                            </StackPanel>
+                        </Grid>
+
+                        <Border Grid.Row="1" Height="1" Background="{StaticResource Border}" Margin="0,0,0,4"/>
+
+                        <ScrollViewer Grid.Row="2"
+                                      VerticalScrollBarVisibility="Auto"
+                                      Padding="12,0,12,12">
+                            <ItemsControl ItemsSource="{Binding Depots}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate DataType="{x:Type vm:DepotSelectionItem}">
+                                        <Border Padding="12,9" Margin="0,1">
+                                            <Border.Style>
+                                                <Style TargetType="Border" BasedOn="{StaticResource DepotListItem}">
+                                                    <Style.Triggers>
+                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                            <Setter Property="Background" Value="{StaticResource AccentVeryLight}"/>
+                                                        </Trigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Border.Style>
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                    <ColumnDefinition Width="14"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                </Grid.ColumnDefinitions>
+                                                <CheckBox Grid.Column="0"
+                                                          IsChecked="{Binding IsSelected}"
+                                                          VerticalAlignment="Center"/>
+                                                <StackPanel Grid.Column="2" VerticalAlignment="Center">
+                                                    <TextBlock Text="{Binding DisplayName}"
+                                                               FontSize="12.5" FontWeight="SemiBold"
+                                                               Foreground="{StaticResource TextPrimary}"/>
+                                                    <TextBlock Margin="0,2,0,0"
+                                                               FontSize="10.5"
+                                                               Foreground="{StaticResource TextMuted}"
+                                                               FontFamily="Consolas"
+                                                               Text="{Binding DepotId}"/>
+                                                </StackPanel>
+                                                <Border Grid.Column="3"
+                                                        CornerRadius="6" Padding="8,4"
+                                                        Background="{StaticResource AccentVeryLight}"
+                                                        VerticalAlignment="Center"
+                                                        Visibility="{Binding OsText, Converter={StaticResource NotEmptyToVis}}">
+                                                    <TextBlock Text="{Binding OsText}"
+                                                               FontSize="9.5" FontWeight="Bold"
+                                                               Foreground="{StaticResource Accent}"/>
+                                                </Border>
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </ScrollViewer>
+                    </Grid>
+                </Border>
             </Grid>
+
+            <!-- Full-width Start button -->
+            <Button Grid.Row="4"
+                    Style="{StaticResource BtnPrimary}"
+                    Command="{Binding StartDownloadAsyncCommand}"
+                    IsEnabled="{Binding CanStart}"
+                    Height="46"
+                    HorizontalAlignment="Stretch">
+                <Button.Effect>
+                    <DropShadowEffect Color="#C07840" BlurRadius="18" ShadowDepth="3" Opacity="0.3"/>
+                </Button.Effect>
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <Viewbox Width="16" Height="16" Margin="0,0,10,0">
+                        <Canvas Width="24" Height="24">
+                            <Path Data="M8,5 L19,12 L8,19 Z"
+                                  Fill="White" Stroke="White" StrokeThickness="1.5"
+                                  StrokeLineJoin="Round" StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
+                        </Canvas>
+                    </Viewbox>
+                    <TextBlock Text="Start Downloading" FontSize="13.5" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                </StackPanel>
+            </Button>
         </Grid>
 
+        <!-- ══════════════════════════════════════════════════════
+             STEP 3 — Downloading
+             ══════════════════════════════════════════════════════ -->
         <Grid Visibility="{Binding CurrentStep, Converter={StaticResource EqToVis},
                             ConverterParameter={x:Static vm:DownloadStep.Downloading}}">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="20"/>
                 <RowDefinition Height="Auto"/>
-                <RowDefinition Height="20"/>
+                <RowDefinition Height="16"/>
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="16"/>
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
-            <Grid Grid.Row="0">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
-                <StackPanel>
+            <!-- Header — title + inline Cancel (no top-right margin hack) -->
+            <StackPanel Grid.Row="0">
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Text="App " Style="{StaticResource TextH1}"/>
                         <TextBlock Text="{Binding AppId}"
                                    Style="{StaticResource TextH1}"
                                    Foreground="{StaticResource Accent}"/>
                     </StackPanel>
-                    <TextBlock Text="{Binding OverallStatus}"
-                               Style="{StaticResource BodyText}"
-                               Foreground="{StaticResource TextMuted}"
-                               Margin="0,4,0,0"/>
+                    <Button Style="{StaticResource BtnDanger}"
+                            Command="{Binding CancelDownloadCommand}"
+                            Visibility="{Binding IsDownloading, Converter={StaticResource BoolToVis}}"
+                            Padding="18,7"
+                            Margin="14,0,0,0"
+                            VerticalAlignment="Center">
+                        <StackPanel Orientation="Horizontal">
+                            <Viewbox Width="11" Height="11" Margin="0,0,5,0">
+                                <Canvas Width="24" Height="24">
+                                    <Path Data="M18,6 L6,18 M6,6 L18,18"
+                                          Stroke="{StaticResource Error}" StrokeThickness="2.2"
+                                          StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
+                                </Canvas>
+                            </Viewbox>
+                            <TextBlock Text="Cancel Download" FontSize="12" FontWeight="SemiBold"/>
+                        </StackPanel>
+                    </Button>
                 </StackPanel>
-                <Button Grid.Column="1"
-                        Style="{StaticResource BtnDanger}"
-                        Command="{Binding CancelDownloadCommand}"
-                        Visibility="{Binding IsDownloading, Converter={StaticResource BoolToVis}}"
-                        Padding="20,9"
-                        Margin="0,0,96,0"
-                        VerticalAlignment="Center">
-                    <StackPanel Orientation="Horizontal">
-                        <Viewbox Width="12" Height="12" Margin="0,0,6,0">
-                            <Canvas Width="24" Height="24">
-                                <Path Data="M18,6 L6,18 M6,6 L18,18"
-                                      Stroke="{StaticResource Error}" StrokeThickness="2.2"
-                                      StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
-                            </Canvas>
-                        </Viewbox>
-                        <TextBlock Text="Cancel Download" FontSize="12.5" FontWeight="SemiBold"/>
-                    </StackPanel>
-                </Button>
-            </Grid>
+                <TextBlock Text="{Binding OverallStatus}"
+                           Style="{StaticResource BodyText}"
+                           Foreground="{StaticResource TextMuted}"
+                           Margin="0,4,0,0"/>
+            </StackPanel>
 
+            <!-- Overall progress card -->
             <Border Grid.Row="2" Style="{StaticResource Card}" Padding="24,20">
                 <Grid>
                     <Grid.RowDefinitions>
@@ -464,7 +478,8 @@
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
                     <Grid Grid.Row="0">
-                        <TextBlock Text="OVERALL DOWNLOAD PROGRESS" Style="{StaticResource TextLabel}" VerticalAlignment="Center"/>
+                        <TextBlock Text="OVERALL DOWNLOAD PROGRESS"
+                                   Style="{StaticResource TextLabel}" VerticalAlignment="Center"/>
                         <TextBlock HorizontalAlignment="Right"
                                    FontSize="15" FontWeight="Bold"
                                    Foreground="{StaticResource Accent}"
@@ -473,9 +488,9 @@
                             <Run Text="%"/>
                         </TextBlock>
                     </Grid>
-                    <Border Grid.Row="2" Height="10" CornerRadius="5"
+                    <Border Grid.Row="2" Height="12" CornerRadius="6"
                             Background="{StaticResource AccentVeryLight}">
-                        <Border HorizontalAlignment="Left" CornerRadius="5"
+                        <Border HorizontalAlignment="Left" CornerRadius="6"
                                 Background="{StaticResource Accent}">
                             <Border.Width>
                                 <MultiBinding Converter="{StaticResource PctToWidth}">
@@ -484,21 +499,19 @@
                                              RelativeSource="{RelativeSource AncestorType=Border, AncestorLevel=1}"/>
                                 </MultiBinding>
                             </Border.Width>
-                            <Border.Effect>
-                                <DropShadowEffect BlurRadius="12" ShadowDepth="0" Opacity="0.4"
-                                                  Color="{StaticResource AccentColor}"/>
-                            </Border.Effect>
                         </Border>
                     </Border>
                 </Grid>
             </Border>
 
+            <!-- Per-depot list -->
             <ScrollViewer Grid.Row="4" VerticalScrollBarVisibility="Auto" Padding="0,0,4,0">
                 <ItemsControl ItemsSource="{Binding DownloadStates}">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate DataType="{x:Type models:DepotDownloadState}">
-                            <Border Margin="0,0,0,12"
-                                    Style="{StaticResource CardFlat}" Padding="20,16">
+                            <Border Margin="0,0,0,10"
+                                    Style="{StaticResource CardFlat}"
+                                    Padding="20,16">
                                 <Border.Effect>
                                     <DropShadowEffect BlurRadius="14" ShadowDepth="2" Opacity="0.03" Color="#1C1610"/>
                                 </Border.Effect>
@@ -528,10 +541,16 @@
                                                        Margin="0,2,0,0"/>
                                         </StackPanel>
 
-                                        <TextBlock Grid.Column="1" VerticalAlignment="Center"
-                                                   Text="{Binding Status, Converter={StaticResource StatusToText}}"
-                                                   FontSize="10.5" FontWeight="Bold"
-                                                   Foreground="{Binding Status, Converter={StaticResource StatusToColor}}"/>
+                                        <Border Grid.Column="1"
+                                                CornerRadius="6" Padding="8,3"
+                                                VerticalAlignment="Center">
+                                            <Border.Background>
+                                                <SolidColorBrush Color="{StaticResource BgCardColor}"/>
+                                            </Border.Background>
+                                            <TextBlock Text="{Binding Status, Converter={StaticResource StatusToText}}"
+                                                       FontSize="10.5" FontWeight="Bold"
+                                                       Foreground="{Binding Status, Converter={StaticResource StatusToColor}}"/>
+                                        </Border>
                                     </Grid>
 
                                     <Border Grid.Row="2" Height="8" CornerRadius="4"
@@ -545,9 +564,6 @@
                                                              RelativeSource="{RelativeSource AncestorType=Border, AncestorLevel=1}"/>
                                                 </MultiBinding>
                                             </Border.Width>
-                                            <Border.Effect>
-                                                <DropShadowEffect Color="#C07840" BlurRadius="6" ShadowDepth="0" Opacity="0.15"/>
-                                            </Border.Effect>
                                         </Border>
                                     </Border>
 
@@ -585,6 +601,7 @@
                 </ItemsControl>
             </ScrollViewer>
 
+            <!-- Success banner -->
             <Border Grid.Row="6"
                     CornerRadius="12" Padding="20,14"
                     Background="{StaticResource SuccessBg}"
@@ -604,7 +621,7 @@
                                    FontSize="13" FontWeight="SemiBold" VerticalAlignment="Center"/>
                     </StackPanel>
                     <Button Grid.Column="1"
-                            Style="{StaticResource BtnPrimary}"
+                            Style="{StaticResource BtnSecondary}"
                             Command="{Binding StartNewCommand}"
                             Padding="18,8" Height="36">
                         <TextBlock Text="New Download" FontSize="12" FontWeight="SemiBold"/>
@@ -612,6 +629,7 @@
                 </Grid>
             </Border>
 
+            <!-- Failure banner -->
             <Border Grid.Row="6"
                     CornerRadius="12" Padding="20,14"
                     Background="{StaticResource ErrorBg}"
@@ -631,7 +649,7 @@
                                    FontSize="13" FontWeight="SemiBold" VerticalAlignment="Center"/>
                     </StackPanel>
                     <Button Grid.Column="1"
-                            Style="{StaticResource BtnPrimary}"
+                            Style="{StaticResource BtnSecondary}"
                             Command="{Binding StartNewCommand}"
                             Padding="18,8" Height="36">
                         <TextBlock Text="Try Again" FontSize="12" FontWeight="SemiBold"/>
@@ -639,5 +657,6 @@
                 </Grid>
             </Border>
         </Grid>
+
     </Grid>
 </UserControl>

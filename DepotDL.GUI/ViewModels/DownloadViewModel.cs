@@ -300,6 +300,10 @@ namespace DepotDL.GUI.ViewModels
                 _animTimer = null;
                 _activeStates = null;
                 IsDownloading = false;
+
+                OverallDisplayPercent = OverallPercent;
+                foreach (var state in DownloadStates)
+                    state.DisplayPercent = state.Percent;
             }
         }
 
@@ -339,6 +343,34 @@ namespace DepotDL.GUI.ViewModels
             DownloadFailed = false;
             OverallPercent = 0;
             OverallDisplayPercent = 0;
+        }
+
+        public void PreFillAppId(string appId)
+        {
+            if (IsDownloading) return;
+            _cts?.Cancel();
+            CurrentStep = DownloadStep.SelectFile;
+            LuaPath = string.Empty;
+            LuaFileName = string.Empty;
+            AppId = string.Empty;
+            LuaLoaded = false;
+            ParseError = string.Empty;
+            RyuuError = string.Empty;
+            Depots.Clear();
+            DownloadStates.Clear();
+            DownloadComplete = false;
+            DownloadFailed = false;
+            OverallPercent = 0;
+            OverallDisplayPercent = 0;
+
+            RyuuAppId = appId;
+
+            var settings = _settings.Load();
+            if (!string.IsNullOrWhiteSpace(settings.RyuuApiKey))
+            {
+                RyuuApiKey = settings.RyuuApiKey;
+                _ = FetchFromRyuuAsync();
+            }
         }
     }
 
