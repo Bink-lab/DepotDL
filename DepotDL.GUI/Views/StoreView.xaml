@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="clr-namespace:DepotDL.GUI.ViewModels"
              xmlns:models="clr-namespace:DepotDL.GUI.Models"
+             xmlns:helpers="clr-namespace:DepotDL.GUI.Helpers"
              FontFamily="Segoe UI">
 
     <UserControl.Resources>
@@ -222,6 +223,7 @@
                     <ScrollViewer.Style>
                         <Style TargetType="ScrollViewer">
                             <Setter Property="Opacity" Value="1"/>
+                            <Setter Property="helpers:SmoothScroll.IsEnabled" Value="True"/>
                             <Style.Triggers>
                                 <DataTrigger Binding="{Binding IsPageTransitioning}" Value="True">
                                     <DataTrigger.EnterActions>
