@@ -52,7 +52,7 @@ namespace DepotDL.GUI.ViewModels
         }
 
         public bool ShowDownloadWidget => Download.IsDownloading && !IsDownloadPage;
-        public bool ShowPackWidget => Library.IsPackingGame && !IsLibraryPage;
+        public bool ShowPackWidget => Library.IsPackingGame;
 
         public async Task InitializeAsync(IProgress<(double pct, string status)> progress,
             CancellationToken ct = default)
