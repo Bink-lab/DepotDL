@@ -264,7 +264,11 @@ namespace DepotDL.GUI.ViewModels
 
                 var settings = _settings.Load();
                 if (!string.IsNullOrWhiteSpace(settings.DownloadBaseDir))
-                    OutputDir = Path.Combine(settings.DownloadBaseDir, $"App_{appId}");
+                {
+                    string folderName = Path.GetFileNameWithoutExtension(path);
+                    if (string.IsNullOrEmpty(folderName)) folderName = appId;
+                    OutputDir = Path.Combine(settings.DownloadBaseDir, folderName);
+                }
 
                 CurrentStep = DownloadStep.ConfigureDepots;
                 UpdateCanStart();
