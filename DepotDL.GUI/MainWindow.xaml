@@ -626,21 +626,16 @@
                         </Grid>
                     </Border>
 
-                    <!-- Floating download widget -->
-                    <Border HorizontalAlignment="Right"
-                            VerticalAlignment="Bottom"
-                            Margin="0,0,24,24"
-                            Panel.ZIndex="5"
-                            Style="{StaticResource FadeInSlideUp}"
-                            Visibility="{Binding ShowDownloadWidget, Converter={StaticResource BoolToVis}}">
-                        <Button Command="{Binding NavigateDownloadCommand}"
-                                BorderThickness="0" Background="Transparent"
-                                Padding="0" Cursor="Hand">
-                            <Button.Template>
-                                <ControlTemplate TargetType="Button">
-                                    <ContentPresenter/>
-                                </ControlTemplate>
-                            </Button.Template>
+                    <!-- Floating widgets (bottom-right) -->
+                    <StackPanel HorizontalAlignment="Right"
+                                VerticalAlignment="Bottom"
+                                Margin="0,0,24,24"
+                                Panel.ZIndex="5">
+
+                        <!-- Pack progress widget -->
+                        <Border Style="{StaticResource FadeInSlideUp}"
+                                Margin="0,0,0,10"
+                                Visibility="{Binding ShowPackWidget, Converter={StaticResource BoolToVis}}">
                             <Border Width="280" CornerRadius="14"
                                     Background="{StaticResource BgCard}"
                                     BorderBrush="{StaticResource Border}"
@@ -653,8 +648,6 @@
                                         <RowDefinition Height="Auto"/>
                                         <RowDefinition Height="10"/>
                                         <RowDefinition Height="Auto"/>
-                                        <RowDefinition Height="8"/>
-                                        <RowDefinition Height="Auto"/>
                                     </Grid.RowDefinitions>
 
                                     <!-- Title + percent -->
@@ -662,29 +655,29 @@
                                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                             <Viewbox Width="13" Height="13" Margin="0,0,7,0">
                                                 <Canvas Width="24" Height="24">
-                                                    <Path Data="M12,4 L12,16 M8,12 L12,16 L16,12 M4,19 L20,19"
-                                                          Stroke="{StaticResource Accent}" StrokeThickness="2.2"
+                                                    <Path Data="M4,4 L20,4 L20,18 L4,18 Z M8,4 L8,2 L16,2 L16,4 M9,10 L15,10 M9,14 L13,14"
+                                                          Stroke="{StaticResource Accent}" StrokeThickness="2"
                                                           Fill="Transparent" StrokeStartLineCap="Round"
                                                           StrokeEndLineCap="Round" StrokeLineJoin="Round"/>
                                                 </Canvas>
                                             </Viewbox>
                                             <TextBlock FontSize="12.5" FontWeight="SemiBold"
                                                        Foreground="{StaticResource TextPrimary}"
-                                                       VerticalAlignment="Center">
-                                                <Run Text="App "/>
-                                                <Run Text="{Binding Download.AppId}" Foreground="{StaticResource Accent}"/>
-                                            </TextBlock>
+                                                       VerticalAlignment="Center"
+                                                       Text="{Binding Library.PackGameName}"
+                                                       MaxWidth="170"
+                                                       TextTrimming="CharacterEllipsis"/>
                                         </StackPanel>
                                         <TextBlock HorizontalAlignment="Right" FontSize="13" FontWeight="Bold"
                                                    Foreground="{StaticResource Accent}" VerticalAlignment="Center">
-                                            <Run Text="{Binding Download.OverallDisplayPercent, StringFormat={}{0:F0}}"/>
+                                            <Run Text="{Binding Library.PackPercent, StringFormat={}{0:F0}}"/>
                                             <Run Text="%"/>
                                         </TextBlock>
                                     </Grid>
 
                                     <!-- Status text -->
                                     <TextBlock Grid.Row="2"
-                                               Text="{Binding Download.OverallStatus}"
+                                               Text="{Binding Library.PackStatus}"
                                                FontSize="10.5"
                                                Foreground="{StaticResource TextMuted}"
                                                TextTrimming="CharacterEllipsis"/>
@@ -696,7 +689,7 @@
                                                 Background="{StaticResource Accent}">
                                             <Border.Width>
                                                 <MultiBinding Converter="{StaticResource PctToWidth}">
-                                                    <Binding Path="Download.OverallDisplayPercent"/>
+                                                    <Binding Path="Library.PackPercent"/>
                                                     <Binding Path="ActualWidth"
                                                              RelativeSource="{RelativeSource AncestorType=Border, AncestorLevel=1}"/>
                                                 </MultiBinding>
@@ -707,17 +700,99 @@
                                             </Border.Effect>
                                         </Border>
                                     </Border>
-
-                                    <!-- Tap hint -->
-                                    <TextBlock Grid.Row="6"
-                                               Text="Click to view →"
-                                               FontSize="10.5"
-                                               Foreground="{StaticResource TextMuted}"
-                                               HorizontalAlignment="Right"/>
                                 </Grid>
                             </Border>
-                        </Button>
-                    </Border>
+                        </Border>
+
+                        <!-- Floating download widget -->
+                        <Border Style="{StaticResource FadeInSlideUp}"
+                                Visibility="{Binding ShowDownloadWidget, Converter={StaticResource BoolToVis}}">
+                            <Button Command="{Binding NavigateDownloadCommand}"
+                                    BorderThickness="0" Background="Transparent"
+                                    Padding="0" Cursor="Hand">
+                                <Button.Template>
+                                    <ControlTemplate TargetType="Button">
+                                        <ContentPresenter/>
+                                    </ControlTemplate>
+                                </Button.Template>
+                                <Border Width="280" CornerRadius="14"
+                                        Background="{StaticResource BgCard}"
+                                        BorderBrush="{StaticResource Border}"
+                                        BorderThickness="1"
+                                        Padding="16,14">
+                                    <Grid>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="3"/>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="10"/>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="8"/>
+                                            <RowDefinition Height="Auto"/>
+                                        </Grid.RowDefinitions>
+
+                                        <!-- Title + percent -->
+                                        <Grid Grid.Row="0">
+                                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                                <Viewbox Width="13" Height="13" Margin="0,0,7,0">
+                                                    <Canvas Width="24" Height="24">
+                                                        <Path Data="M12,4 L12,16 M8,12 L12,16 L16,12 M4,19 L20,19"
+                                                              Stroke="{StaticResource Accent}" StrokeThickness="2.2"
+                                                              Fill="Transparent" StrokeStartLineCap="Round"
+                                                              StrokeEndLineCap="Round" StrokeLineJoin="Round"/>
+                                                    </Canvas>
+                                                </Viewbox>
+                                                <TextBlock FontSize="12.5" FontWeight="SemiBold"
+                                                           Foreground="{StaticResource TextPrimary}"
+                                                           VerticalAlignment="Center">
+                                                    <Run Text="App "/>
+                                                    <Run Text="{Binding Download.AppId}" Foreground="{StaticResource Accent}"/>
+                                                </TextBlock>
+                                            </StackPanel>
+                                            <TextBlock HorizontalAlignment="Right" FontSize="13" FontWeight="Bold"
+                                                       Foreground="{StaticResource Accent}" VerticalAlignment="Center">
+                                                <Run Text="{Binding Download.OverallDisplayPercent, StringFormat={}{0:F0}}"/>
+                                                <Run Text="%"/>
+                                            </TextBlock>
+                                        </Grid>
+
+                                        <!-- Status text -->
+                                        <TextBlock Grid.Row="2"
+                                                   Text="{Binding Download.OverallStatus}"
+                                                   FontSize="10.5"
+                                                   Foreground="{StaticResource TextMuted}"
+                                                   TextTrimming="CharacterEllipsis"/>
+
+                                        <!-- Mini progress bar -->
+                                        <Border Grid.Row="4" Height="6" CornerRadius="3"
+                                                Background="{StaticResource AccentVeryLight}">
+                                            <Border HorizontalAlignment="Left" CornerRadius="3"
+                                                    Background="{StaticResource Accent}">
+                                                <Border.Width>
+                                                    <MultiBinding Converter="{StaticResource PctToWidth}">
+                                                        <Binding Path="Download.OverallDisplayPercent"/>
+                                                        <Binding Path="ActualWidth"
+                                                                 RelativeSource="{RelativeSource AncestorType=Border, AncestorLevel=1}"/>
+                                                    </MultiBinding>
+                                                </Border.Width>
+                                                <Border.Effect>
+                                                    <DropShadowEffect BlurRadius="8" ShadowDepth="0" Opacity="0.4"
+                                                                      Color="{StaticResource AccentColor}"/>
+                                                </Border.Effect>
+                                            </Border>
+                                        </Border>
+
+                                        <!-- Tap hint -->
+                                        <TextBlock Grid.Row="6"
+                                                   Text="Click to view →"
+                                                   FontSize="10.5"
+                                                   Foreground="{StaticResource TextMuted}"
+                                                   HorizontalAlignment="Right"/>
+                                    </Grid>
+                                </Border>
+                            </Button>
+                        </Border>
+                    </StackPanel>
                 </Grid>
             </Border>
 

@@ -19,6 +19,7 @@ namespace DepotDL.GUI.ViewModels
     {
         private readonly LibraryService _lib = new();
         private readonly SettingsService _settings = new();
+        private readonly PackService _pack = new();
 
         [ObservableProperty] private ObservableCollection<LibraryGameViewModel> _games = new();
         [ObservableProperty] private string _searchText = string.Empty;
@@ -30,6 +31,10 @@ namespace DepotDL.GUI.ViewModels
         [ObservableProperty] private bool _deleteFiles;
         [ObservableProperty] private bool _isRedownloadOverlayVisible;
         [ObservableProperty] private LibraryGameViewModel? _gameToRedownload;
+        [ObservableProperty] private bool _isPackingGame;
+        [ObservableProperty] private double _packPercent;
+        [ObservableProperty] private string _packStatus = string.Empty;
+        [ObservableProperty] private string _packGameName = string.Empty;
 
         public Action<LibraryGame>? ValidateHandler { get; set; }
         public Action<LibraryGame>? RedownloadHandler { get; set; }
@@ -209,6 +214,44 @@ namespace DepotDL.GUI.ViewModels
             try { Process.Start("explorer.exe", vm.Game.OutputDir); } catch { }
         }
 
+
+        [RelayCommand]
+        private async Task PackGame(LibraryGameViewModel? vm)
+        {
+            if (vm == null || !Directory.Exists(vm.Game.OutputDir) || IsPackingGame) return;
+
+            PackGameName = vm.Game.GameName;
+            PackPercent = 0;
+            PackStatus = "Preparing...";
+            IsPackingGame = true;
+
+            try
+            {
+                var progress = new Progress<(double percent, string status)>(p =>
+                {
+                    PackPercent = p.percent;
+                    PackStatus = p.status;
+                });
+                await _pack.PackAsync(vm.Game.OutputDir, progress);
+                PackPercent = 100;
+                PackStatus = "Done!";
+                await Task.Delay(2500);
+            }
+            catch (OperationCanceledException)
+            {
+                PackStatus = "Cancelled.";
+                await Task.Delay(1500);
+            }
+            catch (Exception ex)
+            {
+                PackStatus = $"{ex.GetType().Name}: {ex.Message}";
+                await Task.Delay(3000);
+            }
+            finally
+            {
+                IsPackingGame = false;
+            }
+        }
 
         [RelayCommand]
         private void RefreshSizes()

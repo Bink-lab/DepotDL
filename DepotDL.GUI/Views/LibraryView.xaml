@@ -265,6 +265,10 @@
                                                       Style="{StaticResource ModernMenuItem}"
                                                       Command="{Binding Path=PlacementTarget.Tag.ConfirmRedownloadCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
                                                       CommandParameter="{Binding Path=PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
+                                            <MenuItem Header="Pack"
+                                                      Style="{StaticResource ModernMenuItem}"
+                                                      Command="{Binding Path=PlacementTarget.Tag.PackGameCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                                      CommandParameter="{Binding Path=PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
                                             <Separator Margin="6,3" Background="#E8DDD2"/>
                                             <MenuItem Header="Remove from Library"
                                                       Style="{StaticResource ModernMenuItem}"
