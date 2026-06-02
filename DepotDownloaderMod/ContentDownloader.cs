@@ -676,6 +676,7 @@ namespace DepotDownloader
             public ulong sizeDownloaded;
             public ulong depotBytesCompressed;
             public ulong depotBytesUncompressed;
+            public long lastProgressTicks;
         }
 
         private static async Task DownloadSteam3Async(List<DepotDownloadInfo> depots)
@@ -1369,6 +1370,26 @@ namespace DepotDownloader
                 var speedBps = elapsedSec > 0.1 ? (depotDownloadCounter.depotBytesCompressed / elapsedSec) : 0;
                 var speedStr = speedBps > 0 ? $" ({FormatSpeed(speedBps)})" : "";
                 Console.WriteLine("{0,6:#00.00}% {1}{2}", (sizeDownloaded / (float)depotDownloadCounter.completeDownloadSize) * 100.0f, fileFinalPath, speedStr);
+                lock (depotDownloadCounter) { depotDownloadCounter.lastProgressTicks = DateTime.UtcNow.Ticks; }
+            }
+            else
+            {
+                // Throttled mid-file progress: emit at most once per 500 ms so the GUI bar
+                // stays alive during large-file downloads (file-completion lines alone are too sparse).
+                var nowTicks = DateTime.UtcNow.Ticks;
+                bool shouldEmit;
+                lock (depotDownloadCounter)
+                {
+                    shouldEmit = (nowTicks - depotDownloadCounter.lastProgressTicks) >= TimeSpan.TicksPerMillisecond * 500;
+                    if (shouldEmit) depotDownloadCounter.lastProgressTicks = nowTicks;
+                }
+                if (shouldEmit)
+                {
+                    var elapsedSec = (DateTime.UtcNow - downloadStartTime).TotalSeconds;
+                    var speedBps = elapsedSec > 0.1 ? (depotDownloadCounter.depotBytesCompressed / elapsedSec) : 0;
+                    var speedStr = speedBps > 0 ? $" ({FormatSpeed(speedBps)})" : "";
+                    Console.WriteLine("{0,6:#00.00}%{1}", (sizeDownloaded / (float)depotDownloadCounter.completeDownloadSize) * 100.0f, speedStr);
+                }
             }
         }
 

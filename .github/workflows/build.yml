@@ -20,13 +20,11 @@ jobs:
         with:
           dotnet-version: '9.0.x'
 
-      - name: Download DDMod
-        # TODO: Replace with actual DDMod download step (release URL, artifact, etc.)
-        run: |
-          New-Item -ItemType Directory -Path third_party\DDMod -Force
-          # Example: Invoke-WebRequest -Uri "https://..." -OutFile third_party\DDMod\DepotDownloaderMod.zip
-          # Expand-Archive -Path third_party\DDMod\DepotDownloaderMod.zip -DestinationPath third_party\DDMod
-        shell: pwsh
+      - name: Build DepotDownloaderMod
+        working-directory: DepotDownloaderMod
+        run: .\build.bat
+        env:
+          CI: true
 
       - name: Get Build Info
         id: build_info
@@ -80,12 +78,11 @@ jobs:
         with:
           dotnet-version: '9.0.x'
 
-      - name: Download DDMod
-        # TODO: Replace with actual DDMod download step (release URL, artifact, etc.)
+      - name: Build DepotDownloaderMod
+        working-directory: DepotDownloaderMod
         run: |
-          mkdir -p third_party/DDMod
-          # Example: wget -O third_party/DDMod/DepotDownloaderMod.zip "https://..."
-          # unzip third_party/DDMod/DepotDownloaderMod.zip -d third_party/DDMod
+          chmod +x build.sh
+          ./build.sh
 
       - name: Get Build Info
         id: build_info
