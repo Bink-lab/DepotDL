@@ -513,7 +513,7 @@
                                     Style="{StaticResource CardFlat}"
                                     Padding="20,16">
                                 <Border.Effect>
-                                    <DropShadowEffect BlurRadius="14" ShadowDepth="2" Opacity="0.03" Color="#1C1610"/>
+                                    <DropShadowEffect BlurRadius="14" ShadowDepth="2" Opacity="0" Color="#1C1610"/>
                                 </Border.Effect>
                                 <Grid>
                                     <Grid.RowDefinitions>

@@ -393,8 +393,8 @@
         <Setter Property="BorderBrush" Value="{StaticResource Border}"/>
         <Setter Property="Effect">
             <Setter.Value>
-                <DropShadowEffect BlurRadius="20" ShadowDepth="2" Opacity="0.06"
-                                  Color="#1C1610"/>
+                <DropShadowEffect BlurRadius="22" ShadowDepth="2" Opacity="0"
+                                  Color="#C07840"/>
             </Setter.Value>
         </Setter>
     </Style>
