@@ -394,12 +394,6 @@
         <Setter Property="CornerRadius" Value="14"/>
         <Setter Property="BorderThickness" Value="1"/>
         <Setter Property="BorderBrush" Value="{StaticResource Border}"/>
-        <Setter Property="Effect">
-            <Setter.Value>
-                <DropShadowEffect BlurRadius="22" ShadowDepth="2" Opacity="0"
-                                  Color="#C07840"/>
-            </Setter.Value>
-        </Setter>
     </Style>
 
     <Style x:Key="CardFlat" TargetType="Border">

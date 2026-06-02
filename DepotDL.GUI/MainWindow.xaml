@@ -188,9 +188,6 @@
                 <TranslateTransform Y="30"/>
             </TransformGroup>
         </Border.RenderTransform>
-        <Border.Effect>
-            <DropShadowEffect BlurRadius="40" ShadowDepth="6" Opacity="0" Color="#C07840"/>
-        </Border.Effect>
         <Grid>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="210"/>
@@ -592,9 +589,6 @@
                                     BorderBrush="{StaticResource Border}"
                                     BorderThickness="1"
                                     Padding="16,14">
-                                <Border.Effect>
-                                    <DropShadowEffect BlurRadius="24" ShadowDepth="4" Opacity="0" Color="#1C1610"/>
-                                </Border.Effect>
                                 <Grid>
                                     <Grid.RowDefinitions>
                                         <RowDefinition Height="Auto"/>

@@ -261,9 +261,6 @@
                         <ItemsControl.ItemTemplate>
                             <DataTemplate DataType="{x:Type vm:StoreGameViewModel}">
                                 <Border Width="193" Margin="0,0,8,8" Cursor="Hand">
-                                    <Border.Effect>
-                                        <DropShadowEffect BlurRadius="22" ShadowDepth="2" Opacity="0" Color="#C07840"/>
-                                    </Border.Effect>
                                     <Border Style="{StaticResource Card}" Padding="0"
                                             ClipToBounds="True" Effect="{x:Null}">
                                         <Border.RenderTransform>
@@ -534,9 +531,6 @@
                     BorderBrush="{StaticResource Border}"
                     BorderThickness="1"
                     ClipToBounds="True">
-                <Border.Effect>
-                    <DropShadowEffect BlurRadius="60" ShadowDepth="12" Opacity="0" Color="#1C1610"/>
-                </Border.Effect>
                 <Border.RenderTransform>
                     <TranslateTransform/>
                 </Border.RenderTransform>
