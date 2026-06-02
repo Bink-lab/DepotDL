@@ -181,11 +181,14 @@
                                 BorderBrush="{StaticResource Border}"
                                 BorderThickness="1.5"
                                 Background="{StaticResource BgInput}">
-                            <Path x:Name="tick" Data="M3,8.5 L7,12.5 L14,5"
-                                  Stroke="White" StrokeThickness="1.8"
-                                  StrokeStartLineCap="Round" StrokeEndLineCap="Round"
-                                  Visibility="Collapsed"
-                                  HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            <Viewbox x:Name="tick" Margin="3"
+                                     Visibility="Collapsed">
+                                <Canvas Width="11" Height="9">
+                                    <Path Data="M0,4.5 L3.5,8 L11,0"
+                                          Stroke="White" StrokeThickness="1.8"
+                                          StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
+                                </Canvas>
+                            </Viewbox>
                         </Border>
                         <ContentPresenter Margin="8,0,0,0" VerticalAlignment="Center"/>
                     </StackPanel>

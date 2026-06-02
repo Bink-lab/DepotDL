@@ -156,6 +156,10 @@ namespace DepotDL.GUI.ViewModels
                 AppId = appId;
                 Depots = new ObservableCollection<DepotSelectionItem>(
                     depots.Select(d => new DepotSelectionItem(d)));
+
+                if (_settings.Load().SmartOsFilter)
+                    ApplySmartOsFilter();
+
                 LuaLoaded = true;
 
                 var settings = _settings.Load();
@@ -206,6 +210,27 @@ namespace DepotDL.GUI.ViewModels
         {
             foreach (var d in Depots) d.IsSelected = false;
             UpdateCanStart();
+        }
+
+        private void ApplySmartOsFilter()
+        {
+            string currentOs = OperatingSystem.IsWindows() ? "windows"
+                             : OperatingSystem.IsLinux()   ? "linux"
+                             : OperatingSystem.IsMacOS()   ? "macos"
+                             : string.Empty;
+
+            foreach (var item in Depots)
+            {
+                var osList = item.Depot.OsList;
+                if (string.IsNullOrWhiteSpace(osList))
+                    continue;
+
+                var tags = osList.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+                bool hasCurrentOs = !string.IsNullOrEmpty(currentOs) &&
+                                    tags.Any(t => t.Equals(currentOs, StringComparison.OrdinalIgnoreCase));
+                if (!hasCurrentOs)
+                    item.IsSelected = false;
+            }
         }
 
         private void UpdateCanStart()

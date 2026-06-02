@@ -12,5 +12,6 @@ namespace DepotDL.GUI.Models
         public int SearchDebounceMs { get; set; } = 250;
         public double ScrollSensitivity { get; set; } = 1.5;
         public int ScrollDurationMs { get; set; } = 230;
+        public bool SmartOsFilter { get; set; } = false;
     }
 }

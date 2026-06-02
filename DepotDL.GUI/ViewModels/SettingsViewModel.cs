@@ -20,6 +20,7 @@ namespace DepotDL.GUI.ViewModels
         [ObservableProperty] private int _searchDebounceMs = 250;
         [ObservableProperty] private double _scrollSensitivity = 1.5;
         [ObservableProperty] private int _scrollDurationMs = 230;
+        [ObservableProperty] private bool _smartOsFilter;
         [ObservableProperty] private bool _saveSuccess;
 
         public void Load()
@@ -35,6 +36,7 @@ namespace DepotDL.GUI.ViewModels
             SearchDebounceMs = s.SearchDebounceMs;
             ScrollSensitivity = s.ScrollSensitivity;
             ScrollDurationMs = s.ScrollDurationMs;
+            SmartOsFilter = s.SmartOsFilter;
         }
 
         [RelayCommand]
@@ -75,7 +77,8 @@ namespace DepotDL.GUI.ViewModels
                 StorePageSize = StorePageSize,
                 SearchDebounceMs = SearchDebounceMs,
                 ScrollSensitivity = ScrollSensitivity,
-                ScrollDurationMs = ScrollDurationMs
+                ScrollDurationMs = ScrollDurationMs,
+                SmartOsFilter = SmartOsFilter
             });
 
             DepotDL.GUI.Helpers.SmoothScroll.ResetCache();
