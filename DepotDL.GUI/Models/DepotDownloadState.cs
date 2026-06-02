@@ -22,6 +22,7 @@ namespace DepotDL.GUI.Models
         [ObservableProperty] private string _depotName = string.Empty;
         [ObservableProperty] private DepotStatus _status = DepotStatus.Idle;
         [ObservableProperty] private double _percent = 0;
+        [ObservableProperty] private double _displayPercent = 0;
         [ObservableProperty] private string _speedText = string.Empty;
         [ObservableProperty] private string _statusText = "Queued";
         [ObservableProperty] private string _activeFile = string.Empty;

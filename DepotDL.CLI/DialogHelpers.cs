@@ -186,12 +186,6 @@ namespace DepotDL.CLI
 
             string[] candidates = {
                 Path.Combine(baseDir, "DepotDownloaderMod.dll"),
-                Path.Combine(baseDir, "third_party", "DDMod", "DepotDownloaderMod.dll"),
-                Path.Combine(baseDir, "..", "third_party", "DDMod", "DepotDownloaderMod.dll"),
-                Path.Combine(baseDir, "..", "..", "third_party", "DDMod", "DepotDownloaderMod.dll"),
-                Path.Combine(baseDir, "..", "..", "..", "third_party", "DDMod", "DepotDownloaderMod.dll"),
-                Path.Combine(baseDir, "..", "..", "..", "..", "third_party", "DDMod", "DepotDownloaderMod.dll"),
-                Path.Combine(baseDir, "..", "..", "..", "..", "..", "third_party", "DDMod", "DepotDownloaderMod.dll")
             };
 
             foreach (var candidate in candidates)

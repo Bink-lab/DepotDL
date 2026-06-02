@@ -479,7 +479,7 @@
                                 Background="{StaticResource Accent}">
                             <Border.Width>
                                 <MultiBinding Converter="{StaticResource PctToWidth}">
-                                    <Binding Path="OverallPercent"/>
+                                    <Binding Path="OverallDisplayPercent"/>
                                     <Binding Path="ActualWidth"
                                              RelativeSource="{RelativeSource AncestorType=Border, AncestorLevel=1}"/>
                                 </MultiBinding>
@@ -528,19 +528,10 @@
                                                        Margin="0,2,0,0"/>
                                         </StackPanel>
 
-                                        <Grid Grid.Column="1" VerticalAlignment="Center">
-                                            <Border Style="{StaticResource StatusPill}"
-                                                    Background="{Binding Status, Converter={StaticResource StatusToColor}}"
-                                                    Opacity="0.12"
-                                                    VerticalAlignment="Center"/>
-                                            <Border Style="{StaticResource StatusPill}"
-                                                    Background="Transparent"
-                                                    VerticalAlignment="Center">
-                                                <TextBlock Text="{Binding Status, Converter={StaticResource StatusToText}}"
-                                                           FontSize="10.5" FontWeight="Bold"
-                                                           Foreground="{Binding Status, Converter={StaticResource StatusToColor}}"/>
-                                            </Border>
-                                        </Grid>
+                                        <TextBlock Grid.Column="1" VerticalAlignment="Center"
+                                                   Text="{Binding Status, Converter={StaticResource StatusToText}}"
+                                                   FontSize="10.5" FontWeight="Bold"
+                                                   Foreground="{Binding Status, Converter={StaticResource StatusToColor}}"/>
                                     </Grid>
 
                                     <Border Grid.Row="2" Height="8" CornerRadius="4"
@@ -549,7 +540,7 @@
                                                 Background="{Binding Status, Converter={StaticResource StatusToColor}}">
                                             <Border.Width>
                                                 <MultiBinding Converter="{StaticResource PctToWidth}">
-                                                    <Binding Path="Percent"/>
+                                                    <Binding Path="DisplayPercent"/>
                                                     <Binding Path="ActualWidth"
                                                              RelativeSource="{RelativeSource AncestorType=Border, AncestorLevel=1}"/>
                                                 </MultiBinding>

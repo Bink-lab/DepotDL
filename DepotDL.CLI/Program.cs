@@ -65,7 +65,7 @@ namespace DepotDL.CLI
                 {
                     Console.Clear();
                     WriteColored("[Error] DepotDownloaderMod.dll not found in default search locations.", ConsoleColor.Red);
-                    WriteColored("Please ensure DepotDownloaderMod.dll is in SFF/third_party/DDMod/ or adjacent to this tool.", ConsoleColor.Red);
+                    WriteColored("Please ensure DepotDownloaderMod.dll is adjacent to this tool.", ConsoleColor.Red);
                     Console.WriteLine("\nPress any key to exit.");
                     Console.ReadKey();
                     return 1;

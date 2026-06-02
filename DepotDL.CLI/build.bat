@@ -16,7 +16,9 @@ if %ERRORLEVEL% NEQ 0 (
     if /I not "%CI%"=="true" pause
     exit /b %ERRORLEVEL%
 )
-xcopy "..\DepotDownloaderMod\bin\Release\net9.0\*" "bin\Release\net9.0\win-x64\publish\" /E /I /Y >nul
+for %%F in (..\DepotDownloaderMod\bin\Release\net9.0\*.*) do (
+    if /I not "%%~xF"==".exe" copy /Y "%%F" "bin\Release\net9.0\win-x64\publish\" >nul
+)
 if %ERRORLEVEL% NEQ 0 (
     echo [ERROR] Failed to copy DepotDownloaderMod files!
     popd

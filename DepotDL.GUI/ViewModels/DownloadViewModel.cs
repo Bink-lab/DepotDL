@@ -25,6 +25,8 @@ namespace DepotDL.GUI.ViewModels
         private readonly ZipImportService _zipper = new();
 
         private CancellationTokenSource? _cts;
+        private System.Windows.Threading.DispatcherTimer? _animTimer;
+        private List<DepotDownloadState>? _activeStates;
 
         [ObservableProperty] private DownloadStep _currentStep = DownloadStep.SelectFile;
 
@@ -48,6 +50,7 @@ namespace DepotDL.GUI.ViewModels
 
         [ObservableProperty] private ObservableCollection<DepotDownloadState> _downloadStates = new();
         [ObservableProperty] private double _overallPercent;
+        [ObservableProperty] private double _overallDisplayPercent;
         [ObservableProperty] private string _overallStatus = string.Empty;
         [ObservableProperty] private bool _isDownloading;
         [ObservableProperty] private bool _downloadComplete;
@@ -222,7 +225,7 @@ namespace DepotDL.GUI.ViewModels
             {
                 MessageBox.Show(
                     "Could not find .NET 9 runtime or DepotDownloaderMod.dll.\n" +
-                    "Make sure .NET 9 is installed and DepotDownloaderMod.dll is in the third_party/DDMod folder.",
+                    "Make sure .NET 9 is installed and DepotDownloaderMod.dll is adjacent to this application.",
                     "Missing Dependencies", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
@@ -243,16 +246,14 @@ namespace DepotDL.GUI.ViewModels
             OverallStatus = "Starting...";
 
             _cts = new CancellationTokenSource();
+            _activeStates = states;
 
-            _ = Task.Run(async () =>
+            _animTimer = new System.Windows.Threading.DispatcherTimer
             {
-                while (!_cts.IsCancellationRequested && IsDownloading)
-                {
-                    double pct = states.Average(s => s.Percent);
-                    Application.Current.Dispatcher.Invoke(() => OverallPercent = pct);
-                    await Task.Delay(250);
-                }
-            });
+                Interval = TimeSpan.FromMilliseconds(16)
+            };
+            _animTimer.Tick += OnAnimationTick;
+            _animTimer.Start();
 
             try
             {
@@ -295,8 +296,24 @@ namespace DepotDL.GUI.ViewModels
             }
             finally
             {
+                _animTimer?.Stop();
+                _animTimer = null;
+                _activeStates = null;
                 IsDownloading = false;
             }
+        }
+
+        private void OnAnimationTick(object? sender, EventArgs e)
+        {
+            const double lerpFactor = 0.15;
+
+            if (_activeStates != null)
+                OverallPercent = _activeStates.Average(s => s.Percent);
+
+            OverallDisplayPercent += (OverallPercent - OverallDisplayPercent) * lerpFactor;
+
+            foreach (var state in DownloadStates)
+                state.DisplayPercent += (state.Percent - state.DisplayPercent) * lerpFactor;
         }
 
         [RelayCommand]
@@ -321,6 +338,7 @@ namespace DepotDL.GUI.ViewModels
             DownloadComplete = false;
             DownloadFailed = false;
             OverallPercent = 0;
+            OverallDisplayPercent = 0;
         }
     }
 

@@ -20,6 +20,7 @@
   <Target Name="CopyDepotDownloaderModOutput" AfterTargets="Build">
     <ItemGroup>
       <_DepotModFiles Include="..\DepotDownloaderMod\bin\$(Configuration)\net9.0\*.*" />
+      <_DepotModFiles Remove="..\DepotDownloaderMod\bin\$(Configuration)\net9.0\*.exe" />
     </ItemGroup>
     <Copy SourceFiles="@(_DepotModFiles)" DestinationFolder="$(OutputPath)" SkipUnchangedFiles="true" />
   </Target>

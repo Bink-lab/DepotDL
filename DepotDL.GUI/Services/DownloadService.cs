@@ -16,6 +16,7 @@ namespace DepotDL.GUI.Services
         private static readonly Regex SpeedRx = new(@"\(([^)]+)\)\s*$");
 
         private const int MaxRetries = 3;
+        private const int StuckTimeoutSeconds = 120;
 
         public string? DotnetPath { get; private set; }
         public string? DDModPath { get; private set; }
@@ -177,6 +178,7 @@ namespace DepotDL.GUI.Services
 
             var errors = new System.Collections.Concurrent.ConcurrentBag<string>();
             bool hadFailureSignal = false;
+            bool killedByWatchdog = false;
 
             using var proc = new Process { StartInfo = psi };
 
@@ -196,6 +198,45 @@ namespace DepotDL.GUI.Services
             proc.BeginOutputReadLine();
             proc.BeginErrorReadLine();
 
+            // Watchdog: poll state.Percent and state.Status every 15 s.
+            // Reset the timer only when real progress is made (percent advances or
+            // status changes). This fires even when the process floods logs but
+            // the download itself is frozen.
+            using var watchdogCts = CancellationTokenSource.CreateLinkedTokenSource(ct);
+            var watchdog = Task.Run(async () =>
+            {
+                double seenPct = -1;
+                DepotStatus seenStatus = DepotStatus.Queued;
+                long lastProgressTicks = DateTime.UtcNow.Ticks;
+
+                while (!watchdogCts.Token.IsCancellationRequested)
+                {
+                    try { await Task.Delay(15_000, watchdogCts.Token); }
+                    catch (OperationCanceledException) { break; }
+
+                    double nowPct = state.Percent;
+                    DepotStatus nowStatus = state.Status;
+
+                    if (nowPct > seenPct || nowStatus != seenStatus)
+                    {
+                        seenPct = nowPct;
+                        seenStatus = nowStatus;
+                        lastProgressTicks = DateTime.UtcNow.Ticks;
+                    }
+                    else
+                    {
+                        var stale = TimeSpan.FromTicks(DateTime.UtcNow.Ticks - lastProgressTicks);
+                        if (stale.TotalSeconds > StuckTimeoutSeconds)
+                        {
+                            killedByWatchdog = true;
+                            state.StatusText = "Stuck — killing...";
+                            try { proc.Kill(true); } catch { }
+                            break;
+                        }
+                    }
+                }
+            });
+
             try { await proc.WaitForExitAsync(ct); }
             catch (OperationCanceledException)
             {
@@ -203,6 +244,17 @@ namespace DepotDL.GUI.Services
                 state.Status = DepotStatus.Cancelled;
                 state.StatusText = "Cancelled";
                 throw;
+            }
+            finally
+            {
+                watchdogCts.Cancel();
+                try { await watchdog; } catch { }
+            }
+
+            if (killedByWatchdog)
+            {
+                state.StatusText = "No progress — retrying...";
+                return false;
             }
 
             if (proc.ExitCode == 0 && !hadFailureSignal)
@@ -259,6 +311,16 @@ namespace DepotDL.GUI.Services
                 state.StatusText = "Downloading";
                 var sm = SpeedRx.Match(line);
                 state.SpeedText = sm.Success ? sm.Groups[1].Value : string.Empty;
+
+                // Line format: "  5.40% path/to/file.dll (speed)"
+                int fileStart = pctMatch.Index + pctMatch.Length + 1;
+                int fileEnd = sm.Success ? sm.Index : line.Length;
+                if (fileStart < fileEnd)
+                {
+                    string filePath = line[fileStart..fileEnd].Trim();
+                    if (!string.IsNullOrEmpty(filePath))
+                        state.ActiveFile = Path.GetFileName(filePath);
+                }
             }
         }
 
@@ -300,12 +362,6 @@ namespace DepotDL.GUI.Services
             string b = AppDomain.CurrentDomain.BaseDirectory;
             string[] c = {
                 Path.Combine(b, "DepotDownloaderMod.dll"),
-                Path.Combine(b, "third_party", "DDMod", "DepotDownloaderMod.dll"),
-                Path.Combine(b, "..", "third_party", "DDMod", "DepotDownloaderMod.dll"),
-                Path.Combine(b, "..", "..", "third_party", "DDMod", "DepotDownloaderMod.dll"),
-                Path.Combine(b, "..", "..", "..", "third_party", "DDMod", "DepotDownloaderMod.dll"),
-                Path.Combine(b, "..", "..", "..", "..", "third_party", "DDMod", "DepotDownloaderMod.dll"),
-                Path.Combine(b, "..", "..", "..", "..", "..", "third_party", "DDMod", "DepotDownloaderMod.dll"),
             };
             foreach (var p in c) if (File.Exists(p)) return Path.GetFullPath(p);
             return null;

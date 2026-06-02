@@ -17,4 +17,18 @@
     <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.135" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\DepotDownloaderMod\DepotDownloaderMod.csproj">
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
+  </ItemGroup>
+
+  <Target Name="CopyDepotDownloaderModOutput" AfterTargets="Build">
+    <ItemGroup>
+      <_DepotModFiles Include="..\DepotDownloaderMod\bin\$(Configuration)\net9.0\*.*" />
+      <_DepotModFiles Remove="..\DepotDownloaderMod\bin\$(Configuration)\net9.0\*.exe" />
+    </ItemGroup>
+    <Copy SourceFiles="@(_DepotModFiles)" DestinationFolder="$(OutputPath)" SkipUnchangedFiles="true" />
+  </Target>
+
 </Project>
