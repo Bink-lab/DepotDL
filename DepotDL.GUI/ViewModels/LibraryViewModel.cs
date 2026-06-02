@@ -11,12 +11,14 @@ using CommunityToolkit.Mvvm.Input;
 using DepotDL.GUI.Helpers;
 using DepotDL.GUI.Models;
 using DepotDL.GUI.Services;
+using DepotDL.CLI;
 
 namespace DepotDL.GUI.ViewModels
 {
     public partial class LibraryViewModel : ViewModelBase
     {
         private readonly LibraryService _lib = new();
+        private readonly SettingsService _settings = new();
 
         [ObservableProperty] private ObservableCollection<LibraryGameViewModel> _games = new();
         [ObservableProperty] private string _searchText = string.Empty;
@@ -45,66 +47,62 @@ namespace DepotDL.GUI.ViewModels
 
             Games = new ObservableCollection<LibraryGameViewModel>(
                 raw.Select(g => new LibraryGameViewModel(g)));
-            FilterGames();
-            UpdateStats();
-            LoadImagesAsync(_imageCts.Token);
-        }
 
-        private void LoadImagesAsync(CancellationToken ct)
-        {
-            var vms = Games.ToList();
-            _ = Task.Run(async () =>
-            {
-                var sem = new SemaphoreSlim(6, 6);
-                var tasks = vms.Select(async vm =>
-                {
-                    await sem.WaitAsync(ct);
-                    try { await vm.LoadImageAsync(ct); }
-                    catch (OperationCanceledException) { }
-                    finally { sem.Release(); }
-                });
-                try { await Task.WhenAll(tasks); }
-                catch (OperationCanceledException) { }
-            }, ct);
+            FilterGames();
+            _ = LoadImagesAsync(_imageCts.Token);
         }
 
         private void FilterGames()
         {
-            var all = Games;
-            string q = SearchText.Trim().ToLowerInvariant();
-            foreach (var g in all)
-                g.IsVisible = string.IsNullOrEmpty(q) ||
-                              g.Game.GameName.Contains(q, StringComparison.OrdinalIgnoreCase) ||
-                              g.Game.AppId.Contains(q, StringComparison.OrdinalIgnoreCase);
-
-            IsEmpty = !all.Any(g => g.IsVisible);
+            string query = SearchText.Trim().ToLowerInvariant();
+            int visibleCount = 0;
+            long totalBytes = 0;
+            foreach (var g in Games)
+            {
+                bool match = string.IsNullOrEmpty(query) ||
+                             g.Game.GameName.ToLowerInvariant().Contains(query) ||
+                             g.Game.AppId.Contains(query);
+                g.IsVisible = match;
+                if (match) { visibleCount++; totalBytes += g.Game.TotalSizeBytes; }
+            }
+            IsEmpty = visibleCount == 0;
+            GameCount = visibleCount;
+            TotalSizeText = LibraryService.FormatSize(totalBytes);
         }
 
-        private void UpdateStats()
+        private async Task LoadImagesAsync(CancellationToken ct)
         {
-            GameCount = Games.Count;
-            long total = Games.Sum(g => g.Game.TotalSizeBytes);
-            TotalSizeText = total > 0 ? LibraryService.FormatSize(total) : "";
+            var sem = new SemaphoreSlim(6, 6);
+            var tasks = Games.ToList().Select(async vm =>
+            {
+                await sem.WaitAsync(ct);
+                try { await vm.LoadImageAsync(ct); }
+                catch (OperationCanceledException) { }
+                finally { sem.Release(); }
+            });
+            try { await Task.WhenAll(tasks); }
+            catch (OperationCanceledException) { }
         }
 
         [RelayCommand]
-        private void RemoveGame(LibraryGameViewModel? vm)
+        private void ConfirmRemove(LibraryGameViewModel? vm)
         {
             if (vm == null) return;
-            DeleteFiles = false;
             GameToRemove = vm;
+            DeleteFiles = false;
             IsRemoveOverlayVisible = true;
         }
 
         [RelayCommand]
-        private void ConfirmRemove()
+        private async Task DoRemove()
         {
             if (GameToRemove == null) return;
+            var vm = GameToRemove;
             IsRemoveOverlayVisible = false;
-            string? error = _lib.Remove(GameToRemove.Game.AppId, DeleteFiles ? GameToRemove.Game.OutputDir : null);
-            Games.Remove(GameToRemove);
             GameToRemove = null;
-            UpdateStats();
+
+            string? error = await Task.Run(() => _lib.Remove(vm.Game.AppId, DeleteFiles ? vm.Game.OutputDir : null));
+            Games.Remove(vm);
             FilterGames();
             if (error != null)
                 DialogService.ShowError("Delete Failed",
@@ -119,11 +117,50 @@ namespace DepotDL.GUI.ViewModels
         }
 
         [RelayCommand]
+        private async Task LaunchGame(LibraryGameViewModel? vm)
+        {
+            if (vm == null || !Directory.Exists(vm.Game.OutputDir)) return;
+
+            var loadedSettings = _settings.Load();
+            string? webApiKey = loadedSettings.SteamWebApiKey;
+            bool downloadAchievementIcons = loadedSettings.DownloadAchievementIcons;
+            bool fixSuccess = await Task.Run(() => GameLauncher.EnsureGbeApplied(vm.Game.AppId, vm.Game.OutputDir, vm.Game.LuaPath, webApiKey, downloadAchievementIcons));
+            if (!fixSuccess)
+            {
+                string logPath = Path.Combine(vm.Game.OutputDir, "sff_fix_error.log");
+                string errorMsg = "Failed to apply Goldberg Steam Emulator fix to the game.";
+                if (File.Exists(logPath))
+                {
+                    try
+                    {
+                        errorMsg += "\n\nDetails:\n" + File.ReadAllText(logPath);
+                        File.Delete(logPath);
+                    }
+                    catch { }
+                }
+                DialogService.ShowError("Fix Game Failed", errorMsg);
+                return;
+            }
+
+            string? exePath = GameLauncher.FindLaunchTarget(vm.Game.OutputDir);
+            if (string.IsNullOrEmpty(exePath))
+            {
+                DialogService.ShowError("Launch Failed", "Could not find any suitable executable or launch script in the game folder.");
+                return;
+            }
+
+            var launchEx = GameLauncher.Launch(exePath, Path.GetDirectoryName(exePath) ?? vm.Game.OutputDir);
+            if (launchEx != null)
+                DialogService.ShowError("Launch Failed", $"Could not start process:\n{launchEx.Message}");
+        }
+
+        [RelayCommand]
         private void OpenFolder(LibraryGameViewModel? vm)
         {
             if (vm == null || !Directory.Exists(vm.Game.OutputDir)) return;
             try { Process.Start("explorer.exe", vm.Game.OutputDir); } catch { }
         }
+
 
         [RelayCommand]
         private void RefreshSizes()
@@ -147,7 +184,7 @@ namespace DepotDL.GUI.ViewModels
                     if (vm != null) g.TotalSizeBytes = vm.Game.TotalSizeBytes;
                 }
                 _lib.Save(lib.ToList());
-                System.Windows.Application.Current.Dispatcher.Invoke(UpdateStats);
+                System.Windows.Application.Current.Dispatcher.Invoke(FilterGames);
             });
         }
     }

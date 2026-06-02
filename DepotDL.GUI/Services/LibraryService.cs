@@ -109,5 +109,7 @@ namespace DepotDL.GUI.Services
             catch { }
             return size;
         }
+
     }
 }
+

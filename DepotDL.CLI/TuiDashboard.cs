@@ -541,12 +541,13 @@ namespace DepotDL.CLI
                 Console.Clear();
                 var menuItems = new List<string>
                 {
-                    "1. Open Download Folder in File Explorer",
-                    "2. Verify Files (Scan Size)",
-                    "3. Deep Verify & Repair (Hash Check & Download)",
-                    "4. Load & Re-download/Update Game",
-                    "5. Uninstall & Delete Game Files",
-                    "6. Back"
+                    "1. Launch Game",
+                    "2. Open Download Folder in File Explorer",
+                    "3. Verify Files (Scan Size)",
+                    "4. Deep Verify & Repair (Hash Check & Download)",
+                    "5. Load & Re-download/Update Game",
+                    "6. Uninstall & Delete Game Files",
+                    "7. Back"
                 };
 
                 using (CenterConsoleOutput(80))
@@ -597,7 +598,7 @@ namespace DepotDL.CLI
                     }
                     else
                     {
-                        if (i == 4)
+                        if (i == 5)
                         {
                             Console.ForegroundColor = ConsoleColor.Red;
                             Console.WriteLine($"   {menuItems[i]}");
@@ -638,6 +639,43 @@ namespace DepotDL.CLI
                     if (selectedIndex == 0)
                     {
                         Console.Clear();
+                        Console.ForegroundColor = ConsoleColor.Cyan;
+                        Console.WriteLine("Applying Goldberg Steam Emulator...");
+                        Console.ResetColor();
+                        bool fixSuccess = GameLauncher.EnsureGbeApplied(game.AppId, game.OutputDir, game.LuaPath, session.SteamWebApiKey, session.DownloadAchievementIcons);
+                        if (!fixSuccess)
+                        {
+                            string logPath = Path.Combine(game.OutputDir, "sff_fix_error.log");
+                            string errorMsg = "Failed to apply Goldberg Steam Emulator fix.";
+                            if (File.Exists(logPath))
+                            {
+                                try
+                                {
+                                    errorMsg += "\nDetails:\n" + File.ReadAllText(logPath);
+                                    File.Delete(logPath);
+                                }
+                                catch {}
+                            }
+                            PromptText("LAUNCH GAME", $"{errorMsg}\nPress Enter to return.", "");
+                            continue;
+                        }
+                        string? launchTarget = GameLauncher.FindLaunchTarget(game.OutputDir);
+                        if (string.IsNullOrEmpty(launchTarget))
+                        {
+                            PromptText("LAUNCH GAME", "Could not find any suitable executable or launch script in the game folder. Press Enter to return.", "");
+                        }
+                        else
+                        {
+                            var launchEx = GameLauncher.Launch(launchTarget, Path.GetDirectoryName(launchTarget) ?? game.OutputDir);
+                            if (launchEx != null)
+                                PromptText("LAUNCH GAME", $"Failed to start launch target: {launchEx.Message}. Press Enter.", "");
+                            else
+                                PromptText("LAUNCH GAME", $"Launching target: {Path.GetFileName(launchTarget)}...\nPress Enter to return to menu.", "");
+                        }
+                    }
+                    else if (selectedIndex == 1)
+                    {
+                        Console.Clear();
                         try
                         {
                             if (Directory.Exists(game.OutputDir))
@@ -659,7 +697,7 @@ namespace DepotDL.CLI
                             PromptText("OPEN FOLDER", $"Could not open explorer: {ex.Message}. Press Enter.", "");
                         }
                     }
-                    else if (selectedIndex == 1)
+                    else if (selectedIndex == 2)
                     {
                         Console.Clear();
                         bool exists = Directory.Exists(game.OutputDir);
@@ -679,7 +717,7 @@ namespace DepotDL.CLI
                             PromptText("VERIFY FILES", "Directory missing! Updated database. Press Enter.", "");
                         }
                     }
-                    else if (selectedIndex == 2)
+                    else if (selectedIndex == 3)
                     {
                         Console.Clear();
                         var repairSession = new TuiSession
@@ -729,7 +767,7 @@ namespace DepotDL.CLI
                             PromptText("VERIFY & REPAIR FAILED", $"Deep verification and repair failed with exit code: {exitCode}. Press Enter.", "");
                         }
                     }
-                    else if (selectedIndex == 3)
+                    else if (selectedIndex == 4)
                     {
                         Console.Clear();
                         session.LuaPath = game.LuaPath;
@@ -758,7 +796,7 @@ namespace DepotDL.CLI
                         PromptText("LOAD CONFIG", "Active session populated! Return to Dashboard to download. Press Enter.", "");
                         return true;
                     }
-                    else if (selectedIndex == 4)
+                    else if (selectedIndex == 5)
                     {
                         Console.Clear();
                         using (CenterConsoleOutput(80))
@@ -792,7 +830,7 @@ namespace DepotDL.CLI
                             return false;
                         }
                     }
-                    else if (selectedIndex == 5)
+                    else if (selectedIndex == 6)
                     {
                         return false;
                     }
@@ -2383,6 +2421,9 @@ namespace DepotDL.CLI
                 string maskedHubcapKey = string.IsNullOrEmpty(session.HubcapApiKey)
                     ? "[Not Configured]"
                     : new string('*', Math.Min(12, session.HubcapApiKey.Length));
+                string maskedSteamKey = string.IsNullOrEmpty(session.SteamWebApiKey)
+                    ? "[Not Configured]"
+                    : new string('*', Math.Min(12, session.SteamWebApiKey.Length));
                 string updateChannelStr = session.UpdateChannel == UpdateChannel.Production ? "Production" : "Nightly";
 
                 var menuItems = new List<string>
@@ -2392,8 +2433,10 @@ namespace DepotDL.CLI
                     $"3. Download Base Folder         : {TuiText.ShortenTail(outputDirStr, 40)}",
                     $"4. Ryuu API Key                 : {maskedRyuuKey}",
                     $"5. Hubcap API Key               : {maskedHubcapKey}",
-                    $"6. Update Channel               : {updateChannelStr}",
-                    "7. Back"
+                    $"6. Steam Web API Key            : {maskedSteamKey}",
+                    $"7. Update Channel               : {updateChannelStr}",
+                    $"8. Download Achievement Icons  : {(session.DownloadAchievementIcons ? "Enabled" : "Disabled")}",
+                    "9. Back"
                 };
 
                 using (CenterConsoleOutput(80))
@@ -2424,7 +2467,9 @@ namespace DepotDL.CLI
                     DrawSettingRow("Download Base Path:", TuiText.ShortenTail(outputDirStr, 44), ConsoleColor.White);
                     DrawSettingRow("Ryuu API Key:", maskedRyuuKey, string.IsNullOrEmpty(session.RyuuApiKey) ? ConsoleColor.Yellow : ConsoleColor.Green);
                     DrawSettingRow("Hubcap API Key:", maskedHubcapKey, string.IsNullOrEmpty(session.HubcapApiKey) ? ConsoleColor.Yellow : ConsoleColor.Green);
+                    DrawSettingRow("Steam Web API Key:", maskedSteamKey, string.IsNullOrEmpty(session.SteamWebApiKey) ? ConsoleColor.Yellow : ConsoleColor.Green);
                     DrawSettingRow("Update Channel:", updateChannelStr, ConsoleColor.Cyan);
+                    DrawSettingRow("Download Achievement Icons:", session.DownloadAchievementIcons ? "Enabled" : "Disabled", session.DownloadAchievementIcons ? ConsoleColor.Green : ConsoleColor.Red);
 
                     Console.ForegroundColor = ConsoleColor.DarkGray;
                     Console.WriteLine("╚══════════════════════════════════════════════════════════════════════════════╝");
@@ -2509,12 +2554,26 @@ namespace DepotDL.CLI
                     }
                     else if (selectedIndex == 5)
                     {
+                        var input = PromptText("STEAM WEB API KEY", "Enter Steam Web API Key:", session.SteamWebApiKey ?? "", mask: true);
+                        if (input != null)
+                        {
+                            session.SteamWebApiKey = string.IsNullOrWhiteSpace(input) ? null : input.Trim();
+                            SaveSession(session);
+                        }
+                    }
+                    else if (selectedIndex == 6)
+                    {
                         session.UpdateChannel = session.UpdateChannel == UpdateChannel.Production
                             ? UpdateChannel.Nightly
                             : UpdateChannel.Production;
                         SaveSession(session);
                     }
-                    else if (selectedIndex == 6)
+                    else if (selectedIndex == 7)
+                    {
+                        session.DownloadAchievementIcons = !session.DownloadAchievementIcons;
+                        SaveSession(session);
+                    }
+                    else if (selectedIndex == 8)
                     {
                         SaveSession(session);
                         return;

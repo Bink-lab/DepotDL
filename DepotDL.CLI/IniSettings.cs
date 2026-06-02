@@ -27,10 +27,20 @@ namespace DepotDL.CLI
             session.DownloadBaseDir = Get(values, "session.download_base_dir") ?? session.DownloadBaseDir;
             session.RyuuApiKey = Get(values, "ryuu.api_key") ?? session.RyuuApiKey;
             session.HubcapApiKey = Get(values, "hubcap.api_key") ?? session.HubcapApiKey;
+            session.SteamWebApiKey = Get(values, "steam.web_api_key") ?? session.SteamWebApiKey;
 
             if (int.TryParse(Get(values, "settings.max_parallel_depots"), out var maxParallel))
             {
                 session.MaxParallelDepots = Math.Clamp(maxParallel, 1, 8);
+            }
+
+            if (bool.TryParse(Get(values, "settings.download_achievement_icons"), out var downloadAch))
+            {
+                session.DownloadAchievementIcons = downloadAch;
+            }
+            else
+            {
+                session.DownloadAchievementIcons = true;
             }
 
             if (DateTime.TryParse(Get(values, "settings.last_update_check"), CultureInfo.InvariantCulture,
@@ -61,8 +71,12 @@ namespace DepotDL.CLI
             writer.WriteLine("[hubcap]");
             WriteValue(writer, "api_key", session.HubcapApiKey);
             writer.WriteLine();
+            writer.WriteLine("[steam]");
+            WriteValue(writer, "web_api_key", session.SteamWebApiKey);
+            writer.WriteLine();
             writer.WriteLine("[settings]");
             WriteValue(writer, "max_parallel_depots", session.MaxParallelDepots.ToString());
+            WriteValue(writer, "download_achievement_icons", session.DownloadAchievementIcons.ToString().ToLowerInvariant());
             WriteValue(writer, "last_update_check", session.LastUpdateCheckUtc?.ToString("O") ?? string.Empty);
             WriteValue(writer, "last_known_release_tag", session.LastKnownReleaseTag ?? string.Empty);
             WriteValue(writer, "dismissed_update_tag", session.DismissedUpdateTag ?? string.Empty);

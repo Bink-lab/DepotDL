@@ -732,7 +732,8 @@ namespace DepotDL.CLI
 
                 try
                 {
-                    string gameName = Path.GetFileNameWithoutExtension(luaPath);
+                    string gameName = SteamAppInfoProvider.GetAppName(appId);
+                    if (string.IsNullOrEmpty(gameName)) gameName = Path.GetFileNameWithoutExtension(luaPath);
                     if (string.IsNullOrEmpty(gameName)) gameName = $"{appId}";
 
                     var depotIdsList = new List<string>();

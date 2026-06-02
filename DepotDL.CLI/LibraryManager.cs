@@ -267,5 +267,6 @@ namespace DepotDL.CLI
                 ClearReadOnlyAttributes(subdir);
             }
         }
+
     }
 }
