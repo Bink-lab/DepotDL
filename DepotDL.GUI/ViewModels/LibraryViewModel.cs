@@ -3,9 +3,12 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Media.Imaging;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using DepotDL.GUI.Helpers;
 using DepotDL.GUI.Models;
 using DepotDL.GUI.Services;
 
@@ -23,15 +26,21 @@ namespace DepotDL.GUI.ViewModels
 
         partial void OnSearchTextChanged(string value) => FilterGames();
 
+        private CancellationTokenSource? _imageCts;
+
         public void Load()
         {
             var raw = _lib.Load();
             _lib.VerifyAll(raw);
 
+            _imageCts?.Cancel();
+            _imageCts = new CancellationTokenSource();
+
             Games = new ObservableCollection<LibraryGameViewModel>(
                 raw.Select(g => new LibraryGameViewModel(g)));
             FilterGames();
             UpdateStats();
+            LoadImagesAsync(_imageCts.Token);
         }
 
         public async Task LoadAsync()
@@ -42,10 +51,33 @@ namespace DepotDL.GUI.ViewModels
                 _lib.VerifyAll(loaded);
                 return loaded;
             });
+
+            _imageCts?.Cancel();
+            _imageCts = new CancellationTokenSource();
+
             Games = new ObservableCollection<LibraryGameViewModel>(
                 raw.Select(g => new LibraryGameViewModel(g)));
             FilterGames();
             UpdateStats();
+            LoadImagesAsync(_imageCts.Token);
+        }
+
+        private void LoadImagesAsync(CancellationToken ct)
+        {
+            var vms = Games.ToList();
+            _ = Task.Run(async () =>
+            {
+                var sem = new SemaphoreSlim(6, 6);
+                var tasks = vms.Select(async vm =>
+                {
+                    await sem.WaitAsync(ct);
+                    try { await vm.LoadImageAsync(ct); }
+                    catch (OperationCanceledException) { }
+                    finally { sem.Release(); }
+                });
+                try { await Task.WhenAll(tasks); }
+                catch (OperationCanceledException) { }
+            }, ct);
         }
 
         private void FilterGames()
@@ -111,12 +143,14 @@ namespace DepotDL.GUI.ViewModels
         }
     }
 
-    public partial class LibraryGameViewModel : ObservableObject
+    public partial class LibraryGameViewModel : ObservableObject, ISteamGameViewModel
     {
         public LibraryGame Game { get; }
 
         [ObservableProperty] private bool _isVisible = true;
         [ObservableProperty] private string _sizeText = string.Empty;
+        [ObservableProperty] private BitmapImage? _headerImage;
+        [ObservableProperty] private bool _isImageLoading = true;
 
         public string DepotCount => Game.DepotIds.Count == 1
             ? "1 depot" : $"{Game.DepotIds.Count} depots";
@@ -133,5 +167,12 @@ namespace DepotDL.GUI.ViewModels
         }
 
         public void RefreshSize() => SizeText = LibraryService.FormatSize(Game.TotalSizeBytes);
+
+        public Task LoadImageAsync(CancellationToken ct = default)
+        {
+            if (!int.TryParse(Game.AppId, out int appId)) return Task.CompletedTask;
+            string url = $"https://cdn.akamai.steamstatic.com/steam/apps/{appId}/header.jpg";
+            return ImageLoader.LoadGameImageAsync(this, appId, url, ct);
+        }
     }
 }
