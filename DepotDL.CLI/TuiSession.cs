@@ -21,8 +21,10 @@ namespace DepotDL.CLI
         public string? DownloadBaseDir { get; set; }
         public string? RyuuApiKey { get; set; }
         public string? HubcapApiKey { get; set; }
+        public string? SteamWebApiKey { get; set; }
         public bool ManifestsDirConfigured { get; set; }
         public int MaxParallelDepots { get; set; } = 2;
+        public bool DownloadAchievementIcons { get; set; } = true;
         public List<DepotInfo> AllDepots { get; set; } = new();
         public List<DepotInfo> SelectedDepots { get; set; } = new();
         public DateTime?     LastUpdateCheckUtc  { get; set; }

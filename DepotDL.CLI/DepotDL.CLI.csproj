@@ -24,6 +24,14 @@
     </ProjectReference>
   </ItemGroup>
 
+  <ItemGroup>
+    <None Include="..\tools\**\*.*">
+      <Link>tools\%(RecursiveDir)%(FileName)%(Extension)</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+    </None>
+  </ItemGroup>
+
   <Target Name="CopyDepotDownloaderModOutput" AfterTargets="Build">
     <ItemGroup>
       <_DepotModFiles Include="..\DepotDownloaderMod\bin\$(Configuration)\net9.0\*.*" />

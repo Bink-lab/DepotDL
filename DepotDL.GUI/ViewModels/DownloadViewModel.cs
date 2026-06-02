@@ -353,7 +353,7 @@ namespace DepotDL.GUI.ViewModels
                         if (string.IsNullOrWhiteSpace(item.Depot.Name))
                         {
                             item.Depot.Name = m.Name;
-                            item.DisplayName = m.Name;
+                            item.DisplayName = item.Depot.DisplayName;
                         }
                         item.OsList = m.OsList;
                         item.OsArch = m.OsArch;
@@ -430,7 +430,8 @@ namespace DepotDL.GUI.ViewModels
 
                 if (!anyFailed)
                 {
-                    string gameName = Path.GetFileNameWithoutExtension(LuaPath);
+                    string gameName = SteamMetadataService.GetAppName(AppId);
+                    if (string.IsNullOrWhiteSpace(gameName)) gameName = Path.GetFileNameWithoutExtension(LuaPath);
                     if (string.IsNullOrWhiteSpace(gameName)) gameName = $"App {AppId}";
                     var game = new LibraryGame
                     {

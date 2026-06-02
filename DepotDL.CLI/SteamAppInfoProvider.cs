@@ -18,6 +18,13 @@ namespace DepotDL.CLI
     public static class SteamAppInfoProvider
     {
         private static readonly ConcurrentDictionary<string, Dictionary<string, DepotMetadata>> MetadataCache = new(StringComparer.OrdinalIgnoreCase);
+        private static readonly ConcurrentDictionary<string, string> AppNameCache = new(StringComparer.OrdinalIgnoreCase);
+
+        public static string GetAppName(string appId)
+        {
+            if (AppNameCache.TryGetValue(appId, out var name)) return name;
+            return string.Empty;
+        }
 
         public static Dictionary<string, DepotMetadata> LoadDepotMetadata(string appId)
         {
@@ -96,6 +103,13 @@ namespace DepotDL.CLI
                     !data.TryGetProperty("depots", out var depots))
                 {
                     return result;
+                }
+
+                if (data.TryGetProperty("common", out var common) &&
+                    common.TryGetProperty("name", out var nameVal) &&
+                    nameVal.ValueKind == JsonValueKind.String)
+                {
+                    AppNameCache[appId] = nameVal.GetString() ?? string.Empty;
                 }
 
                 foreach (var depot in depots.EnumerateObject())
@@ -185,6 +199,11 @@ namespace DepotDL.CLI
                         {
                             foreach (var app in callbackResult.Apps)
                             {
+                                var appName = app.Value.KeyValues["common"]["name"].AsString();
+                                if (!string.IsNullOrEmpty(appName))
+                                {
+                                    AppNameCache[appId] = appName;
+                                }
                                 ReadDepots(app.Value.KeyValues, result);
                             }
                         }

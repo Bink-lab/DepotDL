@@ -82,6 +82,51 @@
                     </Setter.Value>
                 </Setter>
             </Style>
+            <Style x:Key="ModernContextMenu" TargetType="ContextMenu">
+                <Setter Property="Background" Value="#FEFCF8"/>
+                <Setter Property="BorderBrush" Value="#DDD0C2"/>
+                <Setter Property="BorderThickness" Value="1"/>
+                <Setter Property="Padding" Value="4,4"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="ContextMenu">
+                            <Border Background="{TemplateBinding Background}"
+                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                    CornerRadius="8">
+                                <Border.Effect>
+                                    <DropShadowEffect BlurRadius="12" ShadowDepth="2" Opacity="0.15" Color="#1C1610"/>
+                                </Border.Effect>
+                                <ItemsPresenter KeyboardNavigation.DirectionalNavigation="Cycle"/>
+                            </Border>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <Style x:Key="ModernMenuItem" TargetType="MenuItem">
+                <Setter Property="Padding" Value="14,8"/>
+                <Setter Property="FontSize" Value="12"/>
+                <Setter Property="FontWeight" Value="SemiBold"/>
+                <Setter Property="Background" Value="Transparent"/>
+                <Setter Property="Foreground" Value="{StaticResource TextPrimary}"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="MenuItem">
+                            <Border x:Name="Bg" Background="{TemplateBinding Background}" CornerRadius="5" Margin="2,1">
+                                <ContentPresenter ContentSource="Header" Margin="{TemplateBinding Padding}"
+                                                  RecognizesAccessKey="True" VerticalAlignment="Center"
+                                                  TextElement.Foreground="{TemplateBinding Foreground}"/>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsHighlighted" Value="True">
+                                    <Setter TargetName="Bg" Property="Background" Value="#F0E0CE"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
         </Grid.Resources>
 
         <Grid.RowDefinitions>
@@ -196,13 +241,27 @@
                         <DataTemplate DataType="{x:Type vm:LibraryGameViewModel}">
                             <Border Visibility="{Binding IsVisible, Converter={StaticResource BoolToVis}}"
                                     Margin="0,0,14,14"
-                                    Width="220">
+                                    Width="260">
                                 <Border Style="{StaticResource Card}"
                                         Padding="0"
-                                        ClipToBounds="True">
+                                        ClipToBounds="True"
+                                        Tag="{Binding DataContext, RelativeSource={RelativeSource AncestorType=ItemsControl}}">
                                     <Border.RenderTransform>
                                         <TranslateTransform/>
                                     </Border.RenderTransform>
+                                    <Border.ContextMenu>
+                                        <ContextMenu Style="{StaticResource ModernContextMenu}">
+                                            <MenuItem Header="Open Download Folder"
+                                                      Style="{StaticResource ModernMenuItem}"
+                                                      Command="{Binding Path=PlacementTarget.Tag.OpenFolderCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                                      CommandParameter="{Binding Path=PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
+                                            <MenuItem Header="Remove from Library"
+                                                      Style="{StaticResource ModernMenuItem}"
+                                                      Foreground="#B83B2A"
+                                                      Command="{Binding Path=PlacementTarget.Tag.ConfirmRemoveCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                                      CommandParameter="{Binding Path=PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
+                                        </ContextMenu>
+                                    </Border.ContextMenu>
                                     <Border.Triggers>
                                         <EventTrigger RoutedEvent="MouseEnter">
                                             <BeginStoryboard>
@@ -329,48 +388,24 @@
                                                                Margin="0,2,0,0"/>
                                                 </StackPanel>
                                             </Grid>
-
-                                            <StackPanel Orientation="Horizontal">
-                                                <Button Style="{StaticResource BtnGhost}"
-                                                        Padding="8,5"
-                                                        IsEnabled="{Binding FolderExists}"
-                                                        Command="{Binding DataContext.OpenFolderCommand,
-                                                                  RelativeSource={RelativeSource AncestorType=ItemsControl}}"
-                                                        CommandParameter="{Binding}">
-                                                    <StackPanel Orientation="Horizontal">
-                                                        <Viewbox Width="11" Height="11" Margin="0,0,4,0">
-                                                            <Canvas Width="24" Height="24">
-                                                                <Path Data="M3,7 L21,7 L21,19 A2,2,0,0,1,19,21 L5,21 A2,2,0,0,1,3,19 Z M3,7 L7,3 L11,3 L11,7"
-                                                                      Stroke="{StaticResource TextSecondary}"
-                                                                      StrokeThickness="1.8" Fill="Transparent"
-                                                                      StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
-                                                            </Canvas>
-                                                        </Viewbox>
-                                                        <TextBlock Text="Open" FontSize="11"
-                                                                   Foreground="{StaticResource TextSecondary}"/>
-                                                    </StackPanel>
-                                                </Button>
-
-                                                <Button Style="{StaticResource BtnDanger}"
-                                                        Padding="8,5"
-                                                        Margin="6,0,0,0"
-                                                        Command="{Binding DataContext.RemoveGameCommand,
-                                                                  RelativeSource={RelativeSource AncestorType=ItemsControl}}"
-                                                        CommandParameter="{Binding}">
-                                                    <StackPanel Orientation="Horizontal">
-                                                        <Viewbox Width="11" Height="11" Margin="0,0,4,0">
-                                                            <Canvas Width="24" Height="24">
-                                                                <Path Data="M3,6 L21,6 M8,6 L8,4 L16,4 L16,6 M19,6 L18,20 A1,1,0,0,1,17,21 L7,21 A1,1,0,0,1,6,20 L5,6"
-                                                                      Stroke="{StaticResource Error}"
-                                                                      StrokeThickness="1.8" Fill="Transparent"
-                                                                      StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
-                                                            </Canvas>
-                                                        </Viewbox>
-                                                        <TextBlock Text="Remove" FontSize="11"
-                                                                   Foreground="{StaticResource Error}"/>
-                                                    </StackPanel>
-                                                </Button>
-                                            </StackPanel>
+                                            <Button Style="{StaticResource BtnPrimary}"
+                                                    Padding="12,8"
+                                                    HorizontalAlignment="Stretch"
+                                                    IsEnabled="{Binding FolderExists}"
+                                                    Command="{Binding DataContext.LaunchGameCommand,
+                                                              RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                    CommandParameter="{Binding}">
+                                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                                    <Viewbox Width="12" Height="12" Margin="0,0,6,0">
+                                                        <Canvas Width="24" Height="24">
+                                                            <Path Data="M8,5 L19,12 L8,19 Z" Fill="White"/>
+                                                        </Canvas>
+                                                    </Viewbox>
+                                                    <TextBlock Text="Play" FontSize="12.5"
+                                                               FontWeight="SemiBold"
+                                                               Foreground="White"/>
+                                                </StackPanel>
+                                            </Button>
                                         </StackPanel>
                                         </Border>
                                     </Grid>
@@ -575,7 +610,7 @@
                                 Padding="12,10" FontSize="12" FontWeight="SemiBold"/>
                         <Button Grid.Column="2"
                                 Content="Remove"
-                                Command="{Binding ConfirmRemoveCommand}"
+                                Command="{Binding DoRemoveCommand}"
                                 Style="{StaticResource BtnDanger}"
                                 Padding="12,10" FontSize="12" FontWeight="SemiBold"/>
                     </Grid>

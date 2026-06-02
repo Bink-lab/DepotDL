@@ -153,6 +153,34 @@
                                Style="{StaticResource BodyText}" Margin="0,0,0,8"/>
                     <TextBox Text="{Binding HubcapApiKey, UpdateSourceTrigger=PropertyChanged}"
                              />
+
+                    <Separator Margin="0,20"/>
+
+                    <TextBlock Text="Steam Web API Key"
+                               Style="{StaticResource TextH3}" Margin="0,0,0,4"/>
+                    <TextBlock Text="Used for downloading achievements and stats configuration from the Steam Web API."
+                               Style="{StaticResource BodyText}" Margin="0,0,0,8"/>
+                    <TextBox Text="{Binding SteamWebApiKey, UpdateSourceTrigger=PropertyChanged}"
+                             />
+
+                    <Separator Margin="0,20"/>
+
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                            <TextBlock Text="Download achievement images"
+                                       Style="{StaticResource TextH3}" Margin="0,0,0,4"/>
+                            <TextBlock Style="{StaticResource BodyText}" TextWrapping="Wrap"
+                                       Text="When applying the Goldberg emulator, download achievement icons (normal and grayscale) to the local steam_settings/achievement_images folder and use those paths in achievements.json. Requires a Steam Web API Key."/>
+                        </StackPanel>
+                        <CheckBox Grid.Column="1"
+                                  IsChecked="{Binding DownloadAchievementIcons}"
+                                  VerticalAlignment="Center"
+                                  Margin="20,0,0,0"/>
+                    </Grid>
                 </StackPanel>
             </Border>
 

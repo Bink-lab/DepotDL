@@ -20,6 +20,13 @@ namespace DepotDL.GUI.Services
     {
         private static readonly ConcurrentDictionary<string, Dictionary<string, SteamDepotMeta>> _cache =
             new(StringComparer.OrdinalIgnoreCase);
+        private static readonly ConcurrentDictionary<string, string> _appNameCache = new(StringComparer.OrdinalIgnoreCase);
+
+        public static string GetAppName(string appId)
+        {
+            if (_appNameCache.TryGetValue(appId, out var name)) return name;
+            return string.Empty;
+        }
 
         public static async Task<Dictionary<string, SteamDepotMeta>> GetDepotMetaAsync(string appId)
         {
@@ -80,6 +87,13 @@ namespace DepotDL.GUI.Services
                     !data.TryGetProperty("depots", out var depots))
                     return result;
 
+                if (data.TryGetProperty("common", out var common) &&
+                    common.TryGetProperty("name", out var nameVal) &&
+                    nameVal.ValueKind == JsonValueKind.String)
+                {
+                    _appNameCache[appId] = nameVal.GetString() ?? string.Empty;
+                }
+
                 foreach (var depot in depots.EnumerateObject())
                 {
                     if (!ulong.TryParse(depot.Name, out _) || depot.Value.ValueKind != JsonValueKind.Object)
@@ -134,8 +148,17 @@ namespace DepotDL.GUI.Services
                     if (res.Complete && res.Results != null)
                     {
                         foreach (var r in res.Results)
+                        {
                             foreach (var app in r.Apps)
+                            {
+                                var appName = app.Value.KeyValues["common"]["name"].AsString();
+                                if (!string.IsNullOrEmpty(appName))
+                                {
+                                    _appNameCache[appId] = appName;
+                                }
                                 ReadDepots(app.Value.KeyValues, result);
+                            }
+                        }
                     }
                     tcs.TrySetResult(result);
                 }

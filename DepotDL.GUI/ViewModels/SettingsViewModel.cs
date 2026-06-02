@@ -15,6 +15,7 @@ namespace DepotDL.GUI.ViewModels
         [ObservableProperty] private string _downloadBaseDir = string.Empty;
         [ObservableProperty] private string _ryuuApiKey = string.Empty;
         [ObservableProperty] private string _hubcapApiKey = string.Empty;
+        [ObservableProperty] private string _steamWebApiKey = string.Empty;
         [ObservableProperty] private int _maxParallelDepots = 2;
         [ObservableProperty] private int _storeCacheHours = 24;
         [ObservableProperty] private int _gpuCacheDays = 7;
@@ -23,6 +24,7 @@ namespace DepotDL.GUI.ViewModels
         [ObservableProperty] private double _scrollSensitivity = 1.5;
         [ObservableProperty] private int _scrollDurationMs = 230;
         [ObservableProperty] private bool _autoSelectOsByOs = true;
+        [ObservableProperty] private bool _downloadAchievementIcons = true;
         [ObservableProperty] private bool _saveSuccess;
         [ObservableProperty] private UpdateChannel _updateChannel = UpdateChannel.Nightly;
 
@@ -63,6 +65,7 @@ namespace DepotDL.GUI.ViewModels
             DownloadBaseDir = s.DownloadBaseDir ?? string.Empty;
             RyuuApiKey = s.RyuuApiKey ?? string.Empty;
             HubcapApiKey = s.HubcapApiKey ?? string.Empty;
+            SteamWebApiKey = s.SteamWebApiKey ?? string.Empty;
             MaxParallelDepots = s.MaxParallelDepots;
             StoreCacheHours = s.StoreCacheHours;
             GpuCacheDays = s.GpuCacheDays;
@@ -71,6 +74,7 @@ namespace DepotDL.GUI.ViewModels
             ScrollSensitivity = s.ScrollSensitivity;
             ScrollDurationMs = s.ScrollDurationMs;
             AutoSelectOsByOs = s.AutoSelectOsByOs;
+            DownloadAchievementIcons = s.DownloadAchievementIcons;
             UpdateChannel = s.UpdateChannel;
             _lastUpdateCheckUtc  = s.LastUpdateCheckUtc;
             _lastKnownReleaseTag = s.LastKnownReleaseTag;
@@ -109,6 +113,7 @@ namespace DepotDL.GUI.ViewModels
                 DownloadBaseDir = string.IsNullOrWhiteSpace(DownloadBaseDir) ? null : DownloadBaseDir,
                 RyuuApiKey = string.IsNullOrWhiteSpace(RyuuApiKey) ? null : RyuuApiKey,
                 HubcapApiKey = string.IsNullOrWhiteSpace(HubcapApiKey) ? null : HubcapApiKey,
+                SteamWebApiKey = string.IsNullOrWhiteSpace(SteamWebApiKey) ? null : SteamWebApiKey,
                 MaxParallelDepots = MaxParallelDepots,
                 StoreCacheHours = StoreCacheHours,
                 GpuCacheDays = GpuCacheDays,
@@ -117,6 +122,7 @@ namespace DepotDL.GUI.ViewModels
                 ScrollSensitivity = ScrollSensitivity,
                 ScrollDurationMs = ScrollDurationMs,
                 AutoSelectOsByOs = AutoSelectOsByOs,
+                DownloadAchievementIcons = DownloadAchievementIcons,
                 UpdateChannel = UpdateChannel,
                 LastUpdateCheckUtc  = _lastUpdateCheckUtc,
                 LastKnownReleaseTag = _lastKnownReleaseTag,
