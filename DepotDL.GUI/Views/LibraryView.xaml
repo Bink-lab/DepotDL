@@ -256,6 +256,16 @@
                                                       Style="{StaticResource ModernMenuItem}"
                                                       Command="{Binding Path=PlacementTarget.Tag.OpenFolderCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
                                                       CommandParameter="{Binding Path=PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
+                                            <Separator Margin="6,3" Background="#E8DDD2"/>
+                                            <MenuItem Header="Validate Files"
+                                                      Style="{StaticResource ModernMenuItem}"
+                                                      Command="{Binding Path=PlacementTarget.Tag.ValidateFilesCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                                      CommandParameter="{Binding Path=PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
+                                            <MenuItem Header="Redownload"
+                                                      Style="{StaticResource ModernMenuItem}"
+                                                      Command="{Binding Path=PlacementTarget.Tag.ConfirmRedownloadCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                                      CommandParameter="{Binding Path=PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
+                                            <Separator Margin="6,3" Background="#E8DDD2"/>
                                             <MenuItem Header="Remove from Library"
                                                       Style="{StaticResource ModernMenuItem}"
                                                       Foreground="#B83B2A"
@@ -417,6 +427,141 @@
                 </ItemsControl>
             </ScrollViewer>
         </Grid>
+    </Grid>
+
+    <!-- ══ Redownload confirmation overlay ══════════════════════════ -->
+    <Grid x:Name="RedownloadOverlayRoot" Panel.ZIndex="50" Opacity="0"
+          IsHitTestVisible="{Binding IsRedownloadOverlayVisible}">
+        <Grid.Style>
+            <Style TargetType="Grid">
+                <Style.Triggers>
+                    <DataTrigger Binding="{Binding IsRedownloadOverlayVisible}" Value="True">
+                        <DataTrigger.EnterActions>
+                            <BeginStoryboard>
+                                <Storyboard>
+                                    <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                                                     To="1" Duration="0:0:0.18">
+                                        <DoubleAnimation.EasingFunction>
+                                            <CubicEase EasingMode="EaseOut"/>
+                                        </DoubleAnimation.EasingFunction>
+                                    </DoubleAnimation>
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </DataTrigger.EnterActions>
+                        <DataTrigger.ExitActions>
+                            <BeginStoryboard>
+                                <Storyboard>
+                                    <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                                                     To="0" Duration="0:0:0.14"/>
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </DataTrigger.ExitActions>
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+        </Grid.Style>
+
+        <Rectangle Fill="#1C1610" Opacity="0.72">
+            <Rectangle.InputBindings>
+                <MouseBinding MouseAction="LeftClick" Command="{Binding CancelRedownloadCommand}"/>
+            </Rectangle.InputBindings>
+        </Rectangle>
+
+        <Border Width="420"
+                HorizontalAlignment="Center" VerticalAlignment="Center"
+                Background="{StaticResource BgCard}"
+                BorderBrush="{StaticResource Border}"
+                BorderThickness="1"
+                CornerRadius="16"
+                Padding="28">
+            <Border.RenderTransform>
+                <TranslateTransform/>
+            </Border.RenderTransform>
+            <Border.Style>
+                <Style TargetType="Border">
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsRedownloadOverlayVisible}" Value="True">
+                            <DataTrigger.EnterActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation
+                                            Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.Y)"
+                                            From="20" To="0" Duration="0:0:0.22">
+                                            <DoubleAnimation.EasingFunction>
+                                                <CubicEase EasingMode="EaseOut"/>
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </DataTrigger.EnterActions>
+                            <DataTrigger.ExitActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation
+                                            Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.Y)"
+                                            To="12" Duration="0:0:0.14">
+                                            <DoubleAnimation.EasingFunction>
+                                                <CubicEase EasingMode="EaseIn"/>
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </DataTrigger.ExitActions>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Border.Style>
+
+            <StackPanel>
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                    <Border Width="36" Height="36" CornerRadius="10"
+                            Background="{StaticResource AccentSubtle}"
+                            Margin="0,0,12,0">
+                        <Viewbox Width="16" Height="16">
+                            <Canvas Width="24" Height="24">
+                                <Path Data="M21,12 A9,9 0 1,1 12,3 C14.52,3 16.93,4 18.74,5.74 L21,8 M21,3 L21,8 L16,8"
+                                      Stroke="{StaticResource Accent}"
+                                      StrokeThickness="1.8" Fill="Transparent"
+                                      StrokeStartLineCap="Round" StrokeEndLineCap="Round"
+                                      StrokeLineJoin="Round"/>
+                            </Canvas>
+                        </Viewbox>
+                    </Border>
+                    <TextBlock Text="Redownload Game"
+                               FontSize="17" FontWeight="SemiBold"
+                               Foreground="{StaticResource TextPrimary}"
+                               VerticalAlignment="Center"/>
+                </StackPanel>
+
+                <TextBlock Text="{Binding GameToRedownload.Game.GameName}"
+                           FontSize="13" FontWeight="SemiBold"
+                           Foreground="{StaticResource Accent}"
+                           Margin="0,0,0,6"
+                           TextTrimming="CharacterEllipsis"/>
+
+                <TextBlock Text="All existing game files will be deleted and the game will be re-downloaded from scratch."
+                           FontSize="13" Foreground="{StaticResource TextBody}"
+                           TextWrapping="Wrap" Margin="0,0,0,20"/>
+
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="10"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Button Grid.Column="0"
+                            Content="Cancel"
+                            Command="{Binding CancelRedownloadCommand}"
+                            Style="{StaticResource BtnGhost}"
+                            Padding="12,10" FontSize="12" FontWeight="SemiBold"/>
+                    <Button Grid.Column="2"
+                            Content="Redownload"
+                            Command="{Binding DoRedownloadCommand}"
+                            Style="{StaticResource BtnPrimary}"
+                            Padding="12,10" FontSize="12" FontWeight="SemiBold"/>
+                </Grid>
+            </StackPanel>
+        </Border>
     </Grid>
 
         <!-- ══ Remove-game confirmation overlay ══════════════════════════ -->

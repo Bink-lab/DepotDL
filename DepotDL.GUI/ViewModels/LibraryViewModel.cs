@@ -28,6 +28,11 @@ namespace DepotDL.GUI.ViewModels
         [ObservableProperty] private bool _isRemoveOverlayVisible;
         [ObservableProperty] private LibraryGameViewModel? _gameToRemove;
         [ObservableProperty] private bool _deleteFiles;
+        [ObservableProperty] private bool _isRedownloadOverlayVisible;
+        [ObservableProperty] private LibraryGameViewModel? _gameToRedownload;
+
+        public Action<LibraryGame>? ValidateHandler { get; set; }
+        public Action<LibraryGame>? RedownloadHandler { get; set; }
 
         partial void OnSearchTextChanged(string value) => FilterGames();
 
@@ -114,6 +119,49 @@ namespace DepotDL.GUI.ViewModels
         {
             IsRemoveOverlayVisible = false;
             GameToRemove = null;
+        }
+
+        [RelayCommand]
+        private void ValidateFiles(LibraryGameViewModel? vm)
+        {
+            if (vm == null) return;
+            ValidateHandler?.Invoke(vm.Game);
+        }
+
+        [RelayCommand]
+        private void ConfirmRedownload(LibraryGameViewModel? vm)
+        {
+            if (vm == null) return;
+            GameToRedownload = vm;
+            IsRedownloadOverlayVisible = true;
+        }
+
+        [RelayCommand]
+        private void DoRedownload()
+        {
+            if (GameToRedownload == null) return;
+            var vm = GameToRedownload;
+            IsRedownloadOverlayVisible = false;
+            GameToRedownload = null;
+
+            if (Directory.Exists(vm.Game.OutputDir))
+            {
+                try { Directory.Delete(vm.Game.OutputDir, true); }
+                catch (Exception ex)
+                {
+                    DialogService.ShowError("Delete Failed", $"Could not delete game files:\n{ex.Message}");
+                    return;
+                }
+            }
+
+            RedownloadHandler?.Invoke(vm.Game);
+        }
+
+        [RelayCommand]
+        private void CancelRedownload()
+        {
+            IsRedownloadOverlayVisible = false;
+            GameToRedownload = null;
         }
 
         [RelayCommand]

@@ -452,6 +452,12 @@ namespace DepotDL.GUI.ViewModels
                 OverallStatus = "Download cancelled";
                 CompletionMessage = "Download was cancelled.";
             }
+            catch (Exception ex)
+            {
+                DownloadFailed = true;
+                OverallStatus = "Download failed";
+                CompletionMessage = ex.Message;
+            }
             finally
             {
                 _animTimer?.Stop();
@@ -485,7 +491,9 @@ namespace DepotDL.GUI.ViewModels
         }
 
         [RelayCommand]
-        private void StartNew()
+        private void StartNew() => ResetState();
+
+        private void ResetState()
         {
             _cts?.Cancel();
             CurrentStep = DownloadStep.SelectFile;
@@ -495,6 +503,8 @@ namespace DepotDL.GUI.ViewModels
             LuaLoaded = false;
             ParseError = string.Empty;
             ZipError = string.Empty;
+            RyuuError = string.Empty;
+            HubcapError = string.Empty;
             Depots.Clear();
             DownloadStates.Clear();
             IsDownloading = false;
@@ -502,6 +512,38 @@ namespace DepotDL.GUI.ViewModels
             DownloadFailed = false;
             OverallPercent = 0;
             OverallDisplayPercent = 0;
+        }
+
+        public void PreFillFromLibraryGame(LibraryGame game, bool clearCheckpoints)
+        {
+            if (IsDownloading) return;
+            ResetState();
+
+            if (!File.Exists(game.LuaPath))
+            {
+                DialogService.ShowError("Lua Not Found",
+                    $"The Lua configuration file for this game could not be found:\n{game.LuaPath}");
+                return;
+            }
+
+            LoadLuaFile(game.LuaPath);
+            if (!LuaLoaded) return;
+
+            OutputDir = game.OutputDir;
+
+            var depotIdSet = new HashSet<string>(game.DepotIds, StringComparer.OrdinalIgnoreCase);
+            foreach (var d in Depots)
+                d.IsSelected = depotIdSet.Count == 0 || depotIdSet.Contains(d.DepotId);
+
+            if (clearCheckpoints)
+            {
+                string checkpointDir = Path.Combine(game.OutputDir, ".depotdl_progress");
+                if (Directory.Exists(checkpointDir))
+                    Directory.Delete(checkpointDir, true);
+            }
+
+            UpdateCanStart();
+            _ = StartDownloadAsync();
         }
 
         public void PreFillAppId(string appId, ManifestProvider? provider = null)

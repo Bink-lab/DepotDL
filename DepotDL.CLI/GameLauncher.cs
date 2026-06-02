@@ -251,7 +251,16 @@ namespace DepotDL.CLI
             if (File.Exists(launchPath) && Directory.Exists(settingsDir))
             {
                 bool goldbergApplied = steamApiFiles.Any(f =>
-                    File.Exists(Path.Combine(Path.GetDirectoryName(f)!, "OG_" + Path.GetFileName(f))));
+                {
+                    string og = Path.Combine(Path.GetDirectoryName(f)!, "OG_" + Path.GetFileName(f));
+                    if (!File.Exists(og)) return false;
+                    try
+                    {
+                        if (new FileInfo(f).Length == new FileInfo(og).Length) return false;
+                    }
+                    catch (IOException) { }
+                    return true;
+                });
                 if (goldbergApplied)
                 {
                     string achPath = Path.Combine(settingsDir, "achievements.json");

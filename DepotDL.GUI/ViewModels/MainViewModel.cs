@@ -33,6 +33,17 @@ namespace DepotDL.GUI.ViewModels
                 if (e.PropertyName == nameof(DownloadViewModel.IsDownloading))
                     OnPropertyChanged(nameof(ShowDownloadWidget));
             };
+
+            Library.ValidateHandler = game =>
+            {
+                Download.PreFillFromLibraryGame(game, clearCheckpoints: false);
+                CurrentPage = NavPage.Download;
+            };
+            Library.RedownloadHandler = game =>
+            {
+                Download.PreFillFromLibraryGame(game, clearCheckpoints: true);
+                CurrentPage = NavPage.Download;
+            };
         }
 
         public bool ShowDownloadWidget => Download.IsDownloading && !IsDownloadPage;
