@@ -217,21 +217,41 @@ namespace DepotDL.CLI
             if (string.IsNullOrEmpty(gameDir) || !Directory.Exists(gameDir))
                 return false;
 
-            string settingsDir = Path.Combine(gameDir, "steam_settings");
+            bool isWindows = System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.Windows);
             string launchScript = OperatingSystem.IsWindows() ? "Launch.bat" : "launch.sh";
             string launchPath = Path.Combine(gameDir, launchScript);
+
+            var steamApiFiles = new List<string>();
+            bool scanFailed = false;
+            try
+            {
+                string pattern = isWindows ? "*.dll" : "*.so";
+                foreach (var f in Directory.GetFiles(gameDir, pattern, SearchOption.AllDirectories))
+                {
+                    string fn = Path.GetFileName(f).ToLowerInvariant();
+                    bool match = isWindows ? (fn == "steam_api.dll" || fn == "steam_api64.dll") : fn == "libsteam_api.so";
+                    if (match) steamApiFiles.Add(f);
+                }
+            }
+            catch
+            {
+                scanFailed = true;
+            }
+
+            if (scanFailed)
+            {
+                try { File.WriteAllText(Path.Combine(gameDir, "sff_fix_error.log"), "Failed to scan game directory for Steam API files."); } catch { }
+                return false;
+            }
+
+            string? primaryFile = steamApiFiles.FirstOrDefault(f => Path.GetFileName(f).ToLowerInvariant() == "steam_api64.dll")
+                                ?? steamApiFiles.FirstOrDefault();
+            string settingsDir = Path.Combine(primaryFile != null ? Path.GetDirectoryName(primaryFile)! : gameDir, "steam_settings");
+
             if (File.Exists(launchPath) && Directory.Exists(settingsDir))
             {
-                bool goldbergApplied = false;
-                try
-                {
-                    foreach (var dll in Directory.GetFiles(gameDir, "steam_api*.dll", SearchOption.AllDirectories))
-                    {
-                        string og = Path.Combine(Path.GetDirectoryName(dll)!, "OG_" + Path.GetFileName(dll));
-                        if (File.Exists(og)) { goldbergApplied = true; break; }
-                    }
-                }
-                catch { }
+                bool goldbergApplied = steamApiFiles.Any(f =>
+                    File.Exists(Path.Combine(Path.GetDirectoryName(f)!, "OG_" + Path.GetFileName(f))));
                 if (goldbergApplied)
                 {
                     string achPath = Path.Combine(settingsDir, "achievements.json");
@@ -517,18 +537,14 @@ saves_folder_name=GSE Saves";
             }
 
             bool replaced = false;
-            bool isWindows = System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.Windows);
 
             try
             {
                 if (isWindows)
                 {
-                    var dllFiles = Directory.GetFiles(gameDir, "*.dll", SearchOption.AllDirectories);
-                    foreach (var dll in dllFiles)
+                    foreach (var dll in steamApiFiles)
                     {
                         string nameLower = Path.GetFileName(dll).ToLowerInvariant();
-                        if (nameLower != "steam_api.dll" && nameLower != "steam_api64.dll")
-                            continue;
 
                         string backupPath = Path.Combine(Path.GetDirectoryName(dll)!, "OG_" + Path.GetFileName(dll));
                         if (File.Exists(backupPath))
@@ -564,13 +580,9 @@ saves_folder_name=GSE Saves";
                 }
                 else
                 {
-                    // Linux: search for libsteam_api.so
-                    var soFiles = Directory.GetFiles(gameDir, "*.so", SearchOption.AllDirectories);
-                    foreach (var so in soFiles)
+                    foreach (var so in steamApiFiles)
                     {
                         string nameLower = Path.GetFileName(so).ToLowerInvariant();
-                        if (nameLower != "libsteam_api.so")
-                            continue;
 
                         string backupPath = Path.Combine(Path.GetDirectoryName(so)!, "OG_" + Path.GetFileName(so));
                         if (File.Exists(backupPath))
