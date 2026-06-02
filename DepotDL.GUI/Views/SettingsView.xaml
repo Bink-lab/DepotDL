@@ -112,6 +112,25 @@
                             </StackPanel>
                         </Border>
                     </Grid>
+
+                    <Separator Margin="0,20"/>
+
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                            <TextBlock Text="Auto-select depots by OS"
+                                       Style="{StaticResource TextH3}" Margin="0,0,0,4"/>
+                            <TextBlock Style="{StaticResource BodyText}" TextWrapping="Wrap"
+                                       Text="When loading a config, automatically deselect depots for other operating systems. Depots with no OS tag are always kept selected."/>
+                        </StackPanel>
+                        <CheckBox Grid.Column="1"
+                                  IsChecked="{Binding AutoSelectOsByOs}"
+                                  VerticalAlignment="Center"
+                                  Margin="20,0,0,0"/>
+                    </Grid>
                 </StackPanel>
             </Border>
 

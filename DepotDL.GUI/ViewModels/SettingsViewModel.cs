@@ -22,6 +22,7 @@ namespace DepotDL.GUI.ViewModels
         [ObservableProperty] private int _searchDebounceMs = 250;
         [ObservableProperty] private double _scrollSensitivity = 1.5;
         [ObservableProperty] private int _scrollDurationMs = 230;
+        [ObservableProperty] private bool _autoSelectOsByOs = true;
         [ObservableProperty] private bool _saveSuccess;
         [ObservableProperty] private UpdateChannel _updateChannel = UpdateChannel.Nightly;
 
@@ -69,6 +70,7 @@ namespace DepotDL.GUI.ViewModels
             SearchDebounceMs = s.SearchDebounceMs;
             ScrollSensitivity = s.ScrollSensitivity;
             ScrollDurationMs = s.ScrollDurationMs;
+            AutoSelectOsByOs = s.AutoSelectOsByOs;
             UpdateChannel = s.UpdateChannel;
             _lastUpdateCheckUtc  = s.LastUpdateCheckUtc;
             _lastKnownReleaseTag = s.LastKnownReleaseTag;
@@ -114,6 +116,7 @@ namespace DepotDL.GUI.ViewModels
                 SearchDebounceMs = SearchDebounceMs,
                 ScrollSensitivity = ScrollSensitivity,
                 ScrollDurationMs = ScrollDurationMs,
+                AutoSelectOsByOs = AutoSelectOsByOs,
                 UpdateChannel = UpdateChannel,
                 LastUpdateCheckUtc  = _lastUpdateCheckUtc,
                 LastKnownReleaseTag = _lastKnownReleaseTag,

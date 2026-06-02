@@ -254,7 +254,11 @@ namespace DepotDL.GUI.ViewModels
                 Depots = new ObservableCollection<DepotSelectionItem>(
                     depots.Select(d => new DepotSelectionItem(d)));
 
-                ApplySmartOsFilter();
+                var settings2 = _settings.Load();
+                if (settings2.AutoSelectOsByOs)
+                    ApplySmartOsFilter(Depots);
+
+                _ = EnrichDepotsOsAsync(appId, Depots.ToList());
 
                 LuaLoaded = true;
 
@@ -308,25 +312,49 @@ namespace DepotDL.GUI.ViewModels
             UpdateCanStart();
         }
 
-        private void ApplySmartOsFilter()
+        private static void ApplySmartOsFilter(IEnumerable<DepotSelectionItem> items)
         {
             string currentOs = OperatingSystem.IsWindows() ? "windows"
                              : OperatingSystem.IsLinux()   ? "linux"
                              : OperatingSystem.IsMacOS()   ? "macos"
                              : string.Empty;
 
-            foreach (var item in Depots)
+            foreach (var item in items)
             {
-                var osList = item.Depot.OsList;
-                if (string.IsNullOrWhiteSpace(osList))
+                if (string.IsNullOrWhiteSpace(item.OsList))
                     continue;
 
-                var tags = osList.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+                var tags = item.OsList.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
                 bool hasCurrentOs = !string.IsNullOrEmpty(currentOs) &&
                                     tags.Any(t => t.Equals(currentOs, StringComparison.OrdinalIgnoreCase));
                 if (!hasCurrentOs)
                     item.IsSelected = false;
             }
+        }
+
+        private async Task EnrichDepotsOsAsync(string appId, List<DepotSelectionItem> items)
+        {
+            try
+            {
+                var meta = await SteamMetadataService.GetDepotMetaAsync(appId);
+                if (meta.Count == 0) return;
+
+                await Application.Current.Dispatcher.InvokeAsync(() =>
+                {
+                    var settings = _settings.Load();
+                    foreach (var item in items)
+                    {
+                        if (!meta.TryGetValue(item.DepotId, out var m)) continue;
+                        if (string.IsNullOrWhiteSpace(item.Depot.Name)) item.Depot.Name = m.Name;
+                        item.OsList = m.OsList;
+                        item.OsArch = m.OsArch;
+                    }
+                    if (settings.AutoSelectOsByOs)
+                        ApplySmartOsFilter(items);
+                    UpdateCanStart();
+                });
+            }
+            catch { }
         }
 
         private void UpdateCanStart()
@@ -521,20 +549,31 @@ namespace DepotDL.GUI.ViewModels
     {
         public DepotInfo Depot { get; }
         [ObservableProperty] private bool _isSelected = true;
+        [ObservableProperty] private string _osList = string.Empty;
+        [ObservableProperty] private string _osArch = string.Empty;
 
         public string DisplayName => Depot.DisplayName;
         public string DepotId => Depot.DepotId;
+
         public string OsText
         {
             get
             {
-                if (string.IsNullOrWhiteSpace(Depot.OsList) && string.IsNullOrWhiteSpace(Depot.OsArch))
+                if (string.IsNullOrWhiteSpace(OsList) && string.IsNullOrWhiteSpace(OsArch))
                     return string.Empty;
-                var os = string.IsNullOrWhiteSpace(Depot.OsList) ? "any" : Depot.OsList.Replace(",", "/");
-                return string.IsNullOrWhiteSpace(Depot.OsArch) ? os : $"{os} {Depot.OsArch}";
+                var os = string.IsNullOrWhiteSpace(OsList) ? "any" : OsList.Replace(",", "/");
+                return string.IsNullOrWhiteSpace(OsArch) ? os : $"{os} {OsArch}";
             }
         }
 
-        public DepotSelectionItem(DepotInfo depot) => Depot = depot;
+        partial void OnOsListChanged(string value) => OnPropertyChanged(nameof(OsText));
+        partial void OnOsArchChanged(string value) => OnPropertyChanged(nameof(OsText));
+
+        public DepotSelectionItem(DepotInfo depot)
+        {
+            Depot = depot;
+            _osList = depot.OsList;
+            _osArch = depot.OsArch;
+        }
     }
 }
