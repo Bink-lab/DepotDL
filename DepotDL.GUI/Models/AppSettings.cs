@@ -6,5 +6,11 @@ namespace DepotDL.GUI.Models
         public string? DownloadBaseDir { get; set; }
         public string? RyuuApiKey { get; set; }
         public int MaxParallelDepots { get; set; } = 2;
+        public int StoreCacheHours { get; set; } = 24;
+        public int GpuCacheDays { get; set; } = 7;
+        public int StorePageSize { get; set; } = 48;
+        public int SearchDebounceMs { get; set; } = 250;
+        public double ScrollSensitivity { get; set; } = 1.5;
+        public int ScrollDurationMs { get; set; } = 230;
     }
 }

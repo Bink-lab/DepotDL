@@ -14,6 +14,12 @@ namespace DepotDL.GUI.ViewModels
         [ObservableProperty] private string _downloadBaseDir = string.Empty;
         [ObservableProperty] private string _ryuuApiKey = string.Empty;
         [ObservableProperty] private int _maxParallelDepots = 2;
+        [ObservableProperty] private int _storeCacheHours = 24;
+        [ObservableProperty] private int _gpuCacheDays = 7;
+        [ObservableProperty] private int _storePageSize = 48;
+        [ObservableProperty] private int _searchDebounceMs = 250;
+        [ObservableProperty] private double _scrollSensitivity = 1.5;
+        [ObservableProperty] private int _scrollDurationMs = 230;
         [ObservableProperty] private bool _saveSuccess;
 
         public void Load()
@@ -23,6 +29,12 @@ namespace DepotDL.GUI.ViewModels
             DownloadBaseDir = s.DownloadBaseDir ?? string.Empty;
             RyuuApiKey = s.RyuuApiKey ?? string.Empty;
             MaxParallelDepots = s.MaxParallelDepots;
+            StoreCacheHours = s.StoreCacheHours;
+            GpuCacheDays = s.GpuCacheDays;
+            StorePageSize = s.StorePageSize;
+            SearchDebounceMs = s.SearchDebounceMs;
+            ScrollSensitivity = s.ScrollSensitivity;
+            ScrollDurationMs = s.ScrollDurationMs;
         }
 
         [RelayCommand]
@@ -57,8 +69,16 @@ namespace DepotDL.GUI.ViewModels
                 ManifestsDir = string.IsNullOrWhiteSpace(ManifestsDir) ? null : ManifestsDir,
                 DownloadBaseDir = string.IsNullOrWhiteSpace(DownloadBaseDir) ? null : DownloadBaseDir,
                 RyuuApiKey = string.IsNullOrWhiteSpace(RyuuApiKey) ? null : RyuuApiKey,
-                MaxParallelDepots = MaxParallelDepots
+                MaxParallelDepots = MaxParallelDepots,
+                StoreCacheHours = StoreCacheHours,
+                GpuCacheDays = GpuCacheDays,
+                StorePageSize = StorePageSize,
+                SearchDebounceMs = SearchDebounceMs,
+                ScrollSensitivity = ScrollSensitivity,
+                ScrollDurationMs = ScrollDurationMs
             });
+
+            DepotDL.GUI.Helpers.SmoothScroll.ResetCache();
             SaveSuccess = true;
 
             System.Windows.Threading.DispatcherTimer timer = new()

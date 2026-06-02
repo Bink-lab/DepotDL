@@ -3,11 +3,29 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media.Animation;
+using DepotDL.GUI.Models;
+using DepotDL.GUI.Services;
 
 namespace DepotDL.GUI.Helpers
 {
     public static class SmoothScroll
     {
+        private static AppSettings? _cachedSettings;
+
+        private static AppSettings GetSettings()
+        {
+            if (_cachedSettings != null) return _cachedSettings;
+            try
+            {
+                return _cachedSettings = new SettingsService().Load();
+            }
+            catch
+            {
+                return new AppSettings();
+            }
+        }
+
+        public static void ResetCache() => _cachedSettings = null;
         // Animatable proxy — ScrollViewer.VerticalOffset is read-only, so we drive
         // ScrollToVerticalOffset through this attached property instead.
         public static readonly DependencyProperty VerticalOffsetProperty =
@@ -48,15 +66,15 @@ namespace DepotDL.GUI.Helpers
         {
             var sv = (ScrollViewer)sender;
 
-            // Don't intercept if there's nothing to scroll (e.g. TextBox PART_ContentHost).
             if (sv.ScrollableHeight <= 0) return;
 
             double current = sv.VerticalOffset;
+            var s = GetSettings();
             double target = Math.Clamp(
-                current - e.Delta * 0.5,
+                current - e.Delta * s.ScrollSensitivity,
                 0, sv.ScrollableHeight);
 
-            var anim = new DoubleAnimation(current, target, TimeSpan.FromMilliseconds(320))
+            var anim = new DoubleAnimation(current, target, TimeSpan.FromMilliseconds(s.ScrollDurationMs))
             {
                 EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut }
             };

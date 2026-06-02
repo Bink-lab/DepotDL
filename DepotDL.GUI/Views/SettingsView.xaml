@@ -13,6 +13,10 @@
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="20"/>
                 <RowDefinition Height="Auto"/>
+                <RowDefinition Height="20"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="20"/>
+                <RowDefinition Height="Auto"/>
                 <RowDefinition Height="24"/>
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
@@ -122,7 +126,223 @@
                 </StackPanel>
             </Border>
 
-            <Grid Grid.Row="8">
+            <!-- Store & Cache Settings -->
+            <Border Grid.Row="8" Style="{StaticResource Card}" Padding="20">
+                <StackPanel>
+                    <TextBlock Text="STORE &amp; CACHE" Style="{StaticResource TextLabel}" Margin="0,0,0,16"/>
+
+                    <!-- Store Page Size -->
+                    <Grid Margin="0,0,0,16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="200"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                            <TextBlock Text="Store Page Size"
+                                       Style="{StaticResource TextH3}" Margin="0,0,0,4"/>
+                            <TextBlock Text="Number of game cards displayed per page (12–120)."
+                                       Style="{StaticResource BodyText}"/>
+                        </StackPanel>
+                        <Border Grid.Column="1" Style="{StaticResource CardSmall}"
+                                Padding="16,12" VerticalAlignment="Center">
+                            <StackPanel>
+                                <Grid Margin="0,0,0,8">
+                                    <TextBlock Text="Games"
+                                               FontSize="11" Foreground="{StaticResource TextMuted}"/>
+                                    <TextBlock HorizontalAlignment="Right"
+                                               Text="{Binding StorePageSize}"
+                                               FontSize="16" FontWeight="Bold"
+                                               Foreground="{StaticResource Accent}"/>
+                                </Grid>
+                                <Slider Minimum="12" Maximum="120"
+                                        TickFrequency="6"
+                                        IsSnapToTickEnabled="True"
+                                        Value="{Binding StorePageSize}"/>
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+
+                    <Separator Margin="0,12"/>
+
+                    <!-- Search Debounce -->
+                    <Grid Margin="0,12,0,16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="200"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                            <TextBlock Text="Search Debounce Delay"
+                                       Style="{StaticResource TextH3}" Margin="0,0,0,4"/>
+                            <TextBlock Text="Delay after typing before searching begins (0–2000ms)."
+                                       Style="{StaticResource BodyText}"/>
+                        </StackPanel>
+                        <Border Grid.Column="1" Style="{StaticResource CardSmall}"
+                                Padding="16,12" VerticalAlignment="Center">
+                            <StackPanel>
+                                <Grid Margin="0,0,0,8">
+                                    <TextBlock Text="Delay"
+                                               FontSize="11" Foreground="{StaticResource TextMuted}"/>
+                                    <TextBlock HorizontalAlignment="Right"
+                                               FontSize="16" FontWeight="Bold"
+                                               Foreground="{StaticResource Accent}">
+                                        <Run Text="{Binding SearchDebounceMs}"/>
+                                        <Run Text=" ms" FontSize="11" Foreground="{StaticResource TextMuted}"/>
+                                    </TextBlock>
+                                </Grid>
+                                <Slider Minimum="0" Maximum="2000"
+                                        TickFrequency="50"
+                                        IsSnapToTickEnabled="True"
+                                        Value="{Binding SearchDebounceMs}"/>
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+
+                    <Separator Margin="0,12"/>
+
+                    <!-- Store Cache Hours -->
+                    <Grid Margin="0,12,0,16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="200"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                            <TextBlock Text="Store Cache Lifetime"
+                                       Style="{StaticResource TextH3}" Margin="0,0,0,4"/>
+                            <TextBlock Text="Hours to cache store data locally before re-fetching (1–168h)."
+                                       Style="{StaticResource BodyText}"/>
+                        </StackPanel>
+                        <Border Grid.Column="1" Style="{StaticResource CardSmall}"
+                                Padding="16,12" VerticalAlignment="Center">
+                            <StackPanel>
+                                <Grid Margin="0,0,0,8">
+                                    <TextBlock Text="Lifetime"
+                                               FontSize="11" Foreground="{StaticResource TextMuted}"/>
+                                    <TextBlock HorizontalAlignment="Right"
+                                               FontSize="16" FontWeight="Bold"
+                                               Foreground="{StaticResource Accent}">
+                                        <Run Text="{Binding StoreCacheHours}"/>
+                                        <Run Text=" hours" FontSize="11" Foreground="{StaticResource TextMuted}"/>
+                                    </TextBlock>
+                                </Grid>
+                                <Slider Minimum="1" Maximum="168"
+                                        TickFrequency="1"
+                                        IsSnapToTickEnabled="True"
+                                        Value="{Binding StoreCacheHours}"/>
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+
+                    <Separator Margin="0,12"/>
+
+                    <!-- GPU Cache Days -->
+                    <Grid Margin="0,12,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="200"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                            <TextBlock Text="GPU Specs Cache Lifetime"
+                                       Style="{StaticResource TextH3}" Margin="0,0,0,4"/>
+                            <TextBlock Text="Days to cache GPU benchmark details locally (1–30d)."
+                                       Style="{StaticResource BodyText}"/>
+                        </StackPanel>
+                        <Border Grid.Column="1" Style="{StaticResource CardSmall}"
+                                Padding="16,12" VerticalAlignment="Center">
+                            <StackPanel>
+                                <Grid Margin="0,0,0,8">
+                                    <TextBlock Text="Lifetime"
+                                               FontSize="11" Foreground="{StaticResource TextMuted}"/>
+                                    <TextBlock HorizontalAlignment="Right"
+                                               FontSize="16" FontWeight="Bold"
+                                               Foreground="{StaticResource Accent}">
+                                        <Run Text="{Binding GpuCacheDays}"/>
+                                        <Run Text=" days" FontSize="11" Foreground="{StaticResource TextMuted}"/>
+                                    </TextBlock>
+                                </Grid>
+                                <Slider Minimum="1" Maximum="30"
+                                        TickFrequency="1"
+                                        IsSnapToTickEnabled="True"
+                                        Value="{Binding GpuCacheDays}"/>
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <!-- Smooth Scrolling Settings -->
+            <Border Grid.Row="10" Style="{StaticResource Card}" Padding="20">
+                <StackPanel>
+                    <TextBlock Text="SMOOTH SCROLLING" Style="{StaticResource TextLabel}" Margin="0,0,0,16"/>
+
+                    <!-- Scroll Sensitivity -->
+                    <Grid Margin="0,0,0,16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="200"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                            <TextBlock Text="Scroll Sensitivity"
+                                       Style="{StaticResource TextH3}" Margin="0,0,0,4"/>
+                            <TextBlock Text="Multiplier applied to mouse wheel ticks (0.1–5.0)."
+                                       Style="{StaticResource BodyText}"/>
+                        </StackPanel>
+                        <Border Grid.Column="1" Style="{StaticResource CardSmall}"
+                                Padding="16,12" VerticalAlignment="Center">
+                            <StackPanel>
+                                <Grid Margin="0,0,0,8">
+                                    <TextBlock Text="Sensitivity"
+                                               FontSize="11" Foreground="{StaticResource TextMuted}"/>
+                                    <TextBlock HorizontalAlignment="Right"
+                                               Text="{Binding ScrollSensitivity, StringFormat={}{0:F1}}"
+                                               FontSize="16" FontWeight="Bold"
+                                               Foreground="{StaticResource Accent}"/>
+                                </Grid>
+                                <Slider Minimum="0.1" Maximum="5.0"
+                                        TickFrequency="0.1"
+                                        IsSnapToTickEnabled="True"
+                                        Value="{Binding ScrollSensitivity}"/>
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+
+                    <Separator Margin="0,12"/>
+
+                    <!-- Scroll Duration -->
+                    <Grid Margin="0,12,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="200"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                            <TextBlock Text="Scroll Duration"
+                                       Style="{StaticResource TextH3}" Margin="0,0,0,4"/>
+                            <TextBlock Text="Duration of the scrolling slide animation (50–1000ms)."
+                                       Style="{StaticResource BodyText}"/>
+                        </StackPanel>
+                        <Border Grid.Column="1" Style="{StaticResource CardSmall}"
+                                Padding="16,12" VerticalAlignment="Center">
+                            <StackPanel>
+                                <Grid Margin="0,0,0,8">
+                                    <TextBlock Text="Duration"
+                                               FontSize="11" Foreground="{StaticResource TextMuted}"/>
+                                    <TextBlock HorizontalAlignment="Right"
+                                               FontSize="16" FontWeight="Bold"
+                                               Foreground="{StaticResource Accent}">
+                                        <Run Text="{Binding ScrollDurationMs}"/>
+                                        <Run Text=" ms" FontSize="11" Foreground="{StaticResource TextMuted}"/>
+                                    </TextBlock>
+                                </Grid>
+                                <Slider Minimum="50" Maximum="1000"
+                                        TickFrequency="25"
+                                        IsSnapToTickEnabled="True"
+                                        Value="{Binding ScrollDurationMs}"/>
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <Grid Grid.Row="12">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
