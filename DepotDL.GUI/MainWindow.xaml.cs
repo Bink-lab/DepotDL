@@ -1,3 +1,4 @@
+using System.Threading;
 using System.Windows;
 using System.Windows.Input;
 using DepotDL.GUI.ViewModels;
@@ -8,12 +9,15 @@ namespace DepotDL.GUI
     {
         private bool _isDragging;
         private System.Windows.Point _dragStart;
+        private readonly CancellationTokenSource _cts = new();
 
         public MainWindow()
         {
             InitializeComponent();
             DataContext = new MainViewModel();
             Loaded += MainWindow_Loaded;
+            Closing += (_, _) => _cts.Cancel();
+            SizeChanged += (_, _) => UpdateContentClip();
         }
 
         private void TitleBar_MouseDown(object sender, MouseButtonEventArgs e)
@@ -75,7 +79,14 @@ namespace DepotDL.GUI
 
         private async void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
+            UpdateContentClip();
             await RunSplashscreenAsync();
+        }
+
+        private void UpdateContentClip()
+        {
+            ContentGrid.Clip = new System.Windows.Media.RectangleGeometry(
+                new Rect(0, 0, ContentGrid.ActualWidth, ContentGrid.ActualHeight), 14, 14);
         }
 
         private async System.Threading.Tasks.Task RunSplashscreenAsync()
@@ -89,7 +100,7 @@ namespace DepotDL.GUI
                 SplashStatus.Text = update.status;
             });
 
-            await vm.InitializeAsync(progress);
+            await vm.InitializeAsync(progress, _cts.Token);
             await System.Threading.Tasks.Task.Delay(1000);
 
             var sb = new System.Windows.Media.Animation.Storyboard();

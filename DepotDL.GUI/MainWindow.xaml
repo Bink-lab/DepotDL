@@ -188,7 +188,7 @@
                 <TranslateTransform Y="30"/>
             </TransformGroup>
         </Border.RenderTransform>
-        <Grid>
+        <Grid x:Name="ContentGrid">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="210"/>
                 <ColumnDefinition Width="*"/>
@@ -568,6 +568,63 @@
                                         Visibility="{Binding DataContext.IsSettingsPage,
                                             RelativeSource={RelativeSource AncestorType=Window},
                                             Converter={StaticResource BoolToVis}}"/>
+
+                    <!-- Update notification banner -->
+                    <Border VerticalAlignment="Bottom" HorizontalAlignment="Left"
+                            Margin="16,0,0,16" Panel.ZIndex="6" CornerRadius="12"
+                            BorderThickness="1" BorderBrush="#DDB060" Background="#FEF3E2"
+                            MaxWidth="380" Padding="14,10"
+                            Visibility="{Binding UpdateAvailable, Converter={StaticResource BoolToVis}}">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="8"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="8"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+
+                            <Viewbox Grid.Column="0" Width="15" Height="15" Margin="0,0,10,0">
+                                <Canvas Width="24" Height="24">
+                                    <Path Data="M12,2 L22,20 L2,20 Z"
+                                          Stroke="#C07012" StrokeThickness="1.8" Fill="Transparent"
+                                          StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
+                                    <Line X1="12" Y1="9" X2="12" Y2="14"
+                                          Stroke="#C07012" StrokeThickness="1.8"
+                                          StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
+                                    <Ellipse Canvas.Left="11" Canvas.Top="16" Width="2" Height="2"
+                                             Fill="#C07012"/>
+                                </Canvas>
+                            </Viewbox>
+
+                            <TextBlock Grid.Column="1"
+                                       Text="{Binding UpdateBannerText}"
+                                       FontSize="12.5" Foreground="#7A5500"
+                                       VerticalAlignment="Center"
+                                       TextTrimming="CharacterEllipsis"/>
+
+                            <Button Grid.Column="3"
+                                    Command="{Binding OpenUpdateUrlCommand}"
+                                    Background="Transparent" BorderThickness="0"
+                                    Cursor="Hand" Padding="0">
+                                <TextBlock Text="View release" FontSize="12"
+                                           Foreground="#1A73E8"
+                                           TextDecorations="Underline"
+                                           VerticalAlignment="Center"/>
+                            </Button>
+
+                            <Button Grid.Column="5"
+                                    Command="{Binding DismissUpdateCommand}"
+                                    Background="Transparent" BorderThickness="0"
+                                    Cursor="Hand" Padding="2,0" VerticalAlignment="Center">
+                                <Path Data="M1,1 L7,7 M7,1 L1,7"
+                                      Width="8" Height="8" Stretch="Uniform"
+                                      Stroke="#9C8E82" StrokeThickness="1.5"
+                                      StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
+                            </Button>
+                        </Grid>
+                    </Border>
 
                     <!-- Floating download widget -->
                     <Border HorizontalAlignment="Right"

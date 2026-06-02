@@ -73,6 +73,39 @@ namespace DepotDL.CLI
                     return 1;
                 }
 
+                // Check for updates before entering TUI
+                {
+                    var tempSession = new TuiSession();
+                    IniSettings.LoadInto(tempSession);
+                    string? currentSha = UpdateChecker.GetCurrentSha();
+                    UpdateInfo? updateInfo = null;
+
+                    if (UpdateChecker.ShouldCheck(tempSession))
+                    {
+                        updateInfo = UpdateChecker.Check(currentSha, tempSession.UpdateChannel);
+                        UpdateChecker.RecordCheck(tempSession, updateInfo);
+                        IniSettings.Save(tempSession);
+                    }
+                    else if (!string.IsNullOrEmpty(tempSession.LastKnownReleaseTag) &&
+                             UpdateChecker.IsUpdateAvailableFromCache(tempSession))
+                    {
+                        updateInfo = new UpdateInfo
+                        {
+                            UpdateAvailable = true,
+                            LatestTag       = tempSession.LastKnownReleaseTag,
+                            HtmlUrl         = UpdateChecker.BuildReleaseUrl(tempSession.LastKnownReleaseTag)
+                        };
+                    }
+
+                    if (updateInfo?.UpdateAvailable == true &&
+                        tempSession.LastKnownReleaseTag != tempSession.DismissedUpdateTag)
+                    {
+                        PrintUpdateBanner(updateInfo);
+                        tempSession.DismissedUpdateTag = tempSession.LastKnownReleaseTag;
+                        IniSettings.Save(tempSession);
+                    }
+                }
+
                 return TuiDashboard.RunInteractiveTui(ddmodPath, dotnetPath);
             }
 
@@ -237,7 +270,7 @@ namespace DepotDL.CLI
 
                 if (string.IsNullOrEmpty(outputPath))
                 {
-                    outputPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "downloads", $"App_{appId}");
+                    outputPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "downloads", $"{appId}");
                 }
                 outputPath = Path.GetFullPath(outputPath);
 
@@ -700,7 +733,7 @@ namespace DepotDL.CLI
                 try
                 {
                     string gameName = Path.GetFileNameWithoutExtension(luaPath);
-                    if (string.IsNullOrEmpty(gameName)) gameName = $"App_{appId}";
+                    if (string.IsNullOrEmpty(gameName)) gameName = $"{appId}";
 
                     var depotIdsList = new List<string>();
                     foreach (var depot in depots.Keys)
@@ -765,6 +798,43 @@ namespace DepotDL.CLI
                 }
                 catch { }
             }
+        }
+
+        private static void PrintUpdateBanner(UpdateInfo info)
+        {
+            const int width = 72;
+            int leftPad = TuiDashboard.GetCenterLeftPad(width);
+            string pad = new string(' ', leftPad);
+            string hr = new string('═', width - 2);
+
+            Console.WriteLine();
+            Console.ForegroundColor = ConsoleColor.DarkGray;
+            Console.WriteLine(pad + "╔" + hr + "╗");
+            Console.Write(pad + "║  ");
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.Write(TuiText.Pad("  ★  UPDATE AVAILABLE", width - 4));
+            Console.ForegroundColor = ConsoleColor.DarkGray;
+            Console.WriteLine("  ║");
+            Console.WriteLine(pad + "╠" + hr + "╣");
+            Console.Write(pad + "║  ");
+            Console.ForegroundColor = ConsoleColor.White;
+            Console.Write(TuiText.Pad($"  Latest: {info.LatestTag ?? "unknown"}", width - 4));
+            Console.ForegroundColor = ConsoleColor.DarkGray;
+            Console.WriteLine("  ║");
+            if (!string.IsNullOrEmpty(info.HtmlUrl))
+            {
+                Console.Write(pad + "║  ");
+                Console.ForegroundColor = ConsoleColor.Cyan;
+                Console.Write(TuiText.Pad($"  {info.HtmlUrl}", width - 4));
+                Console.ForegroundColor = ConsoleColor.DarkGray;
+                Console.WriteLine("  ║");
+            }
+            Console.WriteLine(pad + "╚" + hr + "╝");
+            Console.WriteLine();
+            Console.ForegroundColor = ConsoleColor.DarkGray;
+            Console.WriteLine(pad + "  Press any key to continue...");
+            Console.ResetColor();
+            Console.ReadKey(true);
         }
 
         private static void WriteColored(string text, ConsoleColor color)

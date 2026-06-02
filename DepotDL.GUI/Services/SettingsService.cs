@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using DepotDL.GUI.Models;
 
@@ -49,6 +50,17 @@ namespace DepotDL.GUI.Services
                 s.ScrollDurationMs = Math.Clamp(sdms, 50, 1000);
             else s.ScrollDurationMs = 230;
 
+            var channelStr = Get(values, "settings.update_channel");
+            s.UpdateChannel = string.Equals(channelStr, "production", StringComparison.OrdinalIgnoreCase)
+                ? UpdateChannel.Production
+                : UpdateChannel.Nightly;
+
+            if (DateTime.TryParse(Get(values, "settings.last_update_check"), CultureInfo.InvariantCulture,
+                    DateTimeStyles.RoundtripKind, out var luc))
+                s.LastUpdateCheckUtc = luc;
+
+            s.LastKnownReleaseTag = Get(values, "settings.last_known_release_tag");
+
             return s;
         }
 
@@ -74,6 +86,9 @@ namespace DepotDL.GUI.Services
             w.WriteLine($"search_debounce_ms={s.SearchDebounceMs}");
             w.WriteLine($"scroll_sensitivity={s.ScrollSensitivity}");
             w.WriteLine($"scroll_duration_ms={s.ScrollDurationMs}");
+            w.WriteLine($"update_channel={Escape(s.UpdateChannel == UpdateChannel.Production ? "production" : "nightly")}");
+            w.WriteLine($"last_update_check={Escape(s.LastUpdateCheckUtc?.ToString("O") ?? "")}");
+            w.WriteLine($"last_known_release_tag={Escape(s.LastKnownReleaseTag ?? "")}");
         }
 
         private static Dictionary<string, string> ParseIni(string path)

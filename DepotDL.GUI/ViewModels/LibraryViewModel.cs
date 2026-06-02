@@ -30,8 +30,6 @@ namespace DepotDL.GUI.ViewModels
 
         private CancellationTokenSource? _imageCts;
 
-        public void Load() => LoadAsync().GetAwaiter().GetResult();
-
         public async Task LoadAsync()
         {
             var raw = await Task.Run(() =>

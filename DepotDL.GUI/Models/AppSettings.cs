@@ -1,5 +1,9 @@
+using System;
+
 namespace DepotDL.GUI.Models
 {
+    public enum UpdateChannel { Nightly, Production }
+
     public class AppSettings
     {
         public string? ManifestsDir { get; set; }
@@ -14,5 +18,8 @@ namespace DepotDL.GUI.Models
         public double ScrollSensitivity { get; set; } = 1.5;
         public int ScrollDurationMs { get; set; } = 230;
         public bool SmartOsFilter { get; set; } = false;
+        public UpdateChannel UpdateChannel       { get; set; } = UpdateChannel.Nightly;
+        public DateTime?     LastUpdateCheckUtc  { get; set; }
+        public string?       LastKnownReleaseTag { get; set; }
     }
 }

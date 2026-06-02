@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using System.IO;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -23,6 +24,37 @@ namespace DepotDL.GUI.ViewModels
         [ObservableProperty] private int _scrollDurationMs = 230;
         [ObservableProperty] private bool _smartOsFilter;
         [ObservableProperty] private bool _saveSuccess;
+        [ObservableProperty] private UpdateChannel _updateChannel = UpdateChannel.Nightly;
+
+        private DateTime? _lastUpdateCheckUtc;
+        private string?   _lastKnownReleaseTag;
+
+        public bool IsNightly
+        {
+            get => UpdateChannel == UpdateChannel.Nightly;
+            set { if (value) UpdateChannel = UpdateChannel.Nightly; }
+        }
+
+        public bool IsProduction
+        {
+            get => UpdateChannel == UpdateChannel.Production;
+            set { if (value) UpdateChannel = UpdateChannel.Production; }
+        }
+
+        partial void OnUpdateChannelChanged(UpdateChannel value)
+        {
+            OnPropertyChanged(nameof(IsNightly));
+            OnPropertyChanged(nameof(IsProduction));
+        }
+
+        public string CurrentVersion
+        {
+            get
+            {
+                var sha = UpdateCheckerService.GetCurrentSha();
+                return string.IsNullOrEmpty(sha) ? "dev build" : sha;
+            }
+        }
 
         public void Load()
         {
@@ -39,6 +71,9 @@ namespace DepotDL.GUI.ViewModels
             ScrollSensitivity = s.ScrollSensitivity;
             ScrollDurationMs = s.ScrollDurationMs;
             SmartOsFilter = s.SmartOsFilter;
+            UpdateChannel = s.UpdateChannel;
+            _lastUpdateCheckUtc  = s.LastUpdateCheckUtc;
+            _lastKnownReleaseTag = s.LastKnownReleaseTag;
         }
 
         [RelayCommand]
@@ -81,7 +116,10 @@ namespace DepotDL.GUI.ViewModels
                 SearchDebounceMs = SearchDebounceMs,
                 ScrollSensitivity = ScrollSensitivity,
                 ScrollDurationMs = ScrollDurationMs,
-                SmartOsFilter = SmartOsFilter
+                SmartOsFilter = SmartOsFilter,
+                UpdateChannel = UpdateChannel,
+                LastUpdateCheckUtc  = _lastUpdateCheckUtc,
+                LastKnownReleaseTag = _lastKnownReleaseTag,
             });
 
             DepotDL.GUI.Helpers.SmoothScroll.ResetCache();

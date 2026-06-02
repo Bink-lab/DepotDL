@@ -74,6 +74,9 @@ namespace DepotDL.CLI
                     ("Library Index:", libraryStats, missingCount > 0 ? ConsoleColor.Yellow : ConsoleColor.Green)
                 };
 
+                if (UpdateChecker.IsUpdateAvailableFromCache(session))
+                    rightStats.Add(("Update:", "Available ↑", ConsoleColor.Yellow));
+
                 using (CenterConsoleOutput(82))
                 {
                 Console.ForegroundColor = ConsoleColor.DarkGray;
@@ -1805,7 +1808,7 @@ namespace DepotDL.CLI
             session.SelectedDepots = LibraryManager.FilterDownloadableDepots(session.AllDepots, appId);
 
             string gameName = Path.GetFileNameWithoutExtension(session.LuaPath);
-            if (string.IsNullOrEmpty(gameName)) gameName = $"App_{appId}";
+            if (string.IsNullOrEmpty(gameName)) gameName = $"{appId}";
 
             session.OutputDir = BuildOutputDir(session, gameName);
         }
@@ -2362,6 +2365,7 @@ namespace DepotDL.CLI
                 string maskedHubcapKey = string.IsNullOrEmpty(session.HubcapApiKey)
                     ? "[Not Configured]"
                     : new string('*', Math.Min(12, session.HubcapApiKey.Length));
+                string updateChannelStr = session.UpdateChannel == UpdateChannel.Production ? "Production" : "Nightly";
 
                 var menuItems = new List<string>
                 {
@@ -2370,7 +2374,8 @@ namespace DepotDL.CLI
                     $"3. Download Base Folder         : {TuiText.ShortenTail(outputDirStr, 40)}",
                     $"4. Ryuu API Key                 : {maskedRyuuKey}",
                     $"5. Hubcap API Key               : {maskedHubcapKey}",
-                    "6. Back"
+                    $"6. Update Channel               : {updateChannelStr}",
+                    "7. Back"
                 };
 
                 using (CenterConsoleOutput(80))
@@ -2401,6 +2406,7 @@ namespace DepotDL.CLI
                     DrawSettingRow("Download Base Path:", TuiText.ShortenTail(outputDirStr, 44), ConsoleColor.White);
                     DrawSettingRow("Ryuu API Key:", maskedRyuuKey, string.IsNullOrEmpty(session.RyuuApiKey) ? ConsoleColor.Yellow : ConsoleColor.Green);
                     DrawSettingRow("Hubcap API Key:", maskedHubcapKey, string.IsNullOrEmpty(session.HubcapApiKey) ? ConsoleColor.Yellow : ConsoleColor.Green);
+                    DrawSettingRow("Update Channel:", updateChannelStr, ConsoleColor.Cyan);
 
                     Console.ForegroundColor = ConsoleColor.DarkGray;
                     Console.WriteLine("╚══════════════════════════════════════════════════════════════════════════════╝");
@@ -2484,6 +2490,13 @@ namespace DepotDL.CLI
                         }
                     }
                     else if (selectedIndex == 5)
+                    {
+                        session.UpdateChannel = session.UpdateChannel == UpdateChannel.Production
+                            ? UpdateChannel.Nightly
+                            : UpdateChannel.Production;
+                        SaveSession(session);
+                    }
+                    else if (selectedIndex == 6)
                     {
                         SaveSession(session);
                         return;

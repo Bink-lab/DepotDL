@@ -25,5 +25,9 @@ namespace DepotDL.CLI
         public int MaxParallelDepots { get; set; } = 2;
         public List<DepotInfo> AllDepots { get; set; } = new();
         public List<DepotInfo> SelectedDepots { get; set; } = new();
+        public DateTime?     LastUpdateCheckUtc  { get; set; }
+        public string?       LastKnownReleaseTag { get; set; }
+        public string?       DismissedUpdateTag  { get; set; }
+        public UpdateChannel UpdateChannel       { get; set; } = UpdateChannel.Nightly;
     }
 }

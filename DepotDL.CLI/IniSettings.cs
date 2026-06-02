@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 
 namespace DepotDL.CLI
@@ -31,6 +32,19 @@ namespace DepotDL.CLI
             {
                 session.MaxParallelDepots = Math.Clamp(maxParallel, 1, 8);
             }
+
+            if (DateTime.TryParse(Get(values, "settings.last_update_check"), CultureInfo.InvariantCulture,
+                    DateTimeStyles.RoundtripKind, out var lastCheck))
+                session.LastUpdateCheckUtc = lastCheck;
+
+            session.LastKnownReleaseTag = Get(values, "settings.last_known_release_tag");
+            session.DismissedUpdateTag  = Get(values, "settings.dismissed_update_tag");
+
+            var channelStr = Get(values, "settings.update_channel");
+            if (string.Equals(channelStr, "production", StringComparison.OrdinalIgnoreCase))
+                session.UpdateChannel = UpdateChannel.Production;
+            else
+                session.UpdateChannel = UpdateChannel.Nightly;
         }
 
         public static void Save(TuiSession session)
@@ -49,6 +63,10 @@ namespace DepotDL.CLI
             writer.WriteLine();
             writer.WriteLine("[settings]");
             WriteValue(writer, "max_parallel_depots", session.MaxParallelDepots.ToString());
+            WriteValue(writer, "last_update_check", session.LastUpdateCheckUtc?.ToString("O") ?? string.Empty);
+            WriteValue(writer, "last_known_release_tag", session.LastKnownReleaseTag ?? string.Empty);
+            WriteValue(writer, "dismissed_update_tag", session.DismissedUpdateTag ?? string.Empty);
+            WriteValue(writer, "update_channel", session.UpdateChannel == UpdateChannel.Production ? "production" : "nightly");
         }
 
         private static Dictionary<string, string> Load()
