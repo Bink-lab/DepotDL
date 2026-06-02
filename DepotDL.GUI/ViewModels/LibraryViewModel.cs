@@ -66,7 +66,7 @@ namespace DepotDL.GUI.ViewModels
                 if (match) { visibleCount++; totalBytes += g.Game.TotalSizeBytes; }
             }
             IsEmpty = visibleCount == 0;
-            GameCount = Games.Count;
+            GameCount = visibleCount;
             TotalSizeText = LibraryService.FormatSize(totalBytes);
         }
 

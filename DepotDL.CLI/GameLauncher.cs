@@ -292,61 +292,101 @@ namespace DepotDL.CLI
 
             if (File.Exists(steamlessExe))
             {
-                try
+                if (!System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.Windows))
                 {
-                    var exeFiles = Directory.GetFiles(gameDir, "*.exe", SearchOption.AllDirectories);
-                    foreach (var exe in exeFiles)
-                    {
-                        string nameLower = Path.GetFileName(exe).ToLowerInvariant();
-                        if (nameLower.EndsWith(".unpacked.exe", StringComparison.OrdinalIgnoreCase))
-                            continue;
-
-                        bool skip = false;
-                        foreach (var pattern in ExeSkipPatterns)
-                        {
-                            if (nameLower.Contains(pattern)) { skip = true; break; }
-                        }
-                        if (skip) continue;
-
-                        string unpackedPath1 = Path.Combine(Path.GetDirectoryName(exe)!, Path.GetFileNameWithoutExtension(exe) + ".unpacked.exe");
-                        string unpackedPath2 = exe + ".unpacked.exe";
-
-                        if (File.Exists(unpackedPath1)) File.Delete(unpackedPath1);
-                        if (File.Exists(unpackedPath2)) File.Delete(unpackedPath2);
-
-                        var startInfo = new ProcessStartInfo
-                        {
-                            FileName = steamlessExe,
-                            Arguments = $"--quiet --exp \"{exe}\"",
-                            WorkingDirectory = Path.GetDirectoryName(steamlessExe)!,
-                            UseShellExecute = false,
-                            CreateNoWindow = true
-                        };
-                        var proc = Process.Start(startInfo);
-                        proc?.WaitForExit();
-
-                        string? actualUnpacked = null;
-                        if (File.Exists(unpackedPath1)) actualUnpacked = unpackedPath1;
-                        else if (File.Exists(unpackedPath2)) actualUnpacked = unpackedPath2;
-
-                        if (actualUnpacked != null)
-                        {
-                            string backupPath = exe + ".steamstub.bak";
-                            if (!File.Exists(backupPath))
-                            {
-                                File.Copy(exe, backupPath, true);
-                            }
-                            File.Copy(actualUnpacked, exe, true);
-                        }
-
-                        if (File.Exists(unpackedPath1)) File.Delete(unpackedPath1);
-                        if (File.Exists(unpackedPath2)) File.Delete(unpackedPath2);
-                    }
+                    // Steamless is a Windows-only tool; skip on non-Windows platforms
                 }
-                catch (Exception ex)
+                else
                 {
-                    File.WriteAllText(Path.Combine(gameDir, "sff_fix_error.log"), $"SteamStub unpacking error: {ex.Message}");
-                    return false;
+                    try
+                    {
+                        var exeFiles = Directory.GetFiles(gameDir, "*.exe", SearchOption.AllDirectories);
+                        foreach (var exe in exeFiles)
+                        {
+                            string nameLower = Path.GetFileName(exe).ToLowerInvariant();
+                            if (nameLower.EndsWith(".unpacked.exe", StringComparison.OrdinalIgnoreCase))
+                                continue;
+
+                            bool skip = false;
+                            foreach (var pattern in ExeSkipPatterns)
+                            {
+                                if (nameLower.Contains(pattern)) { skip = true; break; }
+                            }
+                            if (skip) continue;
+
+                            string unpackedPath1 = Path.Combine(Path.GetDirectoryName(exe)!, Path.GetFileNameWithoutExtension(exe) + ".unpacked.exe");
+                            string unpackedPath2 = exe + ".unpacked.exe";
+
+                            if (File.Exists(unpackedPath1)) File.Delete(unpackedPath1);
+                            if (File.Exists(unpackedPath2)) File.Delete(unpackedPath2);
+
+                            Process? proc = null;
+                            bool success = false;
+                            try
+                            {
+                                var startInfo = new ProcessStartInfo
+                                {
+                                    FileName = steamlessExe,
+                                    Arguments = $"--quiet --exp \"{exe}\"",
+                                    WorkingDirectory = Path.GetDirectoryName(steamlessExe)!,
+                                    UseShellExecute = false,
+                                    CreateNoWindow = true
+                                };
+                                proc = Process.Start(startInfo);
+                                if (proc != null)
+                                {
+                                    bool exited = proc.WaitForExit(60000); // 60 second timeout
+                                    if (!exited)
+                                    {
+                                        try { proc.Kill(); } catch { }
+                                        File.WriteAllText(Path.Combine(gameDir, "sff_fix_error.log"), $"SteamStub unpacking timed out for {exe}");
+                                    }
+                                    else if (proc.ExitCode == 0)
+                                    {
+                                        success = true;
+                                    }
+                                    else
+                                    {
+                                        File.WriteAllText(Path.Combine(gameDir, "sff_fix_error.log"), $"SteamStub unpacking failed with exit code {proc.ExitCode} for {exe}");
+                                    }
+                                }
+                            }
+                            catch (Exception procEx)
+                            {
+                                File.WriteAllText(Path.Combine(gameDir, "sff_fix_error.log"), $"SteamStub process error: {procEx.Message}");
+                            }
+                            finally
+                            {
+                                proc?.Dispose();
+                            }
+
+                            if (success)
+                            {
+                                string? actualUnpacked = null;
+                                if (File.Exists(unpackedPath1)) actualUnpacked = unpackedPath1;
+                                else if (File.Exists(unpackedPath2)) actualUnpacked = unpackedPath2;
+
+                                if (actualUnpacked != null)
+                                {
+                                    string backupPath = exe + ".steamstub.bak";
+                                    if (!File.Exists(backupPath))
+                                    {
+                                        File.Copy(exe, backupPath, true);
+                                    }
+                                    File.Copy(actualUnpacked, exe, true);
+                                }
+                            }
+
+                            // Cleanup unpacked files only on success or after timeout/failure
+                            if (File.Exists(unpackedPath1)) try { File.Delete(unpackedPath1); } catch { }
+                            if (File.Exists(unpackedPath2)) try { File.Delete(unpackedPath2); } catch { }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        File.WriteAllText(Path.Combine(gameDir, "sff_fix_error.log"), $"SteamStub unpacking error: {ex.Message}");
+                        return false;
+                    }
                 }
             }
 
@@ -477,44 +517,108 @@ saves_folder_name=GSE Saves";
             }
 
             bool replaced = false;
+            bool isWindows = System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.Windows);
+
             try
             {
-                var dllFiles = Directory.GetFiles(gameDir, "*.dll", SearchOption.AllDirectories);
-                foreach (var dll in dllFiles)
+                if (isWindows)
                 {
-                    string nameLower = Path.GetFileName(dll).ToLowerInvariant();
-                    if (nameLower != "steam_api.dll" && nameLower != "steam_api64.dll")
-                        continue;
-
-                    string backupPath = Path.Combine(Path.GetDirectoryName(dll)!, "OG_" + Path.GetFileName(dll));
-                    if (File.Exists(backupPath))
+                    var dllFiles = Directory.GetFiles(gameDir, "*.dll", SearchOption.AllDirectories);
+                    foreach (var dll in dllFiles)
                     {
-                        GenerateInterfacesFile(backupPath, settingsDir);
+                        string nameLower = Path.GetFileName(dll).ToLowerInvariant();
+                        if (nameLower != "steam_api.dll" && nameLower != "steam_api64.dll")
+                            continue;
+
+                        string backupPath = Path.Combine(Path.GetDirectoryName(dll)!, "OG_" + Path.GetFileName(dll));
+                        if (File.Exists(backupPath))
+                        {
+                            GenerateInterfacesFile(backupPath, settingsDir);
+                        }
+                        else
+                        {
+                            GenerateInterfacesFile(dll, settingsDir);
+                            File.Copy(dll, backupPath, true);
+                        }
+
+                        string sourceDll = Path.Combine(goldbergDir, nameLower);
+                        if (File.Exists(sourceDll))
+                        {
+                            File.Copy(sourceDll, dll, true);
+                            replaced = true;
+                        }
+
+                        if (forceColdClient)
+                        {
+                            string clientName = nameLower == "steam_api.dll" ? "steamclient.dll" : "steamclient64.dll";
+                            string loaderName = nameLower == "steam_api.dll" ? "steamclient_loader_x32.exe" : "steamclient_loader_x64.exe";
+
+                            string sourceClient = Path.Combine(goldbergDir, clientName);
+                            string sourceLoader = Path.Combine(goldbergDir, loaderName);
+
+                            string dllDir = Path.GetDirectoryName(dll)!;
+                            if (File.Exists(sourceClient)) File.Copy(sourceClient, Path.Combine(dllDir, clientName), true);
+                            if (File.Exists(sourceLoader)) File.Copy(sourceLoader, Path.Combine(dllDir, loaderName), true);
+                        }
                     }
-                    else
+                }
+                else
+                {
+                    // Linux: search for libsteam_api.so
+                    var soFiles = Directory.GetFiles(gameDir, "*.so", SearchOption.AllDirectories);
+                    foreach (var so in soFiles)
                     {
-                        GenerateInterfacesFile(dll, settingsDir);
-                        File.Copy(dll, backupPath, true);
-                    }
+                        string nameLower = Path.GetFileName(so).ToLowerInvariant();
+                        if (nameLower != "libsteam_api.so")
+                            continue;
 
-                    string sourceDll = Path.Combine(goldbergDir, nameLower);
-                    if (File.Exists(sourceDll))
-                    {
-                        File.Copy(sourceDll, dll, true);
-                        replaced = true;
-                    }
+                        string backupPath = Path.Combine(Path.GetDirectoryName(so)!, "OG_" + Path.GetFileName(so));
+                        if (File.Exists(backupPath))
+                        {
+                            GenerateInterfacesFile(backupPath, settingsDir);
+                        }
+                        else
+                        {
+                            GenerateInterfacesFile(so, settingsDir);
+                            File.Copy(so, backupPath, true);
+                        }
 
-                    if (forceColdClient)
-                    {
-                        string clientName = nameLower == "steam_api.dll" ? "steamclient.dll" : "steamclient64.dll";
-                        string loaderName = nameLower == "steam_api.dll" ? "steamclient_loader_x32.exe" : "steamclient_loader_x64.exe";
+                        string sourceSo = Path.Combine(goldbergDir, nameLower);
+                        if (File.Exists(sourceSo))
+                        {
+                            File.Copy(sourceSo, so, true);
+                            replaced = true;
+                        }
 
-                        string sourceClient = Path.Combine(goldbergDir, clientName);
-                        string sourceLoader = Path.Combine(goldbergDir, loaderName);
+                        if (forceColdClient)
+                        {
+                            // Linux cold client files (adjust names as needed for Goldberg Linux distribution)
+                            string clientName = "libsteamclient.so";
+                            string loaderName = "steamclient_loader";
 
-                        string dllDir = Path.GetDirectoryName(dll)!;
-                        if (File.Exists(sourceClient)) File.Copy(sourceClient, Path.Combine(dllDir, clientName), true);
-                        if (File.Exists(sourceLoader)) File.Copy(sourceLoader, Path.Combine(dllDir, loaderName), true);
+                            string sourceClient = Path.Combine(goldbergDir, clientName);
+                            string sourceLoader = Path.Combine(goldbergDir, loaderName);
+
+                            string soDir = Path.GetDirectoryName(so)!;
+                            if (File.Exists(sourceClient)) File.Copy(sourceClient, Path.Combine(soDir, clientName), true);
+                            if (File.Exists(sourceLoader))
+                            {
+                                string destLoader = Path.Combine(soDir, loaderName);
+                                File.Copy(sourceLoader, destLoader, true);
+                                try
+                                {
+                                    var chmod = Process.Start(new ProcessStartInfo
+                                    {
+                                        FileName = "chmod",
+                                        Arguments = $"+x \"{destLoader}\"",
+                                        UseShellExecute = false,
+                                        CreateNoWindow = true
+                                    });
+                                    chmod?.WaitForExit();
+                                }
+                                catch { }
+                            }
+                        }
                     }
                 }
             }
@@ -526,7 +630,8 @@ saves_folder_name=GSE Saves";
 
             if (!replaced)
             {
-                File.WriteAllText(Path.Combine(gameDir, "sff_fix_error.log"), "No steam_api DLLs found to replace.");
+                string apiFileType = isWindows ? "steam_api DLLs" : "libsteam_api.so";
+                File.WriteAllText(Path.Combine(gameDir, "sff_fix_error.log"), $"No {apiFileType} found to replace.");
                 return false;
             }
 
@@ -536,10 +641,12 @@ saves_folder_name=GSE Saves";
                 if (!string.IsNullOrEmpty(mainExe))
                 {
                     string exeRel = Path.GetRelativePath(gameDir, mainExe);
+                    bool isWindowsPE = mainExe.EndsWith(".exe", StringComparison.OrdinalIgnoreCase);
+
                     if (forceColdClient)
                     {
                         bool is64 = exeRel.EndsWith("64.exe", StringComparison.OrdinalIgnoreCase) || mainExe.Contains("x64", StringComparison.OrdinalIgnoreCase) || mainExe.Contains("Win64", StringComparison.OrdinalIgnoreCase);
-                        string loader = is64 ? "steamclient_loader_x64.exe" : "steamclient_loader_x32.exe";
+                        string loader = isWindows ? (is64 ? "steamclient_loader_x64.exe" : "steamclient_loader_x32.exe") : "steamclient_loader";
                         var loaders = Directory.GetFiles(gameDir, loader, SearchOption.AllDirectories);
                         if (loaders.Length > 0)
                         {
@@ -551,8 +658,17 @@ saves_folder_name=GSE Saves";
                             }
                             else
                             {
-                                string content = $"#!/bin/sh\ncd \"$(dirname \"$0\")/{Path.GetDirectoryName(loaderRel)}\"\nexec \"./{Path.GetFileName(loaderRel)}\"\n";
-                                File.WriteAllText(launchPath, content);
+                                bool loaderIsWindowsPE = loaderRel.EndsWith(".exe", StringComparison.OrdinalIgnoreCase);
+                                if (loaderIsWindowsPE)
+                                {
+                                    string content = $"#!/bin/sh\ncd \"$(dirname \"$0\")/{Path.GetDirectoryName(loaderRel)}\"\nexec wine \"./{Path.GetFileName(loaderRel)}\" \"$@\"\n";
+                                    File.WriteAllText(launchPath, content);
+                                }
+                                else
+                                {
+                                    string content = $"#!/bin/sh\ncd \"$(dirname \"$0\")/{Path.GetDirectoryName(loaderRel)}\"\nexec \"./{Path.GetFileName(loaderRel)}\" \"$@\"\n";
+                                    File.WriteAllText(launchPath, content);
+                                }
                             }
                         }
                     }
@@ -565,8 +681,16 @@ saves_folder_name=GSE Saves";
                         }
                         else
                         {
-                            string content = $"#!/bin/sh\ncd \"$(dirname \"$0\")\"\nexec \"./{exeRel}\"\n";
-                            File.WriteAllText(launchPath, content);
+                            if (isWindowsPE)
+                            {
+                                string content = $"#!/bin/sh\ncd \"$(dirname \"$0\")\"\nexec wine \"./{exeRel}\" \"$@\"\n";
+                                File.WriteAllText(launchPath, content);
+                            }
+                            else
+                            {
+                                string content = $"#!/bin/sh\ncd \"$(dirname \"$0\")\"\nexec \"./{exeRel}\" \"$@\"\n";
+                                File.WriteAllText(launchPath, content);
+                            }
                         }
                     }
                 }
