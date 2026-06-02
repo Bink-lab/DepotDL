@@ -87,6 +87,7 @@
                 <Setter Property="BorderBrush" Value="#DDD0C2"/>
                 <Setter Property="BorderThickness" Value="1"/>
                 <Setter Property="Padding" Value="4,4"/>
+                <Setter Property="HasDropShadow" Value="False"/>
                 <Setter Property="Template">
                     <Setter.Value>
                         <ControlTemplate TargetType="ContextMenu">
