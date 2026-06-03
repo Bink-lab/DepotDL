@@ -84,30 +84,18 @@ namespace DepotDL.GUI.Helpers
 
             try
             {
-                double startOffset = sv.VerticalOffset;
-                double startTarget = state.TargetOffset;
                 var s = GetSettings();
-                var startTime = DateTime.UtcNow;
 
                 while (true)
                 {
-                    if (state.TargetOffset != startTarget)
-                    {
-                        startOffset = sv.VerticalOffset;
-                        startTarget = state.TargetOffset;
-                        startTime = DateTime.UtcNow;
-                        s = GetSettings();
-                    }
+                    double current = sv.VerticalOffset;
+                    double diff = state.TargetOffset - current;
 
-                    double elapsed = (DateTime.UtcNow - startTime).TotalMilliseconds;
-                    double t = Math.Min(elapsed / s.ScrollDurationMs, 1.0);
-                    double eased = 1 - Math.Pow(1 - t, 3);
-                    double offset = startOffset + (startTarget - startOffset) * eased;
-                    sv.ScrollToVerticalOffset(offset);
-
-                    if (t >= 1.0)
+                    if (Math.Abs(diff) < 0.5)
                         break;
 
+                    double factor = 1 - Math.Pow(0.05, 16.0 / s.ScrollDurationMs);
+                    sv.ScrollToVerticalOffset(current + diff * factor);
                     await System.Threading.Tasks.Task.Delay(16);
                 }
 
