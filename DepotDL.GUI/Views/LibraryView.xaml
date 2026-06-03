@@ -95,9 +95,6 @@
                                     BorderBrush="{TemplateBinding BorderBrush}"
                                     BorderThickness="{TemplateBinding BorderThickness}"
                                     CornerRadius="8">
-                                <Border.Effect>
-                                    <DropShadowEffect BlurRadius="12" ShadowDepth="2" Opacity="0.15" Color="#1C1610"/>
-                                </Border.Effect>
                                 <ItemsPresenter KeyboardNavigation.DirectionalNavigation="Cycle"/>
                             </Border>
                         </ControlTemplate>

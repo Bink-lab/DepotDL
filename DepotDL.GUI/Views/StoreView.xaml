@@ -1002,10 +1002,6 @@
                                             BorderThickness="1"
                                             Padding="4"
                                             MinWidth="170">
-                                        <Border.Effect>
-                                            <DropShadowEffect BlurRadius="18" ShadowDepth="3" Direction="270"
-                                                              Color="#1C1610" Opacity="0.10"/>
-                                        </Border.Effect>
                                         <StackPanel>
                                             <!-- Ryuu option -->
                                             <Button Style="{StaticResource ProviderDropItem}"
