@@ -9,7 +9,7 @@ namespace DepotDL.GUI.Services
     public class LibraryService
     {
         private static readonly string LibraryFilePath = Path.Combine(
-            AppDomain.CurrentDomain.BaseDirectory, "library.json");
+            Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "DepotDL", "library.json");
 
         private static readonly JsonSerializerOptions JsonOpts = new() { WriteIndented = true };
 
@@ -28,6 +28,7 @@ namespace DepotDL.GUI.Services
         {
             try
             {
+                Directory.CreateDirectory(Path.GetDirectoryName(LibraryFilePath)!);
                 File.WriteAllText(LibraryFilePath, JsonSerializer.Serialize(games, JsonOpts));
             }
             catch { }

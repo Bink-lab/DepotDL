@@ -21,7 +21,8 @@ namespace DepotDL.CLI
 
     public static class LibraryManager
     {
-        private static readonly string LibraryFilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "library.json");
+        private static readonly string LibraryFilePath = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "DepotDL", "library.json");
 
         public static List<LibraryGame> LoadLibrary()
         {
@@ -41,6 +42,7 @@ namespace DepotDL.CLI
         {
             try
             {
+                Directory.CreateDirectory(Path.GetDirectoryName(LibraryFilePath)!);
                 var options = new JsonSerializerOptions { WriteIndented = true };
                 string json = JsonSerializer.Serialize(games, options);
                 File.WriteAllText(LibraryFilePath, json);
