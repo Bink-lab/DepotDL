@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
@@ -19,6 +21,7 @@ namespace DepotDL.GUI.Helpers
         {
             public double TargetOffset;
             public bool IsAnimating;
+            public CancellationTokenSource? Cts;
         }
 
         private static AppSettings GetSettings()
@@ -37,6 +40,8 @@ namespace DepotDL.GUI.Helpers
         public static void ResetCache()
         {
             _cachedSettings = null;
+            foreach (var state in _states.Values)
+                state.Cts?.Cancel();
             _states.Clear();
             _fadeCache.Clear();
             _animTop.Clear();
@@ -59,20 +64,36 @@ namespace DepotDL.GUI.Helpers
                 sv.PreviewMouseWheel += OnPreviewMouseWheel;
                 sv.PreviewKeyDown += OnPreviewKeyDown;
                 sv.Loaded += OnScrollViewerLoaded;
+                sv.Unloaded += OnScrollViewerUnloaded;
             }
             else
             {
                 sv.PreviewMouseWheel -= OnPreviewMouseWheel;
                 sv.PreviewKeyDown -= OnPreviewKeyDown;
                 sv.Loaded -= OnScrollViewerLoaded;
+                sv.Unloaded -= OnScrollViewerUnloaded;
                 sv.ScrollChanged -= OnScrollChanged;
                 sv.SizeChanged -= OnScrollViewerSizeChanged;
                 sv.RemoveHandler(ScrollBar.ScrollEvent, new ScrollEventHandler(OnScrollBarScrolled));
-                _fadeCache.Remove(sv);
-                _animTop.Remove(sv);
-                _animBot.Remove(sv);
-                sv.OpacityMask = null;
+                CleanupScrollViewer(sv);
             }
+        }
+
+        private static void OnScrollViewerUnloaded(object sender, RoutedEventArgs e)
+        {
+            if (sender is not ScrollViewer sv) return;
+            CleanupScrollViewer(sv);
+        }
+
+        private static void CleanupScrollViewer(ScrollViewer sv)
+        {
+            if (_states.TryGetValue(sv, out var state))
+                state.Cts?.Cancel();
+            _states.Remove(sv);
+            _fadeCache.Remove(sv);
+            _animTop.Remove(sv);
+            _animBot.Remove(sv);
+            sv.OpacityMask = null;
         }
 
         private static void OnScrollViewerLoaded(object sender, RoutedEventArgs e)
@@ -206,7 +227,6 @@ namespace DepotDL.GUI.Helpers
             var sv = (ScrollViewer)sender;
             if (sv.ScrollableHeight <= 0) return;
 
-            var s = GetSettings();
             double delta = e.Key switch
             {
                 Key.Up => -80,
@@ -220,11 +240,12 @@ namespace DepotDL.GUI.Helpers
 
             if (delta == 0) return;
 
-            EnsureState(sv).TargetOffset = Math.Clamp(
-                EnsureState(sv).TargetOffset + delta, 0, sv.ScrollableHeight);
+            var state = EnsureState(sv);
+            state.TargetOffset = Math.Clamp(
+                state.TargetOffset + delta, 0, sv.ScrollableHeight);
 
-            if (!EnsureState(sv).IsAnimating)
-                _ = AnimateScrollAsync(sv, EnsureState(sv));
+            if (!state.IsAnimating)
+                _ = AnimateScrollAsync(sv, state);
 
             e.Handled = true;
         }
@@ -257,15 +278,19 @@ namespace DepotDL.GUI.Helpers
             e.Handled = true;
         }
 
-        private static async System.Threading.Tasks.Task AnimateScrollAsync(ScrollViewer sv, ScrollState state)
+        private static async Task AnimateScrollAsync(ScrollViewer sv, ScrollState state)
         {
             state.IsAnimating = true;
+
+            var cts = new CancellationTokenSource();
+            state.Cts = cts;
+            var token = cts.Token;
 
             try
             {
                 var s = GetSettings();
 
-                while (true)
+                while (!token.IsCancellationRequested)
                 {
                     double current = sv.VerticalOffset;
                     double diff = state.TargetOffset - current;
@@ -275,14 +300,21 @@ namespace DepotDL.GUI.Helpers
 
                     double factor = 1 - Math.Pow(0.05, 16.0 / s.ScrollDurationMs);
                     sv.ScrollToVerticalOffset(current + diff * factor);
-                    await System.Threading.Tasks.Task.Delay(16);
+                    await Task.Delay(16, token);
                 }
 
-                sv.ScrollToVerticalOffset(state.TargetOffset);
+                if (!token.IsCancellationRequested)
+                    sv.ScrollToVerticalOffset(state.TargetOffset);
+            }
+            catch (TaskCanceledException)
+            {
             }
             finally
             {
                 state.IsAnimating = false;
+                if (state.Cts == cts)
+                    state.Cts = null;
+                cts.Dispose();
                 _states.Remove(sv);
             }
         }

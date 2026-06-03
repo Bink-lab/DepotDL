@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="clr-namespace:DepotDL.GUI.ViewModels"
              xmlns:models="clr-namespace:DepotDL.GUI.Models"
+             xmlns:helpers="clr-namespace:DepotDL.GUI.Helpers"
              FontFamily="Segoe UI"
              x:Name="Root"
              AllowDrop="True"
@@ -428,7 +429,7 @@
                         </Grid>
                         <Slider Minimum="1" Maximum="8"
                                 TickFrequency="1"
-                                IsSnapToTickEnabled="True"
+                                helpers:SliderHelper.SmoothSnap="True"
                                 Value="{Binding MaxParallel}"
                                 Margin="0,10,0,0"/>
                     </StackPanel>

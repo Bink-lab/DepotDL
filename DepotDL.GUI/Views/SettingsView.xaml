@@ -1,6 +1,7 @@
 <UserControl x:Class="DepotDL.GUI.Views.SettingsView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:helpers="clr-namespace:DepotDL.GUI.Helpers"
              FontFamily="Segoe UI">
 
     <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="0,42,6,0">
@@ -105,10 +106,10 @@
                                                FontSize="16" FontWeight="Bold"
                                                Foreground="{StaticResource Accent}"/>
                                 </Grid>
-                                <Slider Minimum="1" Maximum="8"
-                                        TickFrequency="1"
-                                        IsSnapToTickEnabled="True"
-                                        Value="{Binding MaxParallelDepots}"/>
+             <Slider Minimum="1" Maximum="8"
+                                         TickFrequency="1"
+                                         helpers:SliderHelper.SmoothSnap="True"
+                                         Value="{Binding MaxParallelDepots}"/>
                             </StackPanel>
                         </Border>
                     </Grid>
@@ -214,7 +215,7 @@
                                 </Grid>
                                 <Slider Minimum="12" Maximum="120"
                                         TickFrequency="6"
-                                        IsSnapToTickEnabled="True"
+                                        helpers:SliderHelper.SmoothSnap="True"
                                         Value="{Binding StorePageSize}"/>
                             </StackPanel>
                         </Border>
@@ -249,7 +250,7 @@
                                 </Grid>
                                 <Slider Minimum="0" Maximum="2000"
                                         TickFrequency="50"
-                                        IsSnapToTickEnabled="True"
+                                        helpers:SliderHelper.SmoothSnap="True"
                                         Value="{Binding SearchDebounceMs}"/>
                             </StackPanel>
                         </Border>
@@ -284,7 +285,7 @@
                                 </Grid>
                                 <Slider Minimum="1" Maximum="168"
                                         TickFrequency="1"
-                                        IsSnapToTickEnabled="True"
+                                        helpers:SliderHelper.SmoothSnap="True"
                                         Value="{Binding StoreCacheHours}"/>
                             </StackPanel>
                         </Border>
@@ -319,7 +320,7 @@
                                 </Grid>
                                 <Slider Minimum="1" Maximum="30"
                                         TickFrequency="1"
-                                        IsSnapToTickEnabled="True"
+                                        helpers:SliderHelper.SmoothSnap="True"
                                         Value="{Binding GpuCacheDays}"/>
                             </StackPanel>
                         </Border>
@@ -357,7 +358,7 @@
                                 </Grid>
                                 <Slider Minimum="0.1" Maximum="5.0"
                                         TickFrequency="0.1"
-                                        IsSnapToTickEnabled="True"
+                                        helpers:SliderHelper.SmoothSnap="True"
                                         Value="{Binding ScrollSensitivity}"/>
                             </StackPanel>
                         </Border>
@@ -392,7 +393,7 @@
                                 </Grid>
                                 <Slider Minimum="50" Maximum="1000"
                                         TickFrequency="25"
-                                        IsSnapToTickEnabled="True"
+                                        helpers:SliderHelper.SmoothSnap="True"
                                         Value="{Binding ScrollDurationMs}"/>
                             </StackPanel>
                         </Border>
