@@ -181,7 +181,7 @@ namespace DepotDL.CLI
                 depot.DecryptionKey = key;
             }
 
-            var manifestRegex = new Regex(@"^\s*setManifestid\s*\(\s*(\d+)\s*,\s*[""'](\d+)[""']\s*\)", RegexOptions.Multiline | RegexOptions.IgnoreCase);
+            var manifestRegex = new Regex(@"^\s*setManifestid\s*\(\s*(\d+)\s*,\s*[""'](\d+)[""'](?:[^)]*)\)", RegexOptions.Multiline | RegexOptions.IgnoreCase);
             var manifestMatches = manifestRegex.Matches(luaContent);
             foreach (Match match in manifestMatches)
             {

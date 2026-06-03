@@ -16,7 +16,7 @@ namespace DepotDL.GUI.Services
             @"^\s*addappid\s*\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(?:""|')(\S+)(?:""|')\s*\)",
             RegexOptions.Multiline | RegexOptions.IgnoreCase);
         private static readonly Regex ManifestRx = new(
-            @"^\s*setManifestid\s*\(\s*(\d+)\s*,\s*[""'](\d+)[""']\s*\)",
+            @"^\s*setManifestid\s*\(\s*(\d+)\s*,\s*[""'](\d+)[""'](?:[^)]*)\)",
             RegexOptions.Multiline | RegexOptions.IgnoreCase);
 
         public (string AppId, List<DepotInfo> Depots) Parse(string luaPath)
