@@ -968,13 +968,35 @@ namespace DepotDownloader
                 DownloadSteam3AsyncDepotFile(cts, downloadCounter, depotFilesData, file, networkChunkQueue);
             });
 
+            var failedChunks = new ConcurrentBag<(FileStreamData fileStreamData, DepotManifest.FileData fileData, DepotManifest.ChunkData chunk)>();
+
             await Parallel.ForEachAsync(networkChunkQueue, parallelOptions, async (q, cancellationToken) =>
             {
-                await DownloadSteam3AsyncDepotFileChunk(
-                    cts, downloadCounter, depotFilesData,
-                    q.fileData, q.fileStreamData, q.chunk
-                );
+                if (!await DownloadSteam3AsyncDepotFileChunk(cts, downloadCounter, depotFilesData, q.fileData, q.fileStreamData, q.chunk))
+                    failedChunks.Add(q);
             });
+
+            const int MaxChunkRetries = 3;
+            for (int attempt = 1; attempt <= MaxChunkRetries && !failedChunks.IsEmpty && !cts.IsCancellationRequested; attempt++)
+            {
+                var toRetry = failedChunks.ToArray();
+                failedChunks.Clear();
+                Console.WriteLine("Retrying {0} failed chunk(s) (attempt {1}/{2})...", toRetry.Length, attempt, MaxChunkRetries);
+                await Task.Delay(3000 * attempt);
+
+                await Parallel.ForEachAsync(toRetry, parallelOptions, async (q, cancellationToken) =>
+                {
+                    if (!await DownloadSteam3AsyncDepotFileChunk(cts, downloadCounter, depotFilesData, q.fileData, q.fileStreamData, q.chunk))
+                        failedChunks.Add(q);
+                });
+            }
+
+            if (!failedChunks.IsEmpty)
+            {
+                Console.WriteLine("Permanently failed {0} chunk(s) for depot {1}. Aborting.", failedChunks.Count, depot.DepotId);
+                cts.Cancel();
+                cts.Token.ThrowIfCancellationRequested();
+            }
 
             // Check for deleted files if updating the depot.
             if (depotFilesData.previousManifest != null)
@@ -1219,7 +1241,7 @@ namespace DepotDownloader
             }
         }
 
-        private static async Task DownloadSteam3AsyncDepotFileChunk(
+        private static async Task<bool> DownloadSteam3AsyncDepotFileChunk(
             CancellationTokenSource cts,
             GlobalDownloadCounter downloadCounter,
             DepotFilesData depotFilesData,
@@ -1309,11 +1331,10 @@ namespace DepotDownloader
 
                 if (written == 0)
                 {
-                    Console.WriteLine("Failed to find any server with chunk {0} for depot {1}. Aborting.", chunkID, depot.DepotId);
-                    cts.Cancel();
+                    Console.WriteLine("Failed to find any server with chunk {0} for depot {1}.", chunkID, depot.DepotId);
+                    return false;
                 }
 
-                // Throw the cancellation exception if requested so that this task is marked failed
                 cts.Token.ThrowIfCancellationRequested();
 
                 try
@@ -1391,6 +1412,8 @@ namespace DepotDownloader
                     Console.WriteLine("{0,6:#00.00}%{1}", (sizeDownloaded / (float)depotDownloadCounter.completeDownloadSize) * 100.0f, speedStr);
                 }
             }
+
+            return true;
         }
 
         class ChunkIdComparer : IEqualityComparer<byte[]>
