@@ -48,6 +48,7 @@ namespace DepotDL.GUI.ViewModels
         [ObservableProperty] private string _ryuuAppId = string.Empty;
         [ObservableProperty] private string _ryuuApiKey = string.Empty;
         [ObservableProperty] private bool _isRyuuBusy;
+        [ObservableProperty] private string _ryuuStatusText = string.Empty;
         [ObservableProperty] private string _ryuuError = string.Empty;
         [ObservableProperty] private bool _canFetchRyuu;
 
@@ -112,6 +113,7 @@ namespace DepotDL.GUI.ViewModels
         private async Task FetchFromRyuuAsync()
         {
             IsRyuuBusy = true;
+            RyuuStatusText = "Fetching...";
             RyuuError = string.Empty;
             try
             {
@@ -119,7 +121,8 @@ namespace DepotDL.GUI.ViewModels
                 settings.RyuuApiKey = RyuuApiKey.Trim();
                 _settings.Save(settings);
 
-                var result = await _ryuu.DownloadPackageAsync(RyuuAppId.Trim(), RyuuApiKey.Trim());
+                var result = await _ryuu.DownloadPackageAsync(RyuuAppId.Trim(), RyuuApiKey.Trim(),
+                    status => RyuuStatusText = status);
                 if (!result.HasZip || string.IsNullOrEmpty(result.ZipPath))
                 {
                     RyuuError = result.Message;

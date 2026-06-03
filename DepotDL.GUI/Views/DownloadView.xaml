@@ -107,7 +107,7 @@
                                 <Grid>
                                     <TextBlock Text="Fetch Config" FontSize="12.5" FontWeight="SemiBold"
                                                Visibility="{Binding IsRyuuBusy, Converter={StaticResource InvBoolToVis}}"/>
-                                    <TextBlock Text="Fetching..." FontSize="12.5" FontWeight="SemiBold"
+                                    <TextBlock Text="{Binding RyuuStatusText}" FontSize="12.5" FontWeight="SemiBold"
                                                Visibility="{Binding IsRyuuBusy, Converter={StaticResource BoolToVis}}"/>
                                 </Grid>
                             </StackPanel>
