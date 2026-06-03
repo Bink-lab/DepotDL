@@ -307,7 +307,7 @@ namespace DepotDL.CLI
 
                         Console.Clear();
 
-                        int exitCode = Program.TriggerDownloadProcess(session.LuaPath, session.ManifestsDir, session.OutputDir, ddmodPath, dotnetPath, session.SelectedDepots, session.MaxParallelDepots);
+                        int exitCode = Program.TriggerDownloadProcess(session.LuaPath, session.ManifestsDir, session.OutputDir, ddmodPath, dotnetPath, session.SelectedDepots, session.MaxParallelDepots, ryuuApiKey: session.RyuuApiKey, hubcapApiKey: session.HubcapApiKey);
 
                         if (exitCode == 0)
                         {
@@ -730,7 +730,8 @@ namespace DepotDL.CLI
                             OutputDir = game.OutputDir,
                             ManifestsDir = session.ManifestsDir,
                             MaxParallelDepots = session.MaxParallelDepots,
-                            RyuuApiKey = session.RyuuApiKey
+                            RyuuApiKey = session.RyuuApiKey,
+                            HubcapApiKey = session.HubcapApiKey
                         };
 
                         ParseLuaFileIntoSession(repairSession);
@@ -747,13 +748,15 @@ namespace DepotDL.CLI
                         }
 
                         int exitCode = Program.TriggerDownloadProcess(
-                            repairSession.LuaPath, 
-                            repairSession.ManifestsDir, 
-                            repairSession.OutputDir, 
-                            ddmodPath, 
-                            dotnetPath, 
+                            repairSession.LuaPath,
+                            repairSession.ManifestsDir,
+                            repairSession.OutputDir,
+                            ddmodPath,
+                            dotnetPath,
                             repairSession.SelectedDepots,
-                            repairSession.MaxParallelDepots
+                            repairSession.MaxParallelDepots,
+                            ryuuApiKey: repairSession.RyuuApiKey,
+                            hubcapApiKey: repairSession.HubcapApiKey
                         );
 
                         if (exitCode == 0)
@@ -1066,7 +1069,8 @@ namespace DepotDL.CLI
                     OutputDir = game.OutputDir,
                     ManifestsDir = session.ManifestsDir,
                     MaxParallelDepots = session.MaxParallelDepots,
-                    RyuuApiKey = session.RyuuApiKey
+                    RyuuApiKey = session.RyuuApiKey,
+                    HubcapApiKey = session.HubcapApiKey
                 };
 
                 // Restore DownloadBaseDir from OutputDir so ParseLuaFileIntoSession recomputes correctly
@@ -1090,13 +1094,15 @@ namespace DepotDL.CLI
                 }
 
                 int exitCode = Program.TriggerDownloadProcess(
-                    batchSession.LuaPath, 
-                    batchSession.ManifestsDir, 
-                    batchSession.OutputDir, 
-                    ddmodPath, 
-                    dotnetPath, 
+                    batchSession.LuaPath,
+                    batchSession.ManifestsDir,
+                    batchSession.OutputDir,
+                    ddmodPath,
+                    dotnetPath,
                     batchSession.SelectedDepots,
-                    batchSession.MaxParallelDepots
+                    batchSession.MaxParallelDepots,
+                    ryuuApiKey: batchSession.RyuuApiKey,
+                    hubcapApiKey: batchSession.HubcapApiKey
                 );
 
                 if (exitCode == 0)

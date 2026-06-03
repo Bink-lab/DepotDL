@@ -442,7 +442,9 @@ namespace DepotDL.GUI.ViewModels
                 await _downloader.RunDownloadsAsync(
                     AppId, selectedDepots, OutputDir,
                     string.IsNullOrWhiteSpace(ManifestsDir) ? null : ManifestsDir,
-                    MaxParallel, states, _cts.Token);
+                    MaxParallel, states, _cts.Token,
+                    ryuuApiKey: string.IsNullOrWhiteSpace(RyuuApiKey) ? null : RyuuApiKey.Trim(),
+                    hubcapApiKey: string.IsNullOrWhiteSpace(HubcapApiKey) ? null : HubcapApiKey.Trim());
 
                 bool anyFailed = states.Any(s => s.Status == DepotStatus.Failed);
                 DownloadComplete = !anyFailed;

@@ -42,6 +42,7 @@ namespace DepotDL.CLI
         private static DateTime _lastDrawTime = DateTime.MinValue;
         private static readonly TimeSpan _drawThrottleInterval = TimeSpan.FromMilliseconds(100);
         private static int[] _lastSlotLengths = Array.Empty<int>();
+        private const int WatchdogTimeoutSeconds = 120;
 
         static int Main(string[] args)
         {
@@ -202,12 +203,12 @@ namespace DepotDL.CLI
             return ProcessDownload(luaPath, manifestsDir, outputPath, ddmodPath, dotnetPath, maxDownloads: maxDownloads, maxParallelDepots: maxParallelDepots);
         }
 
-        public static int TriggerDownloadProcess(string luaPath, string? manifestsDir, string? outputPath, string ddmodPath, string dotnetPath, List<DepotInfo>? selectedDepots, int maxParallelDepots = 2)
+        public static int TriggerDownloadProcess(string luaPath, string? manifestsDir, string? outputPath, string ddmodPath, string dotnetPath, List<DepotInfo>? selectedDepots, int maxParallelDepots = 2, string? ryuuApiKey = null, string? hubcapApiKey = null)
         {
-            return ProcessDownload(luaPath, manifestsDir, outputPath, ddmodPath, dotnetPath, selectedDepots, maxParallelDepots: maxParallelDepots);
+            return ProcessDownload(luaPath, manifestsDir, outputPath, ddmodPath, dotnetPath, selectedDepots, maxParallelDepots: maxParallelDepots, ryuuApiKey: ryuuApiKey, hubcapApiKey: hubcapApiKey);
         }
 
-        private static int ProcessDownload(string luaPath, string? manifestsDir, string? outputPath, string ddmodPath, string dotnetPath, List<DepotInfo>? selectedDepots = null, int maxDownloads = DepotDownloadDefaults.MaxDownloads, int maxParallelDepots = 2)
+        private static int ProcessDownload(string luaPath, string? manifestsDir, string? outputPath, string ddmodPath, string dotnetPath, List<DepotInfo>? selectedDepots = null, int maxDownloads = DepotDownloadDefaults.MaxDownloads, int maxParallelDepots = 2, string? ryuuApiKey = null, string? hubcapApiKey = null)
         {
             void LogError(string message) => WriteColored(message, ConsoleColor.Red);
 
@@ -379,6 +380,46 @@ namespace DepotDL.CLI
                     }
                 }
 
+                var providerCacheLock = new object();
+                var providerManifestCache = new Dictionary<string, Dictionary<string, string>?>(StringComparer.OrdinalIgnoreCase);
+                var providerExtractDirs = new List<string>();
+
+                Dictionary<string, string>? GetProviderManifests(string providerName, Func<ManifestDownloadResult> fetch)
+                {
+                    lock (providerCacheLock)
+                    {
+                        if (providerManifestCache.TryGetValue(providerName, out var cached))
+                            return cached;
+                    }
+
+                    Dictionary<string, string>? map = null;
+                    ManifestDownloadResult fetchResult = fetch();
+                    if (fetchResult.HasZip && !string.IsNullOrEmpty(fetchResult.ZipPath))
+                    {
+                        var imported = ZipHelper.ImportZip(fetchResult.ZipPath);
+                        try { File.Delete(fetchResult.ZipPath); } catch { }
+                        if (imported.ManifestCount > 0)
+                        {
+                            map = BuildManifestMapFromDir(imported.ManifestsDir);
+                            if (!string.IsNullOrEmpty(imported.ImportDir))
+                            {
+                                lock (providerCacheLock) { providerExtractDirs.Add(imported.ImportDir); }
+                            }
+                        }
+                        else if (!string.IsNullOrEmpty(imported.ImportDir))
+                        {
+                            try { Directory.Delete(imported.ImportDir, true); } catch { }
+                        }
+                    }
+                    else if (!string.IsNullOrEmpty(fetchResult.ZipPath))
+                    {
+                        try { File.Delete(fetchResult.ZipPath); } catch { }
+                    }
+
+                    lock (providerCacheLock) { providerManifestCache[providerName] = map; }
+                    return map;
+                }
+
                 var workerTasks = new List<Task>();
 
                 for (int i = 0; i < numWorkers; i++)
@@ -472,171 +513,140 @@ namespace DepotDL.CLI
                                     Thread.Sleep(2000 * retryCount);
                                 }
 
-                                var psi = new ProcessStartInfo
+                                var (ok, watchdogKilled, errorReason) = await RunDepotProcess(slotId, dotnetPath, argsList);
+
+                                if (watchdogKilled)
                                 {
-                                    FileName = dotnetPath,
-                                    UseShellExecute = false,
-                                    RedirectStandardOutput = true,
-                                    RedirectStandardError = true,
-                                    CreateNoWindow = true,
-                                    WorkingDirectory = Path.GetDirectoryName(ddmodPath) ?? AppDomain.CurrentDomain.BaseDirectory
-                                };
-                                foreach (var arg in argsList)
-                                {
-                                    psi.ArgumentList.Add(arg);
+                                    retryCount++;
+                                    string wdDepotId = depot.DepotId;
+                                    lock (_drawLock)
+                                    {
+                                        _slots[slotId].Status = $"Retrying ({retryCount}/{maxRetries - 1})...";
+                                        _slots[slotId].Percent = null;
+                                        _slots[slotId].ActiveValidationFile = null;
+                                        _slots[slotId].LastProgressTime = DateTime.MinValue;
+                                        string wdMsg = retryCount < maxRetries
+                                            ? $"Depot {wdDepotId} stuck for {WatchdogTimeoutSeconds}s, killed. Retrying..."
+                                            : $"Depot {wdDepotId} stuck repeatedly — giving up after {maxRetries} attempts";
+                                        _pendingLogs.Enqueue(() => DownloadTui.WriteStatus("Watchdog", wdMsg, ConsoleColor.Yellow));
+                                    }
+                                    DrawSlots(force: true);
+                                    if (retryCount < maxRetries) { Thread.Sleep(2000 * retryCount); continue; }
+                                    break;
                                 }
 
-                                var depotOutputErrors = new List<string>();
-                                string? lastOutputLine = null;
-
-                                using (var process = new Process { StartInfo = psi })
+                                if (!ok)
                                 {
-                                    process.OutputDataReceived += (sender, lineEventArgs) =>
+                                    retryCount++;
+                                    if (retryCount < maxRetries)
                                     {
-                                        if (!string.IsNullOrWhiteSpace(lineEventArgs.Data))
-                                        {
-                                            lastOutputLine = lineEventArgs.Data;
-                                        }
-                                        if (IsDepotDownloadFailure(lineEventArgs.Data))
-                                        {
-                                            lock (depotOutputErrors)
-                                            {
-                                                depotOutputErrors.Add(lineEventArgs.Data!);
-                                            }
-                                        }
-                                        ProcessProgressLine(slotId, lineEventArgs.Data);
-                                    };
-                                    process.ErrorDataReceived += (sender, lineEventArgs) =>
-                                    {
-                                        if (!string.IsNullOrEmpty(lineEventArgs.Data))
-                                        {
-                                            lastOutputLine = lineEventArgs.Data;
-                                            if (IsDepotDownloadFailure(lineEventArgs.Data))
-                                            {
-                                                lock (depotOutputErrors)
-                                                {
-                                                    depotOutputErrors.Add(lineEventArgs.Data);
-                                                }
-                                            }
-                                        }
-                                    };
-
-                                    process.Start();
-                                    process.BeginOutputReadLine();
-                                    process.BeginErrorReadLine();
-
-                                    const int WatchdogTimeoutSeconds = 120;
-                                    bool killedByWatchdog = false;
-                                    using var watchdogCts = new CancellationTokenSource();
-                                    var watchdogTask = Task.Run(async () =>
-                                    {
-                                        double seenPct = -1;
-                                        string seenStatus = "";
-                                        while (!watchdogCts.Token.IsCancellationRequested)
-                                        {
-                                            try { await Task.Delay(15_000, watchdogCts.Token); }
-                                            catch (OperationCanceledException) { break; }
-
-                                            double nowPct; string nowStatus; DateTime lastProg;
-                                            lock (_drawLock)
-                                            {
-                                                nowPct    = _slots[slotId].Percent ?? -1;
-                                                nowStatus = _slots[slotId].Status;
-                                                lastProg  = _slots[slotId].LastProgressTime;
-                                            }
-
-                                            if (nowPct > seenPct || nowStatus != seenStatus)
-                                            {
-                                                seenPct    = nowPct;
-                                                seenStatus = nowStatus;
-                                            }
-                                            else if (lastProg != DateTime.MinValue &&
-                                                     (DateTime.UtcNow - lastProg).TotalSeconds > WatchdogTimeoutSeconds)
-                                            {
-                                                killedByWatchdog = true;
-                                                lock (_drawLock) { _slots[slotId].Status = "Stuck — killing..."; }
-                                                DrawSlots(force: true);
-                                                try { process.Kill(entireProcessTree: true); } catch { }
-                                                break;
-                                            }
-                                        }
-                                    });
-
-                                    process.WaitForExit();
-                                    watchdogCts.Cancel();
-                                    await watchdogTask;
-
-                                    if (killedByWatchdog)
-                                    {
-                                        depotOk = false;
-                                        retryCount++;
-                                        string wdDepotId = depot.DepotId;
+                                        string depotId = depot.DepotId;
+                                        string retryReason = errorReason ?? "unknown error";
                                         lock (_drawLock)
                                         {
-                                            _slots[slotId].Status = $"Retrying ({retryCount}/{maxRetries - 1})...";
-                                            _slots[slotId].Percent = null;
-                                            _slots[slotId].ActiveValidationFile = null;
-                                            _slots[slotId].LastProgressTime = DateTime.MinValue;
-                                            string wdMsg = retryCount < maxRetries
-                                                ? $"Depot {wdDepotId} stuck for {WatchdogTimeoutSeconds}s, killed. Retrying..."
-                                                : $"Depot {wdDepotId} stuck repeatedly — giving up after {maxRetries} attempts";
-                                            _pendingLogs.Enqueue(() => DownloadTui.WriteStatus("Watchdog", wdMsg, ConsoleColor.Yellow));
+                                            _pendingLogs.Enqueue(() => DownloadTui.WriteStatus("Retry", $"Depot {depotId} failed (attempt {retryCount}/{maxRetries}). Error: {retryReason}. Retrying...", ConsoleColor.Yellow));
                                         }
                                         DrawSlots(force: true);
-                                        if (retryCount < maxRetries) { Thread.Sleep(2000 * retryCount); continue; }
-                                        break;
+                                        continue;
                                     }
 
-                                    if (process.ExitCode != 0 || depotOutputErrors.Count > 0)
+                                    string finalDepotId = depot.DepotId;
+                                    string finalReason = errorReason ?? "unknown error";
+                                    lock (_drawLock)
                                     {
-                                        depotOk = false;
-                                        string reason;
-                                        if (depotOutputErrors.Count > 0)
-                                        {
-                                            reason = depotOutputErrors[depotOutputErrors.Count - 1];
-                                        }
-                                        else if (!string.IsNullOrWhiteSpace(lastOutputLine))
-                                        {
-                                            var msgPart = lastOutputLine;
-                                            int nlIdx = msgPart.IndexOf('\n');
-                                            if (nlIdx > 0) msgPart = msgPart.Substring(0, nlIdx);
-                                            reason = TuiText.Shorten($"{msgPart} (exit code {process.ExitCode})", 60);
-                                        }
-                                        else
-                                        {
-                                            reason = $"DepotDownloaderMod exited with code {process.ExitCode}";
-                                        }
+                                        _pendingLogs.Enqueue(() => DownloadTui.WriteStatus("Failed", $"Depot {finalDepotId}: {finalReason} (after {maxRetries} attempts)", ConsoleColor.Red));
+                                    }
+                                    break;
+                                }
 
-                                        retryCount++;
-                                        if (retryCount < maxRetries)
+                                depotOk = true;
+                                string doneDepotId = depot.DepotId;
+                                MarkDepotComplete(outputPath, doneDepotId);
+                                lock (_drawLock)
+                                {
+                                    _pendingLogs.Enqueue(() => DownloadTui.WriteStatus("Complete", $"Depot {doneDepotId} downloaded successfully", ConsoleColor.Green));
+                                }
+                                break;
+                            }
+
+                            if (!depotOk && (ryuuApiKey != null || hubcapApiKey != null))
+                            {
+                                var providerAttempts = new List<(string name, Func<ManifestDownloadResult> fetch)>();
+                                if (ryuuApiKey != null)
+                                    providerAttempts.Add(("Ryuu", () => RyuuApiClient.DownloadPackage(appId, ryuuApiKey)));
+                                if (hubcapApiKey != null)
+                                    providerAttempts.Add(("Hubcap", () => HubcapApiClient.DownloadPackage(appId, hubcapApiKey)));
+
+                                foreach (var (providerName, fetchFunc) in providerAttempts)
+                                {
+                                    if (depotOk) break;
+                                    {
+                                        Dictionary<string, string>? fallbackManifestMap;
+                                        try { fallbackManifestMap = await Task.Run(() => GetProviderManifests(providerName, fetchFunc)); }
+                                        catch (Exception fetchEx)
                                         {
-                                            string depotId = depot.DepotId;
-                                            lock (_drawLock)
-                                            {
-                                                _pendingLogs.Enqueue(() => DownloadTui.WriteStatus("Retry", $"Depot {depotId} failed (attempt {retryCount}/{maxRetries}). Error: {reason}. Retrying...", ConsoleColor.Yellow));
-                                            }
+                                            string pn = providerName; string di = depot.DepotId; string em = fetchEx.Message;
+                                            lock (_drawLock) { _pendingLogs.Enqueue(() => DownloadTui.WriteStatus(pn, $"Depot {di}: {pn} error — {em}", ConsoleColor.DarkYellow)); }
                                             DrawSlots(force: true);
                                             continue;
                                         }
 
-                                        string finalDepotId = depot.DepotId;
+                                        if (fallbackManifestMap == null) continue;
+
+                                        string? providerManifestFile = null;
+                                        if (!string.IsNullOrEmpty(depot.ManifestId))
+                                        {
+                                            fallbackManifestMap.TryGetValue($"{depot.DepotId}_{depot.ManifestId}", out providerManifestFile);
+                                            if (providerManifestFile == null)
+                                                fallbackManifestMap.TryGetValue(depot.ManifestId, out providerManifestFile);
+                                        }
+                                        if (providerManifestFile == null)
+                                            fallbackManifestMap.TryGetValue(depot.DepotId, out providerManifestFile);
+
+                                        if (providerManifestFile == null) continue;
+
+                                        var fallbackArgs = new List<string>
+                                        {
+                                            ddmodPath, "-app", appId, "-depot", depot.DepotId,
+                                            "-depotkeys", _tempKeysPath!,
+                                            "-max-downloads", DepotDownloadDefaults.NormalizeMaxDownloads(maxDownloads).ToString(CultureInfo.InvariantCulture),
+                                            "-os", "windows", "-validate", "-dir", outputPath
+                                        };
+                                        if (!string.IsNullOrEmpty(depot.ManifestId))
+                                        {
+                                            fallbackArgs.Add("-manifest");
+                                            fallbackArgs.Add(depot.ManifestId);
+                                        }
+                                        fallbackArgs.Add("-manifestfile");
+                                        fallbackArgs.Add(providerManifestFile);
+
+                                        string pName = providerName; string dId = depot.DepotId;
                                         lock (_drawLock)
                                         {
-                                            _pendingLogs.Enqueue(() => DownloadTui.WriteStatus("Failed", $"Depot {finalDepotId}: {reason} (after {maxRetries} attempts)", ConsoleColor.Red));
+                                            _slots[slotId].Status = $"Trying {pName}...";
+                                            _slots[slotId].Percent = null;
+                                            _slots[slotId].ActiveValidationFile = null;
+                                            _slots[slotId].LastProgressTime = DateTime.MinValue;
+                                            _pendingLogs.Enqueue(() => DownloadTui.WriteStatus(pName, $"Depot {dId}: retrying with {pName} manifest", ConsoleColor.Yellow));
                                         }
-                                        break;
-                                    }
-                                    else
-                                    {
-                                        depotOk = true;
-                                        string depotId = depot.DepotId;
-                                        MarkDepotComplete(outputPath, depotId);
-                                        lock (_drawLock)
+                                        DrawSlots(force: true);
+
+                                        var (fallbackOk, _, fallbackError) = await RunDepotProcess(slotId, dotnetPath, fallbackArgs);
+
+                                        if (fallbackOk)
                                         {
-                                            _pendingLogs.Enqueue(() => DownloadTui.WriteStatus("Complete", $"Depot {depotId} downloaded successfully", ConsoleColor.Green));
+                                            depotOk = true;
+                                            MarkDepotComplete(outputPath, depot.DepotId);
+                                            string sid = depot.DepotId; string pn2 = providerName;
+                                            lock (_drawLock) { _pendingLogs.Enqueue(() => DownloadTui.WriteStatus("Complete", $"Depot {sid} downloaded via {pn2}", ConsoleColor.Green)); }
                                         }
-                                        break;
+                                        else
+                                        {
+                                            string sid = depot.DepotId; string pn2 = providerName; string err = fallbackError ?? "unknown error";
+                                            lock (_drawLock) { _pendingLogs.Enqueue(() => DownloadTui.WriteStatus("Failed", $"Depot {sid}: {pn2} fallback failed: {err}", ConsoleColor.Red)); }
+                                        }
                                     }
+                                    DrawSlots(force: true);
                                 }
                             }
 
@@ -677,6 +687,9 @@ namespace DepotDL.CLI
                 }
 
                 Task.WaitAll(workerTasks.ToArray());
+
+                foreach (var dir in providerExtractDirs)
+                    try { Directory.Delete(dir, true); } catch { }
 
                 // Flush any remaining pending logs and clear the slot lines
                 lock (_drawLock)
@@ -1334,6 +1347,134 @@ namespace DepotDL.CLI
                 if (Directory.Exists(dir)) Directory.Delete(dir, true);
             }
             catch { }
+        }
+
+        private static async Task<(bool success, bool watchdogKilled, string? errorReason)> RunDepotProcess(
+            int slotId, string dotnetPath, List<string> argsList)
+        {
+            var psi = new ProcessStartInfo
+            {
+                FileName = dotnetPath,
+                UseShellExecute = false,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                CreateNoWindow = true,
+                WorkingDirectory = Path.GetDirectoryName(argsList[0]) ?? AppDomain.CurrentDomain.BaseDirectory
+            };
+            foreach (var arg in argsList)
+                psi.ArgumentList.Add(arg);
+
+            var depotOutputErrors = new List<string>();
+            string? lastOutputLine = null;
+
+            using var process = new Process { StartInfo = psi };
+
+            process.OutputDataReceived += (_, e) =>
+            {
+                if (!string.IsNullOrWhiteSpace(e.Data))
+                    lastOutputLine = e.Data;
+                if (IsDepotDownloadFailure(e.Data))
+                    lock (depotOutputErrors) { depotOutputErrors.Add(e.Data!); }
+                ProcessProgressLine(slotId, e.Data);
+            };
+            process.ErrorDataReceived += (_, e) =>
+            {
+                if (!string.IsNullOrEmpty(e.Data))
+                {
+                    lastOutputLine = e.Data;
+                    if (IsDepotDownloadFailure(e.Data))
+                        lock (depotOutputErrors) { depotOutputErrors.Add(e.Data); }
+                }
+            };
+
+            process.Start();
+            process.BeginOutputReadLine();
+            process.BeginErrorReadLine();
+
+            bool killedByWatchdog = false;
+            using var watchdogCts = new CancellationTokenSource();
+            var watchdogTask = Task.Run(async () =>
+            {
+                double seenPct = -1;
+                string seenStatus = "";
+                while (!watchdogCts.Token.IsCancellationRequested)
+                {
+                    try { await Task.Delay(15_000, watchdogCts.Token); }
+                    catch (OperationCanceledException) { break; }
+
+                    double nowPct; string nowStatus; DateTime lastProg;
+                    lock (_drawLock)
+                    {
+                        nowPct    = _slots[slotId].Percent ?? -1;
+                        nowStatus = _slots[slotId].Status;
+                        lastProg  = _slots[slotId].LastProgressTime;
+                    }
+
+                    if (nowPct > seenPct || nowStatus != seenStatus)
+                    {
+                        seenPct    = nowPct;
+                        seenStatus = nowStatus;
+                    }
+                    else if (lastProg != DateTime.MinValue &&
+                             (DateTime.UtcNow - lastProg).TotalSeconds > WatchdogTimeoutSeconds)
+                    {
+                        killedByWatchdog = true;
+                        lock (_drawLock) { _slots[slotId].Status = "Stuck — killing..."; }
+                        DrawSlots(force: true);
+                        try { process.Kill(entireProcessTree: true); } catch { }
+                        break;
+                    }
+                }
+            });
+
+            process.WaitForExit();
+            watchdogCts.Cancel();
+            await watchdogTask;
+
+            if (killedByWatchdog)
+                return (false, true, null);
+
+            if (process.ExitCode != 0 || depotOutputErrors.Count > 0)
+            {
+                string reason;
+                if (depotOutputErrors.Count > 0)
+                    reason = depotOutputErrors[depotOutputErrors.Count - 1];
+                else if (!string.IsNullOrWhiteSpace(lastOutputLine))
+                {
+                    var msgPart = lastOutputLine;
+                    int nlIdx = msgPart.IndexOf('\n');
+                    if (nlIdx > 0) msgPart = msgPart.Substring(0, nlIdx);
+                    reason = TuiText.Shorten($"{msgPart} (exit code {process.ExitCode})", 60);
+                }
+                else
+                    reason = $"DepotDownloaderMod exited with code {process.ExitCode}";
+
+                return (false, false, reason);
+            }
+
+            return (true, false, null);
+        }
+
+        private static Dictionary<string, string> BuildManifestMapFromDir(string dir)
+        {
+            var map = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            if (string.IsNullOrEmpty(dir) || !Directory.Exists(dir)) return map;
+            foreach (var file in Directory.GetFiles(dir, "*.manifest"))
+            {
+                var name = Path.GetFileNameWithoutExtension(file);
+                var parts = name.Split('_');
+                if (parts.Length >= 2)
+                {
+                    map[$"{parts[0]}_{parts[1]}"] = file;
+                    map[parts[0]] = file;
+                    map[parts[1]] = file;
+                }
+                else
+                {
+                    map[name] = file;
+                }
+            }
+            return map;
         }
 
         private static string FormatEta(double seconds)

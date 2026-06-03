@@ -35,9 +35,12 @@ namespace DepotDL.GUI.Services
             string? manifestsDir,
             int maxParallel,
             List<DepotDownloadState> states,
-            CancellationToken ct)
+            CancellationToken ct,
+            string? ryuuApiKey = null,
+            string? hubcapApiKey = null)
         {
             string keysFile = Path.Combine(Path.GetTempPath(), $"depotdl_keys_{Guid.NewGuid():N}.vdf");
+            var providerExtractDirs = new System.Collections.Concurrent.ConcurrentBag<string>();
             try
             {
                 using (var w = new StreamWriter(keysFile))
@@ -68,6 +71,31 @@ namespace DepotDL.GUI.Services
                 int workers = Math.Min(maxParallel, queue.Count);
                 if (workers == 0) return;
 
+                var providerCache = new System.Collections.Concurrent.ConcurrentDictionary<string, Lazy<Task<Dictionary<string, string>?>>>();
+
+                Task<Dictionary<string, string>?> GetProviderManifestsAsync(string providerName, Func<Task<ManifestDownloadResult>> fetch)
+                {
+                    var lazy = providerCache.GetOrAdd(providerName, _ => new Lazy<Task<Dictionary<string, string>?>>(async () =>
+                    {
+                        var result = await fetch();
+                        if (!result.HasZip || string.IsNullOrEmpty(result.ZipPath))
+                        {
+                            if (!string.IsNullOrEmpty(result.ZipPath)) try { File.Delete(result.ZipPath); } catch { }
+                            return null;
+                        }
+                        var imported = new ZipImportService().ImportZip(result.ZipPath);
+                        try { File.Delete(result.ZipPath); } catch { }
+                        if (imported.ManifestCount == 0)
+                        {
+                            if (!string.IsNullOrEmpty(imported.ImportDir)) try { Directory.Delete(imported.ImportDir, true); } catch { }
+                            return null;
+                        }
+                        if (!string.IsNullOrEmpty(imported.ImportDir)) providerExtractDirs.Add(imported.ImportDir);
+                        return BuildManifestMap(imported.ManifestsDir);
+                    }));
+                    return lazy.Value;
+                }
+
                 var semaphore = new SemaphoreSlim(workers, workers);
                 var tasks = new List<Task>();
 
@@ -83,7 +111,8 @@ namespace DepotDL.GUI.Services
                         try
                         {
                             await DownloadDepotWithRetryAsync(
-                                appId, depot, outputDir, keysFile, manifestMap, state, ct);
+                                appId, depot, outputDir, keysFile, manifestMap, state, ct,
+                                GetProviderManifestsAsync, ryuuApiKey, hubcapApiKey);
 
                             if (state.Status == DepotStatus.Done)
                                 await File.WriteAllTextAsync(
@@ -105,6 +134,8 @@ namespace DepotDL.GUI.Services
             finally
             {
                 try { File.Delete(keysFile); } catch { }
+                foreach (var dir in providerExtractDirs)
+                    try { Directory.Delete(dir, true); } catch { }
                 CleanupDepotDownloaderFolders(outputDir);
             }
         }
@@ -135,7 +166,9 @@ namespace DepotDL.GUI.Services
         private async Task DownloadDepotWithRetryAsync(
             string appId, DepotInfo depot, string outputDir,
             string keysFile, Dictionary<string, string> manifestMap,
-            DepotDownloadState state, CancellationToken ct)
+            DepotDownloadState state, CancellationToken ct,
+            Func<string, Func<Task<ManifestDownloadResult>>, Task<Dictionary<string, string>?>> getProviderManifests,
+            string? ryuuApiKey = null, string? hubcapApiKey = null)
         {
             for (int attempt = 1; attempt <= MaxRetries; attempt++)
             {
@@ -157,12 +190,68 @@ namespace DepotDL.GUI.Services
                     state.StatusText = "Failed";
                 }
             }
+
+            if (state.Status == DepotStatus.Failed && (ryuuApiKey != null || hubcapApiKey != null))
+            {
+                var providers = new List<(string name, Func<Task<ManifestDownloadResult>> fetch)>();
+                if (ryuuApiKey != null)
+                    providers.Add(("Ryuu", () => new RyuuService().DownloadPackageAsync(appId, ryuuApiKey)));
+                if (hubcapApiKey != null)
+                    providers.Add(("Hubcap", () => new HubcapService().DownloadPackageAsync(appId, hubcapApiKey)));
+
+                foreach (var (providerName, fetchFunc) in providers)
+                {
+                    if (state.Status == DepotStatus.Done) break;
+                    if (ct.IsCancellationRequested)
+                    {
+                        state.Status = DepotStatus.Cancelled;
+                        state.StatusText = "Cancelled";
+                        return;
+                    }
+
+                    state.StatusText = $"Trying {providerName}...";
+                    state.Status = DepotStatus.Connecting;
+
+                    Dictionary<string, string>? providerMap;
+                    try { providerMap = await getProviderManifests(providerName, fetchFunc); }
+                    catch (Exception ex)
+                    {
+                        Debug.WriteLine($"[DownloadService] {providerName} fetch failed for depot {depot.DepotId}: {ex.Message}");
+                        continue;
+                    }
+                    if (providerMap == null) continue;
+
+                    string? providerManifestFile = null;
+                    if (!string.IsNullOrEmpty(depot.ManifestId))
+                    {
+                        providerMap.TryGetValue($"{depot.DepotId}_{depot.ManifestId}", out providerManifestFile);
+                        if (providerManifestFile == null)
+                            providerMap.TryGetValue(depot.ManifestId, out providerManifestFile);
+                    }
+                    if (providerManifestFile == null)
+                        providerMap.TryGetValue(depot.DepotId, out providerManifestFile);
+
+                    if (providerManifestFile == null) continue;
+
+                    bool success = await DownloadDepotAsync(
+                        appId, depot, outputDir, keysFile, manifestMap, state, ct, providerManifestFile);
+
+                    if (success) return;
+                }
+
+                if (state.Status != DepotStatus.Done)
+                {
+                    state.Status = DepotStatus.Failed;
+                    state.StatusText = "Failed";
+                }
+            }
         }
 
         private async Task<bool> DownloadDepotAsync(
             string appId, DepotInfo depot, string outputDir,
             string keysFile, Dictionary<string, string> manifestMap,
-            DepotDownloadState state, CancellationToken ct)
+            DepotDownloadState state, CancellationToken ct,
+            string? manifestOverridePath = null)
         {
             state.Status = DepotStatus.Connecting;
             state.StatusText = "Connecting...";
@@ -193,11 +282,22 @@ namespace DepotDL.GUI.Services
                 psi.ArgumentList.Add("-manifest");
                 psi.ArgumentList.Add(depot.ManifestId);
 
-                string keyCombo = $"{depot.DepotId}_{depot.ManifestId}";
-                if (manifestMap.TryGetValue(keyCombo, out var mf1))
-                { psi.ArgumentList.Add("-manifestfile"); psi.ArgumentList.Add(mf1); }
-                else if (manifestMap.TryGetValue(depot.ManifestId, out var mf2))
-                { psi.ArgumentList.Add("-manifestfile"); psi.ArgumentList.Add(mf2); }
+                string? mf = manifestOverridePath;
+                if (mf == null)
+                {
+                    string keyCombo = $"{depot.DepotId}_{depot.ManifestId}";
+                    if (manifestMap.TryGetValue(keyCombo, out var mf1))
+                        mf = mf1;
+                    else if (manifestMap.TryGetValue(depot.ManifestId, out var mf2))
+                        mf = mf2;
+                }
+                if (mf != null)
+                { psi.ArgumentList.Add("-manifestfile"); psi.ArgumentList.Add(mf); }
+            }
+            else if (manifestOverridePath != null)
+            {
+                psi.ArgumentList.Add("-manifestfile");
+                psi.ArgumentList.Add(manifestOverridePath);
             }
 
             var errors = new System.Collections.Concurrent.ConcurrentBag<string>();
