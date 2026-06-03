@@ -1,6 +1,3 @@
-// This file is subject to the terms and conditions defined
-// in file 'LICENSE', which is part of this source code package.
-
 using System;
 using System.Collections.Generic;
 using System.Windows;
@@ -87,15 +84,30 @@ namespace DepotDL.GUI.Helpers
 
             try
             {
+                double startOffset = sv.VerticalOffset;
+                double startTarget = state.TargetOffset;
+                var s = GetSettings();
+                var startTime = DateTime.UtcNow;
+
                 while (true)
                 {
-                    double current = sv.VerticalOffset;
-                    double diff = state.TargetOffset - current;
+                    if (state.TargetOffset != startTarget)
+                    {
+                        startOffset = sv.VerticalOffset;
+                        startTarget = state.TargetOffset;
+                        startTime = DateTime.UtcNow;
+                        s = GetSettings();
+                    }
 
-                    if (Math.Abs(diff) < 0.5)
+                    double elapsed = (DateTime.UtcNow - startTime).TotalMilliseconds;
+                    double t = Math.Min(elapsed / s.ScrollDurationMs, 1.0);
+                    double eased = 1 - Math.Pow(1 - t, 3);
+                    double offset = startOffset + (startTarget - startOffset) * eased;
+                    sv.ScrollToVerticalOffset(offset);
+
+                    if (t >= 1.0)
                         break;
 
-                    sv.ScrollToVerticalOffset(current + diff * 0.3);
                     await System.Threading.Tasks.Task.Delay(16);
                 }
 

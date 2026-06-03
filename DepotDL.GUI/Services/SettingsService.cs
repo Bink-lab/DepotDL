@@ -50,11 +50,11 @@ namespace DepotDL.GUI.Services
 
             if (double.TryParse(Get(values, "settings.scroll_sensitivity"), out double ss))
                 s.ScrollSensitivity = Math.Clamp(ss, 0.1, 10.0);
-            else s.ScrollSensitivity = 1.5;
+            else s.ScrollSensitivity = 0.8;
 
             if (int.TryParse(Get(values, "settings.scroll_duration_ms"), out int sdms))
                 s.ScrollDurationMs = Math.Clamp(sdms, 50, 1000);
-            else s.ScrollDurationMs = 230;
+            else s.ScrollDurationMs = 300;
 
             var channelStr = Get(values, "settings.update_channel");
             s.UpdateChannel = string.Equals(channelStr, "production", StringComparison.OrdinalIgnoreCase)

@@ -16,8 +16,8 @@ namespace DepotDL.GUI.Models
         public int GpuCacheDays { get; set; } = 7;
         public int StorePageSize { get; set; } = 48;
         public int SearchDebounceMs { get; set; } = 250;
-        public double ScrollSensitivity { get; set; } = 1.5;
-        public int ScrollDurationMs { get; set; } = 230;
+        public double ScrollSensitivity { get; set; } = 0.8;
+        public int ScrollDurationMs { get; set; } = 300;
         public bool AutoSelectOsByOs { get; set; } = true;
         public bool DownloadAchievementIcons { get; set; } = true;
         public UpdateChannel UpdateChannel       { get; set; } = UpdateChannel.Nightly;
