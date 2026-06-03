@@ -12,8 +12,28 @@ namespace DepotDL.GUI.Services
     {
         private static readonly HttpClient Http = new() { Timeout = TimeSpan.FromMinutes(5) };
 
+        private async Task RequestUpdateAsync(string appId, string apiKey)
+        {
+            var url = $"https://generator.ryuu.lol/resellerrequestupdate?appid={Uri.EscapeDataString(appId)}&auth_code={Uri.EscapeDataString(apiKey)}";
+            try
+            {
+                using var cts = new System.Threading.CancellationTokenSource(TimeSpan.FromSeconds(15));
+                using var response = await Http.GetAsync(url, cts.Token);
+                if (response.StatusCode == System.Net.HttpStatusCode.BadRequest)
+                {
+                    var body = await response.Content.ReadAsByteArrayAsync();
+                    var msg = ReadJsonMessage(body);
+                    throw new InvalidOperationException(msg.Length == 0 ? "Ryuu: game not found in database." : $"Ryuu: {msg}");
+                }
+            }
+            catch (OperationCanceledException) { throw; }
+            catch (InvalidOperationException) { throw; }
+            catch { }
+        }
+
         public async Task<ManifestDownloadResult> DownloadPackageAsync(string appId, string apiKey)
         {
+            await RequestUpdateAsync(appId, apiKey);
             var url = $"https://generator.ryuu.lol/secure_download?appid={Uri.EscapeDataString(appId)}&auth_code={Uri.EscapeDataString(apiKey)}";
             using var response = await Http.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
             var contentType = response.Content.Headers.ContentType?.MediaType ?? string.Empty;

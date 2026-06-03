@@ -13,15 +13,33 @@ namespace DepotDL.CLI
             Timeout = TimeSpan.FromMinutes(5)
         };
 
+        public static void RequestUpdate(string appId, string apiKey)
+        {
+            var url = $"https://generator.ryuu.lol/resellerrequestupdate?appid={Uri.EscapeDataString(appId)}&auth_code={Uri.EscapeDataString(apiKey)}";
+            try
+            {
+                using var cts = new System.Threading.CancellationTokenSource(TimeSpan.FromSeconds(15));
+                using var response = Http.GetAsync(url, cts.Token).GetAwaiter().GetResult();
+                if (response.StatusCode == System.Net.HttpStatusCode.BadRequest)
+                {
+                    var body = response.Content.ReadAsByteArrayAsync().GetAwaiter().GetResult();
+                    var msg = ReadJsonMessage(body);
+                    throw new InvalidOperationException(msg.Length == 0 ? "Ryuu: game not found in database." : $"Ryuu: {msg}");
+                }
+            }
+            catch (OperationCanceledException) { throw; }
+            catch (InvalidOperationException) { throw; }
+            catch { }
+        }
+
         public static ManifestDownloadResult DownloadPackage(string appId, string apiKey)
         {
-            // Sanitize appId to prevent path traversal
+            RequestUpdate(appId, apiKey);
             var sanitizedAppId = SanitizeFileName(appId);
             var url = $"https://generator.ryuu.lol/secure_download?appid={Uri.EscapeDataString(appId)}&auth_code={Uri.EscapeDataString(apiKey)}";
             using var response = Http.GetAsync(url, HttpCompletionOption.ResponseHeadersRead).GetAwaiter().GetResult();
             var contentType = response.Content.Headers.ContentType?.MediaType ?? string.Empty;
 
-            // Check if response is JSON by content type first
             if (contentType.Contains("json", StringComparison.OrdinalIgnoreCase))
             {
                 var body = response.Content.ReadAsByteArrayAsync().GetAwaiter().GetResult();
@@ -43,7 +61,6 @@ namespace DepotDL.CLI
                 throw new InvalidOperationException($"Ryuu request failed with HTTP {(int)response.StatusCode}.");
             }
 
-            // Stream response to file instead of buffering in memory
             var zipPath = Path.Combine(Path.GetTempPath(), $"ryuu_{sanitizedAppId}_{Guid.NewGuid():N}.zip");
             using (var stream = response.Content.ReadAsStreamAsync().GetAwaiter().GetResult())
             using (var fileStream = new FileStream(zipPath, FileMode.Create, FileAccess.Write, FileShare.None))
@@ -68,7 +85,6 @@ namespace DepotDL.CLI
                 Message = $"Downloaded Ryuu package to {zipPath}"
             };
         }
-
 
         private static string ReadJsonMessage(byte[] body)
         {
