@@ -1850,9 +1850,7 @@ namespace DepotDL.CLI
             session.SelectedDepots = LibraryManager.FilterDownloadableDepots(session.AllDepots, appId);
             ApplyOsFilter(session);
 
-            string gameName = Path.GetFileNameWithoutExtension(session.LuaPath);
-            if (string.IsNullOrEmpty(gameName)) gameName = $"{appId}";
-
+            string gameName = GetGameName(session);
             session.OutputDir = BuildOutputDir(session, gameName);
         }
 
@@ -2588,17 +2586,24 @@ namespace DepotDL.CLI
 
         private static string GetGameName(TuiSession session)
         {
-            if (!string.IsNullOrEmpty(session.LuaPath))
-            {
-                string name = Path.GetFileNameWithoutExtension(session.LuaPath);
-                if (!string.IsNullOrEmpty(name))
-                    return name;
-            }
+            string? name = null;
             if (!string.IsNullOrEmpty(session.AppId))
             {
-                return $"App_{session.AppId}";
+                name = SteamAppInfoProvider.GetAppName(session.AppId);
             }
-            return "Game";
+            if (string.IsNullOrEmpty(name) && !string.IsNullOrEmpty(session.LuaPath))
+            {
+                name = Path.GetFileNameWithoutExtension(session.LuaPath);
+            }
+            if (string.IsNullOrEmpty(name) && !string.IsNullOrEmpty(session.AppId))
+            {
+                name = session.AppId;
+            }
+            if (string.IsNullOrEmpty(name))
+            {
+                name = "Game";
+            }
+            return LibraryManager.SanitizeFolderName(name);
         }
 
         private static string FormatSize(long bytes)

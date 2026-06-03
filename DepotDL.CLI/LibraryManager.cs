@@ -214,6 +214,17 @@ namespace DepotDL.CLI
             return depots;
         }
 
+        public static string SanitizeFolderName(string name)
+        {
+            if (string.IsNullOrWhiteSpace(name)) return string.Empty;
+            var invalid = Path.GetInvalidFileNameChars();
+            foreach (var c in invalid)
+            {
+                name = name.Replace(c, ' ');
+            }
+            return string.Join(" ", name.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries)).Trim();
+        }
+
         public static bool IsDownloadableDepot(DepotInfo depot, string? appId = null)
         {
             return !string.IsNullOrWhiteSpace(depot.DepotId) &&

@@ -265,8 +265,16 @@ namespace DepotDL.GUI.ViewModels
                 var settings = _settings.Load();
                 if (!string.IsNullOrWhiteSpace(settings.DownloadBaseDir))
                 {
-                    string folderName = Path.GetFileNameWithoutExtension(path);
-                    if (string.IsNullOrEmpty(folderName)) folderName = appId;
+                    string folderName = SteamMetadataService.GetAppName(appId);
+                    if (string.IsNullOrEmpty(folderName))
+                    {
+                        folderName = Path.GetFileNameWithoutExtension(path);
+                    }
+                    if (string.IsNullOrEmpty(folderName))
+                    {
+                        folderName = appId;
+                    }
+                    folderName = SanitizeFolderName(folderName);
                     OutputDir = Path.Combine(settings.DownloadBaseDir, folderName);
                 }
 
@@ -359,8 +367,25 @@ namespace DepotDL.GUI.ViewModels
                         item.OsArch = m.OsArch;
                     }
                     if (settings.AutoSelectOsByOs)
-                        ApplySmartOsFilter(items);
-                    UpdateCanStart();
+                         ApplySmartOsFilter(items);
+
+                     string realGameName = SteamMetadataService.GetAppName(appId);
+                     if (!string.IsNullOrWhiteSpace(realGameName) && !string.IsNullOrWhiteSpace(settings.DownloadBaseDir))
+                     {
+                         string sanitizedGameName = SanitizeFolderName(realGameName);
+                         string oldDefaultFolder = !string.IsNullOrEmpty(LuaPath) ? Path.GetFileNameWithoutExtension(LuaPath) : string.Empty;
+                         if (string.IsNullOrEmpty(oldDefaultFolder)) oldDefaultFolder = appId;
+                         oldDefaultFolder = SanitizeFolderName(oldDefaultFolder);
+
+                         string currentFolder = Path.GetFileName(OutputDir.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar));
+                         if (string.Equals(currentFolder, oldDefaultFolder, StringComparison.OrdinalIgnoreCase) || 
+                             string.Equals(currentFolder, appId, StringComparison.OrdinalIgnoreCase))
+                         {
+                             OutputDir = Path.Combine(settings.DownloadBaseDir, sanitizedGameName);
+                         }
+                     }
+
+                     UpdateCanStart();
                 });
             }
             catch { }
@@ -596,6 +621,17 @@ namespace DepotDL.GUI.ViewModels
                 }
             }
         }
+
+         private static string SanitizeFolderName(string name)
+         {
+             if (string.IsNullOrWhiteSpace(name)) return string.Empty;
+             var invalid = Path.GetInvalidFileNameChars();
+             foreach (var c in invalid)
+             {
+                 name = name.Replace(c, ' ');
+             }
+             return string.Join(" ", name.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries)).Trim();
+         }
     }
 
     public partial class DepotSelectionItem : ObservableObject

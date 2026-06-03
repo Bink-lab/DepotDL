@@ -223,7 +223,7 @@ namespace DepotDL.CLI
                 string luaContent = File.ReadAllText(luaPath);
 
                 string appId;
-                var allParsedDepots = LibraryManager.ParseLuaConfig(luaContent, out appId);
+                var allParsedDepots = LibraryManager.ParseLuaConfig(luaContent, out appId, luaPath);
 
                 if (string.IsNullOrEmpty(appId))
                 {
@@ -270,7 +270,16 @@ namespace DepotDL.CLI
 
                 if (string.IsNullOrEmpty(outputPath))
                 {
-                    outputPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "downloads", $"{appId}");
+                    string gameName = SteamAppInfoProvider.GetAppName(appId);
+                    if (string.IsNullOrEmpty(gameName))
+                    {
+                        gameName = Path.GetFileNameWithoutExtension(luaPath);
+                    }
+                    if (string.IsNullOrEmpty(gameName))
+                    {
+                        gameName = appId;
+                    }
+                    outputPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "downloads", LibraryManager.SanitizeFolderName(gameName));
                 }
                 outputPath = Path.GetFullPath(outputPath);
 
@@ -1344,7 +1353,7 @@ namespace DepotDL.CLI
             Console.WriteLine("  -l, --lua <path>            Path to the game Lua configuration file.");
             Console.WriteLine("\nOptions:");
             Console.WriteLine("  -m, --manifests-dir <dir>   Path to folder containing pre-downloaded *.manifest files.");
-            Console.WriteLine("  -o, --output <dir>          Path to directory where files will be downloaded (Defaults to './downloads/App_<appid>').");
+            Console.WriteLine("  -o, --output <dir>          Path to directory where files will be downloaded (Defaults to './downloads/<Game Name>').");
             Console.WriteLine("  -d, --ddmod <path>          Direct path to DepotDownloaderMod.dll (Auto-resolved if omitted).");
             Console.WriteLine("  -n, --dotnet <path>         Direct path to dotnet executable (Auto-resolved if omitted).");
             Console.WriteLine($"      --max-downloads <n>     Parallel chunk downloads per depot. Default: {DepotDownloadDefaults.MaxDownloads}, max: 128.");
