@@ -255,7 +255,6 @@ namespace DepotDL.GUI.Services
         {
             state.Status = DepotStatus.Connecting;
             state.StatusText = "Connecting...";
-            state.Percent = 0;
             state.SpeedText = string.Empty;
 
             var psi = new ProcessStartInfo

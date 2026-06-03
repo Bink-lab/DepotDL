@@ -505,7 +505,6 @@ namespace DepotDL.CLI
                                     lock (_drawLock)
                                     {
                                         _slots[slotId].Status = $"Retrying ({retryCount}/{maxRetries - 1})...";
-                                        _slots[slotId].Percent = null;
                                         _slots[slotId].ActiveValidationFile = null;
                                         _slots[slotId].LastProgressTime = DateTime.MinValue;
                                     }
@@ -522,7 +521,6 @@ namespace DepotDL.CLI
                                     lock (_drawLock)
                                     {
                                         _slots[slotId].Status = $"Retrying ({retryCount}/{maxRetries - 1})...";
-                                        _slots[slotId].Percent = null;
                                         _slots[slotId].ActiveValidationFile = null;
                                         _slots[slotId].LastProgressTime = DateTime.MinValue;
                                         string wdMsg = retryCount < maxRetries
@@ -624,7 +622,6 @@ namespace DepotDL.CLI
                                         lock (_drawLock)
                                         {
                                             _slots[slotId].Status = $"Trying {pName}...";
-                                            _slots[slotId].Percent = null;
                                             _slots[slotId].ActiveValidationFile = null;
                                             _slots[slotId].LastProgressTime = DateTime.MinValue;
                                             _pendingLogs.Enqueue(() => DownloadTui.WriteStatus(pName, $"Depot {dId}: retrying with {pName} manifest", ConsoleColor.Yellow));
@@ -899,7 +896,6 @@ namespace DepotDL.CLI
                         lock (_drawLock)
                         {
                             _slots[slotId].Status = "Connecting...";
-                            _slots[slotId].Percent = null;
                             _slots[slotId].LastProgressTime = DateTime.UtcNow;
                         }
                         DrawSlots(force: true);
@@ -910,7 +906,6 @@ namespace DepotDL.CLI
                         lock (_drawLock)
                         {
                             slot.Status = "Pre-allocating...";
-                            slot.Percent = null;
                             slot.LastProgressTime = DateTime.UtcNow;
                         }
                         DrawSlots(force: true);
