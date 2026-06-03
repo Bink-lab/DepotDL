@@ -28,11 +28,11 @@
                         <Border x:Name="bg" Background="{TemplateBinding Background}"
                                 CornerRadius="10" Padding="12,9">
                             <Grid>
-                                <Border x:Name="hoverBg" Background="{StaticResource Border}"
+                                <Border x:Name="hoverBg" Background="{StaticResource Accent}"
                                         CornerRadius="10" Margin="-12,-9" Opacity="0"/>
-                                <ContentPresenter Panel.ZIndex="1"/>
-                            </Grid>
-                        </Border>
+                            <ContentPresenter Panel.ZIndex="1"/>
+                        </Grid>
+                    </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
                                 <Trigger.EnterActions>
@@ -40,7 +40,7 @@
                                         <Storyboard>
                                             <DoubleAnimation Storyboard.TargetName="hoverBg"
                                                              Storyboard.TargetProperty="Opacity"
-                                                             To="1" Duration="0:0:0.15"/>
+                                                             To="0.3" Duration="0:0:0.15"/>
                                         </Storyboard>
                                     </BeginStoryboard>
                                 </Trigger.EnterActions>
@@ -59,7 +59,7 @@
                 </Setter.Value>
             </Setter>
         </Style>
-
+        
         <Style x:Key="ChromeBtn" TargetType="Button">
             <Setter Property="Width" Value="28"/>
             <Setter Property="Height" Value="28"/>

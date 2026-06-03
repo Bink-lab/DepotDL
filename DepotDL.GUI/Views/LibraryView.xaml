@@ -170,13 +170,13 @@
                 Background="{StaticResource BgCard}"
                 BorderBrush="{StaticResource Border}"
                 BorderThickness="1"
-                CornerRadius="10">
-            <Grid Margin="12,0">
+                CornerRadius="8">
+            <Grid Margin="10,0">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
-                <Viewbox Grid.Column="0" Width="15" Height="15" Margin="0,0,10,0">
+                <Viewbox Grid.Column="0" Width="16" Height="16" Margin="0,0,8,0">
                     <Canvas Width="24" Height="24">
                         <Ellipse Canvas.Left="3" Canvas.Top="3" Width="14" Height="14"
                                  Stroke="{StaticResource TextMuted}" StrokeThickness="2"/>
@@ -188,8 +188,8 @@
                 <TextBox Grid.Column="1"
                          BorderThickness="0"
                          Background="Transparent"
-                         Padding="0,10"
-                         FontSize="13"
+                         Padding="0,6"
+                         FontSize="12"
                          Foreground="{StaticResource TextPrimary}"
                          Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
                          CaretBrush="{StaticResource Accent}">
