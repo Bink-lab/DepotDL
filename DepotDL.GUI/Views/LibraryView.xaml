@@ -238,8 +238,8 @@
                     <ItemsControl.ItemTemplate>
                         <DataTemplate DataType="{x:Type vm:LibraryGameViewModel}">
                             <Border Visibility="{Binding IsVisible, Converter={StaticResource BoolToVis}}"
-                                    Margin="0,0,14,14"
-                                    Width="260">
+                                    Margin="0,0,12,12"
+                                    Width="250">
                                 <Border Style="{StaticResource Card}"
                                         Padding="0"
                                         ClipToBounds="True"
