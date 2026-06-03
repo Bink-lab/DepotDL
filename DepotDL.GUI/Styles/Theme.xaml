@@ -15,34 +15,44 @@
     <conv:EqualityToVisibilityConverter x:Key="EqToVis"/>
     <conv:EqualityToBoolConverter x:Key="EqToBool"/>
 
-    <Color x:Key="AccentColor">#C07840</Color>
-    <Color x:Key="BgCardColor">#FEFCF8</Color>
-    <Color x:Key="BorderColor">#DDD0C2</Color>
+    <!-- Zinc Dark Theme -->
+    <Color x:Key="AccentColor">#3B82F6</Color>
+    <Color x:Key="BgCardColor">#2A2C35</Color>
+    <Color x:Key="BorderColor">#5A5D6B</Color>
 
-    <SolidColorBrush x:Key="BgPage"          Color="#F5F0E8"/>
-    <SolidColorBrush x:Key="BgSidebar"       Color="#EDE6DB"/>
-    <SolidColorBrush x:Key="BgCard"          Color="#FEFCF8"/>
-    <SolidColorBrush x:Key="BgInput"         Color="#FFFFFF"/>
-    <SolidColorBrush x:Key="Accent"          Color="#C07840"/>
-    <SolidColorBrush x:Key="AccentDark"      Color="#A86332"/>
-    <SolidColorBrush x:Key="AccentLight"     Color="#F0E0CE"/>
-    <SolidColorBrush x:Key="AccentSubtle"    Color="#FAF0E6"/>
-    <SolidColorBrush x:Key="AccentVeryLight" Color="#FAF0E6"/>
-    <SolidColorBrush x:Key="TextH"           Color="#1C1610"/>
-    <SolidColorBrush x:Key="TextPrimary"     Color="#1C1610"/>
-    <SolidColorBrush x:Key="TextBody"        Color="#5A4E42"/>
-    <SolidColorBrush x:Key="TextSecondary"   Color="#5A4E42"/>
-    <SolidColorBrush x:Key="TextMuted"       Color="#9C8E82"/>
-    <SolidColorBrush x:Key="Border"          Color="#DDD0C2"/>
-    <SolidColorBrush x:Key="BorderFocus"     Color="#C07840"/>
-    <SolidColorBrush x:Key="Success"         Color="#4A7C59"/>
-    <SolidColorBrush x:Key="SuccessBg"       Color="#EAF4EE"/>
-    <SolidColorBrush x:Key="SuccessLight"    Color="#EAF4EE"/>
-    <SolidColorBrush x:Key="Error"           Color="#B83B2A"/>
-    <SolidColorBrush x:Key="ErrorBg"         Color="#FDECEA"/>
-    <SolidColorBrush x:Key="ErrorLight"      Color="#FDECEA"/>
-    <SolidColorBrush x:Key="Warning"         Color="#C07012"/>
-    <SolidColorBrush x:Key="WarningBg"       Color="#FEF3E2"/>
+    <!-- BACKGROUNDS -->
+    <SolidColorBrush x:Key="BgPage"          Color="#1E2028"/>
+    <SolidColorBrush x:Key="BgSidebar"       Color="#121319"/>
+    <SolidColorBrush x:Key="BgCard"          Color="#2A2C35"/>
+    <SolidColorBrush x:Key="BgInput"         Color="#373945"/>
+
+    <!-- ACCENT (Blue) -->
+    <SolidColorBrush x:Key="Accent"          Color="#3B82F6"/>
+    <SolidColorBrush x:Key="AccentDark"      Color="#2563EB"/>
+    <SolidColorBrush x:Key="AccentLight"     Color="#2D3952"/>
+    <SolidColorBrush x:Key="AccentSubtle"    Color="#2C3548"/>
+    <SolidColorBrush x:Key="AccentVeryLight" Color="#2B3344"/>
+
+    <!-- TEXT -->
+    <SolidColorBrush x:Key="TextH"           Color="#F5F5FA"/>
+    <SolidColorBrush x:Key="TextPrimary"     Color="#F5F5FA"/>
+    <SolidColorBrush x:Key="TextBody"        Color="#A0A5B4"/>
+    <SolidColorBrush x:Key="TextSecondary"   Color="#A0A5B4"/>
+    <SolidColorBrush x:Key="TextMuted"       Color="#6E7380"/>
+
+    <!-- BORDERS -->
+    <SolidColorBrush x:Key="Border"          Color="#5A5D6B"/>
+    <SolidColorBrush x:Key="BorderFocus"     Color="#3B82F6"/>
+
+    <!-- SEMANTIC COLORS -->
+    <SolidColorBrush x:Key="Success"         Color="#22C55E"/>
+    <SolidColorBrush x:Key="SuccessBg"       Color="#293838"/>
+    <SolidColorBrush x:Key="SuccessLight"    Color="#293B39"/>
+    <SolidColorBrush x:Key="Error"           Color="#F43F5E"/>
+    <SolidColorBrush x:Key="ErrorBg"         Color="#3A2E38"/>
+    <SolidColorBrush x:Key="ErrorLight"      Color="#3E2E39"/>
+    <SolidColorBrush x:Key="Warning"         Color="#EAB308"/>
+    <SolidColorBrush x:Key="WarningBg"       Color="#393731"/>
 
     <Style x:Key="H1" TargetType="TextBlock">
         <Setter Property="FontFamily" Value="Segoe UI"/>
@@ -207,6 +217,42 @@
         </Setter>
     </Style>
 
+    <Style TargetType="RadioButton">
+        <Setter Property="Foreground" Value="{StaticResource TextBody}"/>
+        <Setter Property="FontSize" Value="13"/>
+        <Setter Property="FontFamily" Value="Segoe UI"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="Margin" Value="0,2"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="RadioButton">
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center"
+                                TextElement.Foreground="{TemplateBinding Foreground}">
+                        <Border x:Name="ring" Width="17" Height="17"
+                                CornerRadius="9"
+                                BorderBrush="{StaticResource TextMuted}"
+                                BorderThickness="1.5"
+                                Background="Transparent">
+                            <Ellipse x:Name="dot" Width="7" Height="7"
+                                     Fill="{StaticResource Accent}"
+                                     Visibility="Collapsed"/>
+                        </Border>
+                        <ContentPresenter Margin="8,0,0,0" VerticalAlignment="Center"/>
+                    </StackPanel>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter TargetName="ring" Property="BorderBrush" Value="{StaticResource Accent}"/>
+                            <Setter TargetName="dot" Property="Visibility" Value="Visible"/>
+                        </Trigger>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="ring" Property="BorderBrush" Value="{StaticResource Accent}"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
     <Style TargetType="Slider">
         <Setter Property="Template">
             <Setter.Value>
@@ -229,7 +275,7 @@
                                                  Fill="{StaticResource Accent}"
                                                  Stroke="White" StrokeThickness="2.5">
                                             <Ellipse.Effect>
-                                                <DropShadowEffect Color="#C07840" BlurRadius="8" ShadowDepth="1" Opacity="0.3"/>
+                                                <DropShadowEffect Color="#3B82F6" BlurRadius="8" ShadowDepth="1" Opacity="0.3"/>
                                             </Ellipse.Effect>
                                         </Ellipse>
                                         <ControlTemplate.Triggers>
@@ -273,7 +319,7 @@
                             CornerRadius="9"
                             Padding="{TemplateBinding Padding}">
                         <Border.Effect>
-                            <DropShadowEffect Color="#C07840" BlurRadius="14"
+                            <DropShadowEffect Color="#3B82F6" BlurRadius="14"
                                              ShadowDepth="3" Opacity="0.22"/>
                         </Border.Effect>
                         <Border.RenderTransform>
@@ -337,7 +383,7 @@
     <Style x:Key="BtnDanger" TargetType="Button">
         <Setter Property="Background" Value="Transparent"/>
         <Setter Property="Foreground" Value="{StaticResource Error}"/>
-        <Setter Property="BorderBrush" Value="#EBC5C1"/>
+        <Setter Property="BorderBrush" Value="#5A2E38"/>
         <Setter Property="BorderThickness" Value="1.5"/>
         <Setter Property="Padding" Value="14,7"/>
         <Setter Property="FontSize" Value="12"/>

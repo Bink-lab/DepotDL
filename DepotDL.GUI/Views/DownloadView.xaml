@@ -44,7 +44,7 @@
                                 Background="{StaticResource AccentVeryLight}"
                                 Margin="0,0,14,0">
                             <Border.Effect>
-                                <DropShadowEffect Color="#C07840" BlurRadius="10" ShadowDepth="1" Opacity="0.2"/>
+                                <DropShadowEffect Color="{StaticResource AccentColor}" BlurRadius="10" ShadowDepth="1" Opacity="0.2"/>
                             </Border.Effect>
                             <Viewbox Width="18" Height="18">
                                 <Canvas Width="24" Height="24">
@@ -118,7 +118,7 @@
                     <Border Background="{StaticResource ErrorBg}"
                             CornerRadius="8" Padding="14,10"
                             Margin="0,14,0,0"
-                            BorderBrush="#EBC5C1"
+                            BorderBrush="{StaticResource ErrorLight}"
                             BorderThickness="1"
                             Visibility="{Binding RyuuError, Converter={StaticResource NotEmptyToVis}}">
                         <StackPanel Orientation="Horizontal">
@@ -143,7 +143,7 @@
                                 Background="{StaticResource AccentVeryLight}"
                                 Margin="0,0,14,0">
                             <Border.Effect>
-                                <DropShadowEffect Color="#C07840" BlurRadius="10" ShadowDepth="1" Opacity="0.2"/>
+                                <DropShadowEffect Color="{StaticResource AccentColor}" BlurRadius="10" ShadowDepth="1" Opacity="0.2"/>
                             </Border.Effect>
                             <Viewbox Width="18" Height="18">
                                 <Canvas Width="24" Height="24">
@@ -217,7 +217,7 @@
                     <Border Background="{StaticResource ErrorBg}"
                             CornerRadius="8" Padding="14,10"
                             Margin="0,14,0,0"
-                            BorderBrush="#EBC5C1"
+                            BorderBrush="{StaticResource ErrorLight}"
                             BorderThickness="1"
                             Visibility="{Binding HubcapError, Converter={StaticResource NotEmptyToVis}}">
                         <StackPanel Orientation="Horizontal">
@@ -292,7 +292,7 @@
                     <Border Background="{StaticResource ErrorBg}"
                             CornerRadius="8" Padding="14,10"
                             Margin="0,12,0,0"
-                            BorderBrush="#EBC5C1"
+                            BorderBrush="{StaticResource ErrorLight}"
                             BorderThickness="1"
                             Visibility="{Binding ZipError, Converter={StaticResource NotEmptyToVis}}">
                         <StackPanel Orientation="Horizontal">
@@ -308,7 +308,7 @@
                     <Border Background="{StaticResource ErrorBg}"
                             CornerRadius="8" Padding="14,10"
                             Margin="0,12,0,0"
-                            BorderBrush="#EBC5C1"
+                            BorderBrush="{StaticResource ErrorLight}"
                             BorderThickness="1"
                             Visibility="{Binding ParseError, Converter={StaticResource NotEmptyToVis}}">
                         <StackPanel Orientation="Horizontal">
@@ -539,7 +539,7 @@
                     Height="46"
                     HorizontalAlignment="Stretch">
                 <Button.Effect>
-                    <DropShadowEffect Color="#C07840" BlurRadius="18" ShadowDepth="3" Opacity="0.3"/>
+                    <DropShadowEffect Color="{StaticResource AccentColor}" BlurRadius="18" ShadowDepth="3" Opacity="0.3"/>
                 </Button.Effect>
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                     <Viewbox Width="16" Height="16" Margin="0,0,10,0">
@@ -735,7 +735,7 @@
             <Border Grid.Row="6"
                     CornerRadius="12" Padding="20,14"
                     Background="{StaticResource SuccessBg}"
-                    BorderBrush="#C5E1D4"
+                     BorderBrush="{StaticResource SuccessLight}"
                     BorderThickness="1"
                     Visibility="{Binding DownloadComplete, Converter={StaticResource BoolToVis}}">
                 <Grid>
@@ -763,7 +763,7 @@
             <Border Grid.Row="6"
                     CornerRadius="12" Padding="20,14"
                     Background="{StaticResource ErrorBg}"
-                    BorderBrush="#EBC5C1"
+                    BorderBrush="{StaticResource ErrorLight}"
                     BorderThickness="1"
                     Visibility="{Binding DownloadFailed, Converter={StaticResource BoolToVis}}">
                 <Grid>

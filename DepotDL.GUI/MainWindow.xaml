@@ -8,7 +8,7 @@
         WindowStartupLocation="CenterScreen"
         WindowStyle="None"
         AllowsTransparency="True"
-        ResizeMode="CanResizeWithGrip"
+        ResizeMode="CanResize"
         Background="Transparent"
         FontFamily="Segoe UI"
         TextOptions.TextFormattingMode="Display"
@@ -318,10 +318,10 @@
                                     <Rectangle Canvas.Left="0" Canvas.Top="0" Width="6.5" Height="6.5" RadiusX="1.5" RadiusY="1.5">
                                         <Rectangle.Style>
                                             <Style TargetType="Rectangle">
-                                                <Setter Property="Fill" Value="#9C8E82"/>
+                                                <Setter Property="Fill" Value="{StaticResource TextMuted}"/>
                                                 <Style.Triggers>
                                                     <DataTrigger Binding="{Binding IsLibraryPage}" Value="True">
-                                                        <Setter Property="Fill" Value="#C07840"/>
+                                                        <Setter Property="Fill" Value="{StaticResource Accent}"/>
                                                     </DataTrigger>
                                                 </Style.Triggers>
                                             </Style>
@@ -330,10 +330,10 @@
                                     <Rectangle Canvas.Left="9.5" Canvas.Top="0" Width="6.5" Height="6.5" RadiusX="1.5" RadiusY="1.5">
                                         <Rectangle.Style>
                                             <Style TargetType="Rectangle">
-                                                <Setter Property="Fill" Value="#9C8E82"/>
+                                                <Setter Property="Fill" Value="{StaticResource TextMuted}"/>
                                                 <Style.Triggers>
                                                     <DataTrigger Binding="{Binding IsLibraryPage}" Value="True">
-                                                        <Setter Property="Fill" Value="#C07840"/>
+                                                        <Setter Property="Fill" Value="{StaticResource Accent}"/>
                                                     </DataTrigger>
                                                 </Style.Triggers>
                                             </Style>
@@ -342,10 +342,10 @@
                                     <Rectangle Canvas.Left="0" Canvas.Top="9.5" Width="6.5" Height="6.5" RadiusX="1.5" RadiusY="1.5">
                                         <Rectangle.Style>
                                             <Style TargetType="Rectangle">
-                                                <Setter Property="Fill" Value="#9C8E82"/>
+                                                <Setter Property="Fill" Value="{StaticResource TextMuted}"/>
                                                 <Style.Triggers>
                                                     <DataTrigger Binding="{Binding IsLibraryPage}" Value="True">
-                                                        <Setter Property="Fill" Value="#C07840"/>
+                                                        <Setter Property="Fill" Value="{StaticResource Accent}"/>
                                                     </DataTrigger>
                                                 </Style.Triggers>
                                             </Style>
@@ -354,10 +354,10 @@
                                     <Rectangle Canvas.Left="9.5" Canvas.Top="9.5" Width="6.5" Height="6.5" RadiusX="1.5" RadiusY="1.5">
                                         <Rectangle.Style>
                                             <Style TargetType="Rectangle">
-                                                <Setter Property="Fill" Value="#9C8E82"/>
+                                                <Setter Property="Fill" Value="{StaticResource TextMuted}"/>
                                                 <Style.Triggers>
                                                     <DataTrigger Binding="{Binding IsLibraryPage}" Value="True">
-                                                        <Setter Property="Fill" Value="#C07840"/>
+                                                        <Setter Property="Fill" Value="{StaticResource Accent}"/>
                                                     </DataTrigger>
                                                 </Style.Triggers>
                                             </Style>
@@ -572,7 +572,7 @@
                     <!-- Update notification banner -->
                     <Border VerticalAlignment="Bottom" HorizontalAlignment="Left"
                             Margin="16,0,0,16" Panel.ZIndex="6" CornerRadius="12"
-                            BorderThickness="1" BorderBrush="#DDB060" Background="#FEF3E2"
+                            BorderThickness="1" BorderBrush="{StaticResource Warning}" Background="{StaticResource WarningBg}"
                             MaxWidth="380" Padding="14,10"
                             Visibility="{Binding UpdateAvailable, Converter={StaticResource BoolToVis}}">
                         <Grid>
@@ -588,19 +588,19 @@
                             <Viewbox Grid.Column="0" Width="15" Height="15" Margin="0,0,10,0">
                                 <Canvas Width="24" Height="24">
                                     <Path Data="M12,2 L22,20 L2,20 Z"
-                                          Stroke="#C07012" StrokeThickness="1.8" Fill="Transparent"
+                                          Stroke="{StaticResource Warning}" StrokeThickness="1.8" Fill="Transparent"
                                           StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
                                     <Line X1="12" Y1="9" X2="12" Y2="14"
-                                          Stroke="#C07012" StrokeThickness="1.8"
+                                          Stroke="{StaticResource Warning}" StrokeThickness="1.8"
                                           StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
                                     <Ellipse Canvas.Left="11" Canvas.Top="16" Width="2" Height="2"
-                                             Fill="#C07012"/>
+                                             Fill="{StaticResource Warning}"/>
                                 </Canvas>
                             </Viewbox>
 
                             <TextBlock Grid.Column="1"
                                        Text="{Binding UpdateBannerText}"
-                                       FontSize="12.5" Foreground="#7A5500"
+                                       FontSize="12.5" Foreground="{StaticResource Warning}"
                                        VerticalAlignment="Center"
                                        TextTrimming="CharacterEllipsis"/>
 
@@ -609,7 +609,7 @@
                                     Background="Transparent" BorderThickness="0"
                                     Cursor="Hand" Padding="0">
                                 <TextBlock Text="View release" FontSize="12"
-                                           Foreground="#1A73E8"
+                                           Foreground="{StaticResource Accent}"
                                            TextDecorations="Underline"
                                            VerticalAlignment="Center"/>
                             </Button>
@@ -620,7 +620,7 @@
                                     Cursor="Hand" Padding="2,0" VerticalAlignment="Center">
                                 <Path Data="M1,1 L7,7 M7,1 L1,7"
                                       Width="8" Height="8" Stretch="Uniform"
-                                      Stroke="#9C8E82" StrokeThickness="1.5"
+                                      Stroke="{StaticResource TextMuted}" StrokeThickness="1.5"
                                       StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
                             </Button>
                         </Grid>
@@ -696,7 +696,7 @@
                                             </Border.Width>
                                             <Border.Effect>
                                                 <DropShadowEffect BlurRadius="8" ShadowDepth="0" Opacity="0.4"
-                                                                  Color="{StaticResource AccentColor}"/>
+                                                                   Color="{StaticResource AccentColor}"/>
                                             </Border.Effect>
                                         </Border>
                                     </Border>
@@ -799,7 +799,7 @@
             <Border x:Name="SplashOverlay" Grid.ColumnSpan="2" CornerRadius="14" Panel.ZIndex="100" RenderTransformOrigin="0.5,0.5">
                 <Border.Background>
                     <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                        <GradientStop Color="#FEFCF8" Offset="0"/>                        <GradientStop Color="#F5F0E8" Offset="1"/>                    </LinearGradientBrush>
+                        <GradientStop Color="#121319" Offset="0"/>                        <GradientStop Color="#1E2028" Offset="1"/>                    </LinearGradientBrush>
                 </Border.Background>
                 <Border.RenderTransform>
                     <TransformGroup>
@@ -811,7 +811,7 @@
                 <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
                     <Border Width="80" Height="80" CornerRadius="40" Background="{StaticResource Accent}" HorizontalAlignment="Center" Margin="0,0,0,24">
                         <Border.Effect>
-                            <DropShadowEffect Color="#C07840" BlurRadius="25" ShadowDepth="3" Opacity="0.3"/>
+                            <DropShadowEffect Color="{StaticResource AccentColor}" BlurRadius="25" ShadowDepth="3" Opacity="0.3"/>
                         </Border.Effect>
                         <TextBlock Text="D" FontSize="36" FontWeight="Bold" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                     </Border>
@@ -823,7 +823,7 @@
                     <Border Width="200" Height="3" CornerRadius="1.5" Background="{StaticResource AccentLight}" HorizontalAlignment="Center">
                         <Border x:Name="SplashProgressBar" Width="0" Height="3" CornerRadius="1.5" Background="{StaticResource Accent}" HorizontalAlignment="Left">
                             <Border.Effect>
-                                <DropShadowEffect Color="#C07840" BlurRadius="8" ShadowDepth="0" Opacity="0.4"/>
+                                <DropShadowEffect Color="{StaticResource AccentColor}" BlurRadius="8" ShadowDepth="0" Opacity="0.4"/>
                             </Border.Effect>
                         </Border>
                     </Border>

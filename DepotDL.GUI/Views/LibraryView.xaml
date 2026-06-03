@@ -53,7 +53,7 @@
                                                 </DoubleAnimation>
                                                 <ColorAnimation Storyboard.TargetName="border"
                                                                 Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)"
-                                                                To="#F2D5BF" Duration="0:0:0.2"/>
+                                                                To="#3D4962" Duration="0:0:0.2"/>
                                             </Storyboard>
                                         </BeginStoryboard>
                                     </Trigger.EnterActions>
@@ -69,7 +69,7 @@
                                                 </DoubleAnimation>
                                                 <ColorAnimation Storyboard.TargetName="border"
                                                                 Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)"
-                                                                To="#FAF0E6" Duration="0:0:0.2"/>
+                                                                To="#2C3548" Duration="0:0:0.2"/>
                                             </Storyboard>
                                         </BeginStoryboard>
                                     </Trigger.ExitActions>
@@ -83,8 +83,8 @@
                 </Setter>
             </Style>
             <Style x:Key="ModernContextMenu" TargetType="ContextMenu">
-                <Setter Property="Background" Value="#FEFCF8"/>
-                <Setter Property="BorderBrush" Value="#DDD0C2"/>
+                <Setter Property="Background" Value="{StaticResource BgCard}"/>
+                <Setter Property="BorderBrush" Value="{StaticResource Border}"/>
                 <Setter Property="BorderThickness" Value="1"/>
                 <Setter Property="Padding" Value="4,4"/>
                 <Setter Property="HasDropShadow" Value="False"/>
@@ -96,7 +96,7 @@
                                     BorderThickness="{TemplateBinding BorderThickness}"
                                     CornerRadius="8">
                                 <Border.Effect>
-                                    <DropShadowEffect BlurRadius="12" ShadowDepth="2" Opacity="0.15" Color="#1C1610"/>
+                                    <DropShadowEffect BlurRadius="12" ShadowDepth="2" Opacity="0.4" Color="#000000"/>
                                 </Border.Effect>
                                 <ItemsPresenter KeyboardNavigation.DirectionalNavigation="Cycle"/>
                             </Border>
@@ -121,7 +121,7 @@
                             </Border>
                             <ControlTemplate.Triggers>
                                 <Trigger Property="IsHighlighted" Value="True">
-                                    <Setter TargetName="Bg" Property="Background" Value="#F0E0CE"/>
+                                    <Setter TargetName="Bg" Property="Background" Value="{StaticResource AccentLight}"/>
                                 </Trigger>
                             </ControlTemplate.Triggers>
                         </ControlTemplate>
@@ -256,7 +256,7 @@
                                                       Style="{StaticResource ModernMenuItem}"
                                                       Command="{Binding Path=PlacementTarget.Tag.OpenFolderCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
                                                       CommandParameter="{Binding Path=PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
-                                            <Separator Margin="6,3" Background="#E8DDD2"/>
+                                            <Separator Margin="6,3" Background="{StaticResource Border}"/>
                                             <MenuItem Header="Validate Files"
                                                       Style="{StaticResource ModernMenuItem}"
                                                       Command="{Binding Path=PlacementTarget.Tag.ValidateFilesCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
@@ -269,10 +269,10 @@
                                                       Style="{StaticResource ModernMenuItem}"
                                                       Command="{Binding Path=PlacementTarget.Tag.PackGameCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
                                                       CommandParameter="{Binding Path=PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
-                                            <Separator Margin="6,3" Background="#E8DDD2"/>
+                                            <Separator Margin="6,3" Background="{StaticResource Border}"/>
                                             <MenuItem Header="Remove from Library"
                                                       Style="{StaticResource ModernMenuItem}"
-                                                      Foreground="#B83B2A"
+                                                       Foreground="{StaticResource Error}"
                                                       Command="{Binding Path=PlacementTarget.Tag.ConfirmRemoveCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
                                                       CommandParameter="{Binding Path=PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
                                         </ContextMenu>
@@ -465,7 +465,7 @@
             </Style>
         </Grid.Style>
 
-        <Rectangle Fill="#1C1610" Opacity="0.72">
+        <Rectangle Fill="#000000" Opacity="0.7">
             <Rectangle.InputBindings>
                 <MouseBinding MouseAction="LeftClick" Command="{Binding CancelRedownloadCommand}"/>
             </Rectangle.InputBindings>
@@ -601,7 +601,7 @@
             </Grid.Style>
 
             <!-- Backdrop -->
-            <Rectangle Fill="#1C1610" Opacity="0.72">
+            <Rectangle Fill="#000000" Opacity="0.7">
                 <Rectangle.InputBindings>
                     <MouseBinding MouseAction="LeftClick" Command="{Binding CancelRemoveCommand}"/>
                 </Rectangle.InputBindings>

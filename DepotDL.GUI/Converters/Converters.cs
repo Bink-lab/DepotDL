@@ -36,16 +36,16 @@ namespace DepotDL.GUI.Converters
             {
                 return s switch
                 {
-                    DepotStatus.Done     => new SolidColorBrush(Color.FromRgb(92, 139, 92)),
-                    DepotStatus.Failed   => new SolidColorBrush(Color.FromRgb(192, 57, 43)),
-                    DepotStatus.Downloading => new SolidColorBrush(Color.FromRgb(200, 151, 90)),
-                    DepotStatus.Validating  => new SolidColorBrush(Color.FromRgb(107, 93, 79)),
-                    DepotStatus.Cancelled   => new SolidColorBrush(Color.FromRgb(160, 144, 128)),
-                    DepotStatus.Skipped     => new SolidColorBrush(Color.FromRgb(160, 144, 128)),
-                    _ => new SolidColorBrush(Color.FromRgb(160, 144, 128))
+                    DepotStatus.Done     => new SolidColorBrush(Color.FromRgb(34, 197, 94)),
+                    DepotStatus.Failed   => new SolidColorBrush(Color.FromRgb(244, 63, 94)),
+                    DepotStatus.Downloading => new SolidColorBrush(Color.FromRgb(59, 130, 246)),
+                    DepotStatus.Validating  => new SolidColorBrush(Color.FromRgb(160, 165, 180)),
+                    DepotStatus.Cancelled   => new SolidColorBrush(Color.FromRgb(110, 115, 128)),
+                    DepotStatus.Skipped     => new SolidColorBrush(Color.FromRgb(110, 115, 128)),
+                    _ => new SolidColorBrush(Color.FromRgb(110, 115, 128))
                 };
             }
-            return new SolidColorBrush(Color.FromRgb(160, 144, 128));
+            return new SolidColorBrush(Color.FromRgb(110, 115, 128));
         }
         public object ConvertBack(object v, Type t, object p, CultureInfo c) => DependencyProperty.UnsetValue;
     }
