@@ -151,7 +151,6 @@
                                Margin="8,0,0,0"
                                Foreground="{StaticResource TextMuted}"
                                Visibility="{Binding TotalSizeText, Converter={StaticResource NotEmptyToVis}}">
-                        <Run Text="·  "/>
                         <Run Text="{Binding TotalSizeText}"/>
                     </TextBlock>
                 </StackPanel>
