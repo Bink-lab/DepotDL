@@ -442,7 +442,8 @@ namespace DepotDL.GUI.ViewModels
                         DepotIds = selectedDepots.Select(d => d.DepotId).ToList(),
                         InstallDate = DateTime.Now,
                         TotalSizeBytes = LibraryService.GetDirectorySize(OutputDir),
-                        IsVerified = true
+                        IsVerified = true,
+                        BuildId = SteamMetadataService.GetBuildId(AppId, selectedDepots.Select(d => d.ManifestId).ToList())
                     };
                     _library.AddOrUpdate(game);
                 }

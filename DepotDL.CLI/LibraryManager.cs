@@ -16,6 +16,7 @@ namespace DepotDL.CLI
         public DateTime InstallDate { get; set; }
         public long TotalSizeBytes { get; set; }
         public bool IsVerified { get; set; } = true;
+        public string BuildId { get; set; } = string.Empty;
     }
 
     public static class LibraryManager

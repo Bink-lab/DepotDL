@@ -21,10 +21,38 @@ namespace DepotDL.GUI.Services
         private static readonly ConcurrentDictionary<string, Dictionary<string, SteamDepotMeta>> _cache =
             new(StringComparer.OrdinalIgnoreCase);
         private static readonly ConcurrentDictionary<string, string> _appNameCache = new(StringComparer.OrdinalIgnoreCase);
+        private static readonly ConcurrentDictionary<string, string> _buildIdCache = new(StringComparer.OrdinalIgnoreCase);
+        private static readonly ConcurrentDictionary<string, ConcurrentDictionary<string, string>> _manifestToBuildIdCache = new(StringComparer.OrdinalIgnoreCase);
 
         public static string GetAppName(string appId)
         {
             if (_appNameCache.TryGetValue(appId, out var name)) return name;
+            return string.Empty;
+        }
+
+        public static string GetBuildId(string appId, IEnumerable<string>? manifestIds = null)
+        {
+            if (manifestIds != null && _manifestToBuildIdCache.TryGetValue(appId, out var map))
+            {
+                foreach (var gid in manifestIds)
+                {
+                    if (!string.IsNullOrEmpty(gid) && map.TryGetValue(gid, out var matchedBid))
+                    {
+                        return matchedBid;
+                    }
+                }
+            }
+
+            if (_buildIdCache.TryGetValue(appId, out var bid)) return bid;
+            return string.Empty;
+        }
+
+        private static string ReadBuildIdJson(JsonElement element)
+        {
+            if (element.TryGetProperty("buildid", out var v))
+            {
+                return v.ValueKind == JsonValueKind.String ? v.GetString() ?? string.Empty : v.GetRawText();
+            }
             return string.Empty;
         }
 
@@ -94,6 +122,24 @@ namespace DepotDL.GUI.Services
                     _appNameCache[appId] = nameVal.GetString() ?? string.Empty;
                 }
 
+                if (depots.TryGetProperty("branches", out var branches) && branches.ValueKind == JsonValueKind.Object)
+                {
+                    if (branches.TryGetProperty("public", out var publicBranch) && publicBranch.ValueKind == JsonValueKind.Object)
+                    {
+                        _buildIdCache[appId] = ReadBuildIdJson(publicBranch);
+                    }
+                    else
+                    {
+                        var firstBranch = branches.EnumerateObject().FirstOrDefault();
+                        if (firstBranch.Value.ValueKind == JsonValueKind.Object)
+                        {
+                            _buildIdCache[appId] = ReadBuildIdJson(firstBranch.Value);
+                        }
+                    }
+                }
+
+                ExtractManifestBuildIdsJson(appId, depots);
+
                 foreach (var depot in depots.EnumerateObject())
                 {
                     if (!ulong.TryParse(depot.Name, out _) || depot.Value.ValueKind != JsonValueKind.Object)
@@ -151,12 +197,37 @@ namespace DepotDL.GUI.Services
                         {
                             foreach (var app in r.Apps)
                             {
-                                var appName = app.Value.KeyValues["common"]["name"].AsString();
+                                var appInfo = app.Value.KeyValues;
+                                var appName = appInfo["common"]["name"].AsString();
                                 if (!string.IsNullOrEmpty(appName))
                                 {
                                     _appNameCache[appId] = appName;
                                 }
-                                ReadDepots(app.Value.KeyValues, result);
+                                ReadDepots(appInfo, result);
+
+                                var depotsNode = appInfo["depots"];
+                                if (depotsNode != KeyValue.Invalid)
+                                {
+                                    var branchesNode = depotsNode["branches"];
+                                    if (branchesNode != KeyValue.Invalid)
+                                    {
+                                        var publicBranch = branchesNode["public"];
+                                        if (publicBranch != KeyValue.Invalid && publicBranch["buildid"] != KeyValue.Invalid)
+                                        {
+                                            _buildIdCache[appId] = publicBranch["buildid"].Value ?? string.Empty;
+                                        }
+                                        else
+                                        {
+                                            var firstBranch = branchesNode.Children.FirstOrDefault();
+                                            if (firstBranch != null && firstBranch["buildid"] != KeyValue.Invalid)
+                                            {
+                                                _buildIdCache[appId] = firstBranch["buildid"].Value ?? string.Empty;
+                                            }
+                                        }
+                                    }
+
+                                    ExtractManifestBuildIdsKeyValue(appId, depotsNode);
+                                }
                             }
                         }
                     }
@@ -211,6 +282,93 @@ namespace DepotDL.GUI.Services
                     OsList = config == KeyValue.Invalid ? string.Empty : config["oslist"].AsString() ?? string.Empty,
                     OsArch = config == KeyValue.Invalid ? string.Empty : config["osarch"].AsString() ?? string.Empty,
                 };
+            }
+        }
+
+        private static void ExtractManifestBuildIdsJson(string appId, JsonElement depots)
+        {
+            if (depots.ValueKind != JsonValueKind.Object) return;
+
+            var map = _manifestToBuildIdCache.GetOrAdd(appId, _ => new(StringComparer.OrdinalIgnoreCase));
+
+            var branchBuildIds = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            if (depots.TryGetProperty("branches", out var branches) && branches.ValueKind == JsonValueKind.Object)
+            {
+                foreach (var branch in branches.EnumerateObject())
+                {
+                    if (branch.Value.ValueKind == JsonValueKind.Object && branch.Value.TryGetProperty("buildid", out var buildIdVal))
+                    {
+                        var bid = buildIdVal.ValueKind == JsonValueKind.String ? buildIdVal.GetString() ?? string.Empty : buildIdVal.GetRawText();
+                        if (!string.IsNullOrEmpty(bid))
+                        {
+                            branchBuildIds[branch.Name] = bid;
+                        }
+                    }
+                }
+            }
+
+            foreach (var prop in depots.EnumerateObject())
+            {
+                if (!ulong.TryParse(prop.Name, out _) || prop.Value.ValueKind != JsonValueKind.Object)
+                    continue;
+
+                if (prop.Value.TryGetProperty("manifests", out var manifests) && manifests.ValueKind == JsonValueKind.Object)
+                {
+                    foreach (var branchManifest in manifests.EnumerateObject())
+                    {
+                        if (branchManifest.Value.ValueKind == JsonValueKind.Object &&
+                            branchManifest.Value.TryGetProperty("gid", out var gidVal))
+                        {
+                            var gid = gidVal.ValueKind == JsonValueKind.String ? gidVal.GetString() ?? string.Empty : gidVal.GetRawText();
+                            if (!string.IsNullOrEmpty(gid) && branchBuildIds.TryGetValue(branchManifest.Name, out var bid))
+                            {
+                                map[gid] = bid;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        private static void ExtractManifestBuildIdsKeyValue(string appId, KeyValue depotsNode)
+        {
+            if (depotsNode == KeyValue.Invalid) return;
+
+            var map = _manifestToBuildIdCache.GetOrAdd(appId, _ => new(StringComparer.OrdinalIgnoreCase));
+
+            var branchBuildIds = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            var branchesNode = depotsNode["branches"];
+            if (branchesNode != KeyValue.Invalid)
+            {
+                foreach (var branch in branchesNode.Children)
+                {
+                    var buildIdVal = branch["buildid"];
+                    if (buildIdVal != KeyValue.Invalid && !string.IsNullOrEmpty(buildIdVal.Value))
+                    {
+                        branchBuildIds[branch.Name ?? string.Empty] = buildIdVal.Value;
+                    }
+                }
+            }
+
+            foreach (var depot in depotsNode.Children)
+            {
+                if (!ulong.TryParse(depot.Name, out _)) continue;
+
+                var manifestsNode = depot["manifests"];
+                if (manifestsNode != KeyValue.Invalid)
+                {
+                    foreach (var branchManifest in manifestsNode.Children)
+                    {
+                        var gidVal = branchManifest["gid"];
+                        if (gidVal != KeyValue.Invalid && !string.IsNullOrEmpty(gidVal.Value))
+                        {
+                            if (branchBuildIds.TryGetValue(branchManifest.Name ?? string.Empty, out var bid))
+                            {
+                                map[gidVal.Value] = bid;
+                            }
+                        }
+                    }
+                }
             }
         }
     }

@@ -576,6 +576,10 @@ namespace DepotDL.CLI
                 }
 
                 DrawDetailRow("App ID Target:", game.AppId, ConsoleColor.Green);
+                if (!string.IsNullOrEmpty(game.BuildId))
+                {
+                    DrawDetailRow("Steam Build ID:", game.BuildId, ConsoleColor.Green);
+                }
                 DrawDetailRow("Lua Config Path:", game.LuaPath, ConsoleColor.Gray);
                 DrawDetailRow("Output Folder:", game.OutputDir, ConsoleColor.Gray);
                 DrawDetailRow("Depot IDs:", string.Join(", ", game.DepotIds), ConsoleColor.White);

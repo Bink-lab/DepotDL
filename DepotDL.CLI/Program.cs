@@ -751,7 +751,8 @@ namespace DepotDL.CLI
                         DepotIds = depotIdsList,
                         InstallDate = DateTime.Now,
                         TotalSizeBytes = LibraryManager.GetDirectorySize(outputPath),
-                        IsVerified = true
+                        IsVerified = true,
+                        BuildId = SteamAppInfoProvider.GetBuildId(appId, depots.Values.Select(d => d.ManifestId).ToList())
                     };
                     LibraryManager.AddOrUpdateGame(libGame);
                     DownloadTui.WriteStatus("Library", $"Registered '{gameName}' in the local library index", ConsoleColor.Green);

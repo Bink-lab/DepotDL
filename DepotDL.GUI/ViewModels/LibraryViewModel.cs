@@ -295,6 +295,8 @@ namespace DepotDL.GUI.ViewModels
         public string InstallDateText => Game.InstallDate == default
             ? "Unknown" : Game.InstallDate.ToString("MMM d, yyyy");
 
+        public string BuildIdLabel => string.IsNullOrEmpty(Game.BuildId) ? string.Empty : "  ·  Build ";
+
         public bool FolderExists => Directory.Exists(Game.OutputDir);
 
         public LibraryGameViewModel(LibraryGame game)

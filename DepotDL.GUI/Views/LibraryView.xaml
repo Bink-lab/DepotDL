@@ -376,6 +376,8 @@
                                                        Foreground="{StaticResource TextMuted}">
                                                 <Run Text="AppID "/>
                                                 <Run Text="{Binding Game.AppId}" FontFamily="Consolas"/>
+                                                <Run Text="{Binding BuildIdLabel, Mode=OneWay}"/>
+                                                <Run Text="{Binding Game.BuildId, Mode=OneWay}" FontFamily="Consolas"/>
                                             </TextBlock>
 
                                             <Grid Margin="0,0,0,10">
