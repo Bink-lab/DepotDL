@@ -1,8 +1,11 @@
+// This file is subject to the terms and conditions defined
+// in file 'LICENSE', which is part of this source code package.
+
 using System;
+using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using System.Windows.Media.Animation;
 using DepotDL.GUI.Models;
 using DepotDL.GUI.Services;
 
@@ -11,6 +14,13 @@ namespace DepotDL.GUI.Helpers
     public static class SmoothScroll
     {
         private static AppSettings? _cachedSettings;
+        private static readonly Dictionary<ScrollViewer, ScrollState> _states = new();
+
+        private class ScrollState
+        {
+            public double TargetOffset;
+            public bool IsAnimating;
+        }
 
         private static AppSettings GetSettings()
         {
@@ -25,26 +35,12 @@ namespace DepotDL.GUI.Helpers
             }
         }
 
-        public static void ResetCache() => _cachedSettings = null;
-        // Animatable proxy — ScrollViewer.VerticalOffset is read-only, so we drive
-        // ScrollToVerticalOffset through this attached property instead.
-        public static readonly DependencyProperty VerticalOffsetProperty =
-            DependencyProperty.RegisterAttached(
-                "VerticalOffset", typeof(double), typeof(SmoothScroll),
-                new UIPropertyMetadata(0.0, OnVerticalOffsetChanged));
-
-        public static double GetVerticalOffset(DependencyObject obj) =>
-            (double)obj.GetValue(VerticalOffsetProperty);
-        public static void SetVerticalOffset(DependencyObject obj, double value) =>
-            obj.SetValue(VerticalOffsetProperty, value);
-
-        private static void OnVerticalOffsetChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        public static void ResetCache()
         {
-            if (d is ScrollViewer sv)
-                sv.ScrollToVerticalOffset((double)e.NewValue);
+            _cachedSettings = null;
+            _states.Clear();
         }
 
-        // IsEnabled — attach to a ScrollViewer in XAML to opt in.
         public static readonly DependencyProperty IsEnabledProperty =
             DependencyProperty.RegisterAttached(
                 "IsEnabled", typeof(bool), typeof(SmoothScroll),
@@ -65,22 +61,51 @@ namespace DepotDL.GUI.Helpers
         private static void OnPreviewMouseWheel(object sender, MouseWheelEventArgs e)
         {
             var sv = (ScrollViewer)sender;
-
             if (sv.ScrollableHeight <= 0) return;
 
-            double current = sv.VerticalOffset;
             var s = GetSettings();
-            double target = Math.Clamp(
-                current - e.Delta * s.ScrollSensitivity,
+
+            if (!_states.TryGetValue(sv, out var state))
+            {
+                state = new ScrollState { TargetOffset = sv.VerticalOffset };
+                _states[sv] = state;
+            }
+
+            state.TargetOffset = Math.Clamp(
+                state.TargetOffset - e.Delta * s.ScrollSensitivity,
                 0, sv.ScrollableHeight);
 
-            var anim = new DoubleAnimation(current, target, TimeSpan.FromMilliseconds(s.ScrollDurationMs))
-            {
-                EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut }
-            };
+            if (!state.IsAnimating)
+                _ = AnimateScrollAsync(sv, state);
 
-            sv.BeginAnimation(VerticalOffsetProperty, anim);
             e.Handled = true;
+        }
+
+        private static async System.Threading.Tasks.Task AnimateScrollAsync(ScrollViewer sv, ScrollState state)
+        {
+            state.IsAnimating = true;
+
+            try
+            {
+                while (true)
+                {
+                    double current = sv.VerticalOffset;
+                    double diff = state.TargetOffset - current;
+
+                    if (Math.Abs(diff) < 0.5)
+                        break;
+
+                    sv.ScrollToVerticalOffset(current + diff * 0.3);
+                    await System.Threading.Tasks.Task.Delay(16);
+                }
+
+                sv.ScrollToVerticalOffset(state.TargetOffset);
+            }
+            finally
+            {
+                state.IsAnimating = false;
+                _states.Remove(sv);
+            }
         }
     }
 }
