@@ -339,6 +339,22 @@
             <!-- Header — title + inline Change Source (no top-right margin hack needed) -->
             <StackPanel Grid.Row="0">
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <Button Style="{StaticResource BtnGhost}"
+                            Command="{Binding StartNewCommand}"
+                            Padding="10,6"
+                            Margin="0,0,10,0"
+                            VerticalAlignment="Center">
+                        <StackPanel Orientation="Horizontal">
+                            <Viewbox Width="11" Height="11" Margin="0,0,5,0">
+                                <Canvas Width="24" Height="24">
+                                    <Path Data="M19,12 L5,12 M12,5 L5,12 L12,19"
+                                          Stroke="{StaticResource TextSecondary}" StrokeThickness="2" Fill="Transparent"
+                                          StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"/>
+                                </Canvas>
+                            </Viewbox>
+                            <TextBlock Text="Back" FontSize="11.5" FontWeight="SemiBold" Foreground="{StaticResource TextSecondary}"/>
+                        </StackPanel>
+                    </Button>
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Text="App " Style="{StaticResource TextH1}"/>
                         <TextBlock Text="{Binding AppId}"
@@ -531,27 +547,42 @@
                 </Border>
             </Grid>
 
-            <!-- Full-width Start button -->
-            <Button Grid.Row="4"
-                    Style="{StaticResource BtnPrimary}"
-                    Command="{Binding StartDownloadAsyncCommand}"
-                    IsEnabled="{Binding CanStart}"
-                    Height="46"
-                    HorizontalAlignment="Stretch">
-                <Button.Effect>
-                    <DropShadowEffect Color="#C07840" BlurRadius="18" ShadowDepth="3" Opacity="0.3"/>
-                </Button.Effect>
-                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                    <Viewbox Width="16" Height="16" Margin="0,0,10,0">
-                        <Canvas Width="24" Height="24">
-                            <Path Data="M8,5 L19,12 L8,19 Z"
-                                  Fill="White" Stroke="White" StrokeThickness="1.5"
-                                  StrokeLineJoin="Round" StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
-                        </Canvas>
-                    </Viewbox>
-                    <TextBlock Text="Start Downloading" FontSize="13.5" FontWeight="SemiBold" VerticalAlignment="Center"/>
-                </StackPanel>
-            </Button>
+            <!-- Start block reason + button -->
+            <StackPanel Grid.Row="4">
+                <Border Background="{StaticResource ErrorBg}"
+                        CornerRadius="8" Padding="14,9"
+                        BorderBrush="#EBC5C1" BorderThickness="1"
+                        Margin="0,0,0,10"
+                        Visibility="{Binding StartBlockReason, Converter={StaticResource NotEmptyToVis}}">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="⚠ " Foreground="{StaticResource Error}"
+                                   FontWeight="Bold" FontSize="13" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                        <TextBlock Text="{Binding StartBlockReason}"
+                                   Foreground="{StaticResource Error}"
+                                   FontSize="11.5" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Border>
+
+                <Button Style="{StaticResource BtnPrimary}"
+                        Command="{Binding StartDownloadAsyncCommand}"
+                        IsEnabled="{Binding CanStart}"
+                        Height="46"
+                        HorizontalAlignment="Stretch">
+                    <Button.Effect>
+                        <DropShadowEffect Color="#C07840" BlurRadius="18" ShadowDepth="3" Opacity="0.3"/>
+                    </Button.Effect>
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <Viewbox Width="16" Height="16" Margin="0,0,10,0">
+                            <Canvas Width="24" Height="24">
+                                <Path Data="M8,5 L19,12 L8,19 Z"
+                                      Fill="White" Stroke="White" StrokeThickness="1.5"
+                                      StrokeLineJoin="Round" StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
+                            </Canvas>
+                        </Viewbox>
+                        <TextBlock Text="Start Downloading" FontSize="13.5" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Button>
+            </StackPanel>
         </Grid>
 
         <!-- ══════════════════════════════════════════════════════

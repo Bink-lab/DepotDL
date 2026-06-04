@@ -44,6 +44,7 @@ namespace DepotDL.GUI.ViewModels
         [ObservableProperty] private string _manifestsDir = string.Empty;
         [ObservableProperty] private int _maxParallel = 2;
         [ObservableProperty] private bool _canStart;
+        [ObservableProperty] private string _startBlockReason = string.Empty;
 
         [ObservableProperty] private string _ryuuAppId = string.Empty;
         [ObservableProperty] private string _ryuuApiKey = string.Empty;
@@ -396,6 +397,23 @@ namespace DepotDL.GUI.ViewModels
 
         private void UpdateCanStart()
         {
+            if (!LuaLoaded)
+            {
+                StartBlockReason = string.Empty;
+            }
+            else if (string.IsNullOrWhiteSpace(OutputDir))
+            {
+                StartBlockReason = "Output directory is required.";
+            }
+            else if (!Depots.Any(d => d.IsSelected))
+            {
+                StartBlockReason = "No depots selected.";
+            }
+            else
+            {
+                StartBlockReason = string.Empty;
+            }
+
             CanStart = LuaLoaded &&
                        !string.IsNullOrWhiteSpace(OutputDir) &&
                        Depots.Any(d => d.IsSelected);
