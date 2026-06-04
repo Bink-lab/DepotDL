@@ -702,16 +702,33 @@
                                                        Margin="0,2,0,0"/>
                                         </StackPanel>
 
-                                        <Border Grid.Column="1"
-                                                CornerRadius="6" Padding="8,3"
-                                                VerticalAlignment="Center">
-                                            <Border.Background>
-                                                <SolidColorBrush Color="{StaticResource BgCardColor}"/>
-                                            </Border.Background>
-                                            <TextBlock Text="{Binding Status, Converter={StaticResource StatusToText}}"
-                                                       FontSize="10.5" FontWeight="Bold"
-                                                       Foreground="{Binding Status, Converter={StaticResource StatusToColor}}"/>
-                                        </Border>
+                                        <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                            <Button Style="{StaticResource BtnGhost}"
+                                                    Padding="7,4"
+                                                    Margin="0,0,6,0"
+                                                    VerticalAlignment="Center"
+                                                    Visibility="{Binding Status, Converter={StaticResource EqToVis}, ConverterParameter={x:Static models:DepotStatus.Failed}}"
+                                                    Command="{Binding DataContext.RetryDepotAsyncCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                    CommandParameter="{Binding}"
+                                                    ToolTip="Retry this depot">
+                                                <Viewbox Width="12" Height="12">
+                                                    <Canvas Width="24" Height="24">
+                                                        <Path Data="M1,4 L1,10 L7,10 M23,20 L23,14 L17,14 M20.49,9 A9,9,0,1,0,21.99,14.1 M1.51,10 A9,9,0,0,1,19.5,6"
+                                                              Stroke="{StaticResource TextSecondary}" StrokeThickness="2" Fill="Transparent"
+                                                              StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"/>
+                                                    </Canvas>
+                                                </Viewbox>
+                                            </Button>
+                                            <Border CornerRadius="6" Padding="8,3"
+                                                    VerticalAlignment="Center">
+                                                <Border.Background>
+                                                    <SolidColorBrush Color="{StaticResource BgCardColor}"/>
+                                                </Border.Background>
+                                                <TextBlock Text="{Binding Status, Converter={StaticResource StatusToText}}"
+                                                           FontSize="10.5" FontWeight="Bold"
+                                                           Foreground="{Binding Status, Converter={StaticResource StatusToColor}}"/>
+                                            </Border>
+                                        </StackPanel>
                                     </Grid>
 
                                     <Border Grid.Row="2" Height="8" CornerRadius="4"
@@ -809,12 +826,27 @@
                                    Foreground="{StaticResource Error}"
                                    FontSize="13" FontWeight="SemiBold" VerticalAlignment="Center"/>
                     </StackPanel>
-                    <Button Grid.Column="1"
-                            Style="{StaticResource BtnSecondary}"
-                            Command="{Binding StartNewCommand}"
-                            Padding="18,8" Height="36">
-                        <TextBlock Text="Try Again" FontSize="12" FontWeight="SemiBold"/>
-                    </Button>
+                    <StackPanel Grid.Column="1" Orientation="Horizontal">
+                        <Button Style="{StaticResource BtnSecondary}"
+                                Command="{Binding RetryFailedAsyncCommand}"
+                                Padding="18,8" Height="36" Margin="0,0,8,0">
+                            <StackPanel Orientation="Horizontal">
+                                <Viewbox Width="12" Height="12" Margin="0,0,6,0">
+                                    <Canvas Width="24" Height="24">
+                                        <Path Data="M1,4 L1,10 L7,10 M23,20 L23,14 L17,14 M20.49,9 A9,9,0,1,0,21.99,14.1 M1.51,10 A9,9,0,0,1,19.5,6"
+                                              Stroke="{StaticResource TextPrimary}" StrokeThickness="2" Fill="Transparent"
+                                              StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"/>
+                                    </Canvas>
+                                </Viewbox>
+                                <TextBlock Text="Retry Failed" FontSize="12" FontWeight="SemiBold"/>
+                            </StackPanel>
+                        </Button>
+                        <Button Style="{StaticResource BtnSecondary}"
+                                Command="{Binding StartNewCommand}"
+                                Padding="18,8" Height="36">
+                            <TextBlock Text="New Download" FontSize="12" FontWeight="SemiBold"/>
+                        </Button>
+                    </StackPanel>
                 </Grid>
             </Border>
         </Grid>

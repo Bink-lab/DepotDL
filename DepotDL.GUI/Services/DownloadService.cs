@@ -55,7 +55,7 @@ namespace DepotDL.GUI.Services
                 for (int i = 0; i < depots.Count; i++)
                 {
                     string doneFile = Path.Combine(checkpointDir, $"{depots[i].DepotId}.done");
-                    if (File.Exists(doneFile))
+                    if (File.Exists(doneFile) && states[i].Status != DepotStatus.Done)
                     {
                         states[i].Status = DepotStatus.Skipped;
                         states[i].StatusText = "Already done";

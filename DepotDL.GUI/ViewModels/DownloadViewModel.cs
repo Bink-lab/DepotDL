@@ -29,6 +29,7 @@ namespace DepotDL.GUI.ViewModels
         private CancellationTokenSource? _cts;
         private System.Windows.Threading.DispatcherTimer? _animTimer;
         private List<DepotDownloadState>? _activeStates;
+        private List<DepotInfo>? _lastSelectedDepots;
 
         [ObservableProperty] private DownloadStep _currentStep = DownloadStep.SelectFile;
 
@@ -71,12 +72,16 @@ namespace DepotDL.GUI.ViewModels
         public IAsyncRelayCommand FetchFromRyuuAsyncCommand { get; }
         public IAsyncRelayCommand FetchFromHubcapAsyncCommand { get; }
         public IAsyncRelayCommand StartDownloadAsyncCommand { get; }
+        public IAsyncRelayCommand RetryFailedAsyncCommand { get; }
+        public IAsyncRelayCommand<DepotDownloadState> RetryDepotAsyncCommand { get; }
 
         public DownloadViewModel()
         {
             FetchFromRyuuAsyncCommand = new AsyncRelayCommand(FetchFromRyuuAsync, () => CanFetchRyuu);
             FetchFromHubcapAsyncCommand = new AsyncRelayCommand(FetchFromHubcapAsync, () => CanFetchHubcap);
             StartDownloadAsyncCommand = new AsyncRelayCommand(StartDownloadAsync, () => CanStart);
+            RetryFailedAsyncCommand = new AsyncRelayCommand(RetryFailedAsync, () => !IsDownloading && DownloadFailed && _lastSelectedDepots != null);
+            RetryDepotAsyncCommand = new AsyncRelayCommand<DepotDownloadState>(RetryDepotAsync, s => !IsDownloading && _lastSelectedDepots != null && s?.Status == DepotStatus.Failed);
 
             var settings = _settings.Load();
             ManifestsDir = settings.ManifestsDir ?? string.Empty;
@@ -88,7 +93,40 @@ namespace DepotDL.GUI.ViewModels
         }
 
         partial void OnOutputDirChanged(string value) => UpdateCanStart();
-        partial void OnDepotsChanged(ObservableCollection<DepotSelectionItem> value) => UpdateCanStart();
+
+        partial void OnDepotsChanged(ObservableCollection<DepotSelectionItem>? oldValue, ObservableCollection<DepotSelectionItem> newValue)
+        {
+            if (oldValue != null)
+            {
+                oldValue.CollectionChanged -= OnDepotsCollectionChanged;
+                foreach (var item in oldValue)
+                    item.PropertyChanged -= OnDepotItemPropertyChanged;
+            }
+            if (newValue != null)
+            {
+                newValue.CollectionChanged += OnDepotsCollectionChanged;
+                foreach (var item in newValue)
+                    item.PropertyChanged += OnDepotItemPropertyChanged;
+            }
+            UpdateCanStart();
+        }
+
+        private void OnDepotsCollectionChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            if (e.OldItems != null)
+                foreach (DepotSelectionItem item in e.OldItems)
+                    item.PropertyChanged -= OnDepotItemPropertyChanged;
+            if (e.NewItems != null)
+                foreach (DepotSelectionItem item in e.NewItems)
+                    item.PropertyChanged += OnDepotItemPropertyChanged;
+            UpdateCanStart();
+        }
+
+        private void OnDepotItemPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(DepotSelectionItem.IsSelected))
+                UpdateCanStart();
+        }
         partial void OnRyuuAppIdChanged(string value) => UpdateCanFetchRyuu();
         partial void OnRyuuApiKeyChanged(string value) => UpdateCanFetchRyuu();
         partial void OnIsRyuuBusyChanged(bool value) => UpdateCanFetchRyuu();
@@ -100,15 +138,13 @@ namespace DepotDL.GUI.ViewModels
         private void UpdateCanFetchRyuu()
         {
             CanFetchRyuu = !IsRyuuBusy && !string.IsNullOrWhiteSpace(RyuuAppId);
-            if (FetchFromRyuuAsyncCommand is AsyncRelayCommand cmd)
-                cmd.NotifyCanExecuteChanged();
+            FetchFromRyuuAsyncCommand.NotifyCanExecuteChanged();
         }
 
         private void UpdateCanFetchHubcap()
         {
             CanFetchHubcap = !IsHubcapBusy && !string.IsNullOrWhiteSpace(HubcapAppId);
-            if (FetchFromHubcapAsyncCommand is AsyncRelayCommand cmd)
-                cmd.NotifyCanExecuteChanged();
+            FetchFromHubcapAsyncCommand.NotifyCanExecuteChanged();
         }
 
         private async Task FetchFromRyuuAsync()
@@ -417,8 +453,7 @@ namespace DepotDL.GUI.ViewModels
             CanStart = LuaLoaded &&
                        !string.IsNullOrWhiteSpace(OutputDir) &&
                        Depots.Any(d => d.IsSelected);
-            if (StartDownloadAsyncCommand is AsyncRelayCommand cmd)
-                cmd.NotifyCanExecuteChanged();
+            StartDownloadAsyncCommand.NotifyCanExecuteChanged();
         }
 
         private async Task StartDownloadAsync()
@@ -434,6 +469,8 @@ namespace DepotDL.GUI.ViewModels
             }
 
             var selectedDepots = Depots.Where(d => d.IsSelected).Select(d => d.Depot).ToList();
+            _lastSelectedDepots = selectedDepots;
+
             var states = selectedDepots.Select(d => new DepotDownloadState
             {
                 DepotId = d.DepotId,
@@ -448,6 +485,52 @@ namespace DepotDL.GUI.ViewModels
             DownloadFailed = false;
             OverallStatus = "Starting...";
 
+            await ExecuteDownloadRunAsync(selectedDepots, states);
+        }
+
+        private static void ResetDepotState(DepotDownloadState s)
+        {
+            s.Status = DepotStatus.Queued;
+            s.StatusText = "Queued";
+            s.Percent = 0;
+            s.DisplayPercent = 0;
+            s.SpeedText = string.Empty;
+            s.ActiveFile = string.Empty;
+            s.ErrorMessage = null;
+        }
+
+        private async Task RetryFailedAsync()
+        {
+            if (IsDownloading || _lastSelectedDepots == null) return;
+
+            var states = DownloadStates.ToList();
+            foreach (var s in states.Where(s => s.Status == DepotStatus.Failed))
+                ResetDepotState(s);
+
+            IsDownloading = true;
+            DownloadComplete = false;
+            DownloadFailed = false;
+            OverallStatus = "Retrying failed depots...";
+
+            await ExecuteDownloadRunAsync(_lastSelectedDepots, states);
+        }
+
+        private async Task RetryDepotAsync(DepotDownloadState? state)
+        {
+            if (state == null || IsDownloading || _lastSelectedDepots == null) return;
+
+            ResetDepotState(state);
+
+            IsDownloading = true;
+            DownloadComplete = false;
+            DownloadFailed = false;
+            OverallStatus = $"Retrying {state.DisplayName}...";
+
+            await ExecuteDownloadRunAsync(_lastSelectedDepots, DownloadStates.ToList());
+        }
+
+        private async Task ExecuteDownloadRunAsync(List<DepotInfo> depots, List<DepotDownloadState> states)
+        {
             _cts = new CancellationTokenSource();
             _activeStates = states;
 
@@ -461,7 +544,7 @@ namespace DepotDL.GUI.ViewModels
             try
             {
                 await _downloader.RunDownloadsAsync(
-                    AppId, selectedDepots, OutputDir,
+                    AppId, depots, OutputDir,
                     string.IsNullOrWhiteSpace(ManifestsDir) ? null : ManifestsDir,
                     MaxParallel, states, _cts.Token,
                     ryuuApiKey: string.IsNullOrWhiteSpace(RyuuApiKey) ? null : RyuuApiKey.Trim(),
@@ -474,7 +557,7 @@ namespace DepotDL.GUI.ViewModels
                 OverallStatus = anyFailed ? "Completed with errors" : "All depots downloaded!";
                 CompletionMessage = anyFailed
                     ? $"{states.Count(s => s.Status == DepotStatus.Failed)} depot(s) failed."
-                    : $"{states.Count(s => s.Status == DepotStatus.Done)} depot(s) complete.";
+                    : $"{states.Count(s => s.Status is DepotStatus.Done or DepotStatus.Skipped)} depot(s) complete.";
 
                 if (!anyFailed)
                 {
@@ -487,11 +570,11 @@ namespace DepotDL.GUI.ViewModels
                         GameName = gameName,
                         LuaPath = LuaPath,
                         OutputDir = OutputDir,
-                        DepotIds = selectedDepots.Select(d => d.DepotId).ToList(),
+                        DepotIds = depots.Select(d => d.DepotId).ToList(),
                         InstallDate = DateTime.Now,
                         TotalSizeBytes = LibraryService.GetDirectorySize(OutputDir),
                         IsVerified = true,
-                        BuildId = SteamMetadataService.GetBuildId(AppId, selectedDepots.Select(d => d.ManifestId).ToList())
+                        BuildId = SteamMetadataService.GetBuildId(AppId, depots.Select(d => d.ManifestId).ToList())
                     };
                     _library.AddOrUpdate(game);
                 }
@@ -517,6 +600,9 @@ namespace DepotDL.GUI.ViewModels
                 OverallDisplayPercent = OverallPercent;
                 foreach (var state in DownloadStates)
                     state.DisplayPercent = state.Percent;
+
+                RetryFailedAsyncCommand.NotifyCanExecuteChanged();
+                RetryDepotAsyncCommand.NotifyCanExecuteChanged();
             }
         }
 
@@ -545,6 +631,7 @@ namespace DepotDL.GUI.ViewModels
         private void ResetState()
         {
             _cts?.Cancel();
+            _lastSelectedDepots = null;
             CurrentStep = DownloadStep.SelectFile;
             LuaPath = string.Empty;
             LuaFileName = string.Empty;
@@ -561,6 +648,8 @@ namespace DepotDL.GUI.ViewModels
             DownloadFailed = false;
             OverallPercent = 0;
             OverallDisplayPercent = 0;
+            RetryFailedAsyncCommand.NotifyCanExecuteChanged();
+            RetryDepotAsyncCommand.NotifyCanExecuteChanged();
         }
 
         public void PreFillFromLibraryGame(LibraryGame game, bool clearCheckpoints)

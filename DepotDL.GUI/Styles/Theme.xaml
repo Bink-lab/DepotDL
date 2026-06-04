@@ -176,11 +176,12 @@
             <Setter.Value>
                 <ControlTemplate TargetType="CheckBox">
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                        <Border x:Name="box" Width="17" Height="17"
-                                CornerRadius="4"
-                                BorderBrush="{StaticResource Border}"
-                                BorderThickness="1.5"
-                                Background="{StaticResource BgInput}">
+                        <Grid Width="17" Height="17">
+                            <Rectangle x:Name="boxFill"
+                                       RadiusX="4" RadiusY="4"
+                                       Fill="{StaticResource BgInput}"
+                                       Stroke="{StaticResource Border}"
+                                       StrokeThickness="1.5"/>
                             <Viewbox x:Name="tick" Margin="3"
                                      Visibility="Collapsed">
                                 <Canvas Width="11" Height="9">
@@ -189,17 +190,17 @@
                                           StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
                                 </Canvas>
                             </Viewbox>
-                        </Border>
+                        </Grid>
                         <ContentPresenter Margin="8,0,0,0" VerticalAlignment="Center"/>
                     </StackPanel>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsChecked" Value="True">
-                            <Setter TargetName="box" Property="Background" Value="{StaticResource Accent}"/>
-                            <Setter TargetName="box" Property="BorderBrush" Value="{StaticResource Accent}"/>
+                            <Setter TargetName="boxFill" Property="Fill" Value="{StaticResource Accent}"/>
+                            <Setter TargetName="boxFill" Property="Stroke" Value="{StaticResource Accent}"/>
                             <Setter TargetName="tick" Property="Visibility" Value="Visible"/>
                         </Trigger>
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="box" Property="BorderBrush" Value="{StaticResource Accent}"/>
+                            <Setter TargetName="boxFill" Property="Stroke" Value="{StaticResource Accent}"/>
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
