@@ -310,7 +310,7 @@ namespace DepotDL.GUI.ViewModels
         public Task LoadImageAsync(CancellationToken ct = default)
         {
             if (!int.TryParse(Game.AppId, out int appId)) return Task.CompletedTask;
-            string url = $"https://cdn.akamai.steamstatic.com/steam/apps/{appId}/header.jpg";
+            string url = $"https://api.bonker.dev/api/image-cache/app_{appId}_header.jpg";
             return ImageLoader.LoadGameImageAsync(this, appId, url, ct);
         }
     }

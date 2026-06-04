@@ -35,6 +35,6 @@ namespace DepotDL.GUI.Models
         public string Genre { get; set; } = string.Empty;
 
         public string HeaderImageUrl =>
-            $"https://cdn.akamai.steamstatic.com/steam/apps/{AppId}/header.jpg";
+            $"https://api.bonker.dev/api/image-cache/app_{AppId}_header.jpg";
     }
 }

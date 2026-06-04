@@ -18,8 +18,8 @@ namespace DepotDL.GUI.Services
             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
             "DepotDL.GUI", "cache");
 
-        private static readonly string AllGamesPath = Path.Combine(CacheDir, "steamspy_all.json");
-        private static readonly string MetaPath = Path.Combine(CacheDir, "steamspy_all_meta.json");
+        private static readonly string AllGamesPath = Path.Combine(CacheDir, "applist.json");
+        private static readonly string MetaPath = Path.Combine(CacheDir, "applist_meta.json");
 
         private static readonly HttpClient Http = new() { Timeout = TimeSpan.FromSeconds(25) };
         private static readonly JsonSerializerOptions Opts = new() { PropertyNameCaseInsensitive = true };
@@ -69,96 +69,39 @@ namespace DepotDL.GUI.Services
             IProgress<(int fetched, string status)>? progress,
             CancellationToken ct)
         {
-            var allGames = new List<StoreGame>(50_000);
-            var sem = new SemaphoreSlim(4, 4);
-            int page = 0;
-            const int batchSize = 4;
+            progress?.Report((0, "Fetching app list..."));
 
-            while (!ct.IsCancellationRequested)
+            for (int attempt = 0; attempt < 3; attempt++)
             {
-                var pageTasks = Enumerable.Range(page, batchSize)
-                    .Select(p => FetchPageAsync(p, sem, ct))
-                    .ToList();
-
-                var results = await Task.WhenAll(pageTasks);
-                page += batchSize;
-
-                bool anyExhausted = false;
-                foreach (var (_, games, exhausted) in results.OrderBy(r => r.pg))
+                try
                 {
-                    allGames.AddRange(games);
-                    if (exhausted) anyExhausted = true;
+                    var resp = await Http.GetAsync("https://api.bonker.dev/api/applist?type=game", ct);
+                    resp.EnsureSuccessStatusCode();
+
+                    var json = await resp.Content.ReadAsStringAsync(ct);
+                    var result = JsonSerializer.Deserialize<BonkerAppListResponse>(json, Opts);
+                    if (result?.Apps == null || result.Apps.Count == 0)
+                        throw new InvalidDataException("Empty app list response");
+
+                    var sorted = result.Apps
+                        .Where(a => a.AppId > 0 && !string.IsNullOrWhiteSpace(a.Name))
+                        .Select(a => new StoreGame { AppId = a.AppId, Name = a.Name })
+                        .OrderBy(g => g.Name, StringComparer.OrdinalIgnoreCase)
+                        .ToList();
+
+                    await SaveCachedGamesAsync(sorted);
+                    progress?.Report((sorted.Count, $"Done — {sorted.Count:N0} games indexed"));
+                    return sorted;
                 }
-
-                progress?.Report((allGames.Count, $"Fetching... {allGames.Count:N0} games found"));
-
-                if (anyExhausted) break;
-
-                await Task.Delay(1200, ct);
+                catch (OperationCanceledException) { throw; }
+                catch
+                {
+                    if (attempt == 2) throw;
+                    await Task.Delay(2000, ct);
+                }
             }
 
-            var sorted = allGames
-                .Where(g => g.AppId > 0 && !string.IsNullOrWhiteSpace(g.Name))
-                .OrderBy(g => g.Name, StringComparer.OrdinalIgnoreCase)
-                .ToList();
-
-            await SaveCachedGamesAsync(sorted);
-            progress?.Report((sorted.Count, $"Done — {sorted.Count:N0} games indexed"));
-            return sorted;
-        }
-
-        private async Task<(int pg, List<StoreGame> games, bool exhausted)> FetchPageAsync(
-            int page, SemaphoreSlim sem, CancellationToken ct)
-        {
-            await sem.WaitAsync(ct);
-            try
-            {
-                string url = $"https://steamspy.com/api.php?request=all&page={page}";
-                for (int attempt = 0; attempt < 3; attempt++)
-                {
-                    try
-                    {
-                        var resp = await Http.GetAsync(url, ct);
-                        if (resp.StatusCode == System.Net.HttpStatusCode.TooManyRequests)
-                        {
-                            await Task.Delay(65_000, ct);
-                            continue;
-                        }
-                        resp.EnsureSuccessStatusCode();
-
-                        var json = await resp.Content.ReadAsStringAsync(ct);
-                        if (string.IsNullOrWhiteSpace(json) || json == "null" || json == "{}")
-                            return (page, new List<StoreGame>(), true);
-
-                        var dict = JsonSerializer.Deserialize<Dictionary<string, SpyAllEntry>>(json, Opts);
-                        if (dict == null || dict.Count == 0)
-                            return (page, new List<StoreGame>(), true);
-
-                        var games = dict.Values
-                            .Where(e => e.AppId > 0 && !string.IsNullOrWhiteSpace(e.Name))
-                            .Select(e => new StoreGame
-                            {
-                                AppId = e.AppId,
-                                Name = e.Name,
-                                Developer = e.Developer,
-                                Publisher = e.Publisher,
-                                Owners = e.Owners,
-                                PlayersIn2Weeks = e.Average2Weeks,
-                                Positive = e.Positive,
-                                Negative = e.Negative,
-                                Price = e.Price ?? "0",
-                                Genre = e.Genre
-                            })
-                            .ToList();
-
-                        return (page, games, games.Count < 900);
-                    }
-                    catch (OperationCanceledException) { throw; }
-                    catch { await Task.Delay(2000, ct); }
-                }
-                return (page, new List<StoreGame>(), false);
-            }
-            finally { sem.Release(); }
+            return new List<StoreGame>();
         }
 
         public async Task<SteamAppDetail?> GetAppDetailAsync(int appId, CancellationToken ct = default)
@@ -195,7 +138,7 @@ namespace DepotDL.GUI.Services
                 ShortDescription = store?.ShortDescription ?? string.Empty,
                 DetailedDescription = store?.DetailedDescription ?? string.Empty,
                 HeaderImage = store?.HeaderImage
-                    ?? $"https://cdn.akamai.steamstatic.com/steam/apps/{appId}/header.jpg",
+                    ?? $"https://api.bonker.dev/api/image-cache/app_{appId}_header.jpg",
                 PriceText = store?.PriceText ?? FormatPrice(spy?.RawPrice),
                 Genres = store?.Genres ?? spy?.Genres ?? new List<string>(),
                 Screenshots = store?.Screenshots ?? new List<string>(),
@@ -304,18 +247,15 @@ namespace DepotDL.GUI.Services
             catch { return null; }
         }
 
-        private class SpyAllEntry
+        private class BonkerAppListResponse
         {
-            [JsonPropertyName("appid")]   public int AppId { get; set; }
-            [JsonPropertyName("name")]    public string Name { get; set; } = string.Empty;
-            [JsonPropertyName("developer")] public string Developer { get; set; } = string.Empty;
-            [JsonPropertyName("publisher")] public string Publisher { get; set; } = string.Empty;
-            [JsonPropertyName("owners")]  public string Owners { get; set; } = string.Empty;
-            [JsonPropertyName("average_2weeks")] public int Average2Weeks { get; set; }
-            [JsonPropertyName("positive")] public int Positive { get; set; }
-            [JsonPropertyName("negative")] public int Negative { get; set; }
-            [JsonPropertyName("price")]   public string? Price { get; set; }
-            [JsonPropertyName("genre")]   public string Genre { get; set; } = string.Empty;
+            [JsonPropertyName("apps")] public List<BonkerApp> Apps { get; set; } = new();
+        }
+
+        private class BonkerApp
+        {
+            [JsonPropertyName("appid")] public int AppId { get; set; }
+            [JsonPropertyName("name")]  public string Name { get; set; } = string.Empty;
         }
 
         private class SpyDetailEntry
