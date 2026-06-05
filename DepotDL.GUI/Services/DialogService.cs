@@ -13,5 +13,19 @@ namespace DepotDL.GUI.Services
             };
             dialog.ShowDialog();
         }
+
+        public static bool ShowConfirm(string title, string message)
+            => MessageBox.Show(message, title, MessageBoxButton.YesNo, MessageBoxImage.Question)
+               == MessageBoxResult.Yes;
+
+        public static string? ShowInput(string title, string initialValue = "")
+        {
+            var dialog = new InputDialog(title, initialValue)
+            {
+                Owner = Application.Current.MainWindow
+            };
+            dialog.ShowDialog();
+            return dialog.Result;
+        }
     }
 }

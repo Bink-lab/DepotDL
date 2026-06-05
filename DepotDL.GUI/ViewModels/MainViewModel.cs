@@ -37,6 +37,8 @@ namespace DepotDL.GUI.ViewModels
             {
                 if (e.PropertyName == nameof(LibraryViewModel.IsPackingGame))
                     OnPropertyChanged(nameof(ShowPackWidget));
+                if (e.PropertyName == nameof(LibraryViewModel.IsOnlineFixBusy))
+                    OnPropertyChanged(nameof(ShowOnlineFixWidget));
             };
 
             Library.ValidateHandler = game =>
@@ -53,6 +55,7 @@ namespace DepotDL.GUI.ViewModels
 
         public bool ShowDownloadWidget => Download.IsDownloading && !IsDownloadPage;
         public bool ShowPackWidget => Library.IsPackingGame;
+        public bool ShowOnlineFixWidget => Library.IsOnlineFixBusy;
 
         public async Task InitializeAsync(IProgress<(double pct, string status)> progress,
             CancellationToken ct = default)
@@ -168,6 +171,7 @@ namespace DepotDL.GUI.ViewModels
             OnPropertyChanged(nameof(IsStorePage));
             OnPropertyChanged(nameof(ShowDownloadWidget));
             OnPropertyChanged(nameof(ShowPackWidget));
+            OnPropertyChanged(nameof(ShowOnlineFixWidget));
         }
     }
 }

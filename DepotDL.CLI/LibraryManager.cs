@@ -17,6 +17,7 @@ namespace DepotDL.CLI
         public long TotalSizeBytes { get; set; }
         public bool IsVerified { get; set; } = true;
         public string BuildId { get; set; } = string.Empty;
+        public bool OnlineFixApplied { get; set; }
     }
 
     public static class LibraryManager

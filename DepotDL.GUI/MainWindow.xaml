@@ -704,6 +704,54 @@
                             </Border>
                         </Border>
 
+                        <!-- OnlineFix progress widget -->
+                        <Border Style="{StaticResource FadeInSlideUp}"
+                                Margin="0,0,0,10"
+                                Visibility="{Binding ShowOnlineFixWidget, Converter={StaticResource BoolToVis}}">
+                            <Border Width="280" CornerRadius="14"
+                                    Background="{StaticResource BgCard}"
+                                    BorderBrush="{StaticResource Border}"
+                                    BorderThickness="1"
+                                    Padding="16,14">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="8"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+
+                                    <Grid Grid.Row="0">
+                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                            <Viewbox Width="13" Height="13" Margin="0,0,7,0">
+                                                <Canvas Width="24" Height="24">
+                                                    <Path Data="M12,4 L12,16 M8,12 L12,16 L16,12 M4,19 L20,19"
+                                                          Stroke="{StaticResource Accent}" StrokeThickness="2.2"
+                                                          Fill="Transparent" StrokeStartLineCap="Round"
+                                                          StrokeEndLineCap="Round" StrokeLineJoin="Round"/>
+                                                </Canvas>
+                                            </Viewbox>
+                                            <TextBlock FontSize="12.5" FontWeight="SemiBold"
+                                                       Foreground="{StaticResource TextPrimary}"
+                                                       VerticalAlignment="Center"
+                                                       Text="OnlineFix"/>
+                                        </StackPanel>
+                                        <TextBlock HorizontalAlignment="Right" FontSize="11.5"
+                                                   Foreground="{StaticResource Accent}"
+                                                   VerticalAlignment="Center"
+                                                   Text="{Binding Library.OnlineFixGameName}"
+                                                   MaxWidth="100"
+                                                   TextTrimming="CharacterEllipsis"/>
+                                    </Grid>
+
+                                    <TextBlock Grid.Row="2"
+                                               Text="{Binding Library.OnlineFixStatus}"
+                                               FontSize="10.5"
+                                               Foreground="{StaticResource TextMuted}"
+                                               TextTrimming="CharacterEllipsis"/>
+                                </Grid>
+                            </Border>
+                        </Border>
+
                         <!-- Floating download widget -->
                         <Border Style="{StaticResource FadeInSlideUp}"
                                 Visibility="{Binding ShowDownloadWidget, Converter={StaticResource BoolToVis}}">

@@ -19,6 +19,8 @@
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="20"/>
                 <RowDefinition Height="Auto"/>
+                <RowDefinition Height="20"/>
+                <RowDefinition Height="Auto"/>
                 <RowDefinition Height="24"/>
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
@@ -400,7 +402,28 @@
                 </StackPanel>
             </Border>
 
-            <Grid Grid.Row="14">
+            <Border Grid.Row="12" Style="{StaticResource Card}" Padding="20">
+                <StackPanel>
+                    <TextBlock Text="ONLINEFIX" Style="{StaticResource TextLabel}" Margin="0,0,0,16"/>
+
+                    <TextBlock Text="online-fix.me Username"
+                               Style="{StaticResource TextH3}" Margin="0,0,0,4"/>
+                    <TextBlock Text="Your account username for online-fix.me."
+                               Style="{StaticResource BodyText}" Margin="0,0,0,8"/>
+                    <TextBox Text="{Binding OnlineFixUser, UpdateSourceTrigger=PropertyChanged}"/>
+
+                    <Separator Margin="0,20"/>
+
+                    <TextBlock Text="online-fix.me Password"
+                               Style="{StaticResource TextH3}" Margin="0,0,0,4"/>
+                    <TextBlock Text="Your account password. Stored encrypted locally."
+                               Style="{StaticResource BodyText}" Margin="0,0,0,8"/>
+                    <PasswordBox x:Name="OnlineFixPasswordBox"
+                                 PasswordChanged="OnlineFixPasswordBox_PasswordChanged"/>
+                </StackPanel>
+            </Border>
+
+            <Grid Grid.Row="16">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>

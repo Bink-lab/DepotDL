@@ -15,6 +15,24 @@ namespace DepotDL.GUI.Views
             Message = message;
         }
 
+        protected override void OnSourceInitialized(System.EventArgs e)
+        {
+            base.OnSourceInitialized(e);
+            if (Owner != null)
+            {
+                Left   = Owner.Left;
+                Top    = Owner.Top;
+                Width  = Owner.ActualWidth;
+                Height = Owner.ActualHeight;
+            }
+            else
+            {
+                Width  = 420;
+                Height = 300;
+                WindowStartupLocation = System.Windows.WindowStartupLocation.CenterScreen;
+            }
+        }
+
         private void OkButton_Click(object sender, RoutedEventArgs e) => Close();
     }
 }

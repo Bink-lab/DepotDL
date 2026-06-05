@@ -35,6 +35,9 @@ namespace DepotDL.GUI.ViewModels
         [ObservableProperty] private double _packPercent;
         [ObservableProperty] private string _packStatus = string.Empty;
         [ObservableProperty] private string _packGameName = string.Empty;
+        [ObservableProperty] private bool _isOnlineFixBusy;
+        [ObservableProperty] private string _onlineFixStatus = string.Empty;
+        [ObservableProperty] private string _onlineFixGameName = string.Empty;
 
         public Action<LibraryGame>? ValidateHandler { get; set; }
         public Action<LibraryGame>? RedownloadHandler { get; set; }
@@ -174,25 +177,28 @@ namespace DepotDL.GUI.ViewModels
         {
             if (vm == null || !Directory.Exists(vm.Game.OutputDir)) return;
 
-            var loadedSettings = _settings.Load();
-            string? webApiKey = loadedSettings.SteamWebApiKey;
-            bool downloadAchievementIcons = loadedSettings.DownloadAchievementIcons;
-            bool fixSuccess = await Task.Run(() => GameLauncher.EnsureGbeApplied(vm.Game.AppId, vm.Game.OutputDir, vm.Game.LuaPath, webApiKey, downloadAchievementIcons));
-            if (!fixSuccess)
+            if (!vm.Game.OnlineFixApplied)
             {
-                string logPath = Path.Combine(vm.Game.OutputDir, "sff_fix_error.log");
-                string errorMsg = "Failed to apply Goldberg Steam Emulator fix to the game.";
-                if (File.Exists(logPath))
+                var loadedSettings = _settings.Load();
+                string? webApiKey = loadedSettings.SteamWebApiKey;
+                bool downloadAchievementIcons = loadedSettings.DownloadAchievementIcons;
+                bool fixSuccess = await Task.Run(() => GameLauncher.EnsureGbeApplied(vm.Game.AppId, vm.Game.OutputDir, vm.Game.LuaPath, webApiKey, downloadAchievementIcons));
+                if (!fixSuccess)
                 {
-                    try
+                    string logPath = Path.Combine(vm.Game.OutputDir, "sff_fix_error.log");
+                    string errorMsg = "Failed to apply Goldberg Steam Emulator fix to the game.";
+                    if (File.Exists(logPath))
                     {
-                        errorMsg += "\n\nDetails:\n" + File.ReadAllText(logPath);
-                        File.Delete(logPath);
+                        try
+                        {
+                            errorMsg += "\n\nDetails:\n" + File.ReadAllText(logPath);
+                            File.Delete(logPath);
+                        }
+                        catch { }
                     }
-                    catch { }
+                    DialogService.ShowError("Fix Game Failed", errorMsg);
+                    return;
                 }
-                DialogService.ShowError("Fix Game Failed", errorMsg);
-                return;
             }
 
             string? exePath = GameLauncher.FindLaunchTarget(vm.Game.OutputDir);
@@ -212,6 +218,16 @@ namespace DepotDL.GUI.ViewModels
         {
             if (vm == null || !Directory.Exists(vm.Game.OutputDir)) return;
             try { Process.Start("explorer.exe", vm.Game.OutputDir); } catch { }
+        }
+
+        [RelayCommand]
+        private void RenameGame(LibraryGameViewModel? vm)
+        {
+            if (vm == null) return;
+            string? newName = DialogService.ShowInput("Rename Game", vm.Game.GameName);
+            if (newName == null || newName == vm.Game.GameName) return;
+            vm.ApplyRename(newName);
+            _lib.AddOrUpdate(vm.Game);
         }
 
 
@@ -254,6 +270,78 @@ namespace DepotDL.GUI.ViewModels
         }
 
         [RelayCommand]
+        private async Task InstallOnlineFix(LibraryGameViewModel? vm)
+        {
+            if (vm == null || !Directory.Exists(vm.Game.OutputDir) || IsOnlineFixBusy) return;
+
+            var s = _settings.Load();
+            if (string.IsNullOrWhiteSpace(s.OnlineFixUser) || string.IsNullOrWhiteSpace(s.OnlineFixPass))
+            {
+                DialogService.ShowError("OnlineFix Credentials Missing",
+                    "Add your online-fix.me username and password in Settings before installing a fix.");
+                return;
+            }
+
+            if (!OnlineFixService.IsChromiumInstalled())
+            {
+                bool proceed = DialogService.ShowConfirm("Browser Engine Required",
+                    "OnlineFix requires a browser engine (~170 MB) to be downloaded once.\n\nDownload it now?");
+                if (!proceed) return;
+            }
+
+            OnlineFixGameName = vm.Game.GameName;
+            OnlineFixStatus = "Starting...";
+            IsOnlineFixBusy = true;
+            try
+            {
+                var progress = new Progress<string>(msg => OnlineFixStatus = msg);
+                var (success, error) = await OnlineFixService.ApplyAsync(
+                    vm.Game.GameName, vm.Game.OutputDir, s.OnlineFixUser!, s.OnlineFixPass!, progress);
+
+                if (success)
+                {
+                    vm.Game.OnlineFixApplied = true;
+                    vm.RefreshOnlineFixState();
+                    _lib.AddOrUpdate(vm.Game);
+                    OnlineFixStatus = "Done!";
+                    await Task.Delay(2000);
+                }
+                else
+                {
+                    OnlineFixStatus = $"Failed: {error}";
+                    await Task.Delay(3500);
+                    DialogService.ShowError("OnlineFix Failed", error ?? "Unknown error.");
+                }
+            }
+            catch (Exception ex)
+            {
+                OnlineFixStatus = $"Error: {ex.Message}";
+                await Task.Delay(3000);
+            }
+            finally
+            {
+                IsOnlineFixBusy = false;
+            }
+        }
+
+        [RelayCommand]
+        private void RemoveOnlineFix(LibraryGameViewModel? vm)
+        {
+            if (vm == null || !Directory.Exists(vm.Game.OutputDir)) return;
+            try
+            {
+                OnlineFixService.Revert(vm.Game.OutputDir);
+                vm.Game.OnlineFixApplied = false;
+                vm.RefreshOnlineFixState();
+                _lib.AddOrUpdate(vm.Game);
+            }
+            catch (Exception ex)
+            {
+                DialogService.ShowError("Remove OnlineFix Failed", ex.Message);
+            }
+        }
+
+        [RelayCommand]
         private void RefreshSizes()
         {
             Task.Run(() =>
@@ -288,6 +376,7 @@ namespace DepotDL.GUI.ViewModels
         [ObservableProperty] private string _sizeText = string.Empty;
         [ObservableProperty] private BitmapImage? _headerImage;
         [ObservableProperty] private bool _isImageLoading = true;
+        [ObservableProperty] private string _gameName = string.Empty;
 
         public string DepotCount => Game.DepotIds.Count == 1
             ? "1 depot" : $"{Game.DepotIds.Count} depots";
@@ -298,14 +387,23 @@ namespace DepotDL.GUI.ViewModels
         public string BuildIdLabel => string.IsNullOrEmpty(Game.BuildId) ? string.Empty : "  ·  Build ";
 
         public bool FolderExists => Directory.Exists(Game.OutputDir);
+        public bool OnlineFixApplied => Game.OnlineFixApplied;
 
         public LibraryGameViewModel(LibraryGame game)
         {
             Game = game;
+            _gameName = game.GameName;
             SizeText = LibraryService.FormatSize(game.TotalSizeBytes);
         }
 
         public void RefreshSize() => SizeText = LibraryService.FormatSize(Game.TotalSizeBytes);
+        public void RefreshOnlineFixState() => OnPropertyChanged(nameof(OnlineFixApplied));
+
+        public void ApplyRename(string newName)
+        {
+            Game.GameName = newName;
+            GameName = newName;
+        }
 
         public Task LoadImageAsync(CancellationToken ct = default)
         {

@@ -14,5 +14,6 @@ namespace DepotDL.GUI.Models
         public long TotalSizeBytes { get; set; }
         public bool IsVerified { get; set; } = true;
         public string BuildId { get; set; } = string.Empty;
+        public bool OnlineFixApplied { get; set; }
     }
 }

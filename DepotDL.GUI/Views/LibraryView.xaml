@@ -252,6 +252,10 @@
                                                       Style="{StaticResource ModernMenuItem}"
                                                       Command="{Binding Path=PlacementTarget.Tag.OpenFolderCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
                                                       CommandParameter="{Binding Path=PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
+                                            <MenuItem Header="Rename"
+                                                      Style="{StaticResource ModernMenuItem}"
+                                                      Command="{Binding Path=PlacementTarget.Tag.RenameGameCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                                      CommandParameter="{Binding Path=PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
                                             <Separator Margin="6,3" Background="#E8DDD2"/>
                                             <MenuItem Header="Validate Files"
                                                       Style="{StaticResource ModernMenuItem}"
@@ -265,6 +269,17 @@
                                                       Style="{StaticResource ModernMenuItem}"
                                                       Command="{Binding Path=PlacementTarget.Tag.PackGameCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
                                                       CommandParameter="{Binding Path=PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
+                                            <Separator Margin="6,3" Background="#E8DDD2"/>
+                                            <MenuItem Header="Install OnlineFix"
+                                                      Style="{StaticResource ModernMenuItem}"
+                                                      Command="{Binding Path=PlacementTarget.Tag.InstallOnlineFixCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                                      CommandParameter="{Binding Path=PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                                      Visibility="{Binding Path=PlacementTarget.DataContext.OnlineFixApplied, RelativeSource={RelativeSource AncestorType=ContextMenu}, Converter={StaticResource InvBoolToVis}}"/>
+                                            <MenuItem Header="Remove OnlineFix"
+                                                      Style="{StaticResource ModernMenuItem}"
+                                                      Command="{Binding Path=PlacementTarget.Tag.RemoveOnlineFixCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                                      CommandParameter="{Binding Path=PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                                      Visibility="{Binding Path=PlacementTarget.DataContext.OnlineFixApplied, RelativeSource={RelativeSource AncestorType=ContextMenu}, Converter={StaticResource BoolToVis}}"/>
                                             <Separator Margin="6,3" Background="#E8DDD2"/>
                                             <MenuItem Header="Remove from Library"
                                                       Style="{StaticResource ModernMenuItem}"
@@ -311,6 +326,38 @@
                                             </Border.Background>
                                         </Border>
 
+                                        <!-- OnlineFix indicator dot -->
+                                        <Ellipse Width="10" Height="10"
+                                                 Fill="#2ECC71"
+                                                 HorizontalAlignment="Right" VerticalAlignment="Top"
+                                                 Margin="0,8,8,0">
+                                            <Ellipse.Style>
+                                                <Style TargetType="Ellipse">
+                                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding OnlineFixApplied}" Value="True">
+                                                            <Setter Property="Visibility" Value="Visible"/>
+                                                            <DataTrigger.EnterActions>
+                                                                <BeginStoryboard x:Name="BlinkSB">
+                                                                    <Storyboard RepeatBehavior="Forever" AutoReverse="True">
+                                                                        <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                                                                                         From="1" To="0.2" Duration="0:0:0.85">
+                                                                            <DoubleAnimation.EasingFunction>
+                                                                                <SineEase EasingMode="EaseInOut"/>
+                                                                            </DoubleAnimation.EasingFunction>
+                                                                        </DoubleAnimation>
+                                                                    </Storyboard>
+                                                                </BeginStoryboard>
+                                                            </DataTrigger.EnterActions>
+                                                            <DataTrigger.ExitActions>
+                                                                <StopStoryboard BeginStoryboardName="BlinkSB"/>
+                                                            </DataTrigger.ExitActions>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Ellipse.Style>
+                                        </Ellipse>
+
                                         <!-- Shimmer placeholder -->
                                         <Border Height="103" VerticalAlignment="Top"
                                                 CornerRadius="13,13,0,0"
@@ -348,7 +395,7 @@
                                                 </Grid.ColumnDefinitions>
 
                                                 <TextBlock Grid.Column="0"
-                                                           Text="{Binding Game.GameName}"
+                                                           Text="{Binding GameName}"
                                                            FontSize="13.5" FontWeight="SemiBold"
                                                            Foreground="{StaticResource TextPrimary}"
                                                            TextTrimming="CharacterEllipsis"/>
@@ -462,12 +509,6 @@
                 </Style.Triggers>
             </Style>
         </Grid.Style>
-
-        <Rectangle Fill="#1C1610" Opacity="0.72">
-            <Rectangle.InputBindings>
-                <MouseBinding MouseAction="LeftClick" Command="{Binding CancelRedownloadCommand}"/>
-            </Rectangle.InputBindings>
-        </Rectangle>
 
         <Border Width="420"
                 HorizontalAlignment="Center" VerticalAlignment="Center"
@@ -597,13 +638,6 @@
                     </Style.Triggers>
                 </Style>
             </Grid.Style>
-
-            <!-- Backdrop -->
-            <Rectangle Fill="#1C1610" Opacity="0.72">
-                <Rectangle.InputBindings>
-                    <MouseBinding MouseAction="LeftClick" Command="{Binding CancelRemoveCommand}"/>
-                </Rectangle.InputBindings>
-            </Rectangle>
 
             <!-- Dialog card -->
             <Border Width="420"

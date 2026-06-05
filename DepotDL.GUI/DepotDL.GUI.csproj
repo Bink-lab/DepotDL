@@ -26,6 +26,8 @@
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.3.2" />
     <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.135" />
+    <PackageReference Include="PuppeteerSharp" Version="20.0.2" />
+    <PackageReference Include="SharpCompress" Version="0.40.0" NoWarn="NU1902" />
     <PackageReference Include="SteamKit2" Version="3.2.0" />
     <PackageReference Include="System.Management" Version="9.0.5" />
   </ItemGroup>

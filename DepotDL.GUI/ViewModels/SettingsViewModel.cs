@@ -26,6 +26,8 @@ namespace DepotDL.GUI.ViewModels
         [ObservableProperty] private bool _autoSelectOsByOs = true;
         [ObservableProperty] private bool _downloadAchievementIcons = true;
         [ObservableProperty] private bool _saveSuccess;
+        [ObservableProperty] private string _onlineFixUser = string.Empty;
+        [ObservableProperty] private string _onlineFixPass = string.Empty;
 
         private DateTime? _lastUpdateCheckUtc;
         private string?   _lastKnownReleaseTag;
@@ -49,6 +51,8 @@ namespace DepotDL.GUI.ViewModels
             DownloadAchievementIcons = s.DownloadAchievementIcons;
             _lastUpdateCheckUtc  = s.LastUpdateCheckUtc;
             _lastKnownReleaseTag = s.LastKnownReleaseTag;
+            OnlineFixUser = s.OnlineFixUser ?? string.Empty;
+            OnlineFixPass = s.OnlineFixPass ?? string.Empty;
         }
 
         [RelayCommand]
@@ -96,6 +100,8 @@ namespace DepotDL.GUI.ViewModels
                 DownloadAchievementIcons = DownloadAchievementIcons,
                 LastUpdateCheckUtc  = _lastUpdateCheckUtc,
                 LastKnownReleaseTag = _lastKnownReleaseTag,
+                OnlineFixUser = string.IsNullOrWhiteSpace(OnlineFixUser) ? null : OnlineFixUser,
+                OnlineFixPass = string.IsNullOrWhiteSpace(OnlineFixPass) ? null : OnlineFixPass,
             });
 
             DepotDL.GUI.Helpers.SmoothScroll.ResetCache();

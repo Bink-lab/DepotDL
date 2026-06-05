@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Security.Cryptography;
+using System.Text;
 using DepotDL.GUI.Models;
 
 namespace DepotDL.GUI.Services
@@ -61,6 +63,8 @@ namespace DepotDL.GUI.Services
                 s.LastUpdateCheckUtc = luc;
 
             s.LastKnownReleaseTag = Get(values, "settings.last_known_release_tag");
+            s.OnlineFixUser = Get(values, "onlinefix.user");
+            s.OnlineFixPass = UnprotectString(Get(values, "onlinefix.pass"));
 
             return s;
         }
@@ -93,6 +97,10 @@ namespace DepotDL.GUI.Services
             w.WriteLine($"scroll_duration_ms={s.ScrollDurationMs}");
             w.WriteLine($"last_update_check={Escape(s.LastUpdateCheckUtc?.ToString("O") ?? "")}");
             w.WriteLine($"last_known_release_tag={Escape(s.LastKnownReleaseTag ?? "")}");
+            w.WriteLine();
+            w.WriteLine("[onlinefix]");
+            w.WriteLine($"user={Escape(s.OnlineFixUser ?? "")}");
+            w.WriteLine($"pass={Escape(ProtectString(s.OnlineFixPass) ?? "")}");
         }
 
         private static Dictionary<string, string> ParseIni(string path)
@@ -113,6 +121,26 @@ namespace DepotDL.GUI.Services
 
         private static string? Get(Dictionary<string, string> d, string key)
             => d.TryGetValue(key, out var v) && v.Length > 0 ? v : null;
+
+        private static string? ProtectString(string? value)
+        {
+            if (string.IsNullOrEmpty(value)) return null;
+            var bytes = Encoding.UTF8.GetBytes(value);
+            var encrypted = ProtectedData.Protect(bytes, null, DataProtectionScope.CurrentUser);
+            return Convert.ToBase64String(encrypted);
+        }
+
+        private static string? UnprotectString(string? value)
+        {
+            if (string.IsNullOrEmpty(value)) return null;
+            try
+            {
+                var encrypted = Convert.FromBase64String(value);
+                var bytes = ProtectedData.Unprotect(encrypted, null, DataProtectionScope.CurrentUser);
+                return Encoding.UTF8.GetString(bytes);
+            }
+            catch { return null; }
+        }
 
         private static string Escape(string v)
             => v.Replace("\\", "\\\\").Replace("\r", "\\r").Replace("\n", "\\n");

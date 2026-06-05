@@ -20,5 +20,7 @@ namespace DepotDL.GUI.Models
         public bool DownloadAchievementIcons { get; set; } = true;
         public DateTime?     LastUpdateCheckUtc  { get; set; }
         public string?       LastKnownReleaseTag { get; set; }
+        public string? OnlineFixUser { get; set; }
+        public string? OnlineFixPass { get; set; }
     }
 }
