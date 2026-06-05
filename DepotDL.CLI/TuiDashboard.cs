@@ -59,7 +59,8 @@ namespace DepotDL.CLI
                     "5. Configure Output Folder",
                     "6. Application Settings",
                     "7. Start Download Process",
-                    "8. Exit Application"
+                    "8. Browse Steam Store",
+                    "9. Exit Application"
                 };
 
                 var rightStats = new List<(string Key, string Val, ConsoleColor Color)>
@@ -320,6 +321,10 @@ namespace DepotDL.CLI
                         verified = LibraryManager.VerifyLibraryOnStartup(out totalCount, out missingCount);
                     }
                     else if (menuIndex == 7)
+                    {
+                        RunStoreBrowser(session, ddmodPath, dotnetPath);
+                    }
+                    else if (menuIndex == 8)
                     {
                         SaveSession(session);
                         Console.Clear();
@@ -2609,6 +2614,367 @@ namespace DepotDL.CLI
                 val /= 1024;
             }
             return $"{val:F2} {suffixes[order]}";
+        }
+
+        private static void RunStoreBrowser(TuiSession session, string ddmodPath, string dotnetPath)
+        {
+            List<StoreApiClient.StoreGame>? allGames = null;
+            string loadError = string.Empty;
+
+            Console.Clear();
+            WriteCenteredStatusBox("STEAM STORE BROWSER", new[] { "Connecting to Bonker API..." }, ConsoleColor.Cyan);
+
+            try { allGames = StoreApiClient.GetAllGames(); }
+            catch (Exception ex) { loadError = ex.Message.Split('\n')[0]; }
+
+            if (allGames == null || allGames.Count == 0)
+            {
+                string msg = string.IsNullOrEmpty(loadError)
+                    ? "No games found. Press Enter to return."
+                    : $"Failed to load: {TuiText.Shorten(loadError, 60)}  Press Enter.";
+                PromptText("STEAM STORE BROWSER", msg, "");
+                return;
+            }
+
+            string searchQuery = string.Empty;
+            int selectedIndex = 0;
+            int currentPage = 0;
+            const int pageSize = 16;
+
+            while (true)
+            {
+                List<StoreApiClient.StoreGame> filtered = string.IsNullOrEmpty(searchQuery)
+                    ? allGames
+                    : allGames.Where(g => g.Name.Contains(searchQuery, StringComparison.OrdinalIgnoreCase)).ToList();
+
+                int totalPages = Math.Max(1, (filtered.Count + pageSize - 1) / pageSize);
+                currentPage = Math.Clamp(currentPage, 0, totalPages - 1);
+                var pageItems = filtered.Skip(currentPage * pageSize).Take(pageSize).ToList();
+                int pageCount = pageItems.Count;
+                selectedIndex = Math.Clamp(selectedIndex, 0, Math.Max(0, pageCount - 1));
+
+                Console.Clear();
+                using (CenterConsoleOutput(80))
+                {
+                    Console.ForegroundColor = ConsoleColor.DarkGray;
+                    Console.WriteLine("╔══════════════════════════════════════════════════════════════════════════════╗");
+
+                    Console.Write("║ ");
+                    Console.ForegroundColor = ConsoleColor.Cyan;
+                    Console.Write(TuiText.Pad("STEAM STORE BROWSER", 52));
+                    Console.ForegroundColor = ConsoleColor.DarkGray;
+                    string pageInfo = $"Page {currentPage + 1}/{totalPages}";
+                    Console.Write(TuiText.Pad(pageInfo, 23));
+                    Console.ForegroundColor = ConsoleColor.DarkGray;
+                    Console.WriteLine(" ║");
+
+                    Console.WriteLine("╠══════════════════════════════════════════════════════════════════════════════╣");
+
+                    Console.Write("║ ");
+                    Console.ForegroundColor = ConsoleColor.DarkCyan;
+                    Console.Write("Search: ");
+                    bool hasQuery = !string.IsNullOrEmpty(searchQuery);
+                    Console.ForegroundColor = hasQuery ? ConsoleColor.White : ConsoleColor.DarkGray;
+                    string searchDisplay = hasQuery ? searchQuery : "(type to filter)";
+                    Console.Write(TuiText.Pad(TuiText.Shorten(searchDisplay, 44), 44));
+                    Console.ForegroundColor = ConsoleColor.DarkGray;
+                    string countStr = $"{filtered.Count:N0} games";
+                    Console.Write(TuiText.Pad(countStr, 23));
+                    Console.ForegroundColor = ConsoleColor.DarkGray;
+                    Console.WriteLine(" ║");
+
+                    Console.WriteLine("╠══════════════════════════════════════════════════════════════════════════════╣");
+
+                    for (int i = 0; i < pageSize; i++)
+                    {
+                        Console.ForegroundColor = ConsoleColor.DarkGray;
+                        Console.Write("║ ");
+                        if (i < pageItems.Count)
+                        {
+                            var game = pageItems[i];
+                            string appIdStr = $"[{game.AppId}]";
+                            int nameWidth = 73 - appIdStr.Length;
+                            string nameStr = TuiText.Shorten(game.Name, nameWidth);
+                            string row = nameStr.PadRight(nameWidth) + " " + appIdStr;
+
+                            if (i == selectedIndex)
+                            {
+                                Console.BackgroundColor = ConsoleColor.Cyan;
+                                Console.ForegroundColor = ConsoleColor.Black;
+                                Console.Write(TuiText.Pad($"> {row}", 76));
+                                Console.ResetColor();
+                            }
+                            else
+                            {
+                                Console.ForegroundColor = ConsoleColor.White;
+                                Console.Write(TuiText.Pad($"  {row}", 76));
+                            }
+                        }
+                        else
+                        {
+                            Console.Write(new string(' ', 76));
+                        }
+                        Console.ForegroundColor = ConsoleColor.DarkGray;
+                        Console.WriteLine(" ║");
+                    }
+
+                    Console.ForegroundColor = ConsoleColor.DarkGray;
+                    Console.WriteLine("╠══════════════════════════════════════════════════════════════════════════════╣");
+                    Console.Write("║ ");
+                    Console.ForegroundColor = ConsoleColor.Cyan;
+                    Console.Write("[↑/↓] Nav");
+                    Console.ForegroundColor = ConsoleColor.DarkGray;
+                    Console.Write(" │ ");
+                    Console.ForegroundColor = ConsoleColor.Cyan;
+                    Console.Write("[←/→] Page");
+                    Console.ForegroundColor = ConsoleColor.DarkGray;
+                    Console.Write(" │ ");
+                    Console.ForegroundColor = ConsoleColor.Cyan;
+                    Console.Write("[Enter] Details");
+                    Console.ForegroundColor = ConsoleColor.DarkGray;
+                    Console.Write(" │ ");
+                    Console.ForegroundColor = ConsoleColor.Cyan;
+                    Console.Write("[Bksp] Clear");
+                    Console.ForegroundColor = ConsoleColor.DarkGray;
+                    Console.Write(" │ ");
+                    Console.ForegroundColor = ConsoleColor.Cyan;
+                    Console.Write("[Esc] Back");
+                    Console.ForegroundColor = ConsoleColor.DarkGray;
+                    Console.WriteLine("        ║");
+                    Console.WriteLine("╚══════════════════════════════════════════════════════════════════════════════╝");
+                    Console.ResetColor();
+                }
+
+                var keyInfo = Console.ReadKey(true);
+                var key = keyInfo.Key;
+
+                if (key == ConsoleKey.Escape)
+                    return;
+                else if (key == ConsoleKey.UpArrow)
+                {
+                    selectedIndex--;
+                    if (selectedIndex < 0)
+                    {
+                        if (currentPage > 0) { currentPage--; selectedIndex = pageSize - 1; }
+                        else selectedIndex = 0;
+                    }
+                }
+                else if (key == ConsoleKey.DownArrow)
+                {
+                    selectedIndex++;
+                    if (selectedIndex >= pageCount)
+                    {
+                        if (currentPage < totalPages - 1) { currentPage++; selectedIndex = 0; }
+                        else selectedIndex = Math.Max(0, pageCount - 1);
+                    }
+                }
+                else if (key == ConsoleKey.LeftArrow || key == ConsoleKey.PageUp)
+                {
+                    if (currentPage > 0) { currentPage--; selectedIndex = 0; }
+                }
+                else if (key == ConsoleKey.RightArrow || key == ConsoleKey.PageDown)
+                {
+                    if (currentPage < totalPages - 1) { currentPage++; selectedIndex = 0; }
+                }
+                else if (key == ConsoleKey.Enter && pageCount > 0)
+                {
+                    RunStoreDetailView(session, pageItems[selectedIndex].AppId, pageItems[selectedIndex].Name, ddmodPath, dotnetPath);
+                }
+                else if (key == ConsoleKey.Backspace)
+                {
+                    if (searchQuery.Length > 0)
+                    {
+                        searchQuery = searchQuery[..^1];
+                        selectedIndex = 0;
+                        currentPage = 0;
+                    }
+                }
+                else if (keyInfo.KeyChar >= ' ' && keyInfo.KeyChar != '\0')
+                {
+                    searchQuery += keyInfo.KeyChar;
+                    selectedIndex = 0;
+                    currentPage = 0;
+                }
+            }
+        }
+
+        private static void RunStoreDetailView(TuiSession session, int appId, string fallbackName, string ddmodPath, string dotnetPath)
+        {
+            Console.Clear();
+            WriteCenteredStatusBox("STEAM STORE BROWSER", new[] { $"Loading details for {TuiText.Shorten(fallbackName, 50)}..." }, ConsoleColor.Cyan);
+
+            StoreApiClient.StoreDetail? detail = null;
+            try { detail = StoreApiClient.GetAppDetail(appId); }
+            catch { }
+
+            string name       = detail?.Name ?? fallbackName;
+            string developer  = detail?.Developer ?? string.Empty;
+            string publisher  = detail?.Publisher ?? string.Empty;
+            string genres     = detail?.Genres?.Count > 0 ? string.Join(", ", detail.Genres) : "Unknown";
+            string price      = detail?.PriceText ?? "Unknown";
+            string owners     = detail?.Owners ?? string.Empty;
+            string desc       = detail?.ShortDescription ?? string.Empty;
+            int pos           = detail?.Positive ?? 0;
+            int neg           = detail?.Negative ?? 0;
+            int total         = pos + neg;
+            double score      = total > 0 ? (double)pos / total * 100 : -1;
+
+            while (true)
+            {
+                Console.Clear();
+                using (CenterConsoleOutput(80))
+                {
+                    Console.ForegroundColor = ConsoleColor.DarkGray;
+                    Console.WriteLine("╔══════════════════════════════════════════════════════════════════════════════╗");
+
+                    Console.Write("║ ");
+                    Console.ForegroundColor = ConsoleColor.Cyan;
+                    string nameShort = TuiText.Shorten(name, 59);
+                    Console.Write(TuiText.Pad(nameShort, 59));
+                    Console.ForegroundColor = ConsoleColor.DarkGray;
+                    Console.Write("AppID: ");
+                    Console.ForegroundColor = ConsoleColor.Green;
+                    Console.Write(TuiText.Pad(appId.ToString(), 9));
+                    Console.ForegroundColor = ConsoleColor.DarkGray;
+                    Console.WriteLine(" ║");
+
+                    Console.WriteLine("╠══════════════════════════════════════════════════════════════════════════════╣");
+
+                    WriteStoreDetailRow("Developer:", developer);
+                    WriteStoreDetailRow("Publisher:", publisher);
+                    WriteStoreDetailRow("Genre:", genres);
+                    WriteStoreDetailRow("Price:", price);
+
+                    if (score >= 0)
+                    {
+                        int barWidth = 20;
+                        int filled = (int)(score / 100 * barWidth);
+                        string bar = new string('█', filled) + new string('░', barWidth - filled);
+                        WriteStoreDetailRow("Rating:", $"{bar}  {score:F0}%  ({total:N0} reviews)");
+                    }
+
+                    if (!string.IsNullOrEmpty(owners))
+                        WriteStoreDetailRow("Owners:", owners);
+
+                    if (!string.IsNullOrEmpty(desc))
+                    {
+                        Console.ForegroundColor = ConsoleColor.DarkGray;
+                        Console.WriteLine("╠══════════════════════════════════════════════════════════════════════════════╣");
+                        var descLines = WrapText(desc, 76);
+                        foreach (var line in descLines.Take(5))
+                        {
+                            Console.ForegroundColor = ConsoleColor.DarkGray;
+                            Console.Write("║ ");
+                            Console.ForegroundColor = ConsoleColor.Gray;
+                            Console.Write(TuiText.Pad(line, 76));
+                            Console.ForegroundColor = ConsoleColor.DarkGray;
+                            Console.WriteLine(" ║");
+                        }
+                        if (descLines.Count > 5)
+                        {
+                            Console.ForegroundColor = ConsoleColor.DarkGray;
+                            Console.Write("║ ");
+                            Console.ForegroundColor = ConsoleColor.DarkGray;
+                            Console.Write(TuiText.Pad("...", 76));
+                            Console.WriteLine(" ║");
+                        }
+                    }
+
+                    Console.ForegroundColor = ConsoleColor.DarkGray;
+                    Console.WriteLine("╠══════════════════════════════════════════════════════════════════════════════╣");
+                    Console.Write("║ ");
+                    Console.ForegroundColor = ConsoleColor.Cyan;
+                    Console.Write("[S] Set AppID");
+                    Console.ForegroundColor = ConsoleColor.DarkGray;
+                    Console.Write("   │   ");
+                    Console.ForegroundColor = ConsoleColor.Green;
+                    Console.Write("[D] Download");
+                    Console.ForegroundColor = ConsoleColor.DarkGray;
+                    Console.Write("   │   ");
+                    Console.ForegroundColor = ConsoleColor.Cyan;
+                    Console.Write("[Esc] Back");
+                    Console.ForegroundColor = ConsoleColor.DarkGray;
+                    Console.WriteLine(new string(' ', 76 - "[S] Set AppID   │   [D] Download   │   [Esc] Back".Length) + " ║");
+                    Console.WriteLine("╚══════════════════════════════════════════════════════════════════════════════╝");
+                    Console.ResetColor();
+                }
+
+                var key = Console.ReadKey(true).Key;
+                if (key == ConsoleKey.Escape)
+                    return;
+                if (key == ConsoleKey.S)
+                {
+                    session.AppId = appId.ToString();
+                    Console.Clear();
+                    WriteCenteredStatusBox("APP ID SET", new[] { $"Active AppID set to {appId}", $"({TuiText.Shorten(name, 60)})" }, ConsoleColor.Green);
+                    System.Threading.Thread.Sleep(1200);
+                    return;
+                }
+                if (key == ConsoleKey.D)
+                {
+                    session.AppId = appId.ToString();
+                    RunZipImportAction(session);
+                    if (string.IsNullOrEmpty(session.LuaPath))
+                        continue;
+
+                    var downloadableDepots = LibraryManager.FilterDownloadableDepots(session.AllDepots, session.AppId);
+                    if (downloadableDepots.Count == 0)
+                    {
+                        PromptText("DOWNLOAD", "No downloadable depots with decryption keys found. Press Enter.", "");
+                        continue;
+                    }
+
+                    var selectedDownloadableDepots = LibraryManager.FilterDownloadableDepots(session.SelectedDepots, session.AppId);
+                    var chosenDepots = RunCheckboxSelector($"SELECT DEPOTS FOR APP {session.AppId}", downloadableDepots, selectedDownloadableDepots);
+                    if (chosenDepots == null || chosenDepots.Count == 0)
+                        continue;
+
+                    session.SelectedDepots = chosenDepots;
+                    if (string.IsNullOrEmpty(session.OutputDir))
+                        session.OutputDir = BuildOutputDir(session, GetGameName(session));
+                    SaveSession(session);
+
+                    Console.Clear();
+                    int exitCode = Program.TriggerDownloadProcess(session.LuaPath, session.ManifestsDir, session.OutputDir, ddmodPath, dotnetPath, session.SelectedDepots, session.MaxParallelDepots, ryuuApiKey: session.RyuuApiKey, hubcapApiKey: session.HubcapApiKey);
+                    if (exitCode == 0)
+                        PromptText("DOWNLOAD SUCCESS", "Game downloaded and registered successfully! Press Enter.", "");
+                    else
+                        PromptText("DOWNLOAD FAILED", $"Download finished with exit code: {exitCode}. Press Enter.", "");
+                    return;
+                }
+            }
+        }
+
+        private static void WriteStoreDetailRow(string label, string value)
+        {
+            Console.ForegroundColor = ConsoleColor.DarkGray;
+            Console.Write("║ ");
+            Console.ForegroundColor = ConsoleColor.DarkCyan;
+            Console.Write(TuiText.Pad(label, 14));
+            Console.ForegroundColor = ConsoleColor.White;
+            Console.Write(TuiText.Pad(TuiText.Shorten(value, 62), 62));
+            Console.ForegroundColor = ConsoleColor.DarkGray;
+            Console.WriteLine(" ║");
+        }
+
+        private static List<string> WrapText(string text, int width)
+        {
+            var result = new List<string>();
+            if (string.IsNullOrEmpty(text)) return result;
+            var words = text.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            var line = new System.Text.StringBuilder();
+            foreach (var word in words)
+            {
+                if (line.Length + word.Length + (line.Length > 0 ? 1 : 0) > width)
+                {
+                    if (line.Length > 0) { result.Add(line.ToString()); line.Clear(); }
+                    if (word.Length > width) { result.Add(word[..width]); continue; }
+                }
+                if (line.Length > 0) line.Append(' ');
+                line.Append(word);
+            }
+            if (line.Length > 0) result.Add(line.ToString());
+            return result;
         }
     }
 }

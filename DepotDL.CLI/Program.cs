@@ -1088,6 +1088,11 @@ namespace DepotDL.CLI
                 }
             }
 
+            int windowWidth = 120;
+            try { windowWidth = Console.WindowWidth; } catch { }
+            if (windowWidth < 40) windowWidth = 120;
+            int maxChars = windowWidth - 1;
+
             string pad = new string(' ', DownloadTui.LeftPad);
             int charsWritten = pad.Length;
 
@@ -1176,22 +1181,39 @@ namespace DepotDL.CLI
                             etaStr = $"  ETA {FormatEta(etaSec)}";
                     }
                     string statusText = slot.Status + speedStr + etaStr;
-                    Console.Write(statusText);
-                    charsWritten += statusText.Length;
+                    int statusAvail = maxChars - charsWritten;
+                    if (statusAvail > 0)
+                    {
+                        if (statusText.Length > statusAvail)
+                            statusText = TuiText.Shorten(statusText, statusAvail);
+                        Console.Write(statusText);
+                        charsWritten += statusText.Length;
+                    }
                 }
                 else
                 {
                     Console.ForegroundColor = ConsoleColor.Gray;
-                    Console.Write(slot.Status);
-                    charsWritten += slot.Status.Length;
+                    int statusAvail = maxChars - charsWritten;
+                    string statusText = slot.Status;
+                    if (statusAvail > 0)
+                    {
+                        if (statusText.Length > statusAvail)
+                            statusText = TuiText.Shorten(statusText, statusAvail);
+                        Console.Write(statusText);
+                        charsWritten += statusText.Length;
+                    }
                 }
 
                 if (!string.IsNullOrEmpty(slot.ActiveValidationFile))
                 {
-                    Console.ForegroundColor = ConsoleColor.DarkGray;
-                    string valStr = $"  {TuiText.Shorten(slot.ActiveValidationFile, 20)}";
-                    Console.Write(valStr);
-                    charsWritten += valStr.Length;
+                    int valAvail = maxChars - charsWritten;
+                    if (valAvail > 4)
+                    {
+                        Console.ForegroundColor = ConsoleColor.DarkGray;
+                        string valStr = $"  {TuiText.Shorten(slot.ActiveValidationFile, Math.Max(1, valAvail - 2))}";
+                        Console.Write(valStr);
+                        charsWritten += valStr.Length;
+                    }
                 }
             }
 
@@ -1199,7 +1221,9 @@ namespace DepotDL.CLI
             int lastLen = _lastSlotLengths[slotId];
             if (charsWritten < lastLen)
             {
-                Console.Write(new string(' ', lastLen - charsWritten));
+                int padNeeded = Math.Min(lastLen - charsWritten, maxChars - charsWritten);
+                if (padNeeded > 0)
+                    Console.Write(new string(' ', padNeeded));
             }
             _lastSlotLengths[slotId] = charsWritten;
 
