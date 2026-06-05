@@ -107,9 +107,49 @@ jobs:
           name: DepotDL.CLI-Linux-x64-${{ steps.build_info.outputs.SHA }}
           path: DepotDL.CLI-Linux-x64-${{ steps.build_info.outputs.SHA }}.zip
 
+  build-macos:
+    name: Build macOS
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up .NET 9
+        uses: actions/setup-dotnet@3e891b0cb619bf60e2c25674b222b8940e2c1c25 # v4.2.0
+        with:
+          dotnet-version: '9.0.x'
+
+      - name: Build DepotDownloaderMod
+        working-directory: DepotDownloaderMod
+        run: |
+          chmod +x build.sh
+          ./build.sh
+
+      - name: Get Build Info
+        id: build_info
+        shell: bash
+        run: |
+          SHA_SHORT=$(git rev-parse --short HEAD)
+          echo "SHA=$SHA_SHORT" >> $GITHUB_OUTPUT
+
+      - name: Build DepotDL CLI (macOS)
+        working-directory: DepotDL.CLI
+        run: |
+          chmod +x build-macos.sh
+          ./build-macos.sh osx-arm64
+
+      - name: Package CLI (macOS)
+        run: |
+          zip -j DepotDL.CLI-macOS-arm64-${{ steps.build_info.outputs.SHA }}.zip DepotDL.CLI/bin/Release/net9.0/osx-arm64/publish/*
+
+      - name: Upload CLI (macOS)
+        uses: actions/upload-artifact@6f51ac03b9356f520e9adb1b1b7802705f340c2b # v4.6.0
+        with:
+          name: DepotDL.CLI-macOS-arm64-${{ steps.build_info.outputs.SHA }}
+          path: DepotDL.CLI-macOS-arm64-${{ steps.build_info.outputs.SHA }}.zip
+
   create-nightly:
     name: Create Nightly Release
-    needs: [build-windows, build-linux]
+    needs: [build-windows, build-linux, build-macos]
     runs-on: ubuntu-latest
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     steps:
@@ -172,6 +212,9 @@ jobs:
 
           CLI_LIN=$(find artifacts -name "DepotDL.CLI-Linux-x64-*.zip" | head -n 1)
           cp "$CLI_LIN" "release_assets/DepotDL.CLI-Linux-x64-$SHA.zip"
+
+          CLI_MAC=$(find artifacts -name "DepotDL.CLI-macOS-arm64-*.zip" | head -n 1)
+          cp "$CLI_MAC" "release_assets/DepotDL.CLI-macOS-arm64-$SHA.zip"
 
           echo "Final assets for release:"
           ls -R release_assets/

@@ -1,6 +1,10 @@
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
 using System.Threading;
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Media.Animation;
 using DepotDL.GUI.ViewModels;
 
 namespace DepotDL.GUI
@@ -11,6 +15,9 @@ namespace DepotDL.GUI
         private System.Windows.Point _dragStart;
         private readonly CancellationTokenSource _cts = new();
 
+        private FrameworkElement? _currentPage;
+        private Dictionary<NavPage, FrameworkElement> _pages = new();
+
         public MainWindow()
         {
             InitializeComponent();
@@ -18,6 +25,15 @@ namespace DepotDL.GUI
             Loaded += MainWindow_Loaded;
             Closing += (_, _) => _cts.Cancel();
             SizeChanged += (_, _) => UpdateContentClip();
+
+            _pages = new Dictionary<NavPage, FrameworkElement>
+            {
+                { NavPage.Store,     StoreViewEl },
+                { NavPage.Library,   LibraryViewEl },
+                { NavPage.Download,  DownloadViewEl },
+                { NavPage.Settings,  SettingsViewEl },
+            };
+            _currentPage = LibraryViewEl;
         }
 
         private void TitleBar_MouseDown(object sender, MouseButtonEventArgs e)
@@ -81,6 +97,52 @@ namespace DepotDL.GUI
         {
             UpdateContentClip();
             await RunSplashscreenAsync();
+
+            var vm = (MainViewModel)DataContext;
+            vm.PropertyChanged += OnVmPropertyChanged;
+            if (vm.CurrentPage != NavPage.Library)
+                NavigateTo(vm.CurrentPage);
+        }
+
+        private void OnVmPropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(MainViewModel.CurrentPage))
+                NavigateTo(((MainViewModel)DataContext).CurrentPage);
+        }
+
+        private void NavigateTo(NavPage page)
+        {
+            if (!_pages.TryGetValue(page, out var newPage) || newPage == _currentPage) return;
+
+            var oldPage = _currentPage;
+            _currentPage = newPage;
+
+            var ease   = new CubicEase { EasingMode = EasingMode.EaseOut };
+            var durOut = new Duration(TimeSpan.FromSeconds(0.15));
+            var durIn  = new Duration(TimeSpan.FromSeconds(0.20));
+
+            void ShowNew()
+            {
+                newPage.BeginAnimation(OpacityProperty, null);
+                newPage.Opacity = 0;
+                newPage.Visibility = Visibility.Visible;
+                newPage.BeginAnimation(OpacityProperty, new DoubleAnimation(1, durIn) { EasingFunction = ease });
+            }
+
+            if (oldPage != null)
+            {
+                var fadeOut = new DoubleAnimation(0, durOut);
+                fadeOut.Completed += (_, _) =>
+                {
+                    oldPage.Visibility = Visibility.Collapsed;
+                    ShowNew();
+                };
+                oldPage.BeginAnimation(OpacityProperty, fadeOut);
+            }
+            else
+            {
+                ShowNew();
+            }
         }
 
         private void UpdateContentClip()

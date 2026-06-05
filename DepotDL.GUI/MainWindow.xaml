@@ -521,7 +521,7 @@
             </Border>
 
             <Border Grid.Column="1" Background="{StaticResource BgPage}" CornerRadius="0,14,14,0">
-                <Grid>
+                <Grid ClipToBounds="True">
                     <Border Height="40" Background="Transparent" VerticalAlignment="Top"
                             MouseLeftButtonDown="TitleBar_MouseDown"
                             MouseLeftButtonUp="TitleBar_MouseUp"
@@ -548,26 +548,10 @@
                         </Button>
                     </StackPanel>
 
-                    <views:StoreView Style="{StaticResource FadeInSlideUp}"
-                                     DataContext="{Binding Store}"
-                                     Visibility="{Binding DataContext.IsStorePage,
-                                         RelativeSource={RelativeSource AncestorType=Window},
-                                         Converter={StaticResource BoolToVis}}"/>
-                    <views:LibraryView Style="{StaticResource FadeInSlideUp}"
-                                       DataContext="{Binding Library}"
-                                       Visibility="{Binding DataContext.IsLibraryPage,
-                                           RelativeSource={RelativeSource AncestorType=Window},
-                                           Converter={StaticResource BoolToVis}}"/>
-                    <views:DownloadView Style="{StaticResource FadeInSlideUp}"
-                                        DataContext="{Binding Download}"
-                                        Visibility="{Binding DataContext.IsDownloadPage,
-                                            RelativeSource={RelativeSource AncestorType=Window},
-                                            Converter={StaticResource BoolToVis}}"/>
-                    <views:SettingsView Style="{StaticResource FadeInSlideUp}"
-                                        DataContext="{Binding Settings}"
-                                        Visibility="{Binding DataContext.IsSettingsPage,
-                                            RelativeSource={RelativeSource AncestorType=Window},
-                                            Converter={StaticResource BoolToVis}}"/>
+                    <views:StoreView    x:Name="StoreViewEl"    DataContext="{Binding Store}"    Visibility="Collapsed" Opacity="0"/>
+                    <views:LibraryView  x:Name="LibraryViewEl"  DataContext="{Binding Library}"  Visibility="Visible"   Opacity="1"/>
+                    <views:DownloadView x:Name="DownloadViewEl" DataContext="{Binding Download}" Visibility="Collapsed" Opacity="0"/>
+                    <views:SettingsView x:Name="SettingsViewEl" DataContext="{Binding Settings}" Visibility="Collapsed" Opacity="0"/>
 
                     <!-- Update notification banner -->
                     <Border VerticalAlignment="Bottom" HorizontalAlignment="Left"

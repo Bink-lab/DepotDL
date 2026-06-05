@@ -93,7 +93,10 @@ namespace DepotDL.GUI.Services
                 var buildTime = GetBuildTime();
                 var tagTime   = ParseTagTime(release.TagName);
                 bool updateAvailable;
-                if (buildTime != null && tagTime != null)
+                if (!string.IsNullOrEmpty(currentSha) && !string.IsNullOrEmpty(latestSha) &&
+                    string.Equals(currentSha, latestSha, StringComparison.OrdinalIgnoreCase))
+                    updateAvailable = false;
+                else if (buildTime != null && tagTime != null)
                     updateAvailable = tagTime > buildTime;
                 else
                     updateAvailable = !string.IsNullOrEmpty(currentSha) &&

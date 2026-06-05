@@ -225,12 +225,23 @@ namespace DepotDL.CLI
             bool scanFailed = false;
             try
             {
-                string pattern = isWindows ? "*.dll" : "*.so";
-                foreach (var f in Directory.GetFiles(gameDir, pattern, SearchOption.AllDirectories))
+                if (isWindows)
                 {
-                    string fn = Path.GetFileName(f).ToLowerInvariant();
-                    bool match = isWindows ? (fn == "steam_api.dll" || fn == "steam_api64.dll") : fn == "libsteam_api.so";
-                    if (match) steamApiFiles.Add(f);
+                    foreach (var f in Directory.GetFiles(gameDir, "*.dll", SearchOption.AllDirectories))
+                    {
+                        string fn = Path.GetFileName(f).ToLowerInvariant();
+                        if (fn == "steam_api.dll" || fn == "steam_api64.dll") steamApiFiles.Add(f);
+                    }
+                }
+                else
+                {
+                    string libPattern = OperatingSystem.IsMacOS() ? "*.dylib" : "*.so";
+                    string steamApiLib = OperatingSystem.IsMacOS() ? "libsteam_api.dylib" : "libsteam_api.so";
+                    foreach (var f in Directory.GetFiles(gameDir, libPattern, SearchOption.AllDirectories))
+                    {
+                        string fn = Path.GetFileName(f).ToLowerInvariant();
+                        if (fn == steamApiLib) steamApiFiles.Add(f);
+                    }
                 }
             }
             catch
@@ -651,7 +662,7 @@ saves_folder_name=GSE Saves";
 
             if (!replaced)
             {
-                string apiFileType = isWindows ? "steam_api DLLs" : "libsteam_api.so";
+                string apiFileType = isWindows ? "steam_api DLLs" : OperatingSystem.IsMacOS() ? "libsteam_api.dylib" : "libsteam_api.so";
                 File.WriteAllText(Path.Combine(gameDir, "sff_fix_error.log"), $"No {apiFileType} found to replace.");
                 return false;
             }

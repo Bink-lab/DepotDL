@@ -684,11 +684,14 @@ namespace DepotDL.CLI
                         {
                             if (Directory.Exists(game.OutputDir))
                             {
+                                string openCmd = OperatingSystem.IsWindows() ? "explorer.exe"
+                                    : OperatingSystem.IsMacOS() ? "open"
+                                    : "xdg-open";
                                 Process.Start(new ProcessStartInfo
                                 {
-                                    FileName = "explorer.exe",
+                                    FileName = openCmd,
                                     Arguments = $"\"{game.OutputDir}\"",
-                                    UseShellExecute = true
+                                    UseShellExecute = false
                                 });
                             }
                             else
@@ -1251,7 +1254,7 @@ namespace DepotDL.CLI
                 var menuItems = new List<string>
                 {
                     "1. Configure/Select Manifests Cache Folder",
-                    "2. Import Individual Manifest Files (Windows Explorer)",
+                    "2. Import Individual Manifest Files (File Picker)",
                     "3. Import Configs & Manifests from ZIP File",
                     "4. Scan & List Detailed Cached Manifests",
                     "5. Clear Manifest Cache Folder (Perma-Delete)",
@@ -1492,13 +1495,13 @@ namespace DepotDL.CLI
         private static string? ResolveLocalZipPath()
         {
             string? zipPath = null;
-            bool isWindows = OperatingSystem.IsWindows();
+            bool hasNativePicker = OperatingSystem.IsWindows() || OperatingSystem.IsMacOS();
 
-            if (isWindows)
+            if (hasNativePicker)
             {
                 var options = new List<string>
                 {
-                    "[Open Windows File Explorer...]",
+                    "[Open File Picker...]",
                     "[Type manual zip path...]",
                     "[Cancel]"
                 };
@@ -1657,11 +1660,11 @@ namespace DepotDL.CLI
         {
             var luaFiles = FindLuaFiles();
             var options = new List<string>();
-            bool isWindows = OperatingSystem.IsWindows();
+            bool hasNativePicker = OperatingSystem.IsWindows() || OperatingSystem.IsMacOS();
 
-            if (isWindows)
+            if (hasNativePicker)
             {
-                options.Add("[Open Windows File Explorer...]");
+                options.Add("[Open File Picker...]");
             }
 
             options.AddRange(luaFiles);
@@ -1675,7 +1678,7 @@ namespace DepotDL.CLI
             }
 
             string? selectedPath = null;
-            if (isWindows && options[selIndex] == "[Open Windows File Explorer...]")
+            if (hasNativePicker && options[selIndex] == "[Open File Picker...]")
             {
                 Console.Clear();
                 selectedPath = DialogHelpers.OpenWindowsFileDialog("Select Game Lua Configuration File", "Lua Files (*.lua)|*.lua|All Files (*.*)|*.*");
@@ -1710,11 +1713,11 @@ namespace DepotDL.CLI
         private static void RunConfigureManifestsFolderAction(TuiSession session)
         {
             var options = new List<string>();
-            bool isWindows = OperatingSystem.IsWindows();
+            bool hasNativePicker = OperatingSystem.IsWindows() || OperatingSystem.IsMacOS();
 
-            if (isWindows)
+            if (hasNativePicker)
             {
-                options.Add("[Open Windows Folder Selector...]");
+                options.Add("[Open Folder Picker...]");
             }
             options.Add("[Type manual folder path...]");
             options.Add("[Cancel]");
@@ -1725,7 +1728,7 @@ namespace DepotDL.CLI
                 return;
             }
 
-            if (isWindows && options[selIndex] == "[Open Windows Folder Selector...]")
+            if (hasNativePicker && options[selIndex] == "[Open Folder Picker...]")
             {
                 Console.Clear();
                 var selectedPath = DialogHelpers.OpenWindowsFolderDialog("Select Manifests Folder");
@@ -1753,12 +1756,6 @@ namespace DepotDL.CLI
 
         private static void RunImportIndividualManifestFilesAction(TuiSession session)
         {
-            if (!OperatingSystem.IsWindows())
-            {
-                PromptText("IMPORT MANIFEST", "Individual manifest selection requires Windows. Press Enter.", "");
-                return;
-            }
-
             Console.Clear();
             var selectedFiles = DialogHelpers.OpenWindowsMultiFileDialog("Select Manifest Files", "Manifest Files (*.manifest)|*.manifest|All Files (*.*)|*.*");
             if (selectedFiles.Count == 0)
@@ -1793,11 +1790,11 @@ namespace DepotDL.CLI
         private static void RunConfigureOutputAction(TuiSession session)
         {
             var options = new List<string>();
-            bool isWindows = OperatingSystem.IsWindows();
+            bool hasNativePicker = OperatingSystem.IsWindows() || OperatingSystem.IsMacOS();
 
-            if (isWindows)
+            if (hasNativePicker)
             {
-                options.Add("[Open Windows Folder Selector...]");
+                options.Add("[Open Folder Picker...]");
             }
             options.Add("[Type manual path...]");
             options.Add("[Cancel]");
@@ -1809,7 +1806,7 @@ namespace DepotDL.CLI
             }
 
             string? selectedPath = null;
-            if (isWindows && options[selIndex] == "[Open Windows Folder Selector...]")
+            if (hasNativePicker && options[selIndex] == "[Open Folder Picker...]")
             {
                 Console.Clear();
                 selectedPath = DialogHelpers.OpenWindowsFolderDialog("Select Output Download Folder");
