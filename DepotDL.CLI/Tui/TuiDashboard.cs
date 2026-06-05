@@ -2831,12 +2831,14 @@ namespace DepotDL.CLI.Tui
 
                     Console.Write("║ ");
                     Console.ForegroundColor = ConsoleColor.Cyan;
-                    string nameShort = TuiText.Shorten(name, 59);
-                    Console.Write(TuiText.Pad(nameShort, 59));
+                    string nameShort = TuiText.Shorten(name, 50);
+                    Console.Write(nameShort);
                     Console.ForegroundColor = ConsoleColor.DarkGray;
+                    int spacingNeeded = 76 - nameShort.Length - 15;
+                    Console.Write(new string(' ', Math.Max(1, spacingNeeded)));
                     Console.Write("AppID: ");
                     Console.ForegroundColor = ConsoleColor.Green;
-                    Console.Write(TuiText.Pad(appId.ToString(), 9));
+                    Console.Write(appId.ToString().PadRight(8));
                     Console.ForegroundColor = ConsoleColor.DarkGray;
                     Console.WriteLine(" ║");
 
