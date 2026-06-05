@@ -26,37 +26,9 @@ namespace DepotDL.GUI.ViewModels
         [ObservableProperty] private bool _autoSelectOsByOs = true;
         [ObservableProperty] private bool _downloadAchievementIcons = true;
         [ObservableProperty] private bool _saveSuccess;
-        [ObservableProperty] private UpdateChannel _updateChannel = UpdateChannel.Nightly;
 
         private DateTime? _lastUpdateCheckUtc;
         private string?   _lastKnownReleaseTag;
-
-        public bool IsNightly
-        {
-            get => UpdateChannel == UpdateChannel.Nightly;
-            set { if (value) UpdateChannel = UpdateChannel.Nightly; }
-        }
-
-        public bool IsProduction
-        {
-            get => UpdateChannel == UpdateChannel.Production;
-            set { if (value) UpdateChannel = UpdateChannel.Production; }
-        }
-
-        partial void OnUpdateChannelChanged(UpdateChannel value)
-        {
-            OnPropertyChanged(nameof(IsNightly));
-            OnPropertyChanged(nameof(IsProduction));
-        }
-
-        public string CurrentVersion
-        {
-            get
-            {
-                var sha = UpdateCheckerService.GetCurrentSha();
-                return string.IsNullOrEmpty(sha) ? "dev build" : sha;
-            }
-        }
 
         public void Load()
         {
@@ -75,7 +47,6 @@ namespace DepotDL.GUI.ViewModels
             ScrollDurationMs = s.ScrollDurationMs;
             AutoSelectOsByOs = s.AutoSelectOsByOs;
             DownloadAchievementIcons = s.DownloadAchievementIcons;
-            UpdateChannel = s.UpdateChannel;
             _lastUpdateCheckUtc  = s.LastUpdateCheckUtc;
             _lastKnownReleaseTag = s.LastKnownReleaseTag;
         }
@@ -123,7 +94,6 @@ namespace DepotDL.GUI.ViewModels
                 ScrollDurationMs = ScrollDurationMs,
                 AutoSelectOsByOs = AutoSelectOsByOs,
                 DownloadAchievementIcons = DownloadAchievementIcons,
-                UpdateChannel = UpdateChannel,
                 LastUpdateCheckUtc  = _lastUpdateCheckUtc,
                 LastKnownReleaseTag = _lastKnownReleaseTag,
             });

@@ -9,8 +9,6 @@ using System.Threading.Tasks;
 
 namespace DepotDL.CLI
 {
-    public enum UpdateChannel { Nightly, Production }
-
     public sealed class UpdateInfo
     {
         public bool    UpdateAvailable { get; init; }
@@ -21,8 +19,7 @@ namespace DepotDL.CLI
 
     internal static class UpdateChecker
     {
-        private const string NightlyUrl    = "https://api.github.com/repos/Bink-lab/DepotDL/releases?per_page=1";
-        private const string ProductionUrl = "https://api.github.com/repos/Bink-lab/DepotDL/releases/latest";
+        private const string NightlyUrl = "https://api.github.com/repos/Bink-lab/DepotDL/releases?per_page=1";
 
         private static readonly HttpClient Http = new() { Timeout = TimeSpan.FromSeconds(5) };
 
@@ -55,9 +52,9 @@ namespace DepotDL.CLI
                 ? dt.ToUniversalTime() : null;
         }
 
-        public static UpdateInfo? Check(string? currentSha, UpdateChannel channel)
+        public static UpdateInfo? Check(string? currentSha)
         {
-            try { return CheckAsync(currentSha, channel).GetAwaiter().GetResult(); }
+            try { return CheckAsync(currentSha).GetAwaiter().GetResult(); }
             catch { return null; }
         }
 
@@ -93,10 +90,9 @@ namespace DepotDL.CLI
             return false;
         }
 
-        private static async Task<UpdateInfo?> CheckAsync(string? currentSha, UpdateChannel channel)
+        private static async Task<UpdateInfo?> CheckAsync(string? currentSha)
         {
-            bool isNightly = channel == UpdateChannel.Nightly;
-            using var req = new HttpRequestMessage(HttpMethod.Get, isNightly ? NightlyUrl : ProductionUrl);
+            using var req = new HttpRequestMessage(HttpMethod.Get, NightlyUrl);
             req.Headers.UserAgent.ParseAdd("DepotDL-CLI/1.0");
             req.Headers.Accept.ParseAdd("application/vnd.github+json");
 
@@ -105,16 +101,8 @@ namespace DepotDL.CLI
 
             await using var stream = await resp.Content.ReadAsStreamAsync().ConfigureAwait(false);
 
-            GitHubRelease? release;
-            if (isNightly)
-            {
-                var arr = await JsonSerializer.DeserializeAsync<GitHubRelease[]>(stream).ConfigureAwait(false);
-                release = arr?.Length > 0 ? arr[0] : null;
-            }
-            else
-            {
-                release = await JsonSerializer.DeserializeAsync<GitHubRelease>(stream).ConfigureAwait(false);
-            }
+            var arr = await JsonSerializer.DeserializeAsync<GitHubRelease[]>(stream).ConfigureAwait(false);
+            var release = arr?.Length > 0 ? arr[0] : null;
 
             if (release?.TagName == null) return null;
 

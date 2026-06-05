@@ -83,7 +83,7 @@ namespace DepotDL.GUI.ViewModels
 
                 if (shouldCheck)
                 {
-                    result = await UpdateCheckerService.CheckAsync(currentSha, s.UpdateChannel, ct);
+                    result = await UpdateCheckerService.CheckAsync(currentSha, ct);
                     s.LastUpdateCheckUtc = DateTime.UtcNow;
                     if (result?.LatestTag != null) s.LastKnownReleaseTag = result.LatestTag;
                     _settingsService.Save(s);

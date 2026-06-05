@@ -2432,8 +2432,6 @@ namespace DepotDL.CLI
                 string maskedSteamKey = string.IsNullOrEmpty(session.SteamWebApiKey)
                     ? "[Not Configured]"
                     : new string('*', Math.Min(12, session.SteamWebApiKey.Length));
-                string updateChannelStr = session.UpdateChannel == UpdateChannel.Production ? "Production" : "Nightly";
-
                 var menuItems = new List<string>
                 {
                     $"1. Max Parallel Depot Downloads: {maxParallelStr}",
@@ -2442,9 +2440,8 @@ namespace DepotDL.CLI
                     $"4. Ryuu API Key                 : {maskedRyuuKey}",
                     $"5. Hubcap API Key               : {maskedHubcapKey}",
                     $"6. Steam Web API Key            : {maskedSteamKey}",
-                    $"7. Update Channel               : {updateChannelStr}",
-                    $"8. Download Achievement Icons  : {(session.DownloadAchievementIcons ? "Enabled" : "Disabled")}",
-                    "9. Back"
+                    $"7. Download Achievement Icons  : {(session.DownloadAchievementIcons ? "Enabled" : "Disabled")}",
+                    "8. Back"
                 };
 
                 using (CenterConsoleOutput(80))
@@ -2476,7 +2473,6 @@ namespace DepotDL.CLI
                     DrawSettingRow("Ryuu API Key:", maskedRyuuKey, string.IsNullOrEmpty(session.RyuuApiKey) ? ConsoleColor.Yellow : ConsoleColor.Green);
                     DrawSettingRow("Hubcap API Key:", maskedHubcapKey, string.IsNullOrEmpty(session.HubcapApiKey) ? ConsoleColor.Yellow : ConsoleColor.Green);
                     DrawSettingRow("Steam Web API Key:", maskedSteamKey, string.IsNullOrEmpty(session.SteamWebApiKey) ? ConsoleColor.Yellow : ConsoleColor.Green);
-                    DrawSettingRow("Update Channel:", updateChannelStr, ConsoleColor.Cyan);
                     DrawSettingRow("Download Achievement Icons:", session.DownloadAchievementIcons ? "Enabled" : "Disabled", session.DownloadAchievementIcons ? ConsoleColor.Green : ConsoleColor.Red);
 
                     Console.ForegroundColor = ConsoleColor.DarkGray;
@@ -2571,17 +2567,10 @@ namespace DepotDL.CLI
                     }
                     else if (selectedIndex == 6)
                     {
-                        session.UpdateChannel = session.UpdateChannel == UpdateChannel.Production
-                            ? UpdateChannel.Nightly
-                            : UpdateChannel.Production;
-                        SaveSession(session);
-                    }
-                    else if (selectedIndex == 7)
-                    {
                         session.DownloadAchievementIcons = !session.DownloadAchievementIcons;
                         SaveSession(session);
                     }
-                    else if (selectedIndex == 8)
+                    else if (selectedIndex == 7)
                     {
                         SaveSession(session);
                         return;

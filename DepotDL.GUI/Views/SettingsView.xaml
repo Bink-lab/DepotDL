@@ -400,48 +400,6 @@
                 </StackPanel>
             </Border>
 
-            <!-- Update Channel -->
-            <Border Grid.Row="12" Style="{StaticResource Card}" Padding="20">
-                <StackPanel>
-                    <TextBlock Text="UPDATES" Style="{StaticResource TextLabel}" Margin="0,0,0,14"/>
-
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="24"/>
-                            <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions>
-
-                        <StackPanel VerticalAlignment="Center">
-                            <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
-                                <TextBlock Text="Update Channel" Style="{StaticResource TextH3}" Margin="0,0,8,0"/>
-                                <TextBlock Style="{StaticResource Caption}" VerticalAlignment="Center">
-                                    <Run Text="current build:"/>
-                                    <Run Text="{Binding CurrentVersion, Mode=OneWay}" FontWeight="SemiBold"/>
-                                </TextBlock>
-                            </StackPanel>
-                            <TextBlock Style="{StaticResource BodyText}" TextWrapping="Wrap">
-                                <Run Text="Nightly" FontWeight="SemiBold"/>
-                                <Run Text=" receives pre-release builds on every commit.  "/>
-                                <Run Text="Production" FontWeight="SemiBold"/>
-                                <Run Text=" receives stable releases only."/>
-                            </TextBlock>
-                        </StackPanel>
-
-                        <StackPanel Grid.Column="2" VerticalAlignment="Center">
-                            <RadioButton Content="Nightly"
-                                         GroupName="UpdateChannel"
-                                         IsChecked="{Binding IsNightly}"
-                                         FontSize="13" Margin="0,0,0,6"/>
-                            <RadioButton Content="Production"
-                                         GroupName="UpdateChannel"
-                                         IsChecked="{Binding IsProduction}"
-                                         FontSize="13"/>
-                        </StackPanel>
-                    </Grid>
-                </StackPanel>
-            </Border>
-
             <Grid Grid.Row="14">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>

@@ -83,7 +83,7 @@ namespace DepotDL.CLI
 
                     if (UpdateChecker.ShouldCheck(tempSession))
                     {
-                        updateInfo = UpdateChecker.Check(currentSha, tempSession.UpdateChannel);
+                        updateInfo = UpdateChecker.Check(currentSha);
                         UpdateChecker.RecordCheck(tempSession, updateInfo);
                         IniSettings.Save(tempSession);
                     }

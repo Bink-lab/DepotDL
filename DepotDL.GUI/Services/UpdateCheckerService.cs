@@ -13,8 +13,7 @@ namespace DepotDL.GUI.Services
 {
     public static class UpdateCheckerService
     {
-        private const string NightlyUrl    = "https://api.github.com/repos/Bink-lab/DepotDL/releases?per_page=1";
-        private const string ProductionUrl = "https://api.github.com/repos/Bink-lab/DepotDL/releases/latest";
+        private const string NightlyUrl = "https://api.github.com/repos/Bink-lab/DepotDL/releases?per_page=1";
 
         private static readonly HttpClient Http = new() { Timeout = TimeSpan.FromSeconds(5) };
 
@@ -69,13 +68,12 @@ namespace DepotDL.GUI.Services
             return false;
         }
 
-        public static async Task<UpdateCheckResult?> CheckAsync(string? currentSha, UpdateChannel channel,
+        public static async Task<UpdateCheckResult?> CheckAsync(string? currentSha,
             CancellationToken ct = default)
         {
             try
             {
-                bool isNightly = channel == UpdateChannel.Nightly;
-                using var req = new HttpRequestMessage(HttpMethod.Get, isNightly ? NightlyUrl : ProductionUrl);
+                using var req = new HttpRequestMessage(HttpMethod.Get, NightlyUrl);
                 req.Headers.UserAgent.ParseAdd("DepotDL-GUI/1.0");
                 req.Headers.Accept.ParseAdd("application/vnd.github+json");
 
@@ -84,16 +82,8 @@ namespace DepotDL.GUI.Services
 
                 await using var stream = await resp.Content.ReadAsStreamAsync().ConfigureAwait(false);
 
-                GitHubRelease? release;
-                if (isNightly)
-                {
-                    var arr = await JsonSerializer.DeserializeAsync<GitHubRelease[]>(stream).ConfigureAwait(false);
-                    release = arr?.Length > 0 ? arr[0] : null;
-                }
-                else
-                {
-                    release = await JsonSerializer.DeserializeAsync<GitHubRelease>(stream).ConfigureAwait(false);
-                }
+                var arr = await JsonSerializer.DeserializeAsync<GitHubRelease[]>(stream).ConfigureAwait(false);
+                var release = arr?.Length > 0 ? arr[0] : null;
 
                 if (release?.TagName == null) return null;
 

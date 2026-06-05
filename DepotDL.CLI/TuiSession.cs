@@ -30,6 +30,5 @@ namespace DepotDL.CLI
         public DateTime?     LastUpdateCheckUtc  { get; set; }
         public string?       LastKnownReleaseTag { get; set; }
         public string?       DismissedUpdateTag  { get; set; }
-        public UpdateChannel UpdateChannel       { get; set; } = UpdateChannel.Nightly;
     }
 }
