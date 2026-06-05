@@ -6,8 +6,9 @@ using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
+using DepotDL.CLI.Tui;
 
-namespace DepotDL.CLI
+namespace DepotDL.CLI.Services
 {
     public sealed class UpdateInfo
     {

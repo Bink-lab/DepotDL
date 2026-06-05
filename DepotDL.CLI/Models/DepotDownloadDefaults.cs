@@ -1,4 +1,4 @@
-namespace DepotDL.CLI
+namespace DepotDL.CLI.Models
 {
     internal static class DepotDownloadDefaults
     {

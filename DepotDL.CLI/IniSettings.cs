@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using DepotDL.CLI.Tui;
 
 namespace DepotDL.CLI
 {

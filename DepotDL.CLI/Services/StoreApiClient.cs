@@ -7,7 +7,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading;
 
-namespace DepotDL.CLI
+namespace DepotDL.CLI.Services
 {
     internal static class StoreApiClient
     {

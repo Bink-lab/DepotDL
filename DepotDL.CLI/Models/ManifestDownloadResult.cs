@@ -1,4 +1,4 @@
-namespace DepotDL.CLI
+namespace DepotDL.CLI.Models
 {
     public sealed class ManifestDownloadResult
     {

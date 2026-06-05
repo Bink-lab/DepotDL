@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
 using System.Text.RegularExpressions;
+using DepotDL.CLI.Services;
+using DepotDL.CLI.Tui;
 
 namespace DepotDL.CLI
 {

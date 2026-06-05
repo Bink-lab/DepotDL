@@ -1,4 +1,4 @@
-namespace DepotDL.CLI
+namespace DepotDL.CLI.Tui
 {
     internal static class TuiText
     {

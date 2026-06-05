@@ -6,7 +6,7 @@ using System.Text.Json;
 using System.Threading;
 using SteamKit2;
 
-namespace DepotDL.CLI
+namespace DepotDL.CLI.Services
 {
     public sealed class DepotMetadata
     {

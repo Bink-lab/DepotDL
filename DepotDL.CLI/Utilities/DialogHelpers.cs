@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 
-namespace DepotDL.CLI
+namespace DepotDL.CLI.Utilities
 {
     public static class DialogHelpers
     {

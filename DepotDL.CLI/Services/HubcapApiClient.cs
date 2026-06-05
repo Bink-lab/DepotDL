@@ -3,8 +3,9 @@ using System.IO;
 using System.Net.Http;
 using System.Text;
 using System.Text.Json;
+using DepotDL.CLI.Models;
 
-namespace DepotDL.CLI
+namespace DepotDL.CLI.Services
 {
     public static class HubcapApiClient
     {

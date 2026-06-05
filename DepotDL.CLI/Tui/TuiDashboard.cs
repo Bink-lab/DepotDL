@@ -5,8 +5,10 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Diagnostics;
 using System.Text;
+using DepotDL.CLI.Services;
+using DepotDL.CLI.Utilities;
 
-namespace DepotDL.CLI
+namespace DepotDL.CLI.Tui
 {
     public static class TuiDashboard
     {

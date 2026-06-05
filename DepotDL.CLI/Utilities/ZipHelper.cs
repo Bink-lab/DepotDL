@@ -4,7 +4,7 @@ using System.IO.Compression;
 using System.Linq;
 using System.Text.RegularExpressions;
 
-namespace DepotDL.CLI
+namespace DepotDL.CLI.Utilities
 {
     public sealed class ZipImportResult
     {

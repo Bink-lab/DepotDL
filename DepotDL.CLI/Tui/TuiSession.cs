@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace DepotDL.CLI
+namespace DepotDL.CLI.Tui
 {
     public class DepotInfo
     {
