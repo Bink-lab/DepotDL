@@ -75,7 +75,7 @@ namespace DepotDL.CLI
                 };
 
                 if (UpdateChecker.IsUpdateAvailableFromCache(session))
-                    rightStats.Add(("Update:", "Available ↑", ConsoleColor.Yellow));
+                    rightStats.Add(("Update:", "Available ^", ConsoleColor.Yellow));
 
                 using (CenterConsoleOutput(82))
                 {

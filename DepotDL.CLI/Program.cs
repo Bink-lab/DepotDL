@@ -833,20 +833,20 @@ namespace DepotDL.CLI
             Console.WriteLine(pad + "╔" + hr + "╗");
             Console.Write(pad + "║  ");
             Console.ForegroundColor = ConsoleColor.Yellow;
-            Console.Write(TuiText.Pad("  ★  UPDATE AVAILABLE", width - 4));
+            Console.Write(TuiText.Pad("  ★  UPDATE AVAILABLE", width - 6));
             Console.ForegroundColor = ConsoleColor.DarkGray;
             Console.WriteLine("  ║");
             Console.WriteLine(pad + "╠" + hr + "╣");
             Console.Write(pad + "║  ");
             Console.ForegroundColor = ConsoleColor.White;
-            Console.Write(TuiText.Pad($"  Latest: {info.LatestTag ?? "unknown"}", width - 4));
+            Console.Write(TuiText.Pad($"  Latest: {info.LatestTag ?? "unknown"}", width - 6));
             Console.ForegroundColor = ConsoleColor.DarkGray;
             Console.WriteLine("  ║");
             if (!string.IsNullOrEmpty(info.HtmlUrl))
             {
                 Console.Write(pad + "║  ");
                 Console.ForegroundColor = ConsoleColor.Cyan;
-                Console.Write(TuiText.Pad($"  {info.HtmlUrl}", width - 4));
+                Console.Write(TuiText.Pad($"  {info.HtmlUrl}", width - 6));
                 Console.ForegroundColor = ConsoleColor.DarkGray;
                 Console.WriteLine("  ║");
             }
