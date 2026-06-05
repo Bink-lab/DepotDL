@@ -1431,9 +1431,13 @@ namespace DepotDL.CLI
                 }
             });
 
-            process.WaitForExit();
-            watchdogCts.Cancel();
-            await watchdogTask;
+            try { await process.WaitForExitAsync(watchdogCts.Token); }
+            catch (OperationCanceledException) { /* Watchdog killed the process */ }
+            finally
+            {
+                watchdogCts.Cancel();
+                try { await watchdogTask; } catch { }
+            }
 
             if (killedByWatchdog)
                 return (false, true, null);
