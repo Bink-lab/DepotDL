@@ -80,6 +80,7 @@ BenchmarkDotNet.Artifacts/
 # Claude Code
 # -------------------------------------------------------------------------
 CLAUDE.md
+graphify-out/
 
 # -------------------------------------------------------------------------
 # Local / Environment Secrets (Optional)
