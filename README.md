@@ -76,6 +76,14 @@ DepotDL.CLI.exe --lua "path/to/game.lua" --manifests-dir "path/to/manifests/" --
 dotnet build -c Release
 ```
 
+## Archive
+
+Nightly builds are stored at [depotdl-v.s3.filebase.io](https://depotdl-v.s3.filebase.io). Browse the bucket XML to see all available versions, then download directly:
+
+```
+https://depotdl-v.s3.filebase.io/DepotDL-nightly-<date>-<time>-<commit>.zip
+```
+
 ## License
 
 See LICENSE file in project root.
