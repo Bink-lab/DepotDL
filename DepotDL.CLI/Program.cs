@@ -89,6 +89,12 @@ namespace DepotDL.CLI
                     }
                 }
 
+                if (Console.IsInputRedirected || Console.IsOutputRedirected)
+                {
+                    Console.Error.WriteLine("TUI requires an interactive console.");
+                    return 1;
+                }
+
                 return TuiDashboard.RunInteractiveTui(ddmodPath, dotnetPath);
             }
 
