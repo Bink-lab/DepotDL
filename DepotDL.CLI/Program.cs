@@ -381,7 +381,7 @@ namespace DepotDL.CLI
                     }
 
                     Dictionary<string, string>? map = null;
-                    ManifestDownloadResult fetchResult = fetch();
+                    var fetchResult = fetch();
                     if (fetchResult.HasZip && !string.IsNullOrEmpty(fetchResult.ZipPath))
                     {
                         var imported = ZipHelper.ImportZip(fetchResult.ZipPath);
@@ -984,7 +984,7 @@ namespace DepotDL.CLI
                                 slot.ActiveValidationFile = null;
                             }
 
-                            DateTime now = DateTime.UtcNow;
+                            var now = DateTime.UtcNow;
                             if (slot.DownloadStartTime == null)
                             {
                                 slot.DownloadStartTime = now;
@@ -1261,7 +1261,7 @@ namespace DepotDL.CLI
                         // Flush any pending permanent log lines (completion/failure messages)
                         while (_pendingLogs.Count > 0)
                         {
-                            Action logAction = _pendingLogs.Dequeue();
+                            var logAction = _pendingLogs.Dequeue();
                             ClearCurrentLine();
                             logAction();
                         }

@@ -2644,7 +2644,7 @@ namespace DepotDL.CLI.Tui
 
             while (true)
             {
-                List<StoreApiClient.StoreGame> filtered = string.IsNullOrEmpty(searchQuery)
+                var filtered = string.IsNullOrEmpty(searchQuery)
                     ? allGames
                     : allGames.Where(g => g.Name.Contains(searchQuery, StringComparison.OrdinalIgnoreCase)).ToList();
 

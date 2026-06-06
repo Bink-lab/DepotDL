@@ -32,14 +32,14 @@ namespace DepotDL.CLI.Utilities
                     return new ZipImportResult();
                 }
 
-                using (ZipArchive archive = ZipFile.OpenRead(zipPath))
+                using (var archive = ZipFile.OpenRead(zipPath))
                 {
                     importDir = BuildImportDir(zipPath, archive);
                     manifestsDir = Path.Combine(importDir, "manifests");
                     Directory.CreateDirectory(importDir);
                     Directory.CreateDirectory(manifestsDir);
 
-                    foreach (ZipArchiveEntry entry in archive.Entries)
+                    foreach (var entry in archive.Entries)
                     {
                         var ext = Path.GetExtension(entry.FullName).ToLower();
                         if (ext == ".lua")
