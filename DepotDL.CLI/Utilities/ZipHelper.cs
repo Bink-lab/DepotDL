@@ -50,31 +50,17 @@ namespace DepotDL.CLI.Utilities
                             var fileName = Path.GetFileName(entry.FullName);
                             if (string.IsNullOrEmpty(fileName)) continue;
 
-                            var targetPath = Path.GetFullPath(Path.Combine(importDir, fileName));
-                            if (!targetPath.StartsWith(fullImportDirPath, StringComparison.Ordinal))
-                            {
-                                throw new InvalidOperationException($"Entry is outside target directory: {entry.FullName}");
-                            }
-
+                            var targetPath = ResolveEntryPath(importDir, fullImportDirPath, fileName, entry.FullName);
                             entry.ExtractToFile(targetPath, overwrite: true);
-
                             luaCount++;
-                            if (firstLuaPath == null)
-                            {
-                                firstLuaPath = targetPath;
-                            }
+                            firstLuaPath ??= targetPath;
                         }
                         else if (ext == ".manifest")
                         {
                             var fileName = Path.GetFileName(entry.FullName);
                             if (string.IsNullOrEmpty(fileName)) continue;
 
-                            var targetPath = Path.GetFullPath(Path.Combine(manifestsDir, fileName));
-                            if (!targetPath.StartsWith(fullManifestsDirPath, StringComparison.Ordinal))
-                            {
-                                throw new InvalidOperationException($"Entry is outside target directory: {entry.FullName}");
-                            }
-
+                            var targetPath = ResolveEntryPath(manifestsDir, fullManifestsDirPath, fileName, entry.FullName);
                             entry.ExtractToFile(targetPath, overwrite: true);
                             manifestCount++;
                         }
@@ -94,6 +80,14 @@ namespace DepotDL.CLI.Utilities
                 ImportDir = importDir,
                 ManifestsDir = manifestsDir
             };
+        }
+
+        private static string ResolveEntryPath(string baseDir, string fullBaseDirPath, string fileName, string entryFullName)
+        {
+            var targetPath = Path.GetFullPath(Path.Combine(baseDir, fileName));
+            if (!targetPath.StartsWith(fullBaseDirPath, StringComparison.Ordinal))
+                throw new InvalidOperationException($"Entry is outside target directory: {entryFullName}");
+            return targetPath;
         }
 
         private static string BuildImportDir(string zipPath, ZipArchive archive)

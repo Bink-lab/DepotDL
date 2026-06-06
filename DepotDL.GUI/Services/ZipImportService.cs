@@ -44,7 +44,9 @@ namespace DepotDL.GUI.Services
                 {
                     var target = Path.GetFullPath(Path.Combine(importDir, fileName));
                     if (!target.StartsWith(importDirRoot, StringComparison.OrdinalIgnoreCase))
+                    {
                         throw new InvalidOperationException($"Entry resolves outside import directory: {entry.FullName}");
+                    }
 
                     entry.ExtractToFile(target, overwrite: true);
                     luaCount++;
@@ -54,7 +56,9 @@ namespace DepotDL.GUI.Services
                 {
                     var target = Path.GetFullPath(Path.Combine(manifestsDir, fileName));
                     if (!target.StartsWith(manifestsDirRoot, StringComparison.OrdinalIgnoreCase))
+                    {
                         throw new InvalidOperationException($"Entry resolves outside manifests directory: {entry.FullName}");
+                    }
 
                     entry.ExtractToFile(target, overwrite: true);
                     manifestCount++;
@@ -85,7 +89,9 @@ namespace DepotDL.GUI.Services
             var importsRoot = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "imports") + Path.DirectorySeparatorChar);
             var importDir = Path.GetFullPath(Path.Combine(importsRoot, folderName));
             if (!importDir.StartsWith(importsRoot, StringComparison.OrdinalIgnoreCase))
+            {
                 throw new InvalidOperationException($"Import directory resolves outside imports root: {folderName}");
+            }
 
             return importDir;
         }
