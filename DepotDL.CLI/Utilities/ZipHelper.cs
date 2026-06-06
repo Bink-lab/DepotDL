@@ -39,6 +39,9 @@ namespace DepotDL.CLI.Utilities
                     Directory.CreateDirectory(importDir);
                     Directory.CreateDirectory(manifestsDir);
 
+                    var fullImportDirPath = Path.GetFullPath(importDir + Path.DirectorySeparatorChar);
+                    var fullManifestsDirPath = Path.GetFullPath(manifestsDir + Path.DirectorySeparatorChar);
+
                     foreach (var entry in archive.Entries)
                     {
                         var ext = Path.GetExtension(entry.FullName).ToLower();
@@ -47,13 +50,18 @@ namespace DepotDL.CLI.Utilities
                             var fileName = Path.GetFileName(entry.FullName);
                             if (string.IsNullOrEmpty(fileName)) continue;
 
-                            var targetPath = Path.Combine(importDir, fileName);
+                            var targetPath = Path.GetFullPath(Path.Combine(importDir, fileName));
+                            if (!targetPath.StartsWith(fullImportDirPath, StringComparison.Ordinal))
+                            {
+                                throw new InvalidOperationException($"Entry is outside target directory: {entry.FullName}");
+                            }
+
                             entry.ExtractToFile(targetPath, overwrite: true);
 
                             luaCount++;
                             if (firstLuaPath == null)
                             {
-                                firstLuaPath = Path.GetFullPath(targetPath);
+                                firstLuaPath = targetPath;
                             }
                         }
                         else if (ext == ".manifest")
@@ -61,7 +69,12 @@ namespace DepotDL.CLI.Utilities
                             var fileName = Path.GetFileName(entry.FullName);
                             if (string.IsNullOrEmpty(fileName)) continue;
 
-                            var targetPath = Path.Combine(manifestsDir, fileName);
+                            var targetPath = Path.GetFullPath(Path.Combine(manifestsDir, fileName));
+                            if (!targetPath.StartsWith(fullManifestsDirPath, StringComparison.Ordinal))
+                            {
+                                throw new InvalidOperationException($"Entry is outside target directory: {entry.FullName}");
+                            }
+
                             entry.ExtractToFile(targetPath, overwrite: true);
                             manifestCount++;
                         }
@@ -88,7 +101,7 @@ namespace DepotDL.CLI.Utilities
             var firstLua = archive.Entries.FirstOrDefault(entry => Path.GetExtension(entry.FullName).Equals(".lua", StringComparison.OrdinalIgnoreCase));
             var folderName = firstLua == null
                 ? Path.GetFileNameWithoutExtension(zipPath)
-                : Path.GetFileNameWithoutExtension(firstLua.FullName);
+                : Path.GetFileNameWithoutExtension(Path.GetFileName(firstLua.FullName));
 
             folderName = SanitizeFolderName(folderName);
             if (string.IsNullOrWhiteSpace(folderName))
