@@ -20,29 +20,8 @@ namespace DepotDL.GUI.Services
         private static string ChromiumCacheDir =>
             Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "tools", "chromium");
 
-        // ── debug log ────────────────────────────────────────────────────────────
-        private static readonly string LogPath =
-            Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "onlinefix.log");
-        private static volatile bool _logInitialized;
-        private static readonly object _logLock = new();
-
-        private static void Log(string message)
-        {
-            var line = $"[{DateTime.Now:HH:mm:ss.fff}] {message}";
-            lock (_logLock)
-            {
-                try
-                {
-                    if (!_logInitialized)
-                    {
-                        File.WriteAllText(LogPath, string.Empty);
-                        _logInitialized = true;
-                    }
-                    File.AppendAllText(LogPath, line + Environment.NewLine);
-                }
-                catch { }
-            }
-        }
+        private static void Log(string message) =>
+            DepotDL.CLI.AppLogger.Debug("OnlineFix", message);
 
         public static bool IsChromiumInstalled()
         {

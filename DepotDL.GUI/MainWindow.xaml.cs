@@ -17,6 +17,7 @@ namespace DepotDL.GUI
 
         private FrameworkElement? _currentPage;
         private Dictionary<NavPage, FrameworkElement> _pages = new();
+        private int _navVersion;
 
         public MainWindow()
         {
@@ -117,12 +118,22 @@ namespace DepotDL.GUI
             var oldPage = _currentPage;
             _currentPage = newPage;
 
+            var myVersion = ++_navVersion;
             var ease = new CubicEase { EasingMode = EasingMode.EaseOut };
-            var durOut = new Duration(TimeSpan.FromSeconds(0.15));
             var durIn = new Duration(TimeSpan.FromSeconds(0.20));
+
+            foreach (var p in _pages.Values)
+            {
+                if (p != oldPage && p != newPage)
+                {
+                    p.BeginAnimation(OpacityProperty, null);
+                    p.Visibility = Visibility.Collapsed;
+                }
+            }
 
             void ShowNew()
             {
+                if (_navVersion != myVersion) return;
                 newPage.BeginAnimation(OpacityProperty, null);
                 newPage.Opacity = 0;
                 newPage.Visibility = Visibility.Visible;
@@ -131,7 +142,7 @@ namespace DepotDL.GUI
 
             if (oldPage != null)
             {
-                var fadeOut = new DoubleAnimation(0, durOut);
+                var fadeOut = new DoubleAnimation(0, new Duration(TimeSpan.FromSeconds(0.15)));
                 fadeOut.Completed += (_, _) =>
                 {
                     oldPage.Visibility = Visibility.Collapsed;

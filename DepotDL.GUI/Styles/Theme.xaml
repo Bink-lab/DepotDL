@@ -4,6 +4,10 @@
     xmlns:conv="clr-namespace:DepotDL.GUI.Converters"
     xmlns:helpers="clr-namespace:DepotDL.GUI.Helpers">
 
+    <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="LucideIcons.xaml"/>
+    </ResourceDictionary.MergedDictionaries>
+
     <conv:BoolToVisibilityConverter x:Key="BoolToVis"/>
     <conv:BoolToVisibilityConverter x:Key="InvBoolToVis" Invert="True"/>
     <conv:InverseBoolConverter x:Key="InvBool"/>
@@ -182,14 +186,11 @@
                                        Fill="{StaticResource BgInput}"
                                        Stroke="{StaticResource Border}"
                                        StrokeThickness="1.5"/>
-                            <Viewbox x:Name="tick" Margin="3"
-                                     Visibility="Collapsed">
-                                <Canvas Width="11" Height="9">
-                                    <Path Data="M0,4.5 L3.5,8 L11,0"
-                                          Stroke="White" StrokeThickness="1.8"
-                                          StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
-                                </Canvas>
-                            </Viewbox>
+                            <Path x:Name="tick" Data="{StaticResource LucideCheck}"
+                                  Margin="3" Stretch="Uniform" Visibility="Collapsed"
+                                  Stroke="White" StrokeThickness="1.8"
+                                  StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"
+                                  Fill="Transparent"/>
                         </Grid>
                         <ContentPresenter Margin="8,0,0,0" VerticalAlignment="Center"/>
                     </StackPanel>

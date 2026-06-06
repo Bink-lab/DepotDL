@@ -652,20 +652,12 @@ namespace DepotDL.CLI.Tui
                         Console.ForegroundColor = ConsoleColor.Cyan;
                         Console.WriteLine("Applying Goldberg Steam Emulator...");
                         Console.ResetColor();
-                        var fixSuccess = GameLauncher.EnsureGbeApplied(game.AppId, game.OutputDir, game.LuaPath, session.SteamWebApiKey, session.DownloadAchievementIcons);
+                        var (fixSuccess, fixError) = GameLauncher.EnsureGbeApplied(game.AppId, game.OutputDir, game.LuaPath, session.SteamWebApiKey, session.DownloadAchievementIcons);
                         if (!fixSuccess)
                         {
-                            var logPath = Path.Combine(game.OutputDir, "sff_fix_error.log");
                             var errorMsg = "Failed to apply Goldberg Steam Emulator fix.";
-                            if (File.Exists(logPath))
-                            {
-                                try
-                                {
-                                    errorMsg += "\nDetails:\n" + File.ReadAllText(logPath);
-                                    File.Delete(logPath);
-                                }
-                                catch { }
-                            }
+                            if (!string.IsNullOrEmpty(fixError))
+                                errorMsg += "\nDetails:\n" + fixError;
                             PromptText("LAUNCH GAME", $"{errorMsg}\nPress Enter to return.", "");
                             continue;
                         }

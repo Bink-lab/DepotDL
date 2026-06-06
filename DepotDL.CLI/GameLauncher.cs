@@ -213,10 +213,10 @@ namespace DepotDL.CLI
             }
         }
 
-        public static bool EnsureGbeApplied(string appId, string gameDir, string? luaPath = null, string? steamWebApiKey = null, bool downloadAchievementIcons = true)
+        public static (bool Success, string? Error) EnsureGbeApplied(string appId, string gameDir, string? luaPath = null, string? steamWebApiKey = null, bool downloadAchievementIcons = true)
         {
             if (string.IsNullOrEmpty(gameDir) || !Directory.Exists(gameDir))
-                return false;
+                return (false, null);
 
             var isWindows = System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.Windows);
             var launchScript = OperatingSystem.IsWindows() ? "Launch.bat" : "launch.sh";
@@ -252,8 +252,9 @@ namespace DepotDL.CLI
 
             if (scanFailed)
             {
-                try { File.WriteAllText(Path.Combine(gameDir, "sff_fix_error.log"), "Failed to scan game directory for Steam API files."); } catch { }
-                return false;
+                const string scanErr = "Failed to scan game directory for Steam API files.";
+                AppLogger.Error("GameLauncher", scanErr);
+                return (false, scanErr);
             }
 
             var primaryFile = steamApiFiles.FirstOrDefault(f => Path.GetFileName(f).ToLowerInvariant() == "steam_api64.dll")
@@ -278,7 +279,7 @@ namespace DepotDL.CLI
                     var achPath = Path.Combine(settingsDir, "achievements.json");
                     if (!string.IsNullOrWhiteSpace(steamWebApiKey) && !File.Exists(achPath))
                         FetchAchievementsAndStats(appId, settingsDir, steamWebApiKey, downloadAchievementIcons);
-                    return true;
+                    return (true, null);
                 }
             }
 
@@ -292,7 +293,7 @@ namespace DepotDL.CLI
                 steamlessExe = Path.Combine(toolsPath, "steamless", "Steamless.CLI.exe");
                 goldbergDir = Path.Combine(toolsPath, "goldberg");
                 if (!Directory.Exists(goldbergDir))
-                    return false;
+                    return (false, "Goldberg tools not found in application directory.");
             }
 
             var forceColdClient = false;
@@ -310,8 +311,9 @@ namespace DepotDL.CLI
                         var drmNotice = drmNoticeProp.GetString() ?? "";
                         if (drmNotice.Contains("denuvo", StringComparison.OrdinalIgnoreCase))
                         {
-                            File.WriteAllText(Path.Combine(gameDir, "sff_fix_error.log"), "ABORT: Denuvo DRM detected - cannot be bypassed by Goldberg.");
-                            return false;
+                            const string denuvoErr = "ABORT: Denuvo DRM detected - cannot be bypassed by Goldberg.";
+                            AppLogger.Error("GameLauncher", denuvoErr);
+                            return (false, denuvoErr);
                         }
                         if (!string.IsNullOrEmpty(drmNotice))
                         {
@@ -323,8 +325,9 @@ namespace DepotDL.CLI
                         var extNotice = extNoticeProp.GetString() ?? "";
                         if (!string.IsNullOrEmpty(extNotice))
                         {
-                            File.WriteAllText(Path.Combine(gameDir, "sff_fix_error.log"), $"ABORT: Game requires third-party account - may not work: {extNotice}");
-                            return false;
+                            var extErr = $"ABORT: Game requires third-party account - may not work: {extNotice}";
+                            AppLogger.Error("GameLauncher", extErr);
+                            return (false, extErr);
                         }
                     }
                 }
@@ -380,7 +383,7 @@ namespace DepotDL.CLI
                                     if (!exited)
                                     {
                                         try { proc.Kill(); } catch { }
-                                        File.WriteAllText(Path.Combine(gameDir, "sff_fix_error.log"), $"SteamStub unpacking timed out for {exe}");
+                                        AppLogger.Error("GameLauncher", $"SteamStub unpacking timed out for {exe}");
                                     }
                                     else if (proc.ExitCode == 0)
                                     {
@@ -388,13 +391,13 @@ namespace DepotDL.CLI
                                     }
                                     else
                                     {
-                                        File.WriteAllText(Path.Combine(gameDir, "sff_fix_error.log"), $"SteamStub unpacking failed with exit code {proc.ExitCode} for {exe}");
+                                        AppLogger.Error("GameLauncher", $"SteamStub unpacking failed with exit code {proc.ExitCode} for {exe}");
                                     }
                                 }
                             }
                             catch (Exception procEx)
                             {
-                                File.WriteAllText(Path.Combine(gameDir, "sff_fix_error.log"), $"SteamStub process error: {procEx.Message}");
+                                AppLogger.Error("GameLauncher", $"SteamStub process error: {procEx.Message}");
                             }
                             finally
                             {
@@ -425,8 +428,9 @@ namespace DepotDL.CLI
                     }
                     catch (Exception ex)
                     {
-                        File.WriteAllText(Path.Combine(gameDir, "sff_fix_error.log"), $"SteamStub unpacking error: {ex.Message}");
-                        return false;
+                        var steamlessErr = $"SteamStub unpacking error: {ex.Message}";
+                        AppLogger.Error("GameLauncher", steamlessErr);
+                        return (false, steamlessErr);
                     }
                 }
             }
@@ -553,8 +557,9 @@ saves_folder_name=GSE Saves";
             }
             catch (Exception ex)
             {
-                File.WriteAllText(Path.Combine(gameDir, "sff_fix_error.log"), $"Config generation error: {ex.Message}");
-                return false;
+                var configErr = $"Config generation error: {ex.Message}";
+                AppLogger.Error("GameLauncher", configErr);
+                return (false, configErr);
             }
 
             var replaced = false;
@@ -657,15 +662,17 @@ saves_folder_name=GSE Saves";
             }
             catch (Exception ex)
             {
-                File.WriteAllText(Path.Combine(gameDir, "sff_fix_error.log"), $"Goldberg application error: {ex.Message}");
-                return false;
+                var goldbergErr = $"Goldberg application error: {ex.Message}";
+                AppLogger.Error("GameLauncher", goldbergErr);
+                return (false, goldbergErr);
             }
 
             if (!replaced)
             {
                 var apiFileType = isWindows ? "steam_api DLLs" : OperatingSystem.IsMacOS() ? "libsteam_api.dylib" : "libsteam_api.so";
-                File.WriteAllText(Path.Combine(gameDir, "sff_fix_error.log"), $"No {apiFileType} found to replace.");
-                return false;
+                var noApiErr = $"No {apiFileType} found to replace.";
+                AppLogger.Error("GameLauncher", noApiErr);
+                return (false, noApiErr);
             }
 
             try
@@ -730,7 +737,7 @@ saves_folder_name=GSE Saves";
             }
             catch { }
 
-            return true;
+            return (true, null);
         }
 
         private static void GenerateInterfacesFile(string dllPath, string settingsDir)

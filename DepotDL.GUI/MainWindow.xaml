@@ -255,25 +255,22 @@
                                         </Style>
                                     </Border.Style>
                                 </Border>
-                                <Viewbox Width="16" Height="16" Margin="0,0,10,0">
-                                    <Canvas Width="24" Height="24">
-                                        <Path Data="M6,2 L18,2 L20,8 L4,8 Z M4,8 L4,20 A2,2,0,0,0,6,22 L18,22 A2,2,0,0,0,20,20 L20,8 M9,12 L15,12 M9,16 L13,16"
-                                              StrokeThickness="1.7" StrokeStartLineCap="Round"
-                                              StrokeEndLineCap="Round" StrokeLineJoin="Round"
-                                              Fill="Transparent">
-                                            <Path.Style>
-                                                <Style TargetType="Path">
-                                                    <Setter Property="Stroke" Value="{StaticResource TextMuted}"/>
-                                                    <Style.Triggers>
-                                                        <DataTrigger Binding="{Binding IsStorePage}" Value="True">
-                                                            <Setter Property="Stroke" Value="{StaticResource Accent}"/>
-                                                        </DataTrigger>
-                                                    </Style.Triggers>
-                                                </Style>
-                                            </Path.Style>
-                                        </Path>
-                                    </Canvas>
-                                </Viewbox>
+                                <Path Data="{StaticResource LucideShoppingBag}"
+                                      Width="16" Height="16" Stretch="Uniform" Margin="0,0,10,0"
+                                      StrokeThickness="1.7" StrokeStartLineCap="Round"
+                                      StrokeEndLineCap="Round" StrokeLineJoin="Round"
+                                      Fill="Transparent">
+                                    <Path.Style>
+                                        <Style TargetType="Path">
+                                            <Setter Property="Stroke" Value="{StaticResource TextMuted}"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsStorePage}" Value="True">
+                                                    <Setter Property="Stroke" Value="{StaticResource Accent}"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Path.Style>
+                                </Path>
                                 <TextBlock Text="Store" FontSize="13" VerticalAlignment="Center">
                                     <TextBlock.Style>
                                         <Style TargetType="TextBlock">
@@ -314,56 +311,20 @@
                                         </Style>
                                     </Border.Style>
                                 </Border>
-                                <Canvas Width="16" Height="16" Margin="0,0,10,0">
-                                    <Rectangle Canvas.Left="0" Canvas.Top="0" Width="6.5" Height="6.5" RadiusX="1.5" RadiusY="1.5">
-                                        <Rectangle.Style>
-                                            <Style TargetType="Rectangle">
-                                                <Setter Property="Fill" Value="#9C8E82"/>
-                                                <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding IsLibraryPage}" Value="True">
-                                                        <Setter Property="Fill" Value="#C07840"/>
-                                                    </DataTrigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </Rectangle.Style>
-                                    </Rectangle>
-                                    <Rectangle Canvas.Left="9.5" Canvas.Top="0" Width="6.5" Height="6.5" RadiusX="1.5" RadiusY="1.5">
-                                        <Rectangle.Style>
-                                            <Style TargetType="Rectangle">
-                                                <Setter Property="Fill" Value="#9C8E82"/>
-                                                <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding IsLibraryPage}" Value="True">
-                                                        <Setter Property="Fill" Value="#C07840"/>
-                                                    </DataTrigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </Rectangle.Style>
-                                    </Rectangle>
-                                    <Rectangle Canvas.Left="0" Canvas.Top="9.5" Width="6.5" Height="6.5" RadiusX="1.5" RadiusY="1.5">
-                                        <Rectangle.Style>
-                                            <Style TargetType="Rectangle">
-                                                <Setter Property="Fill" Value="#9C8E82"/>
-                                                <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding IsLibraryPage}" Value="True">
-                                                        <Setter Property="Fill" Value="#C07840"/>
-                                                    </DataTrigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </Rectangle.Style>
-                                    </Rectangle>
-                                    <Rectangle Canvas.Left="9.5" Canvas.Top="9.5" Width="6.5" Height="6.5" RadiusX="1.5" RadiusY="1.5">
-                                        <Rectangle.Style>
-                                            <Style TargetType="Rectangle">
-                                                <Setter Property="Fill" Value="#9C8E82"/>
-                                                <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding IsLibraryPage}" Value="True">
-                                                        <Setter Property="Fill" Value="#C07840"/>
-                                                    </DataTrigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </Rectangle.Style>
-                                    </Rectangle>
-                                </Canvas>
+                                <Path Data="{StaticResource LucideLayoutGrid}"
+                                      Width="16" Height="16" Stretch="Uniform" Margin="0,0,10,0"
+                                      StrokeThickness="0">
+                                    <Path.Style>
+                                        <Style TargetType="Path">
+                                            <Setter Property="Fill" Value="{StaticResource TextMuted}"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsLibraryPage}" Value="True">
+                                                    <Setter Property="Fill" Value="{StaticResource Accent}"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Path.Style>
+                                </Path>
                                 <TextBlock Text="Library" FontSize="13" VerticalAlignment="Center">
                                     <TextBlock.Style>
                                         <Style TargetType="TextBlock">
@@ -404,24 +365,22 @@
                                         </Style>
                                     </Border.Style>
                                 </Border>
-                                <Viewbox Width="16" Height="16" Margin="0,0,10,0">
-                                    <Canvas Width="24" Height="24">
-                                        <Path Data="M12,4 L12,16 M8,12 L12,16 L16,12 M4,19 L20,19"
-                                              StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round"
-                                              Fill="Transparent">
-                                            <Path.Style>
-                                                <Style TargetType="Path">
-                                                    <Setter Property="Stroke" Value="{StaticResource TextMuted}"/>
-                                                    <Style.Triggers>
-                                                        <DataTrigger Binding="{Binding IsDownloadPage}" Value="True">
-                                                            <Setter Property="Stroke" Value="{StaticResource Accent}"/>
-                                                        </DataTrigger>
-                                                    </Style.Triggers>
-                                                </Style>
-                                            </Path.Style>
-                                        </Path>
-                                    </Canvas>
-                                </Viewbox>
+                                <Path Data="{StaticResource LucideDownload}"
+                                      Width="16" Height="16" Stretch="Uniform" Margin="0,0,10,0"
+                                      StrokeThickness="1.7" StrokeStartLineCap="Round"
+                                      StrokeEndLineCap="Round" StrokeLineJoin="Round"
+                                      Fill="Transparent">
+                                    <Path.Style>
+                                        <Style TargetType="Path">
+                                            <Setter Property="Stroke" Value="{StaticResource TextMuted}"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsDownloadPage}" Value="True">
+                                                    <Setter Property="Stroke" Value="{StaticResource Accent}"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Path.Style>
+                                </Path>
                                 <TextBlock Text="Download" FontSize="13" VerticalAlignment="Center">
                                     <TextBlock.Style>
                                         <Style TargetType="TextBlock">
@@ -482,24 +441,22 @@
                                         </Style>
                                     </Border.Style>
                                 </Border>
-                                <Viewbox Width="16" Height="16" Margin="0,0,10,0">
-                                    <Canvas Width="24" Height="24">
-                                        <Path Data="M12,8 A4,4 0 1 0 12,16 A4,4 0 1 0 12,8 M12,2 L12,5 M12,19 L12,22 M4.22,4.22 L6.34,6.34 M17.66,17.66 L19.78,19.78 M2,12 L5,12 M19,12 L22,12 M4.22,19.78 L6.34,17.66 M17.66,6.34 L19.78,4.22"
-                                              StrokeThickness="1.7" StrokeStartLineCap="Round" StrokeEndLineCap="Round"
-                                              Fill="Transparent">
-                                            <Path.Style>
-                                                <Style TargetType="Path">
-                                                    <Setter Property="Stroke" Value="{StaticResource TextMuted}"/>
-                                                    <Style.Triggers>
-                                                        <DataTrigger Binding="{Binding IsSettingsPage}" Value="True">
-                                                            <Setter Property="Stroke" Value="{StaticResource Accent}"/>
-                                                        </DataTrigger>
-                                                    </Style.Triggers>
-                                                </Style>
-                                            </Path.Style>
-                                        </Path>
-                                    </Canvas>
-                                </Viewbox>
+                                <Path Data="{StaticResource LucideSettings}"
+                                      Width="16" Height="16" Stretch="Uniform" Margin="0,0,10,0"
+                                      StrokeThickness="1.5" StrokeStartLineCap="Round"
+                                      StrokeEndLineCap="Round" StrokeLineJoin="Round"
+                                      Fill="Transparent">
+                                    <Path.Style>
+                                        <Style TargetType="Path">
+                                            <Setter Property="Stroke" Value="{StaticResource TextMuted}"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsSettingsPage}" Value="True">
+                                                    <Setter Property="Stroke" Value="{StaticResource Accent}"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Path.Style>
+                                </Path>
                                 <TextBlock Text="Settings" FontSize="13" VerticalAlignment="Center">
                                     <TextBlock.Style>
                                         <Style TargetType="TextBlock">
@@ -533,18 +490,18 @@
                                 Margin="0,10,14,0"
                                 Panel.ZIndex="10">
                         <Button Style="{StaticResource ChromeBtn}" Click="MinimizeBtn_Click">
-                            <Path Data="M0,5 L10,5" Width="10" Height="10" Stretch="Uniform"
+                            <Path Data="{StaticResource LucideMinus}" Width="10" Height="10" Stretch="Uniform"
                                   Stroke="{StaticResource TextMuted}" StrokeThickness="1.5"
-                                  StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
+                                  StrokeStartLineCap="Round" StrokeEndLineCap="Round" Fill="Transparent"/>
                         </Button>
                         <Button Style="{StaticResource ChromeBtn}" Click="MaximizeBtn_Click" Margin="4,0">
-                            <Path Data="M1,1 L9,1 L9,9 L1,9 Z" Width="10" Height="10" Stretch="Uniform"
+                            <Path Data="{StaticResource LucideSquare}" Width="10" Height="10" Stretch="Uniform"
                                   Stroke="{StaticResource TextMuted}" StrokeThickness="1.5" Fill="Transparent"/>
                         </Button>
                         <Button Style="{StaticResource ChromeBtn}" Click="CloseBtn_Click">
-                            <Path Data="M1,1 L9,9 M9,1 L1,9" Width="10" Height="10" Stretch="Uniform"
+                            <Path Data="{StaticResource LucideX}" Width="10" Height="10" Stretch="Uniform"
                                   Stroke="{StaticResource TextMuted}" StrokeThickness="1.5"
-                                  StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
+                                  StrokeStartLineCap="Round" StrokeEndLineCap="Round" Fill="Transparent"/>
                         </Button>
                     </StackPanel>
 
@@ -569,18 +526,10 @@
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
 
-                            <Viewbox Grid.Column="0" Width="15" Height="15" Margin="0,0,10,0">
-                                <Canvas Width="24" Height="24">
-                                    <Path Data="M12,2 L22,20 L2,20 Z"
-                                          Stroke="#C07012" StrokeThickness="1.8" Fill="Transparent"
-                                          StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
-                                    <Line X1="12" Y1="9" X2="12" Y2="14"
-                                          Stroke="#C07012" StrokeThickness="1.8"
-                                          StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
-                                    <Ellipse Canvas.Left="11" Canvas.Top="16" Width="2" Height="2"
-                                             Fill="#C07012"/>
-                                </Canvas>
-                            </Viewbox>
+                            <Path Grid.Column="0" Data="{StaticResource LucideAlertTriangle}"
+                                  Width="15" Height="15" Stretch="Uniform" Margin="0,0,10,0"
+                                  Stroke="#C07012" StrokeThickness="1.8" Fill="Transparent"
+                                  StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"/>
 
                             <TextBlock Grid.Column="1"
                                        Text="{Binding UpdateBannerText}"
@@ -602,10 +551,10 @@
                                     Command="{Binding DismissUpdateCommand}"
                                     Background="Transparent" BorderThickness="0"
                                     Cursor="Hand" Padding="2,0" VerticalAlignment="Center">
-                                <Path Data="M1,1 L7,7 M7,1 L1,7"
+                                <Path Data="{StaticResource LucideX}"
                                       Width="8" Height="8" Stretch="Uniform"
                                       Stroke="#9C8E82" StrokeThickness="1.5"
-                                      StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
+                                      StrokeStartLineCap="Round" StrokeEndLineCap="Round" Fill="Transparent"/>
                             </Button>
                         </Grid>
                     </Border>
@@ -637,14 +586,11 @@
                                     <!-- Title + percent -->
                                     <Grid Grid.Row="0">
                                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                            <Viewbox Width="13" Height="13" Margin="0,0,7,0">
-                                                <Canvas Width="24" Height="24">
-                                                    <Path Data="M4,4 L20,4 L20,18 L4,18 Z M8,4 L8,2 L16,2 L16,4 M9,10 L15,10 M9,14 L13,14"
-                                                          Stroke="{StaticResource Accent}" StrokeThickness="2"
-                                                          Fill="Transparent" StrokeStartLineCap="Round"
-                                                          StrokeEndLineCap="Round" StrokeLineJoin="Round"/>
-                                                </Canvas>
-                                            </Viewbox>
+                                            <Path Data="{StaticResource LucidePackage}"
+                                                  Width="13" Height="13" Stretch="Uniform" Margin="0,0,7,0"
+                                                  Stroke="{StaticResource Accent}" StrokeThickness="1.7"
+                                                  Fill="Transparent" StrokeStartLineCap="Round"
+                                                  StrokeEndLineCap="Round" StrokeLineJoin="Round"/>
                                             <TextBlock FontSize="12.5" FontWeight="SemiBold"
                                                        Foreground="{StaticResource TextPrimary}"
                                                        VerticalAlignment="Center"
@@ -706,14 +652,11 @@
 
                                     <Grid Grid.Row="0">
                                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                            <Viewbox Width="13" Height="13" Margin="0,0,7,0">
-                                                <Canvas Width="24" Height="24">
-                                                    <Path Data="M12,4 L12,16 M8,12 L12,16 L16,12 M4,19 L20,19"
-                                                          Stroke="{StaticResource Accent}" StrokeThickness="2.2"
-                                                          Fill="Transparent" StrokeStartLineCap="Round"
-                                                          StrokeEndLineCap="Round" StrokeLineJoin="Round"/>
-                                                </Canvas>
-                                            </Viewbox>
+                                            <Path Data="{StaticResource LucideDownload}"
+                                                  Width="13" Height="13" Stretch="Uniform" Margin="0,0,7,0"
+                                                  Stroke="{StaticResource Accent}" StrokeThickness="1.7"
+                                                  Fill="Transparent" StrokeStartLineCap="Round"
+                                                  StrokeEndLineCap="Round" StrokeLineJoin="Round"/>
                                             <TextBlock FontSize="12.5" FontWeight="SemiBold"
                                                        Foreground="{StaticResource TextPrimary}"
                                                        VerticalAlignment="Center"
@@ -766,14 +709,11 @@
                                         <!-- Title + percent -->
                                         <Grid Grid.Row="0">
                                             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                                <Viewbox Width="13" Height="13" Margin="0,0,7,0">
-                                                    <Canvas Width="24" Height="24">
-                                                        <Path Data="M12,4 L12,16 M8,12 L12,16 L16,12 M4,19 L20,19"
-                                                              Stroke="{StaticResource Accent}" StrokeThickness="2.2"
-                                                              Fill="Transparent" StrokeStartLineCap="Round"
-                                                              StrokeEndLineCap="Round" StrokeLineJoin="Round"/>
-                                                    </Canvas>
-                                                </Viewbox>
+                                                <Path Data="{StaticResource LucideDownload}"
+                                                      Width="13" Height="13" Stretch="Uniform" Margin="0,0,7,0"
+                                                      Stroke="{StaticResource Accent}" StrokeThickness="1.7"
+                                                      Fill="Transparent" StrokeStartLineCap="Round"
+                                                      StrokeEndLineCap="Round" StrokeLineJoin="Round"/>
                                                 <TextBlock FontSize="12.5" FontWeight="SemiBold"
                                                            Foreground="{StaticResource TextPrimary}"
                                                            VerticalAlignment="Center">

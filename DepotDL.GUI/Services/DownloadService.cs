@@ -158,7 +158,7 @@ namespace DepotDL.GUI.Services
             {
                 if (!Directory.Exists(path)) continue;
                 try { Directory.Delete(path, true); }
-                catch (Exception ex) { Debug.WriteLine($"[DownloadService] cleanup {path} failed: {ex.Message}"); }
+                catch (Exception ex) { DepotDL.CLI.AppLogger.Warn("DownloadService", $"cleanup {path} failed: {ex.Message}"); }
             }
         }
 
@@ -215,7 +215,7 @@ namespace DepotDL.GUI.Services
                     try { providerMap = await getProviderManifests(providerName, fetchFunc); }
                     catch (Exception ex)
                     {
-                        Debug.WriteLine($"[DownloadService] {providerName} fetch failed for depot {depot.DepotId}: {ex.Message}");
+                        DepotDL.CLI.AppLogger.Error("DownloadService", $"{providerName} fetch failed for depot {depot.DepotId}: {ex.Message}");
                         continue;
                     }
                     if (providerMap == null) continue;

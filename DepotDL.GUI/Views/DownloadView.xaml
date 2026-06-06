@@ -46,14 +46,10 @@
                             <Border.Effect>
                                 <DropShadowEffect Color="#C07840" BlurRadius="10" ShadowDepth="1" Opacity="0.2"/>
                             </Border.Effect>
-                            <Viewbox Width="18" Height="18">
-                                <Canvas Width="24" Height="24">
-                                    <Path Data="M12,4 L12,16 M8,12 L12,16 L16,12 M4,19 L20,19"
-                                          Stroke="{StaticResource Accent}" StrokeThickness="2" Fill="Transparent"
-                                          StrokeStartLineCap="Round" StrokeEndLineCap="Round"
-                                          StrokeLineJoin="Round"/>
-                                </Canvas>
-                            </Viewbox>
+                            <Path Data="{StaticResource LucideDownload}"
+                                  Width="18" Height="18" Stretch="Uniform"
+                                  Stroke="{StaticResource Accent}" StrokeThickness="1.7" Fill="Transparent"
+                                  StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"/>
                         </Border>
                         <StackPanel VerticalAlignment="Center">
                             <TextBlock Style="{StaticResource TextH2}" Text="Fetch from Ryuu API"/>
@@ -95,15 +91,11 @@
                                 Padding="28,10"
                                 VerticalAlignment="Center">
                             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                <Viewbox Width="14" Height="14" Margin="0,0,8,0"
-                                         Visibility="{Binding IsRyuuBusy, Converter={StaticResource InvBoolToVis}}">
-                                    <Canvas Width="24" Height="24">
-                                        <Path Data="M12,17 L12,3 M8,13 L12,17 L16,13 M4,21 L20,21"
-                                              Stroke="White" StrokeThickness="2" Fill="Transparent"
-                                              StrokeStartLineCap="Round" StrokeEndLineCap="Round"
-                                              StrokeLineJoin="Round"/>
-                                    </Canvas>
-                                </Viewbox>
+                                <Path Data="{StaticResource LucideDownload}"
+                                      Width="14" Height="14" Stretch="Uniform" Margin="0,0,8,0"
+                                      Visibility="{Binding IsRyuuBusy, Converter={StaticResource InvBoolToVis}}"
+                                      Stroke="White" StrokeThickness="1.7" Fill="Transparent"
+                                      StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"/>
                                 <Grid>
                                     <TextBlock Text="Fetch Config" FontSize="12.5" FontWeight="SemiBold"
                                                Visibility="{Binding IsRyuuBusy, Converter={StaticResource InvBoolToVis}}"/>
@@ -145,14 +137,10 @@
                             <Border.Effect>
                                 <DropShadowEffect Color="#C07840" BlurRadius="10" ShadowDepth="1" Opacity="0.2"/>
                             </Border.Effect>
-                            <Viewbox Width="18" Height="18">
-                                <Canvas Width="24" Height="24">
-                                    <Path Data="M12,4 L12,16 M8,12 L12,16 L16,12 M4,19 L20,19"
-                                          Stroke="{StaticResource Accent}" StrokeThickness="2" Fill="Transparent"
-                                          StrokeStartLineCap="Round" StrokeEndLineCap="Round"
-                                          StrokeLineJoin="Round"/>
-                                </Canvas>
-                            </Viewbox>
+                            <Path Data="{StaticResource LucideDownload}"
+                                  Width="18" Height="18" Stretch="Uniform"
+                                  Stroke="{StaticResource Accent}" StrokeThickness="1.7" Fill="Transparent"
+                                  StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"/>
                         </Border>
                         <StackPanel VerticalAlignment="Center">
                             <TextBlock Style="{StaticResource TextH2}" Text="Fetch from Hubcap API"/>
@@ -194,15 +182,11 @@
                                 Padding="28,10"
                                 VerticalAlignment="Center">
                             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                <Viewbox Width="14" Height="14" Margin="0,0,8,0"
-                                         Visibility="{Binding IsHubcapBusy, Converter={StaticResource InvBoolToVis}}">
-                                    <Canvas Width="24" Height="24">
-                                        <Path Data="M12,17 L12,3 M8,13 L12,17 L16,13 M4,21 L20,21"
-                                              Stroke="White" StrokeThickness="2" Fill="Transparent"
-                                              StrokeStartLineCap="Round" StrokeEndLineCap="Round"
-                                              StrokeLineJoin="Round"/>
-                                    </Canvas>
-                                </Viewbox>
+                                <Path Data="{StaticResource LucideDownload}"
+                                      Width="14" Height="14" Stretch="Uniform" Margin="0,0,8,0"
+                                      Visibility="{Binding IsHubcapBusy, Converter={StaticResource InvBoolToVis}}"
+                                      Stroke="White" StrokeThickness="1.7" Fill="Transparent"
+                                      StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"/>
                                 <Grid>
                                     <TextBlock Text="Fetch Config" FontSize="12.5" FontWeight="SemiBold"
                                                Visibility="{Binding IsHubcapBusy, Converter={StaticResource InvBoolToVis}}"/>
@@ -257,14 +241,10 @@
                                 Padding="18,10"
                                 VerticalAlignment="Center">
                             <StackPanel Orientation="Horizontal">
-                                <Viewbox Width="13" Height="13" Margin="0,0,7,0">
-                                    <Canvas Width="24" Height="24">
-                                        <Path Data="M21,15 L21,19 A2,2,0,0,1,19,21 L5,21 A2,2,0,0,1,3,19 L3,15 M17,8 L12,3 L7,8 M12,3 L12,15"
-                                              Stroke="{StaticResource TextSecondary}" StrokeThickness="1.8" Fill="Transparent"
-                                              StrokeStartLineCap="Round" StrokeEndLineCap="Round"
-                                              StrokeLineJoin="Round"/>
-                                    </Canvas>
-                                </Viewbox>
+                                <Path Data="{StaticResource LucideUpload}"
+                                      Width="13" Height="13" Stretch="Uniform" Margin="0,0,7,0"
+                                      Stroke="{StaticResource TextSecondary}" StrokeThickness="1.7" Fill="Transparent"
+                                      StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"/>
                                 <TextBlock Text="Browse ZIP…" FontSize="12.5" FontWeight="SemiBold"/>
                             </StackPanel>
                         </Button>
@@ -275,14 +255,10 @@
                                 Padding="18,10"
                                 VerticalAlignment="Center">
                             <StackPanel Orientation="Horizontal">
-                                <Viewbox Width="13" Height="13" Margin="0,0,7,0">
-                                    <Canvas Width="24" Height="24">
-                                        <Path Data="M3,7 A2,2,0,0,1,5,5 L10,5 L12,8 L19,8 A2,2,0,0,1,21,10 L21,19 A2,2,0,0,1,19,21 L5,21 A2,2,0,0,1,3,19 Z"
-                                              Stroke="{StaticResource TextSecondary}" StrokeThickness="1.8" Fill="Transparent"
-                                              StrokeStartLineCap="Round" StrokeEndLineCap="Round"
-                                              StrokeLineJoin="Round"/>
-                                    </Canvas>
-                                </Viewbox>
+                                <Path Data="{StaticResource LucideFolder}"
+                                      Width="13" Height="13" Stretch="Uniform" Margin="0,0,7,0"
+                                      Stroke="{StaticResource TextSecondary}" StrokeThickness="1.7" Fill="Transparent"
+                                      StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"/>
                                 <TextBlock Text="Browse Lua…" FontSize="12.5" FontWeight="SemiBold"/>
                             </StackPanel>
                         </Button>
@@ -345,13 +321,10 @@
                             Margin="0,0,10,0"
                             VerticalAlignment="Center">
                         <StackPanel Orientation="Horizontal">
-                            <Viewbox Width="11" Height="11" Margin="0,0,5,0">
-                                <Canvas Width="24" Height="24">
-                                    <Path Data="M19,12 L5,12 M12,5 L5,12 L12,19"
-                                          Stroke="{StaticResource TextSecondary}" StrokeThickness="2" Fill="Transparent"
-                                          StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"/>
-                                </Canvas>
-                            </Viewbox>
+                            <Path Data="{StaticResource LucideArrowLeft}"
+                                  Width="11" Height="11" Stretch="Uniform" Margin="0,0,5,0"
+                                  Stroke="{StaticResource TextSecondary}" StrokeThickness="1.7" Fill="Transparent"
+                                  StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"/>
                             <TextBlock Text="Back" FontSize="11.5" FontWeight="SemiBold" Foreground="{StaticResource TextSecondary}"/>
                         </StackPanel>
                     </Button>
@@ -367,13 +340,10 @@
                             Margin="14,0,0,0"
                             VerticalAlignment="Center">
                         <StackPanel Orientation="Horizontal">
-                            <Viewbox Width="11" Height="11" Margin="0,0,5,0">
-                                <Canvas Width="24" Height="24">
-                                    <Path Data="M16,3 L21,8 L19,10 L14,5 Z M12,7 L3,16 L3,21 L8,21 L17,12"
-                                          Stroke="{StaticResource TextSecondary}" StrokeThickness="2" Fill="Transparent"
-                                          StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"/>
-                                </Canvas>
-                            </Viewbox>
+                            <Path Data="{StaticResource LucidePencil}"
+                                  Width="11" Height="11" Stretch="Uniform" Margin="0,0,5,0"
+                                  Stroke="{StaticResource TextSecondary}" StrokeThickness="1.7" Fill="Transparent"
+                                  StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"/>
                             <TextBlock Text="Change Source" FontSize="11.5" FontWeight="SemiBold"/>
                         </StackPanel>
                     </Button>
@@ -572,13 +542,10 @@
                         <DropShadowEffect Color="#C07840" BlurRadius="18" ShadowDepth="3" Opacity="0.3"/>
                     </Button.Effect>
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                        <Viewbox Width="16" Height="16" Margin="0,0,10,0">
-                            <Canvas Width="24" Height="24">
-                                <Path Data="M8,5 L19,12 L8,19 Z"
-                                      Fill="White" Stroke="White" StrokeThickness="1.5"
-                                      StrokeLineJoin="Round" StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
-                            </Canvas>
-                        </Viewbox>
+                        <Path Data="{StaticResource LucidePlay}"
+                              Width="16" Height="16" Stretch="Uniform" Margin="0,0,10,0"
+                              Fill="White" Stroke="White" StrokeThickness="1"
+                              StrokeLineJoin="Round" StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
                         <TextBlock Text="Start Downloading" FontSize="13.5" FontWeight="SemiBold" VerticalAlignment="Center"/>
                     </StackPanel>
                 </Button>
@@ -616,13 +583,10 @@
                             Margin="14,0,0,0"
                             VerticalAlignment="Center">
                         <StackPanel Orientation="Horizontal">
-                            <Viewbox Width="11" Height="11" Margin="0,0,5,0">
-                                <Canvas Width="24" Height="24">
-                                    <Path Data="M18,6 L6,18 M6,6 L18,18"
-                                          Stroke="{StaticResource Error}" StrokeThickness="2.2"
-                                          StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
-                                </Canvas>
-                            </Viewbox>
+                            <Path Data="{StaticResource LucideX}"
+                                  Width="11" Height="11" Stretch="Uniform" Margin="0,0,5,0"
+                                  Stroke="{StaticResource Error}" StrokeThickness="1.8" Fill="Transparent"
+                                  StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
                             <TextBlock Text="Cancel Download" FontSize="12" FontWeight="SemiBold"/>
                         </StackPanel>
                     </Button>
@@ -711,13 +675,10 @@
                                                     Command="{Binding DataContext.RetryDepotAsyncCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                     CommandParameter="{Binding}"
                                                     ToolTip="Retry this depot">
-                                                <Viewbox Width="12" Height="12">
-                                                    <Canvas Width="24" Height="24">
-                                                        <Path Data="M1,4 L1,10 L7,10 M23,20 L23,14 L17,14 M20.49,9 A9,9,0,1,0,21.99,14.1 M1.51,10 A9,9,0,0,1,19.5,6"
-                                                              Stroke="{StaticResource TextSecondary}" StrokeThickness="2" Fill="Transparent"
-                                                              StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"/>
-                                                    </Canvas>
-                                                </Viewbox>
+                                                <Path Data="{StaticResource LucideRefreshCw}"
+                                                      Width="12" Height="12" Stretch="Uniform"
+                                                      Stroke="{StaticResource TextSecondary}" StrokeThickness="1.7" Fill="Transparent"
+                                                      StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"/>
                                             </Button>
                                             <Border CornerRadius="6" Padding="8,3"
                                                     VerticalAlignment="Center">
@@ -831,13 +792,10 @@
                                 Command="{Binding RetryFailedAsyncCommand}"
                                 Padding="18,8" Height="36" Margin="0,0,8,0">
                             <StackPanel Orientation="Horizontal">
-                                <Viewbox Width="12" Height="12" Margin="0,0,6,0">
-                                    <Canvas Width="24" Height="24">
-                                        <Path Data="M1,4 L1,10 L7,10 M23,20 L23,14 L17,14 M20.49,9 A9,9,0,1,0,21.99,14.1 M1.51,10 A9,9,0,0,1,19.5,6"
-                                              Stroke="{StaticResource TextPrimary}" StrokeThickness="2" Fill="Transparent"
-                                              StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"/>
-                                    </Canvas>
-                                </Viewbox>
+                                <Path Data="{StaticResource LucideRefreshCw}"
+                                      Width="12" Height="12" Stretch="Uniform" Margin="0,0,6,0"
+                                      Stroke="{StaticResource TextPrimary}" StrokeThickness="1.7" Fill="Transparent"
+                                      StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"/>
                                 <TextBlock Text="Retry Failed" FontSize="12" FontWeight="SemiBold"/>
                             </StackPanel>
                         </Button>

@@ -22,19 +22,16 @@
                                     BorderThickness="{TemplateBinding BorderThickness}"
                                     CornerRadius="16" Padding="14,6">
                                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center">
-                                    <Viewbox x:Name="iconBox" Width="14" Height="14" Margin="0,0,6,0" RenderTransformOrigin="0.5,0.5">
-                                        <Viewbox.RenderTransform>
+                                    <Path x:Name="iconBox" Data="{StaticResource LucideRotateCw}"
+                                          Width="14" Height="14" Stretch="Uniform" Margin="0,0,6,0"
+                                          RenderTransformOrigin="0.5,0.5"
+                                          Stroke="{StaticResource Accent}" StrokeThickness="1.7"
+                                          StrokeStartLineCap="Round" StrokeEndLineCap="Round"
+                                          StrokeLineJoin="Round" Fill="Transparent">
+                                        <Path.RenderTransform>
                                             <RotateTransform x:Name="rotator" Angle="0"/>
-                                        </Viewbox.RenderTransform>
-                                        <Canvas Width="24" Height="24">
-                                            <Path Data="M21,12 A9,9 0 1,1 12,3 C14.52,3 16.93,4 18.74,5.74 L21,8 M21,3 L21,8 L16,8"
-                                                  Stroke="{StaticResource Accent}"
-                                                  StrokeThickness="1.7"
-                                                  StrokeStartLineCap="Round" StrokeEndLineCap="Round"
-                                                  StrokeLineJoin="Round"
-                                                  Fill="Transparent"/>
-                                        </Canvas>
-                                    </Viewbox>
+                                        </Path.RenderTransform>
+                                    </Path>
                                     <TextBlock Text="Refresh Sizes" FontSize="11.5" FontWeight="SemiBold"
                                                Foreground="{StaticResource Accent}" VerticalAlignment="Center"/>
                                 </StackPanel>
@@ -172,15 +169,11 @@
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
-                <Viewbox Grid.Column="0" Width="15" Height="15" Margin="0,0,10,0">
-                    <Canvas Width="24" Height="24">
-                        <Ellipse Canvas.Left="3" Canvas.Top="3" Width="14" Height="14"
-                                 Stroke="{StaticResource TextMuted}" StrokeThickness="2"/>
-                        <Path Data="M15,15 L21,21"
-                              Stroke="{StaticResource TextMuted}"
-                              StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
-                    </Canvas>
-                </Viewbox>
+                <Path Grid.Column="0" Data="{StaticResource LucideSearch}"
+                      Width="15" Height="15" Stretch="Uniform" Margin="0,0,10,0"
+                      Stroke="{StaticResource TextMuted}" StrokeThickness="1.7"
+                      StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"
+                      Fill="Transparent"/>
                 <TextBox Grid.Column="1"
                          BorderThickness="0"
                          Background="Transparent"
@@ -209,13 +202,11 @@
                         Background="{StaticResource AccentVeryLight}"
                         HorizontalAlignment="Center"
                         Margin="0,0,0,16">
-                    <Viewbox Width="28" Height="28">
-                        <Canvas Width="24" Height="24">
-                            <Path Data="M4,6 L20,6 M4,12 L20,12 M4,18 L12,18"
-                                  Stroke="{StaticResource Accent}"
-                                  StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
-                        </Canvas>
-                    </Viewbox>
+                    <Path Data="{StaticResource LucideAlignLeft}"
+                          Width="28" Height="28" Stretch="Uniform"
+                          Stroke="{StaticResource Accent}" StrokeThickness="1.7"
+                          StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"
+                          Fill="Transparent"/>
                 </Border>
                 <TextBlock Text="No games yet"
                            Style="{StaticResource TextH3}"
@@ -456,11 +447,10 @@
                                                               RelativeSource={RelativeSource AncestorType=ItemsControl}}"
                                                     CommandParameter="{Binding}">
                                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                                    <Viewbox Width="12" Height="12" Margin="0,0,6,0">
-                                                        <Canvas Width="24" Height="24">
-                                                            <Path Data="M8,5 L19,12 L8,19 Z" Fill="White"/>
-                                                        </Canvas>
-                                                    </Viewbox>
+                                                    <Path Data="{StaticResource LucidePlay}"
+                                                          Width="12" Height="12" Stretch="Uniform" Margin="0,0,6,0"
+                                                          Fill="White" Stroke="White" StrokeThickness="1"
+                                                          StrokeLineJoin="Round"/>
                                                     <TextBlock Text="Play" FontSize="12.5"
                                                                FontWeight="SemiBold"
                                                                Foreground="White"/>
@@ -560,15 +550,10 @@
                     <Border Width="36" Height="36" CornerRadius="10"
                             Background="{StaticResource AccentSubtle}"
                             Margin="0,0,12,0">
-                        <Viewbox Width="16" Height="16">
-                            <Canvas Width="24" Height="24">
-                                <Path Data="M21,12 A9,9 0 1,1 12,3 C14.52,3 16.93,4 18.74,5.74 L21,8 M21,3 L21,8 L16,8"
-                                      Stroke="{StaticResource Accent}"
-                                      StrokeThickness="1.8" Fill="Transparent"
-                                      StrokeStartLineCap="Round" StrokeEndLineCap="Round"
-                                      StrokeLineJoin="Round"/>
-                            </Canvas>
-                        </Viewbox>
+                        <Path Data="{StaticResource LucideRotateCw}"
+                              Width="16" Height="16" Stretch="Uniform"
+                              Stroke="{StaticResource Accent}" StrokeThickness="1.8" Fill="Transparent"
+                              StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"/>
                     </Border>
                     <TextBlock Text="Redownload Game"
                                FontSize="17" FontWeight="SemiBold"
@@ -691,14 +676,10 @@
                         <Border Width="36" Height="36" CornerRadius="10"
                                 Background="{StaticResource ErrorLight}"
                                 Margin="0,0,12,0">
-                            <Viewbox Width="16" Height="16">
-                                <Canvas Width="24" Height="24">
-                                    <Path Data="M3,6 L21,6 M8,6 L8,4 L16,4 L16,6 M19,6 L18,20 A1,1,0,0,1,17,21 L7,21 A1,1,0,0,1,6,20 L5,6"
-                                          Stroke="{StaticResource Error}"
-                                          StrokeThickness="1.8" Fill="Transparent"
-                                          StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
-                                </Canvas>
-                            </Viewbox>
+                            <Path Data="{StaticResource LucideTrash2}"
+                                  Width="16" Height="16" Stretch="Uniform"
+                                  Stroke="{StaticResource Error}" StrokeThickness="1.8" Fill="Transparent"
+                                  StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"/>
                         </Border>
                         <TextBlock Text="Remove Game"
                                    FontSize="17" FontWeight="SemiBold"

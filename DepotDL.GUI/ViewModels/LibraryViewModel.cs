@@ -181,20 +181,12 @@ namespace DepotDL.GUI.ViewModels
                 var loadedSettings = _settings.Load();
                 var webApiKey = loadedSettings.SteamWebApiKey;
                 var downloadAchievementIcons = loadedSettings.DownloadAchievementIcons;
-                var fixSuccess = await Task.Run(() => GameLauncher.EnsureGbeApplied(vm.Game.AppId, vm.Game.OutputDir, vm.Game.LuaPath, webApiKey, downloadAchievementIcons));
+                var (fixSuccess, fixError) = await Task.Run(() => GameLauncher.EnsureGbeApplied(vm.Game.AppId, vm.Game.OutputDir, vm.Game.LuaPath, webApiKey, downloadAchievementIcons));
                 if (!fixSuccess)
                 {
-                    var logPath = Path.Combine(vm.Game.OutputDir, "sff_fix_error.log");
                     var errorMsg = "Failed to apply Goldberg Steam Emulator fix to the game.";
-                    if (File.Exists(logPath))
-                    {
-                        try
-                        {
-                            errorMsg += "\n\nDetails:\n" + File.ReadAllText(logPath);
-                            File.Delete(logPath);
-                        }
-                        catch { }
-                    }
+                    if (!string.IsNullOrEmpty(fixError))
+                        errorMsg += "\n\nDetails:\n" + fixError;
                     DialogService.ShowError("Fix Game Failed", errorMsg);
                     return;
                 }

@@ -36,16 +36,13 @@
                                 Padding="{TemplateBinding Padding}">
                             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                 <ContentPresenter VerticalAlignment="Center"/>
-                                <Viewbox Width="10" Height="10" Margin="6,1,0,0" VerticalAlignment="Center">
-                                    <Canvas Width="24" Height="24">
-                                        <Path x:Name="chevron"
-                                              Data="M6,9 L12,15 L18,9"
-                                              Stroke="{StaticResource TextSecondary}"
-                                              StrokeThickness="2.5"
-                                              StrokeStartLineCap="Round" StrokeEndLineCap="Round"
-                                              StrokeLineJoin="Round" Fill="Transparent"/>
-                                    </Canvas>
-                                </Viewbox>
+                                <Path x:Name="chevron"
+                                      Data="{StaticResource LucideChevronDown}"
+                                      Width="10" Height="10" Stretch="Uniform" Margin="6,1,0,0"
+                                      VerticalAlignment="Center"
+                                      Stroke="{StaticResource TextSecondary}" StrokeThickness="2"
+                                      StrokeStartLineCap="Round" StrokeEndLineCap="Round"
+                                      StrokeLineJoin="Round" Fill="Transparent"/>
                             </StackPanel>
                         </Border>
                         <ControlTemplate.Triggers>
@@ -60,7 +57,7 @@
                                 <Setter TargetName="bd" Property="BorderBrush" Value="{StaticResource Accent}"/>
                                 <Setter Property="Foreground" Value="{StaticResource Accent}"/>
                                 <Setter TargetName="chevron" Property="Stroke" Value="{StaticResource Accent}"/>
-                                <Setter TargetName="chevron" Property="Data" Value="M6,15 L12,9 L18,15"/>
+                                <Setter TargetName="chevron" Property="Data" Value="{StaticResource LucideChevronUp}"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -135,15 +132,11 @@
                         <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
-                    <Viewbox Grid.Column="0" Width="15" Height="15" Margin="0,0,10,0">
-                        <Canvas Width="24" Height="24">
-                            <Ellipse Canvas.Left="3" Canvas.Top="3" Width="14" Height="14"
-                                     Stroke="{StaticResource TextMuted}" StrokeThickness="2"/>
-                            <Path Data="M15,15 L21,21"
-                                  Stroke="{StaticResource TextMuted}"
-                                  StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
-                        </Canvas>
-                    </Viewbox>
+                    <Path Grid.Column="0" Data="{StaticResource LucideSearch}"
+                          Width="15" Height="15" Stretch="Uniform" Margin="0,0,10,0"
+                          Stroke="{StaticResource TextMuted}" StrokeThickness="1.7"
+                          StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"
+                          Fill="Transparent"/>
                     <TextBox Grid.Column="1"
                              BorderThickness="0"
                              Background="Transparent"
@@ -201,14 +194,10 @@
                     <Border Width="64" Height="64" CornerRadius="16"
                             Background="{StaticResource AccentVeryLight}"
                             HorizontalAlignment="Center" Margin="0,0,0,16">
-                        <Viewbox Width="28" Height="28">
-                            <Canvas Width="24" Height="24">
-                                <Path Data="M6,2 L18,2 C19.1,2 20,2.9 20,4 L20,20 C20,21.1 19.1,22 18,22 L6,22 C4.9,22 4,21.1 4,20 L4,4 C4,2.9 4.9,2 6,2 M9,7 L15,7 M9,11 L15,11 M9,15 L12,15"
-                                      Stroke="{StaticResource Accent}"
-                                      StrokeThickness="1.8" Fill="Transparent"
-                                      StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
-                            </Canvas>
-                        </Viewbox>
+                        <Path Data="{StaticResource LucideFileText}"
+                              Width="28" Height="28" Stretch="Uniform"
+                              Stroke="{StaticResource Accent}" StrokeThickness="1.7" Fill="Transparent"
+                              StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"/>
                     </Border>
                     <TextBlock Text="No games found" Style="{StaticResource TextH3}"
                                HorizontalAlignment="Center" Margin="0,0,0,6"/>
@@ -412,13 +401,11 @@
                             </EventTrigger>
                         </Button.Triggers>
                         <StackPanel Orientation="Horizontal">
-                            <Viewbox Width="12" Height="12" Margin="0,0,5,0">
-                                <Canvas Width="24" Height="24">
-                                    <Path Data="M15,6 L9,12 L15,18"
-                                          Stroke="{StaticResource TextBody}"
-                                          StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" Fill="Transparent"/>
-                                </Canvas>
-                            </Viewbox>
+                            <Path Data="{StaticResource LucideChevronLeft}"
+                                  Width="12" Height="12" Stretch="Uniform" Margin="0,0,5,0"
+                                  Stroke="{StaticResource TextBody}" StrokeThickness="1.7"
+                                  StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"
+                                  Fill="Transparent"/>
                             <TextBlock Text="Prev" Foreground="{StaticResource TextBody}"/>
                         </StackPanel>
                     </Button>
@@ -472,13 +459,11 @@
                         </Button.Triggers>
                         <StackPanel Orientation="Horizontal">
                             <TextBlock Text="Next" Foreground="{StaticResource TextBody}"/>
-                            <Viewbox Width="12" Height="12" Margin="5,0,0,0">
-                                <Canvas Width="24" Height="24">
-                                    <Path Data="M9,6 L15,12 L9,18"
-                                          Stroke="{StaticResource TextBody}"
-                                          StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" Fill="Transparent"/>
-                                </Canvas>
-                            </Viewbox>
+                            <Path Data="{StaticResource LucideChevronRight}"
+                                  Width="12" Height="12" Stretch="Uniform" Margin="5,0,0,0"
+                                  Stroke="{StaticResource TextBody}" StrokeThickness="1.7"
+                                  StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"
+                                  Fill="Transparent"/>
                         </StackPanel>
                     </Button>
                 </StackPanel>
@@ -585,15 +570,11 @@
                                         <Border x:Name="bg" CornerRadius="8"
                                                 Background="#88000000"
                                                 Width="30" Height="30">
-                                            <Viewbox Width="14" Height="14"
-                                                     HorizontalAlignment="Center"
-                                                     VerticalAlignment="Center">
-                                                <Canvas Width="24" Height="24">
-                                                    <Path Data="M6,6 L18,18 M18,6 L6,18"
-                                                          Stroke="White" StrokeThickness="2.2"
-                                                          StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
-                                                </Canvas>
-                                            </Viewbox>
+                                            <Path Data="{StaticResource LucideX}"
+                                                  Width="14" Height="14" Stretch="Uniform"
+                                                  HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                  Stroke="White" StrokeThickness="2" Fill="Transparent"
+                                                  StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
                                         </Border>
                                         <ControlTemplate.Triggers>
                                             <Trigger Property="IsMouseOver" Value="True">
@@ -736,17 +717,11 @@
                                                 <TextBlock Grid.Column="0" Text="PC REQUIREMENTS"
                                                            Style="{StaticResource TextLabel}" Margin="0"/>
                                                 <!-- Chevron -->
-                                                <Viewbox Grid.Column="1" Width="12" Height="12">
-                                                    <Canvas Width="24" Height="24">
-                                                        <Path x:Name="ChevronReqs"
-                                                              Data="M6,9 L12,15 L18,9"
-                                                              Stroke="{StaticResource TextMuted}"
-                                                              StrokeThickness="2"
-                                                              StrokeStartLineCap="Round"
-                                                              StrokeEndLineCap="Round"
-                                                              Fill="Transparent"/>
-                                                    </Canvas>
-                                                </Viewbox>
+                                                <Path Grid.Column="1" Data="{StaticResource LucideChevronDown}"
+                                                      Width="12" Height="12" Stretch="Uniform"
+                                                      Stroke="{StaticResource TextMuted}" StrokeThickness="1.7"
+                                                      StrokeStartLineCap="Round" StrokeEndLineCap="Round"
+                                                      StrokeLineJoin="Round" Fill="Transparent"/>
                                             </Grid>
                                         </Button>
 
@@ -895,16 +870,11 @@
                                                 </Grid.ColumnDefinitions>
                                                 <TextBlock Grid.Column="0" Text="FULL DESCRIPTION"
                                                            Style="{StaticResource TextLabel}" Margin="0"/>
-                                                <Viewbox Grid.Column="1" Width="12" Height="12">
-                                                    <Canvas Width="24" Height="24">
-                                                        <Path Data="M6,9 L12,15 L18,9"
-                                                              Stroke="{StaticResource TextMuted}"
-                                                              StrokeThickness="2"
-                                                              StrokeStartLineCap="Round"
-                                                              StrokeEndLineCap="Round"
-                                                              Fill="Transparent"/>
-                                                    </Canvas>
-                                                </Viewbox>
+                                                <Path Grid.Column="1" Data="{StaticResource LucideChevronDown}"
+                                                      Width="12" Height="12" Stretch="Uniform"
+                                                      Stroke="{StaticResource TextMuted}" StrokeThickness="1.7"
+                                                      StrokeStartLineCap="Round" StrokeEndLineCap="Round"
+                                                      StrokeLineJoin="Round" Fill="Transparent"/>
                                             </Grid>
                                         </Button>
 
@@ -1020,17 +990,12 @@
                                                                    Foreground="{StaticResource TextMuted}"
                                                                    Visibility="{Binding CanUseRyuu, Converter={StaticResource InvBoolToVis}}"/>
                                                     </StackPanel>
-                                                    <Viewbox Grid.Column="1" Width="13" Height="13"
-                                                             Margin="14,0,2,0" VerticalAlignment="Center"
-                                                             Visibility="{Binding IsRyuuSelected, Converter={StaticResource BoolToVis}}">
-                                                        <Canvas Width="24" Height="24">
-                                                            <Path Data="M5,12 L10,17 L19,7"
-                                                                  Stroke="{StaticResource Accent}"
-                                                                  StrokeThickness="2.5" Fill="Transparent"
-                                                                  StrokeStartLineCap="Round" StrokeEndLineCap="Round"
-                                                                  StrokeLineJoin="Round"/>
-                                                        </Canvas>
-                                                    </Viewbox>
+                                                    <Path Grid.Column="1" Data="{StaticResource LucideCheck}"
+                                                          Width="13" Height="13" Stretch="Uniform"
+                                                          Margin="14,0,2,0" VerticalAlignment="Center"
+                                                          Visibility="{Binding IsRyuuSelected, Converter={StaticResource BoolToVis}}"
+                                                          Stroke="{StaticResource Accent}" StrokeThickness="2" Fill="Transparent"
+                                                          StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"/>
                                                 </Grid>
                                             </Button>
 
@@ -1051,17 +1016,12 @@
                                                                    Foreground="{StaticResource TextMuted}"
                                                                    Visibility="{Binding CanUseHubcap, Converter={StaticResource InvBoolToVis}}"/>
                                                     </StackPanel>
-                                                    <Viewbox Grid.Column="1" Width="13" Height="13"
-                                                             Margin="14,0,2,0" VerticalAlignment="Center"
-                                                             Visibility="{Binding IsHubcapSelected, Converter={StaticResource BoolToVis}}">
-                                                        <Canvas Width="24" Height="24">
-                                                            <Path Data="M5,12 L10,17 L19,7"
-                                                                  Stroke="{StaticResource Accent}"
-                                                                  StrokeThickness="2.5" Fill="Transparent"
-                                                                  StrokeStartLineCap="Round" StrokeEndLineCap="Round"
-                                                                  StrokeLineJoin="Round"/>
-                                                        </Canvas>
-                                                    </Viewbox>
+                                                    <Path Grid.Column="1" Data="{StaticResource LucideCheck}"
+                                                          Width="13" Height="13" Stretch="Uniform"
+                                                          Margin="14,0,2,0" VerticalAlignment="Center"
+                                                          Visibility="{Binding IsHubcapSelected, Converter={StaticResource BoolToVis}}"
+                                                          Stroke="{StaticResource Accent}" StrokeThickness="2" Fill="Transparent"
+                                                          StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"/>
                                                 </Grid>
                                             </Button>
                                         </StackPanel>
@@ -1074,14 +1034,10 @@
                                     Padding="24,10"
                                     Command="{Binding DownloadGameCommand}">
                                 <StackPanel Orientation="Horizontal">
-                                    <Viewbox Width="15" Height="15" Margin="0,0,8,0">
-                                        <Canvas Width="24" Height="24">
-                                            <Path Data="M12,4 L12,16 M8,12 L12,16 L16,12 M4,19 L20,19"
-                                                  Stroke="White"
-                                                  StrokeThickness="2" StrokeStartLineCap="Round"
-                                                  StrokeEndLineCap="Round" Fill="Transparent"/>
-                                        </Canvas>
-                                    </Viewbox>
+                                    <Path Data="{StaticResource LucideDownload}"
+                                          Width="15" Height="15" Stretch="Uniform" Margin="0,0,8,0"
+                                          Stroke="White" StrokeThickness="1.7" Fill="Transparent"
+                                          StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"/>
                                     <TextBlock Text="Download" FontSize="13" FontWeight="SemiBold" Foreground="White"/>
                                 </StackPanel>
                             </Button>
