@@ -1,8 +1,8 @@
-using System;
+// This file is subject to the terms and conditions defined
+// in file 'LICENSE', which is part of this source code package.
+
 using System.IO;
 using System.Net.Http;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Windows.Media.Imaging;
 using DepotDL.GUI.ViewModels;
 
@@ -29,7 +29,7 @@ namespace DepotDL.GUI.Helpers
             try
             {
                 Directory.CreateDirectory(CacheDir);
-                string cachePath = Path.Combine(CacheDir, $"{appId}.jpg");
+                var cachePath = Path.Combine(CacheDir, $"{appId}.jpg");
 
                 byte[] data;
                 if (File.Exists(cachePath) && new FileInfo(cachePath).Length > 0)
@@ -56,7 +56,7 @@ namespace DepotDL.GUI.Helpers
             {
                 try
                 {
-                    string cachePath = Path.Combine(CacheDir, $"{appId}.jpg");
+                    var cachePath = Path.Combine(CacheDir, $"{appId}.jpg");
                     if (File.Exists(cachePath))
                         File.Delete(cachePath);
                 }

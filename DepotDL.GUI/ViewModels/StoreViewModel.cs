@@ -1,9 +1,7 @@
-using System;
-using System.Collections.Generic;
+// This file is subject to the terms and conditions defined
+// in file 'LICENSE', which is part of this source code package.
+
 using System.Collections.ObjectModel;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -243,7 +241,7 @@ namespace DepotDL.GUI.ViewModels
                 await Task.Delay(130);
             }
 
-            int skip = (CurrentPage - 1) * _pageSize;
+            var skip = (CurrentPage - 1) * _pageSize;
             var page = _filteredVMs.Skip(skip).Take(_pageSize).ToList();
 
             DisplayedGames = new ObservableCollection<StoreGameViewModel>(page);
@@ -269,7 +267,7 @@ namespace DepotDL.GUI.ViewModels
 
             if (HasNext)
             {
-                int nextSkip = CurrentPage * _pageSize;
+                var nextSkip = CurrentPage * _pageSize;
                 var nextPage = _filteredVMs.Skip(nextSkip).Take(_pageSize).ToList();
                 _ = Task.Run(async () =>
                 {
@@ -353,10 +351,10 @@ namespace DepotDL.GUI.ViewModels
             {
                 detail.MinRequirements.TryGetValue("Memory", out minRam);
                 detail.RecommendedRequirements.TryGetValue("Memory", out var recRam);
-                long userMb = userSpecs?.RamMb ?? 0;
-                long minMb = RequirementsParser.ParseRamMb(minRam ?? string.Empty);
-                long recMb = RequirementsParser.ParseRamMb(recRam ?? string.Empty);
-                string userVal = userMb > 0 ? $"{userMb / 1024} GB" : "Unknown";
+                var userMb = userSpecs?.RamMb ?? 0;
+                var minMb = RequirementsParser.ParseRamMb(minRam ?? string.Empty);
+                var recMb = RequirementsParser.ParseRamMb(recRam ?? string.Empty);
+                var userVal = userMb > 0 ? $"{userMb / 1024} GB" : "Unknown";
                 var status = userMb == 0 ? SpecStatus.Unknown
                            : recMb > 0 && userMb >= recMb ? SpecStatus.MeetsRecommended
                            : recMb == 0 && minMb > 0 && userMb >= minMb ? SpecStatus.MeetsRecommended
@@ -371,10 +369,10 @@ namespace DepotDL.GUI.ViewModels
             {
                 detail.MinRequirements.TryGetValue("Storage", out minStore);
                 detail.RecommendedRequirements.TryGetValue("Storage", out var recStore);
-                double userFree = userSpecs?.FreeStorageGb ?? 0;
-                double minGb = RequirementsParser.ParseStorageGb(minStore ?? string.Empty);
-                double recGb = RequirementsParser.ParseStorageGb(recStore ?? string.Empty);
-                string userVal = userFree > 0 ? $"{userFree} GB free" : "Unknown";
+                var userFree = userSpecs?.FreeStorageGb ?? 0;
+                var minGb = RequirementsParser.ParseStorageGb(minStore ?? string.Empty);
+                var recGb = RequirementsParser.ParseStorageGb(recStore ?? string.Empty);
+                var userVal = userFree > 0 ? $"{userFree} GB free" : "Unknown";
                 var status = userFree == 0 ? SpecStatus.Unknown
                            : recGb > 0 && userFree >= recGb ? SpecStatus.MeetsRecommended
                            : recGb == 0 && minGb > 0 && userFree >= minGb ? SpecStatus.MeetsRecommended
@@ -389,7 +387,7 @@ namespace DepotDL.GUI.ViewModels
             {
                 detail.MinRequirements.TryGetValue("Processor", out minCpu);
                 detail.RecommendedRequirements.TryGetValue("Processor", out var recCpu);
-                string userVal = userSpecs?.CpuName ?? "Unknown";
+                var userVal = userSpecs?.CpuName ?? "Unknown";
                 rows.Add(new SpecRow("Processor", minCpu ?? "—", recCpu ?? "—", userVal, SpecStatus.Unknown));
             }
 
@@ -398,7 +396,7 @@ namespace DepotDL.GUI.ViewModels
             {
                 detail.MinRequirements.TryGetValue("Graphics", out minGpu);
                 detail.RecommendedRequirements.TryGetValue("Graphics", out var recGpu);
-                string userVal = userSpecs?.GpuName ?? "Unknown";
+                var userVal = userSpecs?.GpuName ?? "Unknown";
                 rows.Add(new SpecRow("Graphics", minGpu ?? "—", recGpu ?? "—", userVal, SpecStatus.Unknown));
             }
 
@@ -421,12 +419,12 @@ namespace DepotDL.GUI.ViewModels
                 PcSpecs? userSpecs = null;
                 try { userSpecs = PcSpecsHelper.GetSpecs(); } catch { }
 
-                int cpuIdx = -1;
-                for (int i = 0; i < SpecRows.Count; i++)
+                var cpuIdx = -1;
+                for (var i = 0; i < SpecRows.Count; i++)
                     if (SpecRows[i].Label == "Processor") { cpuIdx = i; break; }
 
-                int gpuIdx = -1;
-                for (int i = 0; i < SpecRows.Count; i++)
+                var gpuIdx = -1;
+                for (var i = 0; i < SpecRows.Count; i++)
                     if (SpecRows[i].Label == "Graphics") { gpuIdx = i; break; }
 
                 if (cpuIdx < 0 && gpuIdx < 0) return;
@@ -479,11 +477,11 @@ namespace DepotDL.GUI.ViewModels
                 ct.ThrowIfCancellationRequested();
 
                 var userCpu = userCpuTask?.Result ?? BenchmarkScore.Unknown;
-                var minCpu  = minCpuTask?.Result  ?? BenchmarkScore.Unknown;
-                var recCpu  = recCpuTask?.Result  ?? BenchmarkScore.Unknown;
+                var minCpu = minCpuTask?.Result ?? BenchmarkScore.Unknown;
+                var recCpu = recCpuTask?.Result ?? BenchmarkScore.Unknown;
                 var userGpu = userGpuTask?.Result ?? BenchmarkScore.Unknown;
-                var minGpu  = minGpuTask?.Result  ?? BenchmarkScore.Unknown;
-                var recGpu  = recGpuTask?.Result  ?? BenchmarkScore.Unknown;
+                var minGpu = minGpuTask?.Result ?? BenchmarkScore.Unknown;
+                var recGpu = recGpuTask?.Result ?? BenchmarkScore.Unknown;
 
                 await Application.Current.Dispatcher.InvokeAsync(() =>
                 {

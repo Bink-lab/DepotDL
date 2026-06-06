@@ -1,3 +1,6 @@
+// This file is subject to the terms and conditions defined
+// in file 'LICENSE', which is part of this source code package.
+
 namespace DepotDL.CLI.Tui
 {
     internal static class TuiText
@@ -30,7 +33,7 @@ namespace DepotDL.CLI.Tui
             path ??= string.Empty;
             if (path.Length <= maxLength) return path;
 
-            string fileName = Path.GetFileName(path);
+            var fileName = Path.GetFileName(path);
             if (fileName.Length + 4 < maxLength)
             {
                 return "..." + Path.DirectorySeparatorChar + fileName;

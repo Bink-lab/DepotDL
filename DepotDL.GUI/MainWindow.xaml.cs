@@ -1,7 +1,7 @@
-using System;
-using System.Collections.Generic;
+// This file is subject to the terms and conditions defined
+// in file 'LICENSE', which is part of this source code package.
+
 using System.ComponentModel;
-using System.Threading;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media.Animation;
@@ -117,9 +117,9 @@ namespace DepotDL.GUI
             var oldPage = _currentPage;
             _currentPage = newPage;
 
-            var ease   = new CubicEase { EasingMode = EasingMode.EaseOut };
+            var ease = new CubicEase { EasingMode = EasingMode.EaseOut };
             var durOut = new Duration(TimeSpan.FromSeconds(0.15));
-            var durIn  = new Duration(TimeSpan.FromSeconds(0.20));
+            var durIn = new Duration(TimeSpan.FromSeconds(0.20));
 
             void ShowNew()
             {
@@ -166,7 +166,7 @@ namespace DepotDL.GUI
             await System.Threading.Tasks.Task.Delay(1000);
 
             var sb = new System.Windows.Media.Animation.Storyboard();
-            
+
             var opacityAnim = new System.Windows.Media.Animation.DoubleAnimation
             {
                 To = 0,

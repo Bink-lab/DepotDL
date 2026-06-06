@@ -1,12 +1,10 @@
-using System;
-using System.Collections.Generic;
+// This file is subject to the terms and conditions defined
+// in file 'LICENSE', which is part of this source code package.
+
 using System.IO;
-using System.Linq;
 using System.Net.Http;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using System.Threading;
-using System.Threading.Tasks;
 using DepotDL.GUI.Helpers;
 using DepotDL.GUI.Models;
 
@@ -71,7 +69,7 @@ namespace DepotDL.GUI.Services
         {
             progress?.Report((0, "Fetching app list..."));
 
-            for (int attempt = 0; attempt < 3; attempt++)
+            for (var attempt = 0; attempt < 3; attempt++)
             {
                 try
                 {
@@ -107,7 +105,7 @@ namespace DepotDL.GUI.Services
         public async Task<SteamAppDetail?> GetAppDetailAsync(int appId, CancellationToken ct = default)
         {
             Directory.CreateDirectory(CacheDir);
-            string path = Path.Combine(CacheDir, $"detail_v2_{appId}.json");
+            var path = Path.Combine(CacheDir, $"detail_v2_{appId}.json");
 
             if (File.Exists(path))
             {
@@ -255,19 +253,19 @@ namespace DepotDL.GUI.Services
         private class BonkerApp
         {
             [JsonPropertyName("appid")] public int AppId { get; set; }
-            [JsonPropertyName("name")]  public string Name { get; set; } = string.Empty;
+            [JsonPropertyName("name")] public string Name { get; set; } = string.Empty;
         }
 
         private class SpyDetailEntry
         {
-            [JsonPropertyName("name")]    public string Name { get; set; } = string.Empty;
+            [JsonPropertyName("name")] public string Name { get; set; } = string.Empty;
             [JsonPropertyName("developer")] public string Developer { get; set; } = string.Empty;
             [JsonPropertyName("publisher")] public string Publisher { get; set; } = string.Empty;
-            [JsonPropertyName("owners")]  public string Owners { get; set; } = string.Empty;
+            [JsonPropertyName("owners")] public string Owners { get; set; } = string.Empty;
             [JsonPropertyName("positive")] public int Positive { get; set; }
             [JsonPropertyName("negative")] public int Negative { get; set; }
-            [JsonPropertyName("price")]   public string? Price { get; set; }
-            [JsonPropertyName("genre")]   public string Genre { get; set; } = string.Empty;
+            [JsonPropertyName("price")] public string? Price { get; set; }
+            [JsonPropertyName("genre")] public string Genre { get; set; } = string.Empty;
         }
 
         private class SpyDetailResult
@@ -285,24 +283,24 @@ namespace DepotDL.GUI.Services
         private class StoreApiEntry
         {
             [JsonPropertyName("success")] public bool Success { get; set; }
-            [JsonPropertyName("data")]    public StoreData? Data { get; set; }
+            [JsonPropertyName("data")] public StoreData? Data { get; set; }
         }
 
         private class StoreData
         {
-            [JsonPropertyName("name")]                  public string Name { get; set; } = string.Empty;
-            [JsonPropertyName("short_description")]     public string ShortDescription { get; set; } = string.Empty;
-            [JsonPropertyName("detailed_description")]  public string DetailedDescription { get; set; } = string.Empty;
-            [JsonPropertyName("header_image")]          public string HeaderImage { get; set; } = string.Empty;
-            [JsonPropertyName("genres")]                public List<StoreGenre>? Genres { get; set; }
-            [JsonPropertyName("price_overview")]        public StorePrice? PriceOverview { get; set; }
-            [JsonPropertyName("screenshots")]           public List<StoreScreenshot>? Screenshots { get; set; }
-            [JsonPropertyName("pc_requirements")]       public StoreRequirements? PcRequirements { get; set; }
+            [JsonPropertyName("name")] public string Name { get; set; } = string.Empty;
+            [JsonPropertyName("short_description")] public string ShortDescription { get; set; } = string.Empty;
+            [JsonPropertyName("detailed_description")] public string DetailedDescription { get; set; } = string.Empty;
+            [JsonPropertyName("header_image")] public string HeaderImage { get; set; } = string.Empty;
+            [JsonPropertyName("genres")] public List<StoreGenre>? Genres { get; set; }
+            [JsonPropertyName("price_overview")] public StorePrice? PriceOverview { get; set; }
+            [JsonPropertyName("screenshots")] public List<StoreScreenshot>? Screenshots { get; set; }
+            [JsonPropertyName("pc_requirements")] public StoreRequirements? PcRequirements { get; set; }
         }
 
         private class StoreRequirements
         {
-            [JsonPropertyName("minimum")]     public string Minimum { get; set; } = string.Empty;
+            [JsonPropertyName("minimum")] public string Minimum { get; set; } = string.Empty;
             [JsonPropertyName("recommended")] public string Recommended { get; set; } = string.Empty;
         }
 
@@ -319,7 +317,7 @@ namespace DepotDL.GUI.Services
         private class StoreScreenshot
         {
             [JsonPropertyName("path_thumbnail")] public string PathThumbnail { get; set; } = string.Empty;
-            [JsonPropertyName("path_full")]      public string PathFull { get; set; } = string.Empty;
+            [JsonPropertyName("path_full")] public string PathFull { get; set; } = string.Empty;
         }
 
         private class CacheMeta

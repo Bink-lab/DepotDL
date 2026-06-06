@@ -1,4 +1,6 @@
-using System;
+// This file is subject to the terms and conditions defined
+// in file 'LICENSE', which is part of this source code package.
+
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -68,9 +70,9 @@ namespace DepotDL.GUI.Helpers
 
             if (sv.ScrollableHeight <= 0) return;
 
-            double current = sv.VerticalOffset;
+            var current = sv.VerticalOffset;
             var s = GetSettings();
-            double target = Math.Clamp(
+            var target = Math.Clamp(
                 current - e.Delta * s.ScrollSensitivity,
                 0, sv.ScrollableHeight);
 

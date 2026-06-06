@@ -1,11 +1,8 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Net.Http;
+// This file is subject to the terms and conditions defined
+// in file 'LICENSE', which is part of this source code package.
+
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using System.Threading;
 
 namespace DepotDL.CLI.Services
 {
@@ -26,8 +23,8 @@ namespace DepotDL.CLI.Services
         public static List<StoreGame> GetAllGames(Action<string>? status = null)
         {
             Directory.CreateDirectory(CacheDir);
-            string listPath = Path.Combine(CacheDir, "applist.json");
-            string metaPath = Path.Combine(CacheDir, "applist_meta.json");
+            var listPath = Path.Combine(CacheDir, "applist.json");
+            var metaPath = Path.Combine(CacheDir, "applist_meta.json");
 
             if (File.Exists(listPath) && File.Exists(metaPath))
             {
@@ -45,7 +42,7 @@ namespace DepotDL.CLI.Services
             }
 
             status?.Invoke("Fetching game list from Bonker API...");
-            for (int attempt = 0; attempt < 3; attempt++)
+            for (var attempt = 0; attempt < 3; attempt++)
             {
                 try
                 {
@@ -77,7 +74,7 @@ namespace DepotDL.CLI.Services
         public static StoreDetail? GetAppDetail(int appId)
         {
             Directory.CreateDirectory(CacheDir);
-            string path = Path.Combine(CacheDir, $"detail_v2_{appId}.json");
+            var path = Path.Combine(CacheDir, $"detail_v2_{appId}.json");
 
             if (File.Exists(path))
             {
@@ -162,7 +159,7 @@ namespace DepotDL.CLI.Services
         private static string FormatPrice(string? raw)
         {
             if (string.IsNullOrEmpty(raw) || raw == "0") return "Free to Play";
-            if (int.TryParse(raw, out int cents)) return $"${cents / 100.0:F2}";
+            if (int.TryParse(raw, out var cents)) return $"${cents / 100.0:F2}";
             return raw;
         }
 
@@ -178,20 +175,20 @@ namespace DepotDL.CLI.Services
         internal class StoreGame
         {
             [JsonPropertyName("appid")] public int AppId { get; set; }
-            [JsonPropertyName("name")]  public string Name { get; set; } = string.Empty;
+            [JsonPropertyName("name")] public string Name { get; set; } = string.Empty;
         }
 
         internal class StoreDetail
         {
-            [JsonPropertyName("appid")]             public int AppId { get; set; }
-            [JsonPropertyName("name")]              public string Name { get; set; } = string.Empty;
-            [JsonPropertyName("developer")]         public string Developer { get; set; } = string.Empty;
-            [JsonPropertyName("publisher")]         public string Publisher { get; set; } = string.Empty;
-            [JsonPropertyName("owners")]            public string Owners { get; set; } = string.Empty;
-            [JsonPropertyName("positive")]          public int Positive { get; set; }
-            [JsonPropertyName("negative")]          public int Negative { get; set; }
-            [JsonPropertyName("price_text")]        public string PriceText { get; set; } = string.Empty;
-            [JsonPropertyName("genres")]            public List<string> Genres { get; set; } = new();
+            [JsonPropertyName("appid")] public int AppId { get; set; }
+            [JsonPropertyName("name")] public string Name { get; set; } = string.Empty;
+            [JsonPropertyName("developer")] public string Developer { get; set; } = string.Empty;
+            [JsonPropertyName("publisher")] public string Publisher { get; set; } = string.Empty;
+            [JsonPropertyName("owners")] public string Owners { get; set; } = string.Empty;
+            [JsonPropertyName("positive")] public int Positive { get; set; }
+            [JsonPropertyName("negative")] public int Negative { get; set; }
+            [JsonPropertyName("price_text")] public string PriceText { get; set; } = string.Empty;
+            [JsonPropertyName("genres")] public List<string> Genres { get; set; } = new();
             [JsonPropertyName("short_description")] public string ShortDescription { get; set; } = string.Empty;
         }
 
@@ -203,33 +200,33 @@ namespace DepotDL.CLI.Services
         private class BonkerApp
         {
             [JsonPropertyName("appid")] public int AppId { get; set; }
-            [JsonPropertyName("name")]  public string Name { get; set; } = string.Empty;
+            [JsonPropertyName("name")] public string Name { get; set; } = string.Empty;
         }
 
         private class SpyEntry
         {
-            [JsonPropertyName("name")]      public string Name { get; set; } = string.Empty;
+            [JsonPropertyName("name")] public string Name { get; set; } = string.Empty;
             [JsonPropertyName("developer")] public string Developer { get; set; } = string.Empty;
             [JsonPropertyName("publisher")] public string Publisher { get; set; } = string.Empty;
-            [JsonPropertyName("owners")]    public string Owners { get; set; } = string.Empty;
-            [JsonPropertyName("positive")]  public int Positive { get; set; }
-            [JsonPropertyName("negative")]  public int Negative { get; set; }
-            [JsonPropertyName("price")]     public string? Price { get; set; }
-            [JsonPropertyName("genre")]     public string Genre { get; set; } = string.Empty;
+            [JsonPropertyName("owners")] public string Owners { get; set; } = string.Empty;
+            [JsonPropertyName("positive")] public int Positive { get; set; }
+            [JsonPropertyName("negative")] public int Negative { get; set; }
+            [JsonPropertyName("price")] public string? Price { get; set; }
+            [JsonPropertyName("genre")] public string Genre { get; set; } = string.Empty;
         }
 
         private class StoreEntry
         {
             [JsonPropertyName("success")] public bool Success { get; set; }
-            [JsonPropertyName("data")]    public StoreData? Data { get; set; }
+            [JsonPropertyName("data")] public StoreData? Data { get; set; }
         }
 
         private class StoreData
         {
-            [JsonPropertyName("name")]              public string Name { get; set; } = string.Empty;
+            [JsonPropertyName("name")] public string Name { get; set; } = string.Empty;
             [JsonPropertyName("short_description")] public string ShortDescription { get; set; } = string.Empty;
-            [JsonPropertyName("genres")]            public List<StoreGenre>? Genres { get; set; }
-            [JsonPropertyName("price_overview")]    public StorePrice? PriceOverview { get; set; }
+            [JsonPropertyName("genres")] public List<StoreGenre>? Genres { get; set; }
+            [JsonPropertyName("price_overview")] public StorePrice? PriceOverview { get; set; }
         }
 
         private class StoreGenre

@@ -1,5 +1,6 @@
-using System;
-using System.Collections.Generic;
+// This file is subject to the terms and conditions defined
+// in file 'LICENSE', which is part of this source code package.
+
 using System.IO;
 using System.Text.Json;
 using DepotDL.GUI.Models;
@@ -18,7 +19,7 @@ namespace DepotDL.GUI.Services
             try
             {
                 if (!File.Exists(LibraryFilePath)) return new();
-                string json = File.ReadAllText(LibraryFilePath);
+                var json = File.ReadAllText(LibraryFilePath);
                 return JsonSerializer.Deserialize<List<LibraryGame>>(json) ?? new();
             }
             catch { return new(); }
@@ -37,7 +38,7 @@ namespace DepotDL.GUI.Services
         public void AddOrUpdate(LibraryGame game)
         {
             var lib = Load();
-            int idx = lib.FindIndex(g => g.AppId == game.AppId);
+            var idx = lib.FindIndex(g => g.AppId == game.AppId);
             if (idx >= 0) lib[idx] = game;
             else lib.Add(game);
             Save(lib);
@@ -66,10 +67,10 @@ namespace DepotDL.GUI.Services
 
         public void VerifyAll(List<LibraryGame> games)
         {
-            bool changed = false;
+            var changed = false;
             foreach (var g in games)
             {
-                bool exists = Directory.Exists(g.OutputDir);
+                var exists = Directory.Exists(g.OutputDir);
                 if (g.IsVerified != exists) { g.IsVerified = exists; changed = true; }
             }
             if (changed) Save(games);
@@ -94,14 +95,14 @@ namespace DepotDL.GUI.Services
                 queue.Enqueue(path);
                 while (queue.Count > 0)
                 {
-                    string dir = queue.Dequeue();
+                    var dir = queue.Dequeue();
                     try
                     {
-                        foreach (string f in Directory.GetFiles(dir))
+                        foreach (var f in Directory.GetFiles(dir))
                         {
                             try { size += new FileInfo(f).Length; } catch { }
                         }
-                        foreach (string sd in Directory.GetDirectories(dir))
+                        foreach (var sd in Directory.GetDirectories(dir))
                             queue.Enqueue(sd);
                     }
                     catch { }

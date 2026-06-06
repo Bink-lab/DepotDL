@@ -1,13 +1,11 @@
-using System;
-using System.Collections.Generic;
+// This file is subject to the terms and conditions defined
+// in file 'LICENSE', which is part of this source code package.
+
 using System.IO;
-using System.Linq;
 using System.Net.Http;
 using System.Reflection;
 using System.Text.Json;
 using System.Text.RegularExpressions;
-using System.Threading;
-using System.Threading.Tasks;
 using DepotDL.GUI.Models;
 
 namespace DepotDL.GUI.Services
@@ -72,7 +70,7 @@ namespace DepotDL.GUI.Services
                 var db = await LoadGpuDbAsync(token).ConfigureAwait(false);
                 var entry = FindBestGpuMatch(db, normalized);
                 if (entry == null) return BenchmarkScore.Unknown;
-                int derived = ComputeGpuScore(entry);
+                var derived = ComputeGpuScore(entry);
                 return derived > 0 ? new BenchmarkScore(derived, 0) : BenchmarkScore.Unknown;
             });
 
@@ -227,7 +225,7 @@ namespace DepotDL.GUI.Services
 
         private static int ComputeGpuScore(GpuEntry e)
         {
-            int clock = e.BoostClockMhz > 0 ? e.BoostClockMhz : e.BaseClockMhz;
+            var clock = e.BoostClockMhz > 0 ? e.BoostClockMhz : e.BaseClockMhz;
             if (e.ShadingUnits > 0 && clock > 0)
                 return (int)((long)e.ShadingUnits * clock / 1000);
             if (clock > 0)

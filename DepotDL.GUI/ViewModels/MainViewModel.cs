@@ -1,10 +1,9 @@
-using System;
+// This file is subject to the terms and conditions defined
+// in file 'LICENSE', which is part of this source code package.
+
 using System.Diagnostics;
-using System.Threading;
-using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using DepotDL.GUI.Models;
 using DepotDL.GUI.Services;
 
 namespace DepotDL.GUI.ViewModels
@@ -19,7 +18,7 @@ namespace DepotDL.GUI.ViewModels
         [ObservableProperty] private LibraryViewModel _library = new();
         [ObservableProperty] private DownloadViewModel _download = new();
         [ObservableProperty] private SettingsViewModel _settings = new();
-        [ObservableProperty] private bool    _updateAvailable;
+        [ObservableProperty] private bool _updateAvailable;
         [ObservableProperty] private string? _updateBannerText;
         [ObservableProperty] private string? _updateHtmlUrl;
 
@@ -79,7 +78,7 @@ namespace DepotDL.GUI.ViewModels
                 var s = _settingsService.Load();
                 var currentSha = UpdateCheckerService.GetCurrentSha();
 
-                bool shouldCheck = s.LastUpdateCheckUtc == null ||
+                var shouldCheck = s.LastUpdateCheckUtc == null ||
                                    (DateTime.UtcNow - s.LastUpdateCheckUtc.Value).TotalHours >= 24;
 
                 UpdateCheckResult? result = null;
@@ -96,8 +95,8 @@ namespace DepotDL.GUI.ViewModels
                     result = new UpdateCheckResult
                     {
                         UpdateAvailable = true,
-                        LatestTag       = s.LastKnownReleaseTag,
-                        HtmlUrl         = s.LastKnownReleaseTag != null
+                        LatestTag = s.LastKnownReleaseTag,
+                        HtmlUrl = s.LastKnownReleaseTag != null
                             ? UpdateCheckerService.BuildReleaseUrl(s.LastKnownReleaseTag)
                             : null
                     };
@@ -106,8 +105,8 @@ namespace DepotDL.GUI.ViewModels
                 if (result?.UpdateAvailable == true)
                 {
                     UpdateBannerText = FormatUpdateBannerText(result.LatestTag, result.LatestSha);
-                    UpdateHtmlUrl    = result.HtmlUrl;
-                    UpdateAvailable  = true;
+                    UpdateHtmlUrl = result.HtmlUrl;
+                    UpdateAvailable = true;
                 }
             }
             catch { }
@@ -140,22 +139,22 @@ namespace DepotDL.GUI.ViewModels
             {
                 Process.Start(new ProcessStartInfo
                 {
-                    FileName        = UpdateHtmlUrl,
+                    FileName = UpdateHtmlUrl,
                     UseShellExecute = true
                 });
             }
             catch { }
         }
 
-        [RelayCommand] private async Task NavigateLibrary()  { if (CurrentPage == NavPage.Library) return; CurrentPage = NavPage.Library; await Library.LoadAsync(); }
-        [RelayCommand] private void NavigateDownload()  { CurrentPage = NavPage.Download; }
-        [RelayCommand] private void NavigateSettings()  { CurrentPage = NavPage.Settings; Settings.Load(); }
-        [RelayCommand] private void NavigateStore()     { CurrentPage = NavPage.Store; Store.EnsureLoaded(); }
+        [RelayCommand] private async Task NavigateLibrary() { if (CurrentPage == NavPage.Library) return; CurrentPage = NavPage.Library; await Library.LoadAsync(); }
+        [RelayCommand] private void NavigateDownload() { CurrentPage = NavPage.Download; }
+        [RelayCommand] private void NavigateSettings() { CurrentPage = NavPage.Settings; Settings.Load(); }
+        [RelayCommand] private void NavigateStore() { CurrentPage = NavPage.Store; Store.EnsureLoaded(); }
 
-        public bool IsLibraryPage  => CurrentPage == NavPage.Library;
+        public bool IsLibraryPage => CurrentPage == NavPage.Library;
         public bool IsDownloadPage => CurrentPage == NavPage.Download;
         public bool IsSettingsPage => CurrentPage == NavPage.Settings;
-        public bool IsStorePage    => CurrentPage == NavPage.Store;
+        public bool IsStorePage => CurrentPage == NavPage.Store;
 
         public void NavigateDownloadWithAppId(string appId, ManifestProvider? provider = null)
         {

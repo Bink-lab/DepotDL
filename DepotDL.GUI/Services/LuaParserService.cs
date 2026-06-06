@@ -1,5 +1,6 @@
-using System;
-using System.Collections.Generic;
+// This file is subject to the terms and conditions defined
+// in file 'LICENSE', which is part of this source code package.
+
 using System.Diagnostics;
 using System.IO;
 using System.Text.Json;
@@ -21,7 +22,7 @@ namespace DepotDL.GUI.Services
 
         public (string AppId, List<DepotInfo> Depots) Parse(string luaPath)
         {
-            string content = File.ReadAllText(luaPath);
+            var content = File.ReadAllText(luaPath);
             var result = ParseContent(content);
             if (!string.IsNullOrEmpty(result.AppId))
                 EnrichWithOsMetadata(result.AppId, result.Depots);
@@ -82,7 +83,7 @@ namespace DepotDL.GUI.Services
 
         public (string AppId, List<DepotInfo> Depots) ParseContent(string content)
         {
-            string appId = string.Empty;
+            var appId = string.Empty;
             var map = new Dictionary<string, DepotInfo>();
 
             var m = AppIdRx.Match(content);
@@ -93,14 +94,14 @@ namespace DepotDL.GUI.Services
 
             foreach (Match km in KeyRx.Matches(content))
             {
-                string id = km.Groups[1].Value;
+                var id = km.Groups[1].Value;
                 if (!map.TryGetValue(id, out var d)) { d = new DepotInfo { DepotId = id }; map[id] = d; }
                 d.DecryptionKey = km.Groups[3].Value;
             }
 
             foreach (Match mm in ManifestRx.Matches(content))
             {
-                string id = mm.Groups[1].Value;
+                var id = mm.Groups[1].Value;
                 if (!map.TryGetValue(id, out var d)) { d = new DepotInfo { DepotId = id }; map[id] = d; }
                 d.ManifestId = mm.Groups[2].Value;
             }

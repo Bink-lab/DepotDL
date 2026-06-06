@@ -1,7 +1,7 @@
-using System;
-using System.IO;
+// This file is subject to the terms and conditions defined
+// in file 'LICENSE', which is part of this source code package.
+
 using System.IO.Compression;
-using System.Linq;
 using System.Text.RegularExpressions;
 
 namespace DepotDL.CLI.Utilities
@@ -19,11 +19,11 @@ namespace DepotDL.CLI.Utilities
     {
         public static ZipImportResult ImportZip(string zipPath)
         {
-            int luaCount = 0;
-            int manifestCount = 0;
+            var luaCount = 0;
+            var manifestCount = 0;
             string? firstLuaPath = null;
-            string importDir = string.Empty;
-            string manifestsDir = string.Empty;
+            var importDir = string.Empty;
+            var manifestsDir = string.Empty;
 
             try
             {
@@ -86,7 +86,7 @@ namespace DepotDL.CLI.Utilities
         private static string BuildImportDir(string zipPath, ZipArchive archive)
         {
             var firstLua = archive.Entries.FirstOrDefault(entry => Path.GetExtension(entry.FullName).Equals(".lua", StringComparison.OrdinalIgnoreCase));
-            string folderName = firstLua == null
+            var folderName = firstLua == null
                 ? Path.GetFileNameWithoutExtension(zipPath)
                 : Path.GetFileNameWithoutExtension(firstLua.FullName);
 

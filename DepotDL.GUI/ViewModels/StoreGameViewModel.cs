@@ -1,7 +1,6 @@
-using System;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Windows;
+// This file is subject to the terms and conditions defined
+// in file 'LICENSE', which is part of this source code package.
+
 using System.Windows.Media.Imaging;
 using CommunityToolkit.Mvvm.ComponentModel;
 using DepotDL.GUI.Helpers;
@@ -25,7 +24,7 @@ namespace DepotDL.GUI.ViewModels
                 var parts = s.Split("..", StringSplitOptions.TrimEntries);
                 if (parts.Length == 0) return s;
                 var lower = parts[0].Replace(",", "").Trim();
-                if (!long.TryParse(lower, out long n)) return s;
+                if (!long.TryParse(lower, out var n)) return s;
                 if (n >= 1_000_000_000) return $"{n / 1_000_000_000}B+ owners";
                 if (n >= 1_000_000) return $"{n / 1_000_000}M+ owners";
                 if (n >= 1_000) return $"{n / 1_000}K+ owners";
@@ -37,10 +36,10 @@ namespace DepotDL.GUI.ViewModels
         {
             get
             {
-                int total = Game.Positive + Game.Negative;
+                var total = Game.Positive + Game.Negative;
                 if (total == 0) return "No reviews";
-                double pct = Game.Positive * 100.0 / total;
-                string label = pct >= 80 ? "Very Positive"
+                var pct = Game.Positive * 100.0 / total;
+                var label = pct >= 80 ? "Very Positive"
                              : pct >= 70 ? "Positive"
                              : pct >= 40 ? "Mixed"
                              : "Negative";

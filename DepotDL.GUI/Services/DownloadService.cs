@@ -1,11 +1,10 @@
-using System;
-using System.Collections.Generic;
+// This file is subject to the terms and conditions defined
+// in file 'LICENSE', which is part of this source code package.
+
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Text.RegularExpressions;
-using System.Threading;
-using System.Threading.Tasks;
 using DepotDL.GUI.Models;
 
 namespace DepotDL.GUI.Services
@@ -39,7 +38,7 @@ namespace DepotDL.GUI.Services
             string? ryuuApiKey = null,
             string? hubcapApiKey = null)
         {
-            string keysFile = Path.Combine(Path.GetTempPath(), $"depotdl_keys_{Guid.NewGuid():N}.vdf");
+            var keysFile = Path.Combine(Path.GetTempPath(), $"depotdl_keys_{Guid.NewGuid():N}.vdf");
             var providerExtractDirs = new System.Collections.Concurrent.ConcurrentBag<string>();
             try
             {
@@ -49,12 +48,12 @@ namespace DepotDL.GUI.Services
                             await w.WriteLineAsync($"{d.DepotId};{d.DecryptionKey}");
 
                 var manifestMap = BuildManifestMap(manifestsDir);
-                string checkpointDir = Path.Combine(outputDir, ".depotdl_progress");
+                var checkpointDir = Path.Combine(outputDir, ".depotdl_progress");
                 Directory.CreateDirectory(checkpointDir);
 
-                for (int i = 0; i < depots.Count; i++)
+                for (var i = 0; i < depots.Count; i++)
                 {
-                    string doneFile = Path.Combine(checkpointDir, $"{depots[i].DepotId}.done");
+                    var doneFile = Path.Combine(checkpointDir, $"{depots[i].DepotId}.done");
                     if (File.Exists(doneFile) && states[i].Status != DepotStatus.Done)
                     {
                         states[i].Status = DepotStatus.Skipped;
@@ -64,11 +63,11 @@ namespace DepotDL.GUI.Services
                 }
 
                 var queue = new System.Collections.Concurrent.ConcurrentQueue<(DepotInfo, DepotDownloadState)>();
-                for (int i = 0; i < depots.Count; i++)
+                for (var i = 0; i < depots.Count; i++)
                     if (states[i].Status != DepotStatus.Skipped)
                         queue.Enqueue((depots[i], states[i]));
 
-                int workers = Math.Min(maxParallel, queue.Count);
+                var workers = Math.Min(maxParallel, queue.Count);
                 if (workers == 0) return;
 
                 var providerCache = new System.Collections.Concurrent.ConcurrentDictionary<string, Lazy<Task<Dictionary<string, string>?>>>();
@@ -124,7 +123,7 @@ namespace DepotDL.GUI.Services
 
                 await Task.WhenAll(tasks);
 
-                bool allDone = true;
+                var allDone = true;
                 foreach (var s in states)
                     if (s.Status != DepotStatus.Done && s.Status != DepotStatus.Skipped)
                     { allDone = false; break; }
@@ -150,7 +149,7 @@ namespace DepotDL.GUI.Services
 
             if (!string.IsNullOrEmpty(DDModPath))
             {
-                string? ddmodDir = Path.GetDirectoryName(DDModPath);
+                var ddmodDir = Path.GetDirectoryName(DDModPath);
                 if (!string.IsNullOrEmpty(ddmodDir))
                     candidates.Add(Path.Combine(ddmodDir, ".DepotDownloader"));
             }
@@ -170,7 +169,7 @@ namespace DepotDL.GUI.Services
             Func<string, Func<Task<ManifestDownloadResult>>, Task<Dictionary<string, string>?>> getProviderManifests,
             string? ryuuApiKey = null, string? hubcapApiKey = null)
         {
-            for (int attempt = 1; attempt <= MaxRetries; attempt++)
+            for (var attempt = 1; attempt <= MaxRetries; attempt++)
             {
                 if (attempt > 1)
                 {
@@ -179,7 +178,7 @@ namespace DepotDL.GUI.Services
                     await Task.Delay(2000 * (attempt - 1), ct);
                 }
 
-                bool success = await DownloadDepotAsync(
+                var success = await DownloadDepotAsync(
                     appId, depot, outputDir, keysFile, manifestMap, state, ct);
 
                 if (success) return;
@@ -233,7 +232,7 @@ namespace DepotDL.GUI.Services
 
                     if (providerManifestFile == null) continue;
 
-                    bool success = await DownloadDepotAsync(
+                    var success = await DownloadDepotAsync(
                         appId, depot, outputDir, keysFile, manifestMap, state, ct, providerManifestFile);
 
                     if (success) return;
@@ -281,10 +280,10 @@ namespace DepotDL.GUI.Services
                 psi.ArgumentList.Add("-manifest");
                 psi.ArgumentList.Add(depot.ManifestId);
 
-                string? mf = manifestOverridePath;
+                var mf = manifestOverridePath;
                 if (mf == null)
                 {
-                    string keyCombo = $"{depot.DepotId}_{depot.ManifestId}";
+                    var keyCombo = $"{depot.DepotId}_{depot.ManifestId}";
                     if (manifestMap.TryGetValue(keyCombo, out var mf1))
                         mf = mf1;
                     else if (manifestMap.TryGetValue(depot.ManifestId, out var mf2))
@@ -300,8 +299,8 @@ namespace DepotDL.GUI.Services
             }
 
             var errors = new System.Collections.Concurrent.ConcurrentBag<string>();
-            bool hadFailureSignal = false;
-            bool killedByWatchdog = false;
+            var hadFailureSignal = false;
+            var killedByWatchdog = false;
 
             using var proc = new Process { StartInfo = psi };
 
@@ -330,14 +329,14 @@ namespace DepotDL.GUI.Services
             {
                 double seenPct = -1;
                 DepotStatus seenStatus = DepotStatus.Queued;
-                long lastProgressTicks = DateTime.UtcNow.Ticks;
+                var lastProgressTicks = DateTime.UtcNow.Ticks;
 
                 while (!watchdogCts.Token.IsCancellationRequested)
                 {
                     try { await Task.Delay(15_000, watchdogCts.Token); }
                     catch (OperationCanceledException) { break; }
 
-                    double nowPct = state.Percent;
+                    var nowPct = state.Percent;
                     DepotStatus nowStatus = state.Status;
 
                     if (nowPct > seenPct || nowStatus != seenStatus)
@@ -427,7 +426,7 @@ namespace DepotDL.GUI.Services
             var pctMatch = PctRx.Match(line);
             if (pctMatch.Success &&
                 double.TryParse(pctMatch.Groups[1].Value.Replace(',', '.'),
-                    NumberStyles.Any, CultureInfo.InvariantCulture, out double pct))
+                    NumberStyles.Any, CultureInfo.InvariantCulture, out var pct))
             {
                 state.Percent = pct;
                 state.Status = DepotStatus.Downloading;
@@ -436,11 +435,11 @@ namespace DepotDL.GUI.Services
                 state.SpeedText = sm.Success ? sm.Groups[1].Value : string.Empty;
 
                 // Line format: "  5.40% path/to/file.dll (speed)"
-                int fileStart = pctMatch.Index + pctMatch.Length + 1;
-                int fileEnd = sm.Success ? sm.Index : line.Length;
+                var fileStart = pctMatch.Index + pctMatch.Length + 1;
+                var fileEnd = sm.Success ? sm.Index : line.Length;
                 if (fileStart < fileEnd)
                 {
-                    string filePath = line[fileStart..fileEnd].Trim();
+                    var filePath = line[fileStart..fileEnd].Trim();
                     if (!string.IsNullOrEmpty(filePath))
                         state.ActiveFile = Path.GetFileName(filePath);
                 }
@@ -453,7 +452,7 @@ namespace DepotDL.GUI.Services
             if (string.IsNullOrEmpty(dir) || !Directory.Exists(dir)) return map;
             foreach (var f in Directory.GetFiles(dir, "*.manifest"))
             {
-                string n = Path.GetFileNameWithoutExtension(f);
+                var n = Path.GetFileNameWithoutExtension(f);
                 var parts = n.Split('_');
                 if (parts.Length >= 2) { map[$"{parts[0]}_{parts[1]}"] = f; map[parts[0]] = f; }
                 else map[n] = f;
@@ -465,11 +464,19 @@ namespace DepotDL.GUI.Services
         {
             try
             {
-                var p = new Process { StartInfo = new ProcessStartInfo
-                    { FileName = "dotnet", Arguments = "--list-runtimes",
-                      UseShellExecute = false, RedirectStandardOutput = true, CreateNoWindow = true } };
+                var p = new Process
+                {
+                    StartInfo = new ProcessStartInfo
+                    {
+                        FileName = "dotnet",
+                        Arguments = "--list-runtimes",
+                        UseShellExecute = false,
+                        RedirectStandardOutput = true,
+                        CreateNoWindow = true
+                    }
+                };
                 p.Start();
-                string o = p.StandardOutput.ReadToEnd(); p.WaitForExit();
+                var o = p.StandardOutput.ReadToEnd(); p.WaitForExit();
                 if (o.Contains("Microsoft.NETCore.App 9.")) return "dotnet";
             }
             catch { }
@@ -482,7 +489,7 @@ namespace DepotDL.GUI.Services
 
         private static string? ResolveDDMod()
         {
-            string b = AppDomain.CurrentDomain.BaseDirectory;
+            var b = AppDomain.CurrentDomain.BaseDirectory;
             string[] c = {
                 Path.Combine(b, "DepotDownloaderMod.dll"),
             };

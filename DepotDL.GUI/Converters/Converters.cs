@@ -1,4 +1,6 @@
-using System;
+// This file is subject to the terms and conditions defined
+// in file 'LICENSE', which is part of this source code package.
+
 using System.Globalization;
 using System.Windows;
 using System.Windows.Data;
@@ -12,7 +14,7 @@ namespace DepotDL.GUI.Converters
         public bool Invert { get; set; }
         public object Convert(object v, Type t, object p, CultureInfo c)
         {
-            bool b = v is bool bv && bv;
+            var b = v is bool bv && bv;
             if (Invert) b = !b;
             return b ? Visibility.Visible : Visibility.Collapsed;
         }
@@ -36,12 +38,12 @@ namespace DepotDL.GUI.Converters
             {
                 return s switch
                 {
-                    DepotStatus.Done     => new SolidColorBrush(Color.FromRgb(92, 139, 92)),
-                    DepotStatus.Failed   => new SolidColorBrush(Color.FromRgb(192, 57, 43)),
+                    DepotStatus.Done => new SolidColorBrush(Color.FromRgb(92, 139, 92)),
+                    DepotStatus.Failed => new SolidColorBrush(Color.FromRgb(192, 57, 43)),
                     DepotStatus.Downloading => new SolidColorBrush(Color.FromRgb(200, 151, 90)),
-                    DepotStatus.Validating  => new SolidColorBrush(Color.FromRgb(107, 93, 79)),
-                    DepotStatus.Cancelled   => new SolidColorBrush(Color.FromRgb(160, 144, 128)),
-                    DepotStatus.Skipped     => new SolidColorBrush(Color.FromRgb(160, 144, 128)),
+                    DepotStatus.Validating => new SolidColorBrush(Color.FromRgb(107, 93, 79)),
+                    DepotStatus.Cancelled => new SolidColorBrush(Color.FromRgb(160, 144, 128)),
+                    DepotStatus.Skipped => new SolidColorBrush(Color.FromRgb(160, 144, 128)),
                     _ => new SolidColorBrush(Color.FromRgb(160, 144, 128))
                 };
             }
@@ -58,16 +60,16 @@ namespace DepotDL.GUI.Converters
             {
                 return s switch
                 {
-                    DepotStatus.Idle         => "Idle",
-                    DepotStatus.Queued       => "Queued",
-                    DepotStatus.Connecting   => "Connecting",
+                    DepotStatus.Idle => "Idle",
+                    DepotStatus.Queued => "Queued",
+                    DepotStatus.Connecting => "Connecting",
                     DepotStatus.PreAllocating => "Pre-Allocating",
-                    DepotStatus.Downloading  => "Downloading",
-                    DepotStatus.Validating   => "Validating",
-                    DepotStatus.Done         => "Complete",
-                    DepotStatus.Failed       => "Failed",
-                    DepotStatus.Cancelled    => "Cancelled",
-                    DepotStatus.Skipped      => "Skipped",
+                    DepotStatus.Downloading => "Downloading",
+                    DepotStatus.Validating => "Validating",
+                    DepotStatus.Done => "Complete",
+                    DepotStatus.Failed => "Failed",
+                    DepotStatus.Cancelled => "Cancelled",
+                    DepotStatus.Skipped => "Skipped",
                     _ => "Unknown"
                 };
             }
@@ -97,8 +99,8 @@ namespace DepotDL.GUI.Converters
         public bool ShowWhenEmpty { get; set; }
         public object Convert(object v, Type t, object p, CultureInfo c)
         {
-            bool empty = string.IsNullOrWhiteSpace(v as string);
-            bool show = ShowWhenEmpty ? empty : !empty;
+            var empty = string.IsNullOrWhiteSpace(v as string);
+            var show = ShowWhenEmpty ? empty : !empty;
             return show ? Visibility.Visible : Visibility.Collapsed;
         }
         public object ConvertBack(object v, Type t, object p, CultureInfo c) => DependencyProperty.UnsetValue;
@@ -108,7 +110,7 @@ namespace DepotDL.GUI.Converters
     {
         public object Convert(object v, Type t, object p, CultureInfo c)
         {
-            bool equal = Equals(v, p) || (v != null && v.ToString() == p?.ToString());
+            var equal = Equals(v, p) || (v != null && v.ToString() == p?.ToString());
             return equal ? Visibility.Visible : Visibility.Collapsed;
         }
         public object ConvertBack(object v, Type t, object p, CultureInfo c) => DependencyProperty.UnsetValue;

@@ -1,21 +1,20 @@
-using System;
+// This file is subject to the terms and conditions defined
+// in file 'LICENSE', which is part of this source code package.
+
 using System.Globalization;
-using System.Linq;
-using System.Net.Http;
 using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using System.Threading.Tasks;
 using DepotDL.CLI.Tui;
 
 namespace DepotDL.CLI.Services
 {
     public sealed class UpdateInfo
     {
-        public bool    UpdateAvailable { get; init; }
-        public string? LatestTag       { get; init; }
-        public string? HtmlUrl         { get; init; }
-        public string? LatestSha       { get; init; }
+        public bool UpdateAvailable { get; init; }
+        public string? LatestTag { get; init; }
+        public string? HtmlUrl { get; init; }
+        public string? LatestSha { get; init; }
     }
 
     internal static class UpdateChecker
@@ -24,11 +23,11 @@ namespace DepotDL.CLI.Services
 
         private static readonly HttpClient Http = new() { Timeout = TimeSpan.FromSeconds(5) };
 
-        private static readonly Lazy<string?>   _currentSha = new(ReadCurrentSha);
-        private static readonly Lazy<DateTime?> _buildTime  = new(ReadBuildTime);
+        private static readonly Lazy<string?> _currentSha = new(ReadCurrentSha);
+        private static readonly Lazy<DateTime?> _buildTime = new(ReadBuildTime);
 
-        public static string?   GetCurrentSha() => _currentSha.Value;
-        public static DateTime? GetBuildTime()  => _buildTime.Value;
+        public static string? GetCurrentSha() => _currentSha.Value;
+        public static DateTime? GetBuildTime() => _buildTime.Value;
 
         private static string? ReadCurrentSha()
         {
@@ -85,7 +84,7 @@ namespace DepotDL.CLI.Services
         {
             if (string.IsNullOrEmpty(session.LastKnownReleaseTag)) return false;
             var buildTime = GetBuildTime();
-            var tagTime   = ParseTagTime(session.LastKnownReleaseTag);
+            var tagTime = ParseTagTime(session.LastKnownReleaseTag);
             if (buildTime != null && tagTime != null)
                 return tagTime > buildTime;
             return false;
@@ -111,7 +110,7 @@ namespace DepotDL.CLI.Services
             var latestSha = parts.Length >= 4 ? parts[^1] : null;
 
             var buildTime = GetBuildTime();
-            var tagTime   = ParseTagTime(release.TagName);
+            var tagTime = ParseTagTime(release.TagName);
             bool updateAvailable;
             if (!string.IsNullOrEmpty(currentSha) && !string.IsNullOrEmpty(latestSha) &&
                 string.Equals(currentSha, latestSha, StringComparison.OrdinalIgnoreCase))
@@ -126,9 +125,9 @@ namespace DepotDL.CLI.Services
             return new UpdateInfo
             {
                 UpdateAvailable = updateAvailable,
-                LatestTag       = release.TagName,
-                HtmlUrl         = release.HtmlUrl ?? BuildReleaseUrl(release.TagName),
-                LatestSha       = latestSha
+                LatestTag = release.TagName,
+                HtmlUrl = release.HtmlUrl ?? BuildReleaseUrl(release.TagName),
+                LatestSha = latestSha
             };
         }
 

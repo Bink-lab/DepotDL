@@ -1,10 +1,9 @@
-using System;
+// This file is subject to the terms and conditions defined
+// in file 'LICENSE', which is part of this source code package.
+
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
-using System.Threading;
-using System.Threading.Tasks;
 using SteamKit2;
 
 namespace DepotDL.GUI.Services

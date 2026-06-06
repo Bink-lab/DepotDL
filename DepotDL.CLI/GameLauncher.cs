@@ -1,10 +1,11 @@
-using System;
-using System.IO;
+// This file is subject to the terms and conditions defined
+// in file 'LICENSE', which is part of this source code package.
+
 using System.Diagnostics;
-using System.Collections.Generic;
-using System.Text.RegularExpressions;
+using System.IO;
 using System.Net.Http;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 
 namespace DepotDL.CLI
 {
@@ -42,7 +43,7 @@ namespace DepotDL.CLI
             {
                 try
                 {
-                    string batPath = Path.Combine(gameDir, "Launch.bat");
+                    var batPath = Path.Combine(gameDir, "Launch.bat");
                     if (File.Exists(batPath)) return batPath;
 
                     var bats = Directory.GetFiles(gameDir, "Launch*.bat", SearchOption.TopDirectoryOnly);
@@ -55,10 +56,10 @@ namespace DepotDL.CLI
             {
                 try
                 {
-                    string shPath = Path.Combine(gameDir, "launch.sh");
+                    var shPath = Path.Combine(gameDir, "launch.sh");
                     if (File.Exists(shPath)) return shPath;
 
-                    string wineShPath = Path.Combine(gameDir, "launch_wine.sh");
+                    var wineShPath = Path.Combine(gameDir, "launch_wine.sh");
                     if (File.Exists(wineShPath)) return wineShPath;
 
                     var shs = Directory.GetFiles(gameDir, "launch*.sh", SearchOption.TopDirectoryOnly);
@@ -74,7 +75,7 @@ namespace DepotDL.CLI
             }
             else
             {
-                string? native = FindMainLinuxBinary(gameDir);
+                var native = FindMainLinuxBinary(gameDir);
                 if (native != null) return native;
 
                 return FindMainExe(gameDir);
@@ -91,11 +92,11 @@ namespace DepotDL.CLI
                 var files = Directory.GetFiles(gameDir, "*.exe", SearchOption.AllDirectories);
                 foreach (var file in files)
                 {
-                    string nameLower = Path.GetFileName(file).ToLowerInvariant();
+                    var nameLower = Path.GetFileName(file).ToLowerInvariant();
                     if (nameLower.EndsWith(".unpacked.exe", StringComparison.OrdinalIgnoreCase))
                         continue;
 
-                    bool skip = false;
+                    var skip = false;
                     foreach (var pattern in ExeSkipPatterns)
                     {
                         if (nameLower.Contains(pattern))
@@ -110,7 +111,7 @@ namespace DepotDL.CLI
                     try
                     {
                         var info = new FileInfo(file);
-                        long size = info.Length;
+                        var size = info.Length;
                         if (size > bestSize)
                         {
                             bestSize = size;
@@ -135,16 +136,16 @@ namespace DepotDL.CLI
                 var files = Directory.GetFiles(gameDir, "*", SearchOption.AllDirectories);
                 foreach (var file in files)
                 {
-                    string ext = Path.GetExtension(file).ToLowerInvariant();
-                    bool skipExt = false;
+                    var ext = Path.GetExtension(file).ToLowerInvariant();
+                    var skipExt = false;
                     foreach (var skip in LinuxSkipExtensions)
                     {
                         if (ext == skip) { skipExt = true; break; }
                     }
                     if (skipExt) continue;
 
-                    string nameLower = Path.GetFileName(file).ToLowerInvariant();
-                    bool skipName = false;
+                    var nameLower = Path.GetFileName(file).ToLowerInvariant();
+                    var skipName = false;
                     foreach (var skip in LinuxSkipPatterns)
                     {
                         if (nameLower.Contains(skip)) { skipName = true; break; }
@@ -156,7 +157,7 @@ namespace DepotDL.CLI
                         var info = new FileInfo(file);
                         using (var fs = new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.Read))
                         {
-                            byte[] magic = new byte[4];
+                            var magic = new byte[4];
                             if (fs.Read(magic, 0, 4) == 4)
                             {
                                 if (magic[0] == 0x7f && magic[1] == 0x45 && magic[2] == 0x4c && magic[3] == 0x46)
@@ -217,29 +218,29 @@ namespace DepotDL.CLI
             if (string.IsNullOrEmpty(gameDir) || !Directory.Exists(gameDir))
                 return false;
 
-            bool isWindows = System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.Windows);
-            string launchScript = OperatingSystem.IsWindows() ? "Launch.bat" : "launch.sh";
-            string launchPath = Path.Combine(gameDir, launchScript);
+            var isWindows = System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.Windows);
+            var launchScript = OperatingSystem.IsWindows() ? "Launch.bat" : "launch.sh";
+            var launchPath = Path.Combine(gameDir, launchScript);
 
             var steamApiFiles = new List<string>();
-            bool scanFailed = false;
+            var scanFailed = false;
             try
             {
                 if (isWindows)
                 {
                     foreach (var f in Directory.GetFiles(gameDir, "*.dll", SearchOption.AllDirectories))
                     {
-                        string fn = Path.GetFileName(f).ToLowerInvariant();
+                        var fn = Path.GetFileName(f).ToLowerInvariant();
                         if (fn == "steam_api.dll" || fn == "steam_api64.dll") steamApiFiles.Add(f);
                     }
                 }
                 else
                 {
-                    string libPattern = OperatingSystem.IsMacOS() ? "*.dylib" : "*.so";
-                    string steamApiLib = OperatingSystem.IsMacOS() ? "libsteam_api.dylib" : "libsteam_api.so";
+                    var libPattern = OperatingSystem.IsMacOS() ? "*.dylib" : "*.so";
+                    var steamApiLib = OperatingSystem.IsMacOS() ? "libsteam_api.dylib" : "libsteam_api.so";
                     foreach (var f in Directory.GetFiles(gameDir, libPattern, SearchOption.AllDirectories))
                     {
-                        string fn = Path.GetFileName(f).ToLowerInvariant();
+                        var fn = Path.GetFileName(f).ToLowerInvariant();
                         if (fn == steamApiLib) steamApiFiles.Add(f);
                     }
                 }
@@ -255,15 +256,15 @@ namespace DepotDL.CLI
                 return false;
             }
 
-            string? primaryFile = steamApiFiles.FirstOrDefault(f => Path.GetFileName(f).ToLowerInvariant() == "steam_api64.dll")
+            var primaryFile = steamApiFiles.FirstOrDefault(f => Path.GetFileName(f).ToLowerInvariant() == "steam_api64.dll")
                                 ?? steamApiFiles.FirstOrDefault();
-            string settingsDir = Path.Combine(primaryFile != null ? Path.GetDirectoryName(primaryFile)! : gameDir, "steam_settings");
+            var settingsDir = Path.Combine(primaryFile != null ? Path.GetDirectoryName(primaryFile)! : gameDir, "steam_settings");
 
             if (File.Exists(launchPath) && Directory.Exists(settingsDir))
             {
-                bool goldbergApplied = steamApiFiles.Any(f =>
+                var goldbergApplied = steamApiFiles.Any(f =>
                 {
-                    string og = Path.Combine(Path.GetDirectoryName(f)!, "OG_" + Path.GetFileName(f));
+                    var og = Path.Combine(Path.GetDirectoryName(f)!, "OG_" + Path.GetFileName(f));
                     if (!File.Exists(og)) return false;
                     try
                     {
@@ -274,16 +275,16 @@ namespace DepotDL.CLI
                 });
                 if (goldbergApplied)
                 {
-                    string achPath = Path.Combine(settingsDir, "achievements.json");
+                    var achPath = Path.Combine(settingsDir, "achievements.json");
                     if (!string.IsNullOrWhiteSpace(steamWebApiKey) && !File.Exists(achPath))
                         FetchAchievementsAndStats(appId, settingsDir, steamWebApiKey, downloadAchievementIcons);
                     return true;
                 }
             }
 
-            string toolsPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "tools");
-            string steamlessExe = Path.Combine(toolsPath, "steamless", "Steamless.CLI.exe");
-            string goldbergDir = Path.Combine(toolsPath, "goldberg");
+            var toolsPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "tools");
+            var steamlessExe = Path.Combine(toolsPath, "steamless", "Steamless.CLI.exe");
+            var goldbergDir = Path.Combine(toolsPath, "goldberg");
 
             if (!Directory.Exists(toolsPath))
             {
@@ -294,11 +295,11 @@ namespace DepotDL.CLI
                     return false;
             }
 
-            bool forceColdClient = false;
+            var forceColdClient = false;
 
             try
             {
-                string url = $"https://store.steampowered.com/api/appdetails?appids={appId}";
+                var url = $"https://store.steampowered.com/api/appdetails?appids={appId}";
                 var response = _apiClient.GetStringAsync(url).GetAwaiter().GetResult();
                 using var doc = JsonDocument.Parse(response);
                 if (doc.RootElement.TryGetProperty(appId, out var appData) && appData.GetProperty("success").GetBoolean())
@@ -306,7 +307,7 @@ namespace DepotDL.CLI
                     var data = appData.GetProperty("data");
                     if (data.TryGetProperty("drm_notice", out var drmNoticeProp))
                     {
-                        string drmNotice = drmNoticeProp.GetString() ?? "";
+                        var drmNotice = drmNoticeProp.GetString() ?? "";
                         if (drmNotice.Contains("denuvo", StringComparison.OrdinalIgnoreCase))
                         {
                             File.WriteAllText(Path.Combine(gameDir, "sff_fix_error.log"), "ABORT: Denuvo DRM detected - cannot be bypassed by Goldberg.");
@@ -319,7 +320,7 @@ namespace DepotDL.CLI
                     }
                     if (data.TryGetProperty("ext_user_account_notice", out var extNoticeProp))
                     {
-                        string extNotice = extNoticeProp.GetString() ?? "";
+                        var extNotice = extNoticeProp.GetString() ?? "";
                         if (!string.IsNullOrEmpty(extNotice))
                         {
                             File.WriteAllText(Path.Combine(gameDir, "sff_fix_error.log"), $"ABORT: Game requires third-party account - may not work: {extNotice}");
@@ -343,25 +344,25 @@ namespace DepotDL.CLI
                         var exeFiles = Directory.GetFiles(gameDir, "*.exe", SearchOption.AllDirectories);
                         foreach (var exe in exeFiles)
                         {
-                            string nameLower = Path.GetFileName(exe).ToLowerInvariant();
+                            var nameLower = Path.GetFileName(exe).ToLowerInvariant();
                             if (nameLower.EndsWith(".unpacked.exe", StringComparison.OrdinalIgnoreCase))
                                 continue;
 
-                            bool skip = false;
+                            var skip = false;
                             foreach (var pattern in ExeSkipPatterns)
                             {
                                 if (nameLower.Contains(pattern)) { skip = true; break; }
                             }
                             if (skip) continue;
 
-                            string unpackedPath1 = Path.Combine(Path.GetDirectoryName(exe)!, Path.GetFileNameWithoutExtension(exe) + ".unpacked.exe");
-                            string unpackedPath2 = exe + ".unpacked.exe";
+                            var unpackedPath1 = Path.Combine(Path.GetDirectoryName(exe)!, Path.GetFileNameWithoutExtension(exe) + ".unpacked.exe");
+                            var unpackedPath2 = exe + ".unpacked.exe";
 
                             if (File.Exists(unpackedPath1)) File.Delete(unpackedPath1);
                             if (File.Exists(unpackedPath2)) File.Delete(unpackedPath2);
 
                             Process? proc = null;
-                            bool success = false;
+                            var success = false;
                             try
                             {
                                 var startInfo = new ProcessStartInfo
@@ -375,7 +376,7 @@ namespace DepotDL.CLI
                                 proc = Process.Start(startInfo);
                                 if (proc != null)
                                 {
-                                    bool exited = proc.WaitForExit(60000); // 60 second timeout
+                                    var exited = proc.WaitForExit(60000); // 60 second timeout
                                     if (!exited)
                                     {
                                         try { proc.Kill(); } catch { }
@@ -408,7 +409,7 @@ namespace DepotDL.CLI
 
                                 if (actualUnpacked != null)
                                 {
-                                    string backupPath = exe + ".steamstub.bak";
+                                    var backupPath = exe + ".steamstub.bak";
                                     if (!File.Exists(backupPath))
                                     {
                                         File.Copy(exe, backupPath, true);
@@ -439,12 +440,12 @@ namespace DepotDL.CLI
                 var dlcList = new List<string>();
                 if (!string.IsNullOrEmpty(luaPath) && File.Exists(luaPath))
                 {
-                    string luaContent = File.ReadAllText(luaPath);
+                    var luaContent = File.ReadAllText(luaPath);
                     var dlcRegex = new Regex(@"\[""(\d{4,})""\]\s*=\s*""([^""]+)""");
                     foreach (Match m in dlcRegex.Matches(luaContent))
                     {
-                        string dlcId = m.Groups[1].Value;
-                        string dlcName = m.Groups[2].Value;
+                        var dlcId = m.Groups[1].Value;
+                        var dlcName = m.Groups[2].Value;
                         if (dlcId == appId) continue;
                         dlcList.Add($"{dlcId}={dlcName}");
                     }
@@ -462,7 +463,7 @@ namespace DepotDL.CLI
                 };
                 File.WriteAllLines(Path.Combine(settingsDir, "configs.app.ini"), configsAppLines);
 
-                string configsMain = @"[main::general]
+                var configsMain = @"[main::general]
 new_app_ticket=1
 gc_token=1
 block_unknown_clients=0
@@ -490,13 +491,13 @@ force_steamhttp_success=0
 download_steamhttp_requests=0";
                 File.WriteAllText(Path.Combine(settingsDir, "configs.main.ini"), configsMain);
 
-                string configsOverlay = @"[overlay::general]
+                var configsOverlay = @"[overlay::general]
 enable_experimental_overlay=1";
                 File.WriteAllText(Path.Combine(settingsDir, "configs.overlay.ini"), configsOverlay);
 
                 FetchAchievementsAndStats(appId, settingsDir, steamWebApiKey, downloadAchievementIcons);
 
-                string languages = @"english
+                var languages = @"english
 french
 italian
 german
@@ -512,9 +513,9 @@ latam
 tchinese";
                 File.WriteAllText(Path.Combine(settingsDir, "supported_languages.txt"), languages);
 
-                string controllerDir = Path.Combine(settingsDir, "controller");
+                var controllerDir = Path.Combine(settingsDir, "controller");
                 Directory.CreateDirectory(controllerDir);
-                string controls = @"AxisL=LJOY=joystick_move
+                var controls = @"AxisL=LJOY=joystick_move
 AxisR=RJOY=joystick_move
 AnalogL=LTRIGGER=trigger
 AnalogR=RTRIGGER=trigger
@@ -534,13 +535,13 @@ LTrigTop=LBUMPER
 RTrigTop=RBUMPER";
                 File.WriteAllText(Path.Combine(controllerDir, "controls.txt"), controls);
 
-                string appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-                string gseSaves = Path.Combine(appData, "GSE Saves");
-                string gseSettings = Path.Combine(gseSaves, "settings");
+                var appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+                var gseSaves = Path.Combine(appData, "GSE Saves");
+                var gseSettings = Path.Combine(gseSaves, "settings");
                 Directory.CreateDirectory(gseSettings);
                 Directory.CreateDirectory(Path.Combine(gseSaves, appId));
 
-                string configsUser = @"[user::general]
+                var configsUser = @"[user::general]
 account_name=Player
 account_steamid=76561198000000001
 language=english
@@ -556,7 +557,7 @@ saves_folder_name=GSE Saves";
                 return false;
             }
 
-            bool replaced = false;
+            var replaced = false;
 
             try
             {
@@ -564,9 +565,9 @@ saves_folder_name=GSE Saves";
                 {
                     foreach (var dll in steamApiFiles)
                     {
-                        string nameLower = Path.GetFileName(dll).ToLowerInvariant();
+                        var nameLower = Path.GetFileName(dll).ToLowerInvariant();
 
-                        string backupPath = Path.Combine(Path.GetDirectoryName(dll)!, "OG_" + Path.GetFileName(dll));
+                        var backupPath = Path.Combine(Path.GetDirectoryName(dll)!, "OG_" + Path.GetFileName(dll));
                         if (File.Exists(backupPath))
                         {
                             GenerateInterfacesFile(backupPath, settingsDir);
@@ -577,7 +578,7 @@ saves_folder_name=GSE Saves";
                             File.Copy(dll, backupPath, true);
                         }
 
-                        string sourceDll = Path.Combine(goldbergDir, nameLower);
+                        var sourceDll = Path.Combine(goldbergDir, nameLower);
                         if (File.Exists(sourceDll))
                         {
                             File.Copy(sourceDll, dll, true);
@@ -586,13 +587,13 @@ saves_folder_name=GSE Saves";
 
                         if (forceColdClient)
                         {
-                            string clientName = nameLower == "steam_api.dll" ? "steamclient.dll" : "steamclient64.dll";
-                            string loaderName = nameLower == "steam_api.dll" ? "steamclient_loader_x32.exe" : "steamclient_loader_x64.exe";
+                            var clientName = nameLower == "steam_api.dll" ? "steamclient.dll" : "steamclient64.dll";
+                            var loaderName = nameLower == "steam_api.dll" ? "steamclient_loader_x32.exe" : "steamclient_loader_x64.exe";
 
-                            string sourceClient = Path.Combine(goldbergDir, clientName);
-                            string sourceLoader = Path.Combine(goldbergDir, loaderName);
+                            var sourceClient = Path.Combine(goldbergDir, clientName);
+                            var sourceLoader = Path.Combine(goldbergDir, loaderName);
 
-                            string dllDir = Path.GetDirectoryName(dll)!;
+                            var dllDir = Path.GetDirectoryName(dll)!;
                             if (File.Exists(sourceClient)) File.Copy(sourceClient, Path.Combine(dllDir, clientName), true);
                             if (File.Exists(sourceLoader)) File.Copy(sourceLoader, Path.Combine(dllDir, loaderName), true);
                         }
@@ -602,9 +603,9 @@ saves_folder_name=GSE Saves";
                 {
                     foreach (var so in steamApiFiles)
                     {
-                        string nameLower = Path.GetFileName(so).ToLowerInvariant();
+                        var nameLower = Path.GetFileName(so).ToLowerInvariant();
 
-                        string backupPath = Path.Combine(Path.GetDirectoryName(so)!, "OG_" + Path.GetFileName(so));
+                        var backupPath = Path.Combine(Path.GetDirectoryName(so)!, "OG_" + Path.GetFileName(so));
                         if (File.Exists(backupPath))
                         {
                             GenerateInterfacesFile(backupPath, settingsDir);
@@ -615,7 +616,7 @@ saves_folder_name=GSE Saves";
                             File.Copy(so, backupPath, true);
                         }
 
-                        string sourceSo = Path.Combine(goldbergDir, nameLower);
+                        var sourceSo = Path.Combine(goldbergDir, nameLower);
                         if (File.Exists(sourceSo))
                         {
                             File.Copy(sourceSo, so, true);
@@ -625,17 +626,17 @@ saves_folder_name=GSE Saves";
                         if (forceColdClient)
                         {
                             // Linux cold client files (adjust names as needed for Goldberg Linux distribution)
-                            string clientName = "libsteamclient.so";
-                            string loaderName = "steamclient_loader";
+                            var clientName = "libsteamclient.so";
+                            var loaderName = "steamclient_loader";
 
-                            string sourceClient = Path.Combine(goldbergDir, clientName);
-                            string sourceLoader = Path.Combine(goldbergDir, loaderName);
+                            var sourceClient = Path.Combine(goldbergDir, clientName);
+                            var sourceLoader = Path.Combine(goldbergDir, loaderName);
 
-                            string soDir = Path.GetDirectoryName(so)!;
+                            var soDir = Path.GetDirectoryName(so)!;
                             if (File.Exists(sourceClient)) File.Copy(sourceClient, Path.Combine(soDir, clientName), true);
                             if (File.Exists(sourceLoader))
                             {
-                                string destLoader = Path.Combine(soDir, loaderName);
+                                var destLoader = Path.Combine(soDir, loaderName);
                                 File.Copy(sourceLoader, destLoader, true);
                                 try
                                 {
@@ -662,43 +663,43 @@ saves_folder_name=GSE Saves";
 
             if (!replaced)
             {
-                string apiFileType = isWindows ? "steam_api DLLs" : OperatingSystem.IsMacOS() ? "libsteam_api.dylib" : "libsteam_api.so";
+                var apiFileType = isWindows ? "steam_api DLLs" : OperatingSystem.IsMacOS() ? "libsteam_api.dylib" : "libsteam_api.so";
                 File.WriteAllText(Path.Combine(gameDir, "sff_fix_error.log"), $"No {apiFileType} found to replace.");
                 return false;
             }
 
             try
             {
-                string? mainExe = FindMainExe(gameDir);
+                var mainExe = FindMainExe(gameDir);
                 if (!string.IsNullOrEmpty(mainExe))
                 {
-                    string exeRel = Path.GetRelativePath(gameDir, mainExe);
-                    bool isWindowsPE = mainExe.EndsWith(".exe", StringComparison.OrdinalIgnoreCase);
+                    var exeRel = Path.GetRelativePath(gameDir, mainExe);
+                    var isWindowsPE = mainExe.EndsWith(".exe", StringComparison.OrdinalIgnoreCase);
 
                     if (forceColdClient)
                     {
-                        bool is64 = exeRel.EndsWith("64.exe", StringComparison.OrdinalIgnoreCase) || mainExe.Contains("x64", StringComparison.OrdinalIgnoreCase) || mainExe.Contains("Win64", StringComparison.OrdinalIgnoreCase);
-                        string loader = isWindows ? (is64 ? "steamclient_loader_x64.exe" : "steamclient_loader_x32.exe") : "steamclient_loader";
+                        var is64 = exeRel.EndsWith("64.exe", StringComparison.OrdinalIgnoreCase) || mainExe.Contains("x64", StringComparison.OrdinalIgnoreCase) || mainExe.Contains("Win64", StringComparison.OrdinalIgnoreCase);
+                        var loader = isWindows ? (is64 ? "steamclient_loader_x64.exe" : "steamclient_loader_x32.exe") : "steamclient_loader";
                         var loaders = Directory.GetFiles(gameDir, loader, SearchOption.AllDirectories);
                         if (loaders.Length > 0)
                         {
-                            string loaderRel = Path.GetRelativePath(gameDir, loaders[0]);
+                            var loaderRel = Path.GetRelativePath(gameDir, loaders[0]);
                             if (OperatingSystem.IsWindows())
                             {
-                                string content = $"@echo off\ncd /d \"%~dp0{Path.GetDirectoryName(loaderRel)}\"\nstart \"\" \"{Path.GetFileName(loaderRel)}\"\n";
+                                var content = $"@echo off\ncd /d \"%~dp0{Path.GetDirectoryName(loaderRel)}\"\nstart \"\" \"{Path.GetFileName(loaderRel)}\"\n";
                                 File.WriteAllText(launchPath, content);
                             }
                             else
                             {
-                                bool loaderIsWindowsPE = loaderRel.EndsWith(".exe", StringComparison.OrdinalIgnoreCase);
+                                var loaderIsWindowsPE = loaderRel.EndsWith(".exe", StringComparison.OrdinalIgnoreCase);
                                 if (loaderIsWindowsPE)
                                 {
-                                    string content = $"#!/bin/sh\ncd \"$(dirname \"$0\")/{Path.GetDirectoryName(loaderRel)}\"\nexec wine \"./{Path.GetFileName(loaderRel)}\" \"$@\"\n";
+                                    var content = $"#!/bin/sh\ncd \"$(dirname \"$0\")/{Path.GetDirectoryName(loaderRel)}\"\nexec wine \"./{Path.GetFileName(loaderRel)}\" \"$@\"\n";
                                     File.WriteAllText(launchPath, content);
                                 }
                                 else
                                 {
-                                    string content = $"#!/bin/sh\ncd \"$(dirname \"$0\")/{Path.GetDirectoryName(loaderRel)}\"\nexec \"./{Path.GetFileName(loaderRel)}\" \"$@\"\n";
+                                    var content = $"#!/bin/sh\ncd \"$(dirname \"$0\")/{Path.GetDirectoryName(loaderRel)}\"\nexec \"./{Path.GetFileName(loaderRel)}\" \"$@\"\n";
                                     File.WriteAllText(launchPath, content);
                                 }
                             }
@@ -708,19 +709,19 @@ saves_folder_name=GSE Saves";
                     {
                         if (OperatingSystem.IsWindows())
                         {
-                            string content = $"@echo off\ncd /d \"%~dp0\"\nstart \"\" \"{exeRel}\"\n";
+                            var content = $"@echo off\ncd /d \"%~dp0\"\nstart \"\" \"{exeRel}\"\n";
                             File.WriteAllText(launchPath, content);
                         }
                         else
                         {
                             if (isWindowsPE)
                             {
-                                string content = $"#!/bin/sh\ncd \"$(dirname \"$0\")\"\nexec wine \"./{exeRel}\" \"$@\"\n";
+                                var content = $"#!/bin/sh\ncd \"$(dirname \"$0\")\"\nexec wine \"./{exeRel}\" \"$@\"\n";
                                 File.WriteAllText(launchPath, content);
                             }
                             else
                             {
-                                string content = $"#!/bin/sh\ncd \"$(dirname \"$0\")\"\nexec \"./{exeRel}\" \"$@\"\n";
+                                var content = $"#!/bin/sh\ncd \"$(dirname \"$0\")\"\nexec \"./{exeRel}\" \"$@\"\n";
                                 File.WriteAllText(launchPath, content);
                             }
                         }
@@ -736,8 +737,8 @@ saves_folder_name=GSE Saves";
         {
             try
             {
-                byte[] data = File.ReadAllBytes(dllPath);
-                string content = System.Text.Encoding.Latin1.GetString(data);
+                var data = File.ReadAllBytes(dllPath);
+                var content = System.Text.Encoding.Latin1.GetString(data);
 
                 var matches = new HashSet<string>();
                 var interfaceRegex = new Regex(
@@ -752,7 +753,7 @@ saves_folder_name=GSE Saves";
                 {
                     var list = new List<string>(matches);
                     list.Sort();
-                    string outPath = Path.Combine(settingsDir, "steam_interfaces.txt");
+                    var outPath = Path.Combine(settingsDir, "steam_interfaces.txt");
                     File.WriteAllLines(outPath, list);
                 }
             }
@@ -765,8 +766,8 @@ saves_folder_name=GSE Saves";
                 return;
             try
             {
-                string apiKey = userKey.Trim();
-                string url = $"https://api.steampowered.com/ISteamUserStats/GetSchemaForGame/v2/?key={apiKey}&appid={appId}&l=english";
+                var apiKey = userKey.Trim();
+                var url = $"https://api.steampowered.com/ISteamUserStats/GetSchemaForGame/v2/?key={apiKey}&appid={appId}&l=english";
                 var response = _apiClient.GetStringAsync(url).GetAwaiter().GetResult();
                 using var doc = JsonDocument.Parse(response);
                 if (doc.RootElement.TryGetProperty("game", out var game) &&
@@ -818,7 +819,7 @@ saves_folder_name=GSE Saves";
                             if (downloadAchievementIcons)
                             {
                                 // Collect icon URLs for downloading; queue them keyed by achievement name
-                                string? achName = dict.TryGetValue("name", out var n) ? n as string : null;
+                                var achName = dict.TryGetValue("name", out var n) ? n as string : null;
                                 if (!string.IsNullOrEmpty(achName))
                                 {
                                     if (dict.TryGetValue("icon", out var iconVal) && iconVal is string iconUrl && !string.IsNullOrEmpty(iconUrl))
@@ -834,7 +835,7 @@ saves_folder_name=GSE Saves";
                         // Download images concurrently (up to 8 parallel), then rewrite icon paths to local relative paths
                         if (downloadAchievementIcons && downloadTasks.Count > 0)
                         {
-                            string imagesDir = Path.Combine(settingsDir, "achievement_images");
+                            var imagesDir = Path.Combine(settingsDir, "achievement_images");
                             Directory.CreateDirectory(imagesDir);
 
                             // Track which files were successfully downloaded
@@ -842,13 +843,13 @@ saves_folder_name=GSE Saves";
 
                             Parallel.ForEachAsync(downloadTasks, new ParallelOptions { MaxDegreeOfParallelism = 8 }, async (task, ct) =>
                             {
-                                string filename = task.IsGray
+                                var filename = task.IsGray
                                     ? $"{task.Name}_gray.jpg"
                                     : $"{task.Name}.jpg";
-                                string destPath = Path.Combine(imagesDir, filename);
+                                var destPath = Path.Combine(imagesDir, filename);
                                 try
                                 {
-                                    byte[] bytes = await _dlClient.GetByteArrayAsync(task.Url, ct).ConfigureAwait(false);
+                                    var bytes = await _dlClient.GetByteArrayAsync(task.Url, ct).ConfigureAwait(false);
                                     await File.WriteAllBytesAsync(destPath, bytes, ct).ConfigureAwait(false);
                                     downloaded[filename] = true;
                                 }
@@ -858,11 +859,11 @@ saves_folder_name=GSE Saves";
                             // Rewrite icon/icongray fields in achList to local relative paths where downloaded
                             foreach (var dict in achList)
                             {
-                                string? achName = dict.TryGetValue("name", out var n) ? n as string : null;
+                                var achName = dict.TryGetValue("name", out var n) ? n as string : null;
                                 if (string.IsNullOrEmpty(achName)) continue;
 
-                                string normalFile = $"{achName}.jpg";
-                                string grayFile   = $"{achName}_gray.jpg";
+                                var normalFile = $"{achName}.jpg";
+                                var grayFile = $"{achName}_gray.jpg";
 
                                 if (downloaded.ContainsKey(normalFile))
                                     dict["icon"] = $"achievement_images/{normalFile}";
@@ -874,7 +875,7 @@ saves_folder_name=GSE Saves";
 
                         if (achList.Count > 0)
                         {
-                            string achPath = Path.Combine(settingsDir, "achievements.json");
+                            var achPath = Path.Combine(settingsDir, "achievements.json");
                             var options = new JsonSerializerOptions { WriteIndented = true };
                             File.WriteAllText(achPath, JsonSerializer.Serialize(achList, options));
                         }
@@ -886,16 +887,16 @@ saves_folder_name=GSE Saves";
                         foreach (var stat in stats.EnumerateArray())
                         {
                             var dict = new Dictionary<string, string>();
-                            string name = "";
+                            var name = "";
                             if (stat.TryGetProperty("name", out var nameProp))
                                 name = nameProp.GetString() ?? "";
 
-                            string type = "int";
+                            var type = "int";
                             if (stat.TryGetProperty("type", out var typeProp))
                             {
                                 if (typeProp.ValueKind == JsonValueKind.Number)
                                 {
-                                    int typeVal = typeProp.GetInt32();
+                                    var typeVal = typeProp.GetInt32();
                                     type = typeVal switch
                                     {
                                         1 => "int",
@@ -910,7 +911,7 @@ saves_folder_name=GSE Saves";
                                 }
                             }
 
-                            string defVal = "0";
+                            var defVal = "0";
                             if (stat.TryGetProperty("defaultvalue", out var defProp))
                             {
                                 if (defProp.ValueKind == JsonValueKind.Number)
@@ -928,7 +929,7 @@ saves_folder_name=GSE Saves";
 
                         if (statsList.Count > 0)
                         {
-                            string statsPath = Path.Combine(settingsDir, "stats.json");
+                            var statsPath = Path.Combine(settingsDir, "stats.json");
                             var options = new JsonSerializerOptions { WriteIndented = true };
                             File.WriteAllText(statsPath, JsonSerializer.Serialize(statsList, options));
                         }

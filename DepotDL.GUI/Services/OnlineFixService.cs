@@ -1,11 +1,9 @@
-using System;
-using System.Collections.Generic;
+// This file is subject to the terms and conditions defined
+// in file 'LICENSE', which is part of this source code package.
+
 using System.IO;
-using System.Linq;
 using System.Net.Http;
 using System.Text.RegularExpressions;
-using System.Threading;
-using System.Threading.Tasks;
 using PuppeteerSharp;
 using SharpCompress.Archives;
 using SharpCompress.Common;
@@ -30,7 +28,7 @@ namespace DepotDL.GUI.Services
 
         private static void Log(string message)
         {
-            string line = $"[{DateTime.Now:HH:mm:ss.fff}] {message}";
+            var line = $"[{DateTime.Now:HH:mm:ss.fff}] {message}";
             lock (_logLock)
             {
                 try
@@ -84,12 +82,12 @@ namespace DepotDL.GUI.Services
 
             foreach (var og in ogFiles)
             {
-                string dir = Path.GetDirectoryName(og)!;
-                string orig = Path.Combine(dir, Path.GetFileName(og)[3..]);
+                var dir = Path.GetDirectoryName(og)!;
+                var orig = Path.Combine(dir, Path.GetFileName(og)[3..]);
                 try { File.Copy(og, orig, true); File.Delete(og); } catch { }
             }
 
-            string settingsDir = Path.Combine(gameDir, "steam_settings");
+            var settingsDir = Path.Combine(gameDir, "steam_settings");
             if (Directory.Exists(settingsDir))
                 try { Directory.Delete(settingsDir, true); } catch { }
 
@@ -98,7 +96,7 @@ namespace DepotDL.GUI.Services
                 "steamclient_loader_x32.exe", "steamclient_loader_x64.exe",
                 "Launch.bat", "launch.sh"
             };
-            foreach (string name in artifacts)
+            foreach (var name in artifacts)
             {
                 try
                 {
@@ -134,7 +132,7 @@ namespace DepotDL.GUI.Services
             Log($"=== ApplyAsync START: game=\"{gameName}\" dir=\"{gameDir}\" ===");
             string? archiveUrl = null;
             var rawBrowserCookies = new List<(string Name, string Value)>();
-            string userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36";
+            var userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36";
             string? btnHref = null;
 
             try
@@ -162,8 +160,8 @@ namespace DepotDL.GUI.Services
 
                 // Search
                 progress?.Report($"Searching online-fix.me for \"{gameName}\"...");
-                string encoded = Uri.EscapeDataString(gameName);
-                string searchUrl = $"{OnlineFixBase}/index.php?do=search&subaction=search&story={encoded}";
+                var encoded = Uri.EscapeDataString(gameName);
+                var searchUrl = $"{OnlineFixBase}/index.php?do=search&subaction=search&story={encoded}";
                 Log($"Search URL: {searchUrl}");
                 await page.GoToAsync(searchUrl,
                     new NavigationOptions { WaitUntil = new[] { WaitUntilNavigation.DOMContentLoaded }, Timeout = 20000 });
@@ -185,13 +183,13 @@ namespace DepotDL.GUI.Services
                     if (anchors != null)
                     {
                         Log($"Search results: {anchors.Length} anchor(s) with /games/ href");
-                        string lowerGame = gameName.ToLowerInvariant();
+                        var lowerGame = gameName.ToLowerInvariant();
                         foreach (var a in anchors)
                         {
-                            string text = a[0].ToLowerInvariant();
-                            string href = a[1];
+                            var text = a[0].ToLowerInvariant();
+                            var href = a[1];
                             if (string.IsNullOrEmpty(text) || string.IsNullOrEmpty(href)) continue;
-                            double ratio = ComputeRatio(lowerGame, text);
+                            var ratio = ComputeRatio(lowerGame, text);
                             Log($"  candidate: ratio={ratio:P0} text=\"{text}\" href={href}");
                             if (ratio > bestRatio) { bestRatio = ratio; bestHref = href; }
                         }
@@ -211,7 +209,7 @@ namespace DepotDL.GUI.Services
                 ct.ThrowIfCancellationRequested();
 
                 // Login if form is present
-                bool loginPresent = false;
+                var loginPresent = false;
                 try
                 {
                     loginPresent = await page.EvaluateFunctionAsync<bool>(
@@ -256,7 +254,7 @@ namespace DepotDL.GUI.Services
                 if (string.IsNullOrEmpty(btnHref))
                     return (false, "Could not find the OnlineFix download button on the game page.");
 
-                string uploadsBase = "https://uploads.online-fix.me";
+                var uploadsBase = "https://uploads.online-fix.me";
                 try
                 {
                     var pageCookies = await page.GetCookiesAsync(OnlineFixBase);
@@ -281,7 +279,7 @@ namespace DepotDL.GUI.Services
                     Log($"Browser cookies for {uploadsBase}: {uploadsCookies.Length} cookie(s): {string.Join(", ", uploadsCookies.Select(c => c.Name))}");
                     foreach (var c in uploadsCookies)
                     {
-                        int idx = rawBrowserCookies.FindIndex(x => x.Name == c.Name);
+                        var idx = rawBrowserCookies.FindIndex(x => x.Name == c.Name);
                         if (idx >= 0) rawBrowserCookies[idx] = (c.Name, c.Value);
                         else rawBrowserCookies.Add((c.Name, c.Value));
                     }
@@ -293,23 +291,23 @@ namespace DepotDL.GUI.Services
                 using var navHttp = new HttpClient(navHandler) { Timeout = TimeSpan.FromSeconds(30) };
                 navHttp.DefaultRequestHeaders.TryAddWithoutValidation("User-Agent", userAgent);
                 navHttp.DefaultRequestHeaders.TryAddWithoutValidation("Referer", OnlineFixBase + "/");
-                string initCookieHeader = string.Join("; ", rawBrowserCookies.Select(c => $"{c.Name}={c.Value}"));
+                var initCookieHeader = string.Join("; ", rawBrowserCookies.Select(c => $"{c.Name}={c.Value}"));
                 if (!string.IsNullOrEmpty(initCookieHeader))
                     navHttp.DefaultRequestHeaders.TryAddWithoutValidation("Cookie", initCookieHeader);
 
                 Log($"HttpClient path: GET {btnHref}");
-                for (int attempt = 0; attempt < 3 && archiveUrl == null; attempt++)
+                for (var attempt = 0; attempt < 3 && archiveUrl == null; attempt++)
                 {
                     ct.ThrowIfCancellationRequested();
                     if (attempt > 0) await Task.Delay(3000, ct);
                     try
                     {
                         using var resp = await navHttp.GetAsync(btnHref, HttpCompletionOption.ResponseHeadersRead, ct);
-                        string httpFinalUrl = resp.RequestMessage?.RequestUri?.AbsoluteUri ?? btnHref;
+                        var httpFinalUrl = resp.RequestMessage?.RequestUri?.AbsoluteUri ?? btnHref;
                         Log($"  attempt {attempt + 1}: status={(int)resp.StatusCode} finalUrl={httpFinalUrl}");
                         if (!resp.IsSuccessStatusCode) continue;
 
-                        string html = await resp.Content.ReadAsStringAsync(ct);
+                        var html = await resp.Content.ReadAsStringAsync(ct);
                         Log($"  response body length={html.Length} chars");
 
                         var subdirs = Regex.Matches(html, @"href=""([^""]+/)""")
@@ -324,12 +322,12 @@ namespace DepotDL.GUI.Services
                             ct.ThrowIfCancellationRequested();
                             try
                             {
-                                string subUrl = new Uri(new Uri(httpFinalUrl), sub).AbsoluteUri;
+                                var subUrl = new Uri(new Uri(httpFinalUrl), sub).AbsoluteUri;
                                 Log($"  scanning subdir: {subUrl}");
                                 using var subResp = await navHttp.GetAsync(subUrl, ct);
                                 Log($"  subdir status={(int)subResp.StatusCode}");
                                 MergeSetCookieHeaders(subResp, rawBrowserCookies);
-                                string subHtml = await subResp.Content.ReadAsStringAsync(ct);
+                                var subHtml = await subResp.Content.ReadAsStringAsync(ct);
                                 archiveUrl = FindBestArchive(subHtml, subUrl);
                                 Log($"  subdir FindBestArchive: {archiveUrl ?? "(null)"}");
                                 if (archiveUrl != null) break;
@@ -364,11 +362,11 @@ namespace DepotDL.GUI.Services
                         });
                         ct.ThrowIfCancellationRequested();
 
-                        string bFinalUrl = page.Url;
+                        var bFinalUrl = page.Url;
                         Log($"Browser fallback landed on: {bFinalUrl}");
                         if (bFinalUrl.Contains("uploads.online-fix.me", StringComparison.OrdinalIgnoreCase))
                         {
-                            string bHtml = await page.GetContentAsync();
+                            var bHtml = await page.GetContentAsync();
                             Log($"Browser fallback page body length={bHtml.Length}");
                             try
                             {
@@ -376,7 +374,7 @@ namespace DepotDL.GUI.Services
                                 Log($"Browser uploads cookies: {uc.Length} cookie(s): {string.Join(", ", uc.Select(c => c.Name))}");
                                 foreach (var c in uc)
                                 {
-                                    int idx = rawBrowserCookies.FindIndex(x => x.Name == c.Name);
+                                    var idx = rawBrowserCookies.FindIndex(x => x.Name == c.Name);
                                     if (idx >= 0) rawBrowserCookies[idx] = (c.Name, c.Value);
                                     else rawBrowserCookies.Add((c.Name, c.Value));
                                 }
@@ -392,14 +390,14 @@ namespace DepotDL.GUI.Services
                                 ct.ThrowIfCancellationRequested();
                                 try
                                 {
-                                    string subUrl = new Uri(new Uri(bFinalUrl), sub).AbsoluteUri;
+                                    var subUrl = new Uri(new Uri(bFinalUrl), sub).AbsoluteUri;
                                     Log($"Browser fallback scanning subdir: {subUrl}");
                                     await page.GoToAsync(subUrl, new NavigationOptions
                                     {
                                         WaitUntil = new[] { WaitUntilNavigation.DOMContentLoaded },
                                         Timeout = 15000
                                     });
-                                    string subHtml = await page.GetContentAsync();
+                                    var subHtml = await page.GetContentAsync();
                                     archiveUrl = FindBestArchive(subHtml, subUrl);
                                     Log($"Browser fallback subdir FindBestArchive: {archiveUrl ?? "(null)"}");
                                     if (archiveUrl != null) break;
@@ -433,7 +431,7 @@ namespace DepotDL.GUI.Services
             ct.ThrowIfCancellationRequested();
 
             // Download archive — separate client so Timeout can be set freely
-            string tempFile = Path.Combine(Path.GetTempPath(), $"onlinefix_{Guid.NewGuid():N}.rar");
+            var tempFile = Path.Combine(Path.GetTempPath(), $"onlinefix_{Guid.NewGuid():N}.rar");
             try
             {
                 progress?.Report("Downloading fix archive...");
@@ -441,14 +439,14 @@ namespace DepotDL.GUI.Services
                 using var dlHttp = new HttpClient(dlHandler) { Timeout = Timeout.InfiniteTimeSpan };
                 dlHttp.DefaultRequestHeaders.TryAddWithoutValidation("User-Agent", userAgent);
                 dlHttp.DefaultRequestHeaders.TryAddWithoutValidation("Referer", btnHref);
-                string cookieHeader = string.Join("; ", rawBrowserCookies.Select(c => $"{c.Name}={c.Value}"));
+                var cookieHeader = string.Join("; ", rawBrowserCookies.Select(c => $"{c.Name}={c.Value}"));
                 if (!string.IsNullOrEmpty(cookieHeader))
                     dlHttp.DefaultRequestHeaders.TryAddWithoutValidation("Cookie", cookieHeader);
                 Log($"dl Cookie header: {cookieHeader}");
 
                 Log($"Downloading: GET {archiveUrl}");
                 HttpResponseMessage? dlResp = null;
-                for (int dlAttempt = 0; dlAttempt < 3; dlAttempt++)
+                for (var dlAttempt = 0; dlAttempt < 3; dlAttempt++)
                 {
                     if (dlAttempt > 0)
                     {
@@ -468,11 +466,11 @@ namespace DepotDL.GUI.Services
                 }
                 using var _ = dlResp!;
 
-                long total = dlResp!.Content.Headers.ContentLength ?? 0;
+                var total = dlResp!.Content.Headers.ContentLength ?? 0;
                 long downloaded = 0;
                 await using var fs = File.Create(tempFile);
                 await using var stream = await dlResp.Content.ReadAsStreamAsync(ct);
-                byte[] buf = new byte[1024 * 1024];
+                var buf = new byte[1024 * 1024];
                 int read;
                 while ((read = await stream.ReadAsync(buf, ct)) > 0)
                 {
@@ -497,11 +495,11 @@ namespace DepotDL.GUI.Services
 
             // Extract archive
             progress?.Report("Extracting fix...");
-            string tempExtractDir = Path.Combine(Path.GetTempPath(), $"onlinefix_{Guid.NewGuid():N}");
+            var tempExtractDir = Path.Combine(Path.GetTempPath(), $"onlinefix_{Guid.NewGuid():N}");
             try
             {
                 Directory.CreateDirectory(tempExtractDir);
-                string extractRoot = Path.GetFullPath(tempExtractDir);
+                var extractRoot = Path.GetFullPath(tempExtractDir);
                 using var archive = ArchiveFactory.Open(tempFile, new SharpCompress.Readers.ReaderOptions
                 {
                     Password = ArchivePassword,
@@ -509,7 +507,7 @@ namespace DepotDL.GUI.Services
                 });
                 foreach (var entry in archive.Entries.Where(e => !e.IsDirectory))
                 {
-                    string destPath = Path.GetFullPath(Path.Combine(extractRoot, entry.Key ?? ""));
+                    var destPath = Path.GetFullPath(Path.Combine(extractRoot, entry.Key ?? ""));
                     if (!destPath.StartsWith(extractRoot, StringComparison.OrdinalIgnoreCase)) continue;
                     entry.WriteToDirectory(extractRoot, new ExtractionOptions
                     {
@@ -557,23 +555,23 @@ namespace DepotDL.GUI.Services
 
         public static void Revert(string gameDir)
         {
-            string markerPath = Path.Combine(gameDir, MarkerFileName);
+            var markerPath = Path.Combine(gameDir, MarkerFileName);
             try
             {
                 var lines = File.ReadAllLines(markerPath);
                 foreach (var line in lines.Skip(1))
                 {
                     if (string.IsNullOrWhiteSpace(line) || line.Length < 2) continue;
-                    char kind = line[0];
-                    string rel = line[1..];
+                    var kind = line[0];
+                    var rel = line[1..];
                     if (kind == '+')
                     {
                         TryDelete(Path.Combine(gameDir, rel));
                     }
                     else if (kind == '~')
                     {
-                        string dst = Path.Combine(gameDir, rel);
-                        string bak = dst + ".bak";
+                        var dst = Path.Combine(gameDir, rel);
+                        var bak = dst + ".bak";
                         try { if (File.Exists(bak)) { File.Copy(bak, dst, true); File.Delete(bak); } } catch { }
                     }
                 }
@@ -587,15 +585,15 @@ namespace DepotDL.GUI.Services
         private static string? FindBestArchive(string html, string baseUrl)
         {
             string? best = null;
-            int bestScore = 0;
+            var bestScore = 0;
             foreach (Match m in Regex.Matches(html, @"href=""([^""]+\.(?:rar|zip|7z))""", RegexOptions.IgnoreCase))
             {
-                string href = m.Groups[1].Value;
-                string abs = href.StartsWith("http", StringComparison.OrdinalIgnoreCase)
+                var href = m.Groups[1].Value;
+                var abs = href.StartsWith("http", StringComparison.OrdinalIgnoreCase)
                     ? href
                     : new Uri(new Uri(baseUrl), href).AbsoluteUri;
-                string lower = Uri.UnescapeDataString(abs).ToLowerInvariant();
-                int score = 0;
+                var lower = Uri.UnescapeDataString(abs).ToLowerInvariant();
+                var score = 0;
                 if (lower.Contains("fix")) score += 10;
                 if (lower.Contains("repair")) score += 10;
                 if (lower.Contains("generic")) score += 5;
@@ -610,12 +608,12 @@ namespace DepotDL.GUI.Services
             var backedUp = new List<string>();
             foreach (var srcFile in Directory.GetFiles(srcDir, "*", SearchOption.AllDirectories))
             {
-                string rel = Path.GetRelativePath(srcDir, srcFile);
-                string dst = Path.Combine(dstDir, rel);
+                var rel = Path.GetRelativePath(srcDir, srcFile);
+                var dst = Path.Combine(dstDir, rel);
                 Directory.CreateDirectory(Path.GetDirectoryName(dst)!);
                 if (File.Exists(dst))
                 {
-                    string bak = dst + ".bak";
+                    var bak = dst + ".bak";
                     if (!File.Exists(bak))
                         File.Copy(dst, bak, false);
                     backedUp.Add(rel);
@@ -650,18 +648,18 @@ namespace DepotDL.GUI.Services
                 return 0.6 + 0.2 * ((double)query.Length / candidate.Length);
 
             // Levenshtein fallback for fuzzy matches
-            int dist = LevenshteinDistance(query, candidate);
-            int maxLen = Math.Max(query.Length, candidate.Length);
+            var dist = LevenshteinDistance(query, candidate);
+            var maxLen = Math.Max(query.Length, candidate.Length);
             return maxLen == 0 ? 1.0 : 1.0 - (double)dist / maxLen;
         }
 
         private static int LevenshteinDistance(string a, string b)
         {
-            int[,] d = new int[a.Length + 1, b.Length + 1];
-            for (int i = 0; i <= a.Length; i++) d[i, 0] = i;
-            for (int j = 0; j <= b.Length; j++) d[0, j] = j;
-            for (int i = 1; i <= a.Length; i++)
-                for (int j = 1; j <= b.Length; j++)
+            var d = new int[a.Length + 1, b.Length + 1];
+            for (var i = 0; i <= a.Length; i++) d[i, 0] = i;
+            for (var j = 0; j <= b.Length; j++) d[0, j] = j;
+            for (var i = 1; i <= a.Length; i++)
+                for (var j = 1; j <= b.Length; j++)
                     d[i, j] = Math.Min(
                         Math.Min(d[i - 1, j] + 1, d[i, j - 1] + 1),
                         d[i - 1, j - 1] + (a[i - 1] == b[j - 1] ? 0 : 1));
@@ -674,12 +672,12 @@ namespace DepotDL.GUI.Services
             foreach (var header in setCookieHeaders)
             {
                 // Set-Cookie: name=value; Path=/; ...
-                string nameValue = header.Split(';')[0].Trim();
-                int eq = nameValue.IndexOf('=');
+                var nameValue = header.Split(';')[0].Trim();
+                var eq = nameValue.IndexOf('=');
                 if (eq <= 0) continue;
-                string name = nameValue[..eq].Trim();
-                string value = nameValue[(eq + 1)..].Trim();
-                int idx = jar.FindIndex(x => x.Name == name);
+                var name = nameValue[..eq].Trim();
+                var value = nameValue[(eq + 1)..].Trim();
+                var idx = jar.FindIndex(x => x.Name == name);
                 if (idx >= 0) jar[idx] = (name, value);
                 else jar.Add((name, value));
             }

@@ -977,7 +977,7 @@ namespace DepotDownloader
             });
 
             const int MaxChunkRetries = 3;
-            for (int attempt = 1; attempt <= MaxChunkRetries && !failedChunks.IsEmpty && !cts.IsCancellationRequested; attempt++)
+            for (var attempt = 1; attempt <= MaxChunkRetries && !failedChunks.IsEmpty && !cts.IsCancellationRequested; attempt++)
             {
                 var toRetry = failedChunks.ToArray();
                 failedChunks.Clear();

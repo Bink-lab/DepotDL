@@ -1,5 +1,6 @@
-using System;
-using System.Collections.Generic;
+// This file is subject to the terms and conditions defined
+// in file 'LICENSE', which is part of this source code package.
+
 using System.Text.RegularExpressions;
 
 namespace DepotDL.GUI.Helpers
@@ -39,18 +40,18 @@ namespace DepotDL.GUI.Helpers
         public static long ParseRamMb(string value)
         {
             var m = Regex.Match(value, @"(\d+)\s*GB", RegexOptions.IgnoreCase);
-            if (m.Success && long.TryParse(m.Groups[1].Value, out long gb)) return gb * 1024;
+            if (m.Success && long.TryParse(m.Groups[1].Value, out var gb)) return gb * 1024;
             m = Regex.Match(value, @"(\d+)\s*MB", RegexOptions.IgnoreCase);
-            if (m.Success && long.TryParse(m.Groups[1].Value, out long mb)) return mb;
+            if (m.Success && long.TryParse(m.Groups[1].Value, out var mb)) return mb;
             return 0;
         }
 
         public static double ParseStorageGb(string value)
         {
             var m = Regex.Match(value, @"([\d.]+)\s*GB", RegexOptions.IgnoreCase);
-            if (m.Success && double.TryParse(m.Groups[1].Value, out double gb)) return gb;
+            if (m.Success && double.TryParse(m.Groups[1].Value, out var gb)) return gb;
             m = Regex.Match(value, @"([\d.]+)\s*MB", RegexOptions.IgnoreCase);
-            if (m.Success && double.TryParse(m.Groups[1].Value, out double mb)) return mb / 1024.0;
+            if (m.Success && double.TryParse(m.Groups[1].Value, out var mb)) return mb / 1024.0;
             return 0;
         }
 

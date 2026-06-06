@@ -1,9 +1,8 @@
-using System;
+// This file is subject to the terms and conditions defined
+// in file 'LICENSE', which is part of this source code package.
+
 using System.IO;
 using System.IO.Compression;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace DepotDL.GUI.Services
 {
@@ -15,36 +14,36 @@ namespace DepotDL.GUI.Services
             CancellationToken ct = default,
             CompressionLevel compression = CompressionLevel.Optimal)
         {
-            string dir = outputDir.TrimEnd('\\', '/');
-            string parentDir = Path.GetDirectoryName(dir) ?? dir;
-            string folderName = Path.GetFileName(dir);
-            string zipPath = Path.Combine(parentDir, folderName + ".zip");
-            string tmpPath = zipPath + ".tmp";
+            var dir = outputDir.TrimEnd('\\', '/');
+            var parentDir = Path.GetDirectoryName(dir) ?? dir;
+            var folderName = Path.GetFileName(dir);
+            var zipPath = Path.Combine(parentDir, folderName + ".zip");
+            var tmpPath = zipPath + ".tmp";
 
             await Task.Run(() =>
             {
                 if (File.Exists(tmpPath)) File.Delete(tmpPath);
 
                 var files = Directory.EnumerateFiles(dir, "*", SearchOption.AllDirectories).ToList();
-                int total = files.Count;
-                int done = 0;
-                int lastPct = -1;
+                var total = files.Count;
+                var done = 0;
+                var lastPct = -1;
 
                 progress.Report((0, $"0 / {total:N0} files"));
 
                 using (var archive = ZipFile.Open(tmpPath, ZipArchiveMode.Create))
                 {
-                    foreach (string file in files)
+                    foreach (var file in files)
                     {
                         ct.ThrowIfCancellationRequested();
-                        string entryName = Path.GetRelativePath(dir, file);
+                        var entryName = Path.GetRelativePath(dir, file);
                         archive.CreateEntryFromFile(file, entryName, compression);
                         done++;
-                        int pctInt = total == 0 ? 100 : (int)((double)done / total * 100.0);
+                        var pctInt = total == 0 ? 100 : (int)((double)done / total * 100.0);
                         if (pctInt != lastPct)
                         {
                             lastPct = pctInt;
-                            int snap = done;
+                            var snap = done;
                             progress.Report((pctInt, $"{snap:N0} / {total:N0} files"));
                         }
                     }

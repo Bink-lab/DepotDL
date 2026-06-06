@@ -1,10 +1,8 @@
-using System;
-using System.Collections.Generic;
+// This file is subject to the terms and conditions defined
+// in file 'LICENSE', which is part of this source code package.
+
 using System.Collections.ObjectModel;
 using System.IO;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -305,7 +303,7 @@ namespace DepotDL.GUI.ViewModels
                 var settings = _settings.Load();
                 if (!string.IsNullOrWhiteSpace(settings.DownloadBaseDir))
                 {
-                    string folderName = SteamMetadataService.GetAppName(appId);
+                    var folderName = SteamMetadataService.GetAppName(appId);
                     if (string.IsNullOrEmpty(folderName))
                     {
                         folderName = Path.GetFileNameWithoutExtension(path);
@@ -366,9 +364,9 @@ namespace DepotDL.GUI.ViewModels
 
         private static void ApplySmartOsFilter(IEnumerable<DepotSelectionItem> items)
         {
-            string currentOs = OperatingSystem.IsWindows() ? "windows"
-                             : OperatingSystem.IsLinux()   ? "linux"
-                             : OperatingSystem.IsMacOS()   ? "macos"
+            var currentOs = OperatingSystem.IsWindows() ? "windows"
+                             : OperatingSystem.IsLinux() ? "linux"
+                             : OperatingSystem.IsMacOS() ? "macos"
                              : string.Empty;
 
             foreach (var item in items)
@@ -377,7 +375,7 @@ namespace DepotDL.GUI.ViewModels
                     continue;
 
                 var tags = item.OsList.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-                bool hasCurrentOs = !string.IsNullOrEmpty(currentOs) &&
+                var hasCurrentOs = !string.IsNullOrEmpty(currentOs) &&
                                     tags.Any(t => t.Equals(currentOs, StringComparison.OrdinalIgnoreCase));
                 if (!hasCurrentOs)
                     item.IsSelected = false;
@@ -407,25 +405,25 @@ namespace DepotDL.GUI.ViewModels
                         item.OsArch = m.OsArch;
                     }
                     if (settings.AutoSelectOsByOs)
-                         ApplySmartOsFilter(items);
+                        ApplySmartOsFilter(items);
 
-                     string realGameName = SteamMetadataService.GetAppName(appId);
-                     if (!string.IsNullOrWhiteSpace(realGameName) && !string.IsNullOrWhiteSpace(settings.DownloadBaseDir))
-                     {
-                         string sanitizedGameName = SanitizeFolderName(realGameName);
-                         string oldDefaultFolder = !string.IsNullOrEmpty(LuaPath) ? Path.GetFileNameWithoutExtension(LuaPath) : string.Empty;
-                         if (string.IsNullOrEmpty(oldDefaultFolder)) oldDefaultFolder = appId;
-                         oldDefaultFolder = SanitizeFolderName(oldDefaultFolder);
+                    var realGameName = SteamMetadataService.GetAppName(appId);
+                    if (!string.IsNullOrWhiteSpace(realGameName) && !string.IsNullOrWhiteSpace(settings.DownloadBaseDir))
+                    {
+                        var sanitizedGameName = SanitizeFolderName(realGameName);
+                        var oldDefaultFolder = !string.IsNullOrEmpty(LuaPath) ? Path.GetFileNameWithoutExtension(LuaPath) : string.Empty;
+                        if (string.IsNullOrEmpty(oldDefaultFolder)) oldDefaultFolder = appId;
+                        oldDefaultFolder = SanitizeFolderName(oldDefaultFolder);
 
-                         string currentFolder = Path.GetFileName(OutputDir.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar));
-                         if (string.Equals(currentFolder, oldDefaultFolder, StringComparison.OrdinalIgnoreCase) || 
-                             string.Equals(currentFolder, appId, StringComparison.OrdinalIgnoreCase))
-                         {
-                             OutputDir = Path.Combine(settings.DownloadBaseDir, sanitizedGameName);
-                         }
-                     }
+                        var currentFolder = Path.GetFileName(OutputDir.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar));
+                        if (string.Equals(currentFolder, oldDefaultFolder, StringComparison.OrdinalIgnoreCase) ||
+                            string.Equals(currentFolder, appId, StringComparison.OrdinalIgnoreCase))
+                        {
+                            OutputDir = Path.Combine(settings.DownloadBaseDir, sanitizedGameName);
+                        }
+                    }
 
-                     UpdateCanStart();
+                    UpdateCanStart();
                 });
             }
             catch { }
@@ -550,7 +548,7 @@ namespace DepotDL.GUI.ViewModels
                     ryuuApiKey: string.IsNullOrWhiteSpace(RyuuApiKey) ? null : RyuuApiKey.Trim(),
                     hubcapApiKey: string.IsNullOrWhiteSpace(HubcapApiKey) ? null : HubcapApiKey.Trim());
 
-                bool anyFailed = states.Any(s => s.Status == DepotStatus.Failed);
+                var anyFailed = states.Any(s => s.Status == DepotStatus.Failed);
                 DownloadComplete = !anyFailed;
                 DownloadFailed = anyFailed;
                 OverallPercent = anyFailed ? OverallPercent : 100;
@@ -561,7 +559,7 @@ namespace DepotDL.GUI.ViewModels
 
                 if (!anyFailed)
                 {
-                    string gameName = SteamMetadataService.GetAppName(AppId);
+                    var gameName = SteamMetadataService.GetAppName(AppId);
                     if (string.IsNullOrWhiteSpace(gameName)) gameName = Path.GetFileNameWithoutExtension(LuaPath);
                     if (string.IsNullOrWhiteSpace(gameName)) gameName = $"App {AppId}";
                     var game = new LibraryGame
@@ -675,7 +673,7 @@ namespace DepotDL.GUI.ViewModels
 
             if (clearCheckpoints)
             {
-                string checkpointDir = Path.Combine(game.OutputDir, ".depotdl_progress");
+                var checkpointDir = Path.Combine(game.OutputDir, ".depotdl_progress");
                 if (Directory.Exists(checkpointDir))
                     Directory.Delete(checkpointDir, true);
             }
@@ -734,16 +732,16 @@ namespace DepotDL.GUI.ViewModels
             }
         }
 
-         private static string SanitizeFolderName(string name)
-         {
-             if (string.IsNullOrWhiteSpace(name)) return string.Empty;
-             var invalid = Path.GetInvalidFileNameChars();
-             foreach (var c in invalid)
-             {
-                 name = name.Replace(c, ' ');
-             }
-             return string.Join(" ", name.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries)).Trim();
-         }
+        private static string SanitizeFolderName(string name)
+        {
+            if (string.IsNullOrWhiteSpace(name)) return string.Empty;
+            var invalid = Path.GetInvalidFileNameChars();
+            foreach (var c in invalid)
+            {
+                name = name.Replace(c, ' ');
+            }
+            return string.Join(" ", name.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries)).Trim();
+        }
     }
 
     public partial class DepotSelectionItem : ObservableObject

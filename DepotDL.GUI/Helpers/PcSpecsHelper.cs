@@ -1,4 +1,6 @@
-using System;
+// This file is subject to the terms and conditions defined
+// in file 'LICENSE', which is part of this source code package.
+
 using System.Management;
 using DepotDL.GUI.Models;
 
@@ -12,8 +14,8 @@ namespace DepotDL.GUI.Helpers
         {
             if (_cached != null) return _cached;
 
-            string cpu = QueryFirst("SELECT Name FROM Win32_Processor", "Name") ?? "Unknown";
-            string gpu = QueryFirst("SELECT Name FROM Win32_VideoController", "Name") ?? "Unknown";
+            var cpu = QueryFirst("SELECT Name FROM Win32_Processor", "Name") ?? "Unknown";
+            var gpu = QueryFirst("SELECT Name FROM Win32_VideoController", "Name") ?? "Unknown";
 
             long ramMb = 0;
             using (var search = new ManagementObjectSearcher("SELECT Capacity FROM Win32_PhysicalMemory"))
@@ -23,7 +25,7 @@ namespace DepotDL.GUI.Helpers
                 {
                     using (obj)
                     {
-                        if (ulong.TryParse(obj["Capacity"]?.ToString(), out ulong cap))
+                        if (ulong.TryParse(obj["Capacity"]?.ToString(), out var cap))
                             ramMb += (long)(cap / (1024 * 1024));
                     }
                 }
@@ -38,10 +40,10 @@ namespace DepotDL.GUI.Helpers
                 {
                     using (obj)
                     {
-                        if (ulong.TryParse(obj["FreeSpace"]?.ToString(), out ulong free) &&
-                            ulong.TryParse(obj["Size"]?.ToString(), out ulong size))
+                        if (ulong.TryParse(obj["FreeSpace"]?.ToString(), out var free) &&
+                            ulong.TryParse(obj["Size"]?.ToString(), out var size))
                         {
-                            double fGb = free / (1024.0 * 1024 * 1024);
+                            var fGb = free / (1024.0 * 1024 * 1024);
                             if (fGb > freeGb)
                             {
                                 freeGb = fGb;

@@ -1,3 +1,6 @@
+// This file is subject to the terms and conditions defined
+// in file 'LICENSE', which is part of this source code package.
+
 using System.ComponentModel;
 using System.Windows;
 using System.Windows.Input;
@@ -32,9 +35,9 @@ namespace DepotDL.GUI.Views
             base.OnSourceInitialized(e);
             if (Owner != null)
             {
-                Left   = Owner.Left;
-                Top    = Owner.Top;
-                Width  = Owner.ActualWidth;
+                Left = Owner.Left;
+                Top = Owner.Top;
+                Width = Owner.ActualWidth;
                 Height = Owner.ActualHeight;
             }
             InputBox.Focus();

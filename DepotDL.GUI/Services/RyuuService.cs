@@ -1,9 +1,10 @@
-using System;
+// This file is subject to the terms and conditions defined
+// in file 'LICENSE', which is part of this source code package.
+
 using System.IO;
 using System.Net.Http;
 using System.Text;
 using System.Text.Json;
-using System.Threading.Tasks;
 using DepotDL.GUI.Models;
 
 namespace DepotDL.GUI.Services
@@ -17,7 +18,7 @@ namespace DepotDL.GUI.Services
         private async Task RequestUpdateAsync(string appId, string apiKey)
         {
             var url = $"https://generator.ryuu.lol/resellerrequestupdate?appid={Uri.EscapeDataString(appId)}&auth_code={Uri.EscapeDataString(apiKey)}";
-            for (int attempt = 0; attempt <= MaxRetries; attempt++)
+            for (var attempt = 0; attempt <= MaxRetries; attempt++)
             {
                 try
                 {
@@ -41,9 +42,9 @@ namespace DepotDL.GUI.Services
             onStatus?.Invoke("Updating manifests...");
             await RequestUpdateAsync(appId, apiKey);
 
-            for (int attempt = 0; attempt <= MaxRetries; attempt++)
+            for (var attempt = 0; attempt <= MaxRetries; attempt++)
             {
-                string attemptSuffix = attempt > 0 ? $" (retry {attempt}/{MaxRetries})" : string.Empty;
+                var attemptSuffix = attempt > 0 ? $" (retry {attempt}/{MaxRetries})" : string.Empty;
 
                 onStatus?.Invoke($"Downloading...{attemptSuffix}");
                 var url = $"https://generator.ryuu.lol/secure_download?appid={Uri.EscapeDataString(appId)}&auth_code={Uri.EscapeDataString(apiKey)}";

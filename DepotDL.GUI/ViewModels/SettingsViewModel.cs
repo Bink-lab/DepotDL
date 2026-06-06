@@ -1,5 +1,6 @@
-using System.ComponentModel;
-using System.IO;
+// This file is subject to the terms and conditions defined
+// in file 'LICENSE', which is part of this source code package.
+
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using DepotDL.GUI.Models;
@@ -30,7 +31,7 @@ namespace DepotDL.GUI.ViewModels
         [ObservableProperty] private string _onlineFixPass = string.Empty;
 
         private DateTime? _lastUpdateCheckUtc;
-        private string?   _lastKnownReleaseTag;
+        private string? _lastKnownReleaseTag;
 
         public void Load()
         {
@@ -49,7 +50,7 @@ namespace DepotDL.GUI.ViewModels
             ScrollDurationMs = s.ScrollDurationMs;
             AutoSelectOsByOs = s.AutoSelectOsByOs;
             DownloadAchievementIcons = s.DownloadAchievementIcons;
-            _lastUpdateCheckUtc  = s.LastUpdateCheckUtc;
+            _lastUpdateCheckUtc = s.LastUpdateCheckUtc;
             _lastKnownReleaseTag = s.LastKnownReleaseTag;
             OnlineFixUser = s.OnlineFixUser ?? string.Empty;
             OnlineFixPass = s.OnlineFixPass ?? string.Empty;
@@ -98,7 +99,7 @@ namespace DepotDL.GUI.ViewModels
                 ScrollDurationMs = ScrollDurationMs,
                 AutoSelectOsByOs = AutoSelectOsByOs,
                 DownloadAchievementIcons = DownloadAchievementIcons,
-                LastUpdateCheckUtc  = _lastUpdateCheckUtc,
+                LastUpdateCheckUtc = _lastUpdateCheckUtc,
                 LastKnownReleaseTag = _lastKnownReleaseTag,
                 OnlineFixUser = string.IsNullOrWhiteSpace(OnlineFixUser) ? null : OnlineFixUser,
                 OnlineFixPass = string.IsNullOrWhiteSpace(OnlineFixPass) ? null : OnlineFixPass,

@@ -1,12 +1,11 @@
-using System;
+// This file is subject to the terms and conditions defined
+// in file 'LICENSE', which is part of this source code package.
+
 using System.Globalization;
-using System.Linq;
 using System.Net.Http;
 using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using System.Threading;
-using System.Threading.Tasks;
 using DepotDL.GUI.Models;
 
 namespace DepotDL.GUI.Services
@@ -17,11 +16,11 @@ namespace DepotDL.GUI.Services
 
         private static readonly HttpClient Http = new() { Timeout = TimeSpan.FromSeconds(5) };
 
-        private static readonly Lazy<string?>   _currentSha = new(ReadCurrentSha);
-        private static readonly Lazy<DateTime?> _buildTime  = new(ReadBuildTime);
+        private static readonly Lazy<string?> _currentSha = new(ReadCurrentSha);
+        private static readonly Lazy<DateTime?> _buildTime = new(ReadBuildTime);
 
-        public static string?   GetCurrentSha() => _currentSha.Value;
-        public static DateTime? GetBuildTime()  => _buildTime.Value;
+        public static string? GetCurrentSha() => _currentSha.Value;
+        public static DateTime? GetBuildTime() => _buildTime.Value;
 
         private static string? ReadCurrentSha()
         {
@@ -62,7 +61,7 @@ namespace DepotDL.GUI.Services
         {
             if (string.IsNullOrEmpty(settings.LastKnownReleaseTag)) return false;
             var buildTime = GetBuildTime();
-            var tagTime   = ParseTagTime(settings.LastKnownReleaseTag);
+            var tagTime = ParseTagTime(settings.LastKnownReleaseTag);
             if (buildTime != null && tagTime != null)
                 return tagTime > buildTime;
             return false;
@@ -91,7 +90,7 @@ namespace DepotDL.GUI.Services
                 var latestSha = parts.Length >= 4 ? parts[^1] : null;
 
                 var buildTime = GetBuildTime();
-                var tagTime   = ParseTagTime(release.TagName);
+                var tagTime = ParseTagTime(release.TagName);
                 bool updateAvailable;
                 if (!string.IsNullOrEmpty(currentSha) && !string.IsNullOrEmpty(latestSha) &&
                     string.Equals(currentSha, latestSha, StringComparison.OrdinalIgnoreCase))
@@ -106,9 +105,9 @@ namespace DepotDL.GUI.Services
                 return new UpdateCheckResult
                 {
                     UpdateAvailable = updateAvailable,
-                    LatestTag       = release.TagName,
-                    HtmlUrl         = release.HtmlUrl ?? BuildReleaseUrl(release.TagName),
-                    LatestSha       = latestSha
+                    LatestTag = release.TagName,
+                    HtmlUrl = release.HtmlUrl ?? BuildReleaseUrl(release.TagName),
+                    LatestSha = latestSha
                 };
             }
             catch
@@ -126,9 +125,9 @@ namespace DepotDL.GUI.Services
 
     public sealed class UpdateCheckResult
     {
-        public bool    UpdateAvailable { get; init; }
-        public string? LatestTag       { get; init; }
-        public string? HtmlUrl         { get; init; }
-        public string? LatestSha       { get; init; }
+        public bool UpdateAvailable { get; init; }
+        public string? LatestTag { get; init; }
+        public string? HtmlUrl { get; init; }
+        public string? LatestSha { get; init; }
     }
 }

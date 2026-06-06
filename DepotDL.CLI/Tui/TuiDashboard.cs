@@ -1,8 +1,6 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text.RegularExpressions;
+// This file is subject to the terms and conditions defined
+// in file 'LICENSE', which is part of this source code package.
+
 using System.Diagnostics;
 using System.Text;
 using DepotDL.CLI.Services;
@@ -14,10 +12,10 @@ namespace DepotDL.CLI.Tui
     {
         public static int RunInteractiveTui(string ddmodPath, string dotnetPath)
         {
-            try { if (OperatingSystem.IsWindows()) Console.CursorVisible = false; } catch {}
+            try { if (OperatingSystem.IsWindows()) Console.CursorVisible = false; } catch { }
             var session = new TuiSession();
-            
-            string defaultManifestsDir = "manifests";
+
+            var defaultManifestsDir = "manifests";
             if (!Directory.Exists(defaultManifestsDir))
             {
                 if (Directory.Exists("../manifests")) defaultManifestsDir = "../manifests";
@@ -30,27 +28,27 @@ namespace DepotDL.CLI.Tui
             Console.Clear();
             WriteCenteredStatusBox("DEPOTDL", new[] { "Initializing library and scanning systems" }, ConsoleColor.Cyan);
 
-            int verified = LibraryManager.VerifyLibraryOnStartup(out int totalCount, out int missingCount);
+            var verified = LibraryManager.VerifyLibraryOnStartup(out var totalCount, out var missingCount);
             System.Threading.Thread.Sleep(800);
 
-            int menuIndex = 0;
+            var menuIndex = 0;
             while (true)
             {
                 Console.Clear();
 
-                string luaName = string.IsNullOrEmpty(session.LuaPath) ? "[None Loaded]" : Path.GetFileName(session.LuaPath);
+                var luaName = string.IsNullOrEmpty(session.LuaPath) ? "[None Loaded]" : Path.GetFileName(session.LuaPath);
                 luaName = TuiText.Shorten(luaName, 21);
-                string appId = string.IsNullOrEmpty(session.AppId) ? "[None]" : session.AppId;
-                string depotSel = session.AllDepots.Count == 0 
-                    ? "0 Depots (No Lua)" 
+                var appId = string.IsNullOrEmpty(session.AppId) ? "[None]" : session.AppId;
+                var depotSel = session.AllDepots.Count == 0
+                    ? "0 Depots (No Lua)"
                     : $"{session.SelectedDepots.Count}/{session.AllDepots.Count} Selected";
-                string manifestsVal = string.IsNullOrEmpty(session.ManifestsDir) ? "[Default]" : session.ManifestsDir;
+                var manifestsVal = string.IsNullOrEmpty(session.ManifestsDir) ? "[Default]" : session.ManifestsDir;
                 manifestsVal = TuiText.ShortenTail(manifestsVal, 21);
-                string outputVal = string.IsNullOrEmpty(session.OutputDir) ? "[Auto]" : session.OutputDir;
+                var outputVal = string.IsNullOrEmpty(session.OutputDir) ? "[Auto]" : session.OutputDir;
                 outputVal = TuiText.ShortenTail(outputVal, 21);
-                string outputBaseVal = string.IsNullOrEmpty(session.DownloadBaseDir) ? "[Auto]" : session.DownloadBaseDir;
+                var outputBaseVal = string.IsNullOrEmpty(session.DownloadBaseDir) ? "[Auto]" : session.DownloadBaseDir;
                 outputBaseVal = TuiText.ShortenTail(outputBaseVal, 21);
-                string libraryStats = $"{verified}/{totalCount} Games";
+                var libraryStats = $"{verified}/{totalCount} Games";
 
                 var leftItems = new List<string>
                 {
@@ -82,98 +80,98 @@ namespace DepotDL.CLI.Tui
 
                 using (CenterConsoleOutput(82))
                 {
-                Console.ForegroundColor = ConsoleColor.DarkGray;
-                Console.WriteLine("╔════════════════════════════════════════╦════════════════════════════════════════╗");
-                Console.Write("║ ");
-                Console.ForegroundColor = ConsoleColor.Cyan;
-                Console.Write(TuiText.Pad("DepotDL", 38));
-                Console.ForegroundColor = ConsoleColor.DarkGray;
-                Console.Write(" ║ ");
-                Console.ForegroundColor = ConsoleColor.Cyan;
-                Console.Write(TuiText.Pad("ACTIVE SESSION STATUS", 38));
-                Console.ForegroundColor = ConsoleColor.DarkGray;
-                Console.WriteLine(" ║");
-                Console.WriteLine("╠════════════════════════════════════════╬════════════════════════════════════════╣");
-
-                int maxRows = Math.Max(leftItems.Count, rightStats.Count);
-                for (int i = 0; i < maxRows; i++)
-                {
                     Console.ForegroundColor = ConsoleColor.DarkGray;
+                    Console.WriteLine("╔════════════════════════════════════════╦════════════════════════════════════════╗");
                     Console.Write("║ ");
+                    Console.ForegroundColor = ConsoleColor.Cyan;
+                    Console.Write(TuiText.Pad("DepotDL", 38));
+                    Console.ForegroundColor = ConsoleColor.DarkGray;
+                    Console.Write(" ║ ");
+                    Console.ForegroundColor = ConsoleColor.Cyan;
+                    Console.Write(TuiText.Pad("ACTIVE SESSION STATUS", 38));
+                    Console.ForegroundColor = ConsoleColor.DarkGray;
+                    Console.WriteLine(" ║");
+                    Console.WriteLine("╠════════════════════════════════════════╬════════════════════════════════════════╣");
 
-                    if (i < leftItems.Count)
+                    var maxRows = Math.Max(leftItems.Count, rightStats.Count);
+                    for (var i = 0; i < maxRows; i++)
                     {
-                        if (i == menuIndex)
+                        Console.ForegroundColor = ConsoleColor.DarkGray;
+                        Console.Write("║ ");
+
+                        if (i < leftItems.Count)
                         {
-                            Console.BackgroundColor = ConsoleColor.Cyan;
-                            Console.ForegroundColor = ConsoleColor.Black;
-                            Console.Write(TuiText.Pad($"> {leftItems[i]}", 38));
-                            Console.ResetColor();
-                        }
-                        else
-                        {
-                            if (i == 6 && string.IsNullOrEmpty(session.LuaPath))
+                            if (i == menuIndex)
                             {
-                                Console.ForegroundColor = ConsoleColor.DarkGray;
-                            }
-                            else if (i == 6)
-                            {
-                                Console.ForegroundColor = ConsoleColor.Green;
+                                Console.BackgroundColor = ConsoleColor.Cyan;
+                                Console.ForegroundColor = ConsoleColor.Black;
+                                Console.Write(TuiText.Pad($"> {leftItems[i]}", 38));
+                                Console.ResetColor();
                             }
                             else
                             {
-                                Console.ForegroundColor = ConsoleColor.White;
+                                if (i == 6 && string.IsNullOrEmpty(session.LuaPath))
+                                {
+                                    Console.ForegroundColor = ConsoleColor.DarkGray;
+                                }
+                                else if (i == 6)
+                                {
+                                    Console.ForegroundColor = ConsoleColor.Green;
+                                }
+                                else
+                                {
+                                    Console.ForegroundColor = ConsoleColor.White;
+                                }
+                                Console.Write(TuiText.Pad($"  {leftItems[i]}", 38));
                             }
-                            Console.Write(TuiText.Pad($"  {leftItems[i]}", 38));
                         }
-                    }
-                    else
-                    {
-                        Console.Write(new string(' ', 38));
+                        else
+                        {
+                            Console.Write(new string(' ', 38));
+                        }
+
+                        Console.ForegroundColor = ConsoleColor.DarkGray;
+                        Console.Write(" ║ ");
+
+                        if (i < rightStats.Count)
+                        {
+                            var stat = rightStats[i];
+                            Console.ForegroundColor = ConsoleColor.DarkCyan;
+                            Console.Write(TuiText.Pad(stat.Key, 17));
+                            Console.ForegroundColor = stat.Color;
+                            Console.Write(TuiText.Pad(stat.Val, 21));
+                        }
+                        else
+                        {
+                            Console.Write(new string(' ', 38));
+                        }
+
+                        Console.ForegroundColor = ConsoleColor.DarkGray;
+                        Console.WriteLine(" ║");
                     }
 
                     Console.ForegroundColor = ConsoleColor.DarkGray;
-                    Console.Write(" ║ ");
+                    Console.WriteLine("╚════════════════════════════════════════╩════════════════════════════════════════╝");
 
-                    if (i < rightStats.Count)
-                    {
-                        var stat = rightStats[i];
-                        Console.ForegroundColor = ConsoleColor.DarkCyan;
-                        Console.Write(TuiText.Pad(stat.Key, 17));
-                        Console.ForegroundColor = stat.Color;
-                        Console.Write(TuiText.Pad(stat.Val, 21));
-                    }
-                    else
-                    {
-                        Console.Write(new string(' ', 38));
-                    }
-
+                    Console.ForegroundColor = ConsoleColor.DarkCyan;
+                    Console.WriteLine("══════════════════════════════════════════════════════════════════════════════════");
+                    Console.ForegroundColor = ConsoleColor.Cyan;
+                    Console.Write("  [↑/↓] Navigate   ");
                     Console.ForegroundColor = ConsoleColor.DarkGray;
-                    Console.WriteLine(" ║");
-                }
-
-                Console.ForegroundColor = ConsoleColor.DarkGray;
-                Console.WriteLine("╚════════════════════════════════════════╩════════════════════════════════════════╝");
-                
-                Console.ForegroundColor = ConsoleColor.DarkCyan;
-                Console.WriteLine("══════════════════════════════════════════════════════════════════════════════════");
-                Console.ForegroundColor = ConsoleColor.Cyan;
-                Console.Write("  [↑/↓] Navigate   ");
-                Console.ForegroundColor = ConsoleColor.DarkGray;
-                Console.Write("│");
-                Console.ForegroundColor = ConsoleColor.Cyan;
-                Console.Write("   [Enter] Select   ");
-                Console.ForegroundColor = ConsoleColor.DarkGray;
-                Console.Write("│");
-                Console.ForegroundColor = ConsoleColor.Cyan;
-                Console.Write("   [L] Library   ");
-                Console.ForegroundColor = ConsoleColor.DarkGray;
-                Console.Write("│");
-                Console.ForegroundColor = ConsoleColor.Cyan;
-                Console.WriteLine("   [Esc] Exit / Back");
-                Console.ForegroundColor = ConsoleColor.DarkCyan;
-                Console.WriteLine("══════════════════════════════════════════════════════════════════════════════════");
-                Console.ResetColor();
+                    Console.Write("│");
+                    Console.ForegroundColor = ConsoleColor.Cyan;
+                    Console.Write("   [Enter] Select   ");
+                    Console.ForegroundColor = ConsoleColor.DarkGray;
+                    Console.Write("│");
+                    Console.ForegroundColor = ConsoleColor.Cyan;
+                    Console.Write("   [L] Library   ");
+                    Console.ForegroundColor = ConsoleColor.DarkGray;
+                    Console.Write("│");
+                    Console.ForegroundColor = ConsoleColor.Cyan;
+                    Console.WriteLine("   [Esc] Exit / Back");
+                    Console.ForegroundColor = ConsoleColor.DarkCyan;
+                    Console.WriteLine("══════════════════════════════════════════════════════════════════════════════════");
+                    Console.ResetColor();
                 }
 
                 var key = Console.ReadKey(true).Key;
@@ -189,7 +187,7 @@ namespace DepotDL.CLI.Tui
                 {
                     SaveSession(session);
                     Console.Clear();
-                    try { if (OperatingSystem.IsWindows()) Console.CursorVisible = true; } catch {}
+                    try { if (OperatingSystem.IsWindows()) Console.CursorVisible = true; } catch { }
                     return 0;
                 }
                 else if (key == ConsoleKey.L)
@@ -263,8 +261,8 @@ namespace DepotDL.CLI.Tui
 
                         // Pre-download summary: manifest matches + resume status
                         {
-                            int matchedManifests = 0;
-                            int depotsWithManifestId = session.SelectedDepots.Count(d => !string.IsNullOrEmpty(d.ManifestId));
+                            var matchedManifests = 0;
+                            var depotsWithManifestId = session.SelectedDepots.Count(d => !string.IsNullOrEmpty(d.ManifestId));
                             if (depotsWithManifestId > 0 && !string.IsNullOrEmpty(session.ManifestsDir) && Directory.Exists(session.ManifestsDir))
                             {
                                 var localNames = Directory.GetFiles(session.ManifestsDir, "*.manifest")
@@ -280,8 +278,8 @@ namespace DepotDL.CLI.Tui
                                 }
                             }
 
-                            string outputForCheck = !string.IsNullOrEmpty(session.OutputDir) ? session.OutputDir : string.Empty;
-                            int alreadyDone = 0;
+                            var outputForCheck = !string.IsNullOrEmpty(session.OutputDir) ? session.OutputDir : string.Empty;
+                            var alreadyDone = 0;
                             if (!string.IsNullOrEmpty(outputForCheck))
                             {
                                 var done = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
@@ -310,7 +308,7 @@ namespace DepotDL.CLI.Tui
 
                         Console.Clear();
 
-                        int exitCode = Program.TriggerDownloadProcess(session.LuaPath, session.ManifestsDir, session.OutputDir, ddmodPath, dotnetPath, session.SelectedDepots, session.MaxParallelDepots, ryuuApiKey: session.RyuuApiKey, hubcapApiKey: session.HubcapApiKey);
+                        var exitCode = Program.TriggerDownloadProcess(session.LuaPath, session.ManifestsDir, session.OutputDir, ddmodPath, dotnetPath, session.SelectedDepots, session.MaxParallelDepots, ryuuApiKey: session.RyuuApiKey, hubcapApiKey: session.HubcapApiKey);
 
                         if (exitCode == 0)
                         {
@@ -330,7 +328,7 @@ namespace DepotDL.CLI.Tui
                     {
                         SaveSession(session);
                         Console.Clear();
-                        try { if (OperatingSystem.IsWindows()) Console.CursorVisible = true; } catch {}
+                        try { if (OperatingSystem.IsWindows()) Console.CursorVisible = true; } catch { }
                         return 0;
                     }
                 }
@@ -339,170 +337,170 @@ namespace DepotDL.CLI.Tui
 
         private static void RunLibraryDashboard(TuiSession session, string ddmodPath, string dotnetPath)
         {
-            int selectedIndex = 0;
+            var selectedIndex = 0;
             while (true)
             {
                 Console.Clear();
                 var games = LibraryManager.LoadLibrary();
-                int totalMenuItems = games.Count + 2;
+                var totalMenuItems = games.Count + 2;
                 if (selectedIndex >= totalMenuItems) selectedIndex = totalMenuItems - 1;
                 if (selectedIndex < 0) selectedIndex = 0;
 
                 using (CenterConsoleOutput(88))
                 {
-                Console.ForegroundColor = ConsoleColor.DarkGray;
-                Console.WriteLine("╔════════════════════════════════════════╦════════════════╦═══════════════╦════════════╗");
-                Console.Write("║ ");
-                Console.ForegroundColor = ConsoleColor.Cyan;
-                Console.Write(TuiText.Pad("GAME NAME", 38));
-                Console.ForegroundColor = ConsoleColor.DarkGray;
-                Console.Write(" ║ ");
-                Console.ForegroundColor = ConsoleColor.Cyan;
-                Console.Write(TuiText.Pad("APP ID", 14));
-                Console.ForegroundColor = ConsoleColor.DarkGray;
-                Console.Write(" ║ ");
-                Console.ForegroundColor = ConsoleColor.Cyan;
-                Console.Write(TuiText.Pad("TOTAL SIZE", 13));
-                Console.ForegroundColor = ConsoleColor.DarkGray;
-                Console.Write(" ║ ");
-                Console.ForegroundColor = ConsoleColor.Cyan;
-                Console.Write(TuiText.Pad("STATUS", 10));
-                Console.ForegroundColor = ConsoleColor.DarkGray;
-                Console.WriteLine(" ║");
-                Console.WriteLine("╠════════════════════════════════════════╬════════════════╬═══════════════╬════════════╣");
-
-                for (int i = 0; i < totalMenuItems; i++)
-                {
                     Console.ForegroundColor = ConsoleColor.DarkGray;
+                    Console.WriteLine("╔════════════════════════════════════════╦════════════════╦═══════════════╦════════════╗");
                     Console.Write("║ ");
-
-                    if (i == selectedIndex)
-                    {
-                        Console.BackgroundColor = ConsoleColor.Cyan;
-                        Console.ForegroundColor = ConsoleColor.Black;
-                        
-                        if (i < games.Count)
-                        {
-                            var g = games[i];
-                            Console.Write(TuiText.Pad($"> {g.GameName}", 38));
-                            Console.ResetColor();
-                            Console.ForegroundColor = ConsoleColor.DarkGray;
-                            Console.Write(" ║ ");
-                            Console.ForegroundColor = ConsoleColor.White;
-                            Console.Write(TuiText.Pad(g.AppId, 14));
-                            Console.ForegroundColor = ConsoleColor.DarkGray;
-                            Console.Write(" ║ ");
-                            Console.ForegroundColor = ConsoleColor.White;
-                            Console.Write(TuiText.Pad(FormatSize(g.TotalSizeBytes), 13));
-                            Console.ForegroundColor = ConsoleColor.DarkGray;
-                            Console.Write(" ║ ");
-                            Console.ForegroundColor = g.IsVerified ? ConsoleColor.Green : ConsoleColor.Red;
-                            Console.Write(TuiText.Pad(g.IsVerified ? "Verified" : "Missing", 10));
-                        }
-                        else if (i == games.Count)
-                        {
-                            Console.Write(TuiText.Pad("> [BATCH OPERATIONS...]", 38));
-                            Console.ResetColor();
-                            Console.ForegroundColor = ConsoleColor.DarkGray;
-                            Console.Write(" ║ ");
-                            Console.Write(TuiText.Pad("", 14));
-                            Console.Write(" ║ ");
-                            Console.Write(TuiText.Pad("", 13));
-                            Console.Write(" ║ ");
-                            Console.Write(TuiText.Pad("", 10));
-                        }
-                        else
-                        {
-                            Console.Write(TuiText.Pad("> [BACK TO DASHBOARD]", 38));
-                            Console.ResetColor();
-                            Console.ForegroundColor = ConsoleColor.DarkGray;
-                            Console.Write(" ║ ");
-                            Console.Write(TuiText.Pad("", 14));
-                            Console.Write(" ║ ");
-                            Console.Write(TuiText.Pad("", 13));
-                            Console.Write(" ║ ");
-                            Console.Write(TuiText.Pad("", 10));
-                        }
-                        
-                        Console.ResetColor();
-                    }
-                    else
-                    {
-                        if (i < games.Count)
-                        {
-                            var g = games[i];
-                            Console.ForegroundColor = ConsoleColor.White;
-                            Console.Write(TuiText.Pad($"  {g.GameName}", 38));
-                            Console.ForegroundColor = ConsoleColor.DarkGray;
-                            Console.Write(" ║ ");
-                            Console.ForegroundColor = ConsoleColor.Gray;
-                            Console.Write(TuiText.Pad(g.AppId, 14));
-                            Console.ForegroundColor = ConsoleColor.DarkGray;
-                            Console.Write(" ║ ");
-                            Console.ForegroundColor = ConsoleColor.Gray;
-                            Console.Write(TuiText.Pad(FormatSize(g.TotalSizeBytes), 13));
-                            Console.ForegroundColor = ConsoleColor.DarkGray;
-                            Console.Write(" ║ ");
-                            Console.ForegroundColor = g.IsVerified ? ConsoleColor.Green : ConsoleColor.Red;
-                            Console.Write(TuiText.Pad(g.IsVerified ? "Verified" : "Missing", 10));
-                        }
-                        else if (i == games.Count)
-                        {
-                            Console.ForegroundColor = ConsoleColor.Yellow;
-                            Console.Write(TuiText.Pad("  [BATCH OPERATIONS...]", 38));
-                            Console.ForegroundColor = ConsoleColor.DarkGray;
-                            Console.Write(" ║ ");
-                            Console.Write(TuiText.Pad("", 14));
-                            Console.Write(" ║ ");
-                            Console.Write(TuiText.Pad("", 13));
-                            Console.Write(" ║ ");
-                            Console.Write(TuiText.Pad("", 10));
-                        }
-                        else
-                        {
-                            Console.ForegroundColor = ConsoleColor.Gray;
-                            Console.Write(TuiText.Pad("  [BACK TO DASHBOARD]", 38));
-                            Console.ForegroundColor = ConsoleColor.DarkGray;
-                            Console.Write(" ║ ");
-                            Console.Write(TuiText.Pad("", 14));
-                            Console.Write(" ║ ");
-                            Console.Write(TuiText.Pad("", 13));
-                            Console.Write(" ║ ");
-                            Console.Write(TuiText.Pad("", 10));
-                        }
-                    }
-
+                    Console.ForegroundColor = ConsoleColor.Cyan;
+                    Console.Write(TuiText.Pad("GAME NAME", 38));
+                    Console.ForegroundColor = ConsoleColor.DarkGray;
+                    Console.Write(" ║ ");
+                    Console.ForegroundColor = ConsoleColor.Cyan;
+                    Console.Write(TuiText.Pad("APP ID", 14));
+                    Console.ForegroundColor = ConsoleColor.DarkGray;
+                    Console.Write(" ║ ");
+                    Console.ForegroundColor = ConsoleColor.Cyan;
+                    Console.Write(TuiText.Pad("TOTAL SIZE", 13));
+                    Console.ForegroundColor = ConsoleColor.DarkGray;
+                    Console.Write(" ║ ");
+                    Console.ForegroundColor = ConsoleColor.Cyan;
+                    Console.Write(TuiText.Pad("STATUS", 10));
                     Console.ForegroundColor = ConsoleColor.DarkGray;
                     Console.WriteLine(" ║");
-                }
+                    Console.WriteLine("╠════════════════════════════════════════╬════════════════╬═══════════════╬════════════╣");
 
-                Console.ForegroundColor = ConsoleColor.DarkGray;
-                Console.WriteLine("╚════════════════════════════════════════╩════════════════╩═══════════════╩════════════╝");
+                    for (var i = 0; i < totalMenuItems; i++)
+                    {
+                        Console.ForegroundColor = ConsoleColor.DarkGray;
+                        Console.Write("║ ");
 
-                Console.ForegroundColor = ConsoleColor.DarkCyan;
-                Console.WriteLine("════════════════════════════════════════════════════════════════════════════════════════");
-                Console.ForegroundColor = ConsoleColor.Cyan;
-                Console.Write("  [↑/↓] Navigate  ");
-                Console.ForegroundColor = ConsoleColor.DarkGray;
-                Console.Write("│");
-                Console.ForegroundColor = ConsoleColor.Cyan;
-                Console.Write("  [Enter] Select Game  ");
-                Console.ForegroundColor = ConsoleColor.DarkGray;
-                Console.Write("│");
-                Console.ForegroundColor = ConsoleColor.Cyan;
-                Console.Write("  [B] Batch Actions  ");
-                Console.ForegroundColor = ConsoleColor.DarkGray;
-                Console.Write("│");
-                Console.ForegroundColor = ConsoleColor.Cyan;
-                Console.WriteLine("  [Esc] Dashboard");
-                Console.ForegroundColor = ConsoleColor.DarkCyan;
-                Console.WriteLine("════════════════════════════════════════════════════════════════════════════════════════");
-                Console.ResetColor();
+                        if (i == selectedIndex)
+                        {
+                            Console.BackgroundColor = ConsoleColor.Cyan;
+                            Console.ForegroundColor = ConsoleColor.Black;
+
+                            if (i < games.Count)
+                            {
+                                var g = games[i];
+                                Console.Write(TuiText.Pad($"> {g.GameName}", 38));
+                                Console.ResetColor();
+                                Console.ForegroundColor = ConsoleColor.DarkGray;
+                                Console.Write(" ║ ");
+                                Console.ForegroundColor = ConsoleColor.White;
+                                Console.Write(TuiText.Pad(g.AppId, 14));
+                                Console.ForegroundColor = ConsoleColor.DarkGray;
+                                Console.Write(" ║ ");
+                                Console.ForegroundColor = ConsoleColor.White;
+                                Console.Write(TuiText.Pad(FormatSize(g.TotalSizeBytes), 13));
+                                Console.ForegroundColor = ConsoleColor.DarkGray;
+                                Console.Write(" ║ ");
+                                Console.ForegroundColor = g.IsVerified ? ConsoleColor.Green : ConsoleColor.Red;
+                                Console.Write(TuiText.Pad(g.IsVerified ? "Verified" : "Missing", 10));
+                            }
+                            else if (i == games.Count)
+                            {
+                                Console.Write(TuiText.Pad("> [BATCH OPERATIONS...]", 38));
+                                Console.ResetColor();
+                                Console.ForegroundColor = ConsoleColor.DarkGray;
+                                Console.Write(" ║ ");
+                                Console.Write(TuiText.Pad("", 14));
+                                Console.Write(" ║ ");
+                                Console.Write(TuiText.Pad("", 13));
+                                Console.Write(" ║ ");
+                                Console.Write(TuiText.Pad("", 10));
+                            }
+                            else
+                            {
+                                Console.Write(TuiText.Pad("> [BACK TO DASHBOARD]", 38));
+                                Console.ResetColor();
+                                Console.ForegroundColor = ConsoleColor.DarkGray;
+                                Console.Write(" ║ ");
+                                Console.Write(TuiText.Pad("", 14));
+                                Console.Write(" ║ ");
+                                Console.Write(TuiText.Pad("", 13));
+                                Console.Write(" ║ ");
+                                Console.Write(TuiText.Pad("", 10));
+                            }
+
+                            Console.ResetColor();
+                        }
+                        else
+                        {
+                            if (i < games.Count)
+                            {
+                                var g = games[i];
+                                Console.ForegroundColor = ConsoleColor.White;
+                                Console.Write(TuiText.Pad($"  {g.GameName}", 38));
+                                Console.ForegroundColor = ConsoleColor.DarkGray;
+                                Console.Write(" ║ ");
+                                Console.ForegroundColor = ConsoleColor.Gray;
+                                Console.Write(TuiText.Pad(g.AppId, 14));
+                                Console.ForegroundColor = ConsoleColor.DarkGray;
+                                Console.Write(" ║ ");
+                                Console.ForegroundColor = ConsoleColor.Gray;
+                                Console.Write(TuiText.Pad(FormatSize(g.TotalSizeBytes), 13));
+                                Console.ForegroundColor = ConsoleColor.DarkGray;
+                                Console.Write(" ║ ");
+                                Console.ForegroundColor = g.IsVerified ? ConsoleColor.Green : ConsoleColor.Red;
+                                Console.Write(TuiText.Pad(g.IsVerified ? "Verified" : "Missing", 10));
+                            }
+                            else if (i == games.Count)
+                            {
+                                Console.ForegroundColor = ConsoleColor.Yellow;
+                                Console.Write(TuiText.Pad("  [BATCH OPERATIONS...]", 38));
+                                Console.ForegroundColor = ConsoleColor.DarkGray;
+                                Console.Write(" ║ ");
+                                Console.Write(TuiText.Pad("", 14));
+                                Console.Write(" ║ ");
+                                Console.Write(TuiText.Pad("", 13));
+                                Console.Write(" ║ ");
+                                Console.Write(TuiText.Pad("", 10));
+                            }
+                            else
+                            {
+                                Console.ForegroundColor = ConsoleColor.Gray;
+                                Console.Write(TuiText.Pad("  [BACK TO DASHBOARD]", 38));
+                                Console.ForegroundColor = ConsoleColor.DarkGray;
+                                Console.Write(" ║ ");
+                                Console.Write(TuiText.Pad("", 14));
+                                Console.Write(" ║ ");
+                                Console.Write(TuiText.Pad("", 13));
+                                Console.Write(" ║ ");
+                                Console.Write(TuiText.Pad("", 10));
+                            }
+                        }
+
+                        Console.ForegroundColor = ConsoleColor.DarkGray;
+                        Console.WriteLine(" ║");
+                    }
+
+                    Console.ForegroundColor = ConsoleColor.DarkGray;
+                    Console.WriteLine("╚════════════════════════════════════════╩════════════════╩═══════════════╩════════════╝");
+
+                    Console.ForegroundColor = ConsoleColor.DarkCyan;
+                    Console.WriteLine("════════════════════════════════════════════════════════════════════════════════════════");
+                    Console.ForegroundColor = ConsoleColor.Cyan;
+                    Console.Write("  [↑/↓] Navigate  ");
+                    Console.ForegroundColor = ConsoleColor.DarkGray;
+                    Console.Write("│");
+                    Console.ForegroundColor = ConsoleColor.Cyan;
+                    Console.Write("  [Enter] Select Game  ");
+                    Console.ForegroundColor = ConsoleColor.DarkGray;
+                    Console.Write("│");
+                    Console.ForegroundColor = ConsoleColor.Cyan;
+                    Console.Write("  [B] Batch Actions  ");
+                    Console.ForegroundColor = ConsoleColor.DarkGray;
+                    Console.Write("│");
+                    Console.ForegroundColor = ConsoleColor.Cyan;
+                    Console.WriteLine("  [Esc] Dashboard");
+                    Console.ForegroundColor = ConsoleColor.DarkCyan;
+                    Console.WriteLine("════════════════════════════════════════════════════════════════════════════════════════");
+                    Console.ResetColor();
                 }
 
                 var keyInfo = Console.ReadKey(true);
                 var key = keyInfo.Key;
-                
+
                 if (key == ConsoleKey.UpArrow)
                 {
                     selectedIndex = (selectedIndex - 1 + totalMenuItems) % totalMenuItems;
@@ -542,7 +540,7 @@ namespace DepotDL.CLI.Tui
 
         private static bool RunGameDetailsMenu(LibraryGame game, TuiSession session, string ddmodPath, string dotnetPath)
         {
-            int selectedIndex = 0;
+            var selectedIndex = 0;
             while (true)
             {
                 Console.Clear();
@@ -559,77 +557,77 @@ namespace DepotDL.CLI.Tui
 
                 using (CenterConsoleOutput(80))
                 {
-                Console.ForegroundColor = ConsoleColor.DarkGray;
-                Console.WriteLine("╔══════════════════════════════════════════════════════════════════════════════╗");
-                Console.Write("║ ");
-                Console.ForegroundColor = ConsoleColor.Cyan;
-                Console.Write(TuiText.Pad($"GAME DETAILS: {game.GameName.ToUpper()}", 76));
-                Console.ForegroundColor = ConsoleColor.DarkGray;
-                Console.WriteLine(" ║");
-                Console.WriteLine("╠══════════════════════════════════════════════════════════════════════════════╣");
-
-                void DrawDetailRow(string label, string val, ConsoleColor valColor)
-                {
                     Console.ForegroundColor = ConsoleColor.DarkGray;
-                    Console.Write("║  ");
-                    Console.ForegroundColor = ConsoleColor.DarkCyan;
-                    Console.Write(TuiText.Pad(label, 18));
-                    Console.ForegroundColor = valColor;
-                    
-                    Console.Write(TuiText.Pad(val, 56));
-                    
+                    Console.WriteLine("╔══════════════════════════════════════════════════════════════════════════════╗");
+                    Console.Write("║ ");
+                    Console.ForegroundColor = ConsoleColor.Cyan;
+                    Console.Write(TuiText.Pad($"GAME DETAILS: {game.GameName.ToUpper()}", 76));
                     Console.ForegroundColor = ConsoleColor.DarkGray;
-                    Console.WriteLine("  ║");
-                }
+                    Console.WriteLine(" ║");
+                    Console.WriteLine("╠══════════════════════════════════════════════════════════════════════════════╣");
 
-                DrawDetailRow("App ID Target:", game.AppId, ConsoleColor.Green);
-                if (!string.IsNullOrEmpty(game.BuildId))
-                {
-                    DrawDetailRow("Steam Build ID:", game.BuildId, ConsoleColor.Green);
-                }
-                DrawDetailRow("Lua Config Path:", game.LuaPath, ConsoleColor.Gray);
-                DrawDetailRow("Output Folder:", game.OutputDir, ConsoleColor.Gray);
-                DrawDetailRow("Depot IDs:", string.Join(", ", game.DepotIds), ConsoleColor.White);
-                DrawDetailRow("Install Date:", game.InstallDate.ToString("g"), ConsoleColor.White);
-                DrawDetailRow("Total Size:", FormatSize(game.TotalSizeBytes), ConsoleColor.White);
-                DrawDetailRow("Verification:", game.IsVerified ? "Verified (Exists on disk)" : "Missing (Directory not found)", game.IsVerified ? ConsoleColor.Green : ConsoleColor.Red);
-
-                Console.ForegroundColor = ConsoleColor.DarkGray;
-                Console.WriteLine("╚══════════════════════════════════════════════════════════════════════════════╝");
-                Console.ResetColor();
-
-                for (int i = 0; i < menuItems.Count; i++)
-                {
-                    if (i == selectedIndex)
+                    void DrawDetailRow(string label, string val, ConsoleColor valColor)
                     {
-                        Console.BackgroundColor = ConsoleColor.Cyan;
-                        Console.ForegroundColor = ConsoleColor.Black;
-                        Console.WriteLine($">  {menuItems[i]}");
-                        Console.ResetColor();
+                        Console.ForegroundColor = ConsoleColor.DarkGray;
+                        Console.Write("║  ");
+                        Console.ForegroundColor = ConsoleColor.DarkCyan;
+                        Console.Write(TuiText.Pad(label, 18));
+                        Console.ForegroundColor = valColor;
+
+                        Console.Write(TuiText.Pad(val, 56));
+
+                        Console.ForegroundColor = ConsoleColor.DarkGray;
+                        Console.WriteLine("  ║");
                     }
-                    else
+
+                    DrawDetailRow("App ID Target:", game.AppId, ConsoleColor.Green);
+                    if (!string.IsNullOrEmpty(game.BuildId))
                     {
-                        if (i == 5)
+                        DrawDetailRow("Steam Build ID:", game.BuildId, ConsoleColor.Green);
+                    }
+                    DrawDetailRow("Lua Config Path:", game.LuaPath, ConsoleColor.Gray);
+                    DrawDetailRow("Output Folder:", game.OutputDir, ConsoleColor.Gray);
+                    DrawDetailRow("Depot IDs:", string.Join(", ", game.DepotIds), ConsoleColor.White);
+                    DrawDetailRow("Install Date:", game.InstallDate.ToString("g"), ConsoleColor.White);
+                    DrawDetailRow("Total Size:", FormatSize(game.TotalSizeBytes), ConsoleColor.White);
+                    DrawDetailRow("Verification:", game.IsVerified ? "Verified (Exists on disk)" : "Missing (Directory not found)", game.IsVerified ? ConsoleColor.Green : ConsoleColor.Red);
+
+                    Console.ForegroundColor = ConsoleColor.DarkGray;
+                    Console.WriteLine("╚══════════════════════════════════════════════════════════════════════════════╝");
+                    Console.ResetColor();
+
+                    for (var i = 0; i < menuItems.Count; i++)
+                    {
+                        if (i == selectedIndex)
                         {
-                            Console.ForegroundColor = ConsoleColor.Red;
-                            Console.WriteLine($"   {menuItems[i]}");
+                            Console.BackgroundColor = ConsoleColor.Cyan;
+                            Console.ForegroundColor = ConsoleColor.Black;
+                            Console.WriteLine($">  {menuItems[i]}");
+                            Console.ResetColor();
                         }
                         else
                         {
-                            Console.ForegroundColor = ConsoleColor.White;
-                            Console.WriteLine($"   {menuItems[i]}");
+                            if (i == 5)
+                            {
+                                Console.ForegroundColor = ConsoleColor.Red;
+                                Console.WriteLine($"   {menuItems[i]}");
+                            }
+                            else
+                            {
+                                Console.ForegroundColor = ConsoleColor.White;
+                                Console.WriteLine($"   {menuItems[i]}");
+                            }
+                            Console.ResetColor();
                         }
-                        Console.ResetColor();
                     }
-                }
 
-                Console.ForegroundColor = ConsoleColor.DarkCyan;
-                Console.WriteLine("\n══════════════════════════════════════════════════════════════════════════════════");
-                Console.ForegroundColor = ConsoleColor.Cyan;
-                Console.WriteLine("  [↑/↓] Navigate   [Enter] Confirm Selected Action   [Esc] Back to Library");
-                Console.ForegroundColor = ConsoleColor.DarkCyan;
-                Console.WriteLine("══════════════════════════════════════════════════════════════════════════════════");
-                Console.ResetColor();
+                    Console.ForegroundColor = ConsoleColor.DarkCyan;
+                    Console.WriteLine("\n══════════════════════════════════════════════════════════════════════════════════");
+                    Console.ForegroundColor = ConsoleColor.Cyan;
+                    Console.WriteLine("  [↑/↓] Navigate   [Enter] Confirm Selected Action   [Esc] Back to Library");
+                    Console.ForegroundColor = ConsoleColor.DarkCyan;
+                    Console.WriteLine("══════════════════════════════════════════════════════════════════════════════════");
+                    Console.ResetColor();
                 }
 
                 var key = Console.ReadKey(true).Key;
@@ -653,11 +651,11 @@ namespace DepotDL.CLI.Tui
                         Console.ForegroundColor = ConsoleColor.Cyan;
                         Console.WriteLine("Applying Goldberg Steam Emulator...");
                         Console.ResetColor();
-                        bool fixSuccess = GameLauncher.EnsureGbeApplied(game.AppId, game.OutputDir, game.LuaPath, session.SteamWebApiKey, session.DownloadAchievementIcons);
+                        var fixSuccess = GameLauncher.EnsureGbeApplied(game.AppId, game.OutputDir, game.LuaPath, session.SteamWebApiKey, session.DownloadAchievementIcons);
                         if (!fixSuccess)
                         {
-                            string logPath = Path.Combine(game.OutputDir, "sff_fix_error.log");
-                            string errorMsg = "Failed to apply Goldberg Steam Emulator fix.";
+                            var logPath = Path.Combine(game.OutputDir, "sff_fix_error.log");
+                            var errorMsg = "Failed to apply Goldberg Steam Emulator fix.";
                             if (File.Exists(logPath))
                             {
                                 try
@@ -665,12 +663,12 @@ namespace DepotDL.CLI.Tui
                                     errorMsg += "\nDetails:\n" + File.ReadAllText(logPath);
                                     File.Delete(logPath);
                                 }
-                                catch {}
+                                catch { }
                             }
                             PromptText("LAUNCH GAME", $"{errorMsg}\nPress Enter to return.", "");
                             continue;
                         }
-                        string? launchTarget = GameLauncher.FindLaunchTarget(game.OutputDir);
+                        var launchTarget = GameLauncher.FindLaunchTarget(game.OutputDir);
                         if (string.IsNullOrEmpty(launchTarget))
                         {
                             PromptText("LAUNCH GAME", "Could not find any suitable executable or launch script in the game folder. Press Enter to return.", "");
@@ -691,7 +689,7 @@ namespace DepotDL.CLI.Tui
                         {
                             if (Directory.Exists(game.OutputDir))
                             {
-                                string openCmd = OperatingSystem.IsWindows() ? "explorer.exe"
+                                var openCmd = OperatingSystem.IsWindows() ? "explorer.exe"
                                     : OperatingSystem.IsMacOS() ? "open"
                                     : "xdg-open";
                                 Process.Start(new ProcessStartInfo
@@ -714,14 +712,14 @@ namespace DepotDL.CLI.Tui
                     else if (selectedIndex == 2)
                     {
                         Console.Clear();
-                        bool exists = Directory.Exists(game.OutputDir);
-                        long size = exists ? LibraryManager.GetDirectorySize(game.OutputDir) : 0;
-                        
+                        var exists = Directory.Exists(game.OutputDir);
+                        var size = exists ? LibraryManager.GetDirectorySize(game.OutputDir) : 0;
+
                         game.IsVerified = exists;
                         game.TotalSizeBytes = size;
-                        
+
                         LibraryManager.AddOrUpdateGame(game);
-                        
+
                         if (exists)
                         {
                             PromptText("VERIFY FILES", $"Verified! Updated size: {FormatSize(size)}. Press Enter.", "");
@@ -757,7 +755,7 @@ namespace DepotDL.CLI.Tui
                             repairSession.SelectedDepots = restoredDepots;
                         }
 
-                        int exitCode = Program.TriggerDownloadProcess(
+                        var exitCode = Program.TriggerDownloadProcess(
                             repairSession.LuaPath,
                             repairSession.ManifestsDir,
                             repairSession.OutputDir,
@@ -771,12 +769,12 @@ namespace DepotDL.CLI.Tui
 
                         if (exitCode == 0)
                         {
-                            bool exists = Directory.Exists(game.OutputDir);
-                            long size = exists ? LibraryManager.GetDirectorySize(game.OutputDir) : 0;
+                            var exists = Directory.Exists(game.OutputDir);
+                            var size = exists ? LibraryManager.GetDirectorySize(game.OutputDir) : 0;
                             game.IsVerified = exists;
                             game.TotalSizeBytes = size;
                             LibraryManager.AddOrUpdateGame(game);
-                            
+
                             PromptText("VERIFY & REPAIR SUCCESS", $"Deep verification and repair completed successfully! Cleaned and verified size: {FormatSize(size)}. Press Enter.", "");
                         }
                         else
@@ -798,7 +796,7 @@ namespace DepotDL.CLI.Tui
                         }
 
                         ParseLuaFileIntoSession(session);
-                        
+
                         var restoredDepots = new List<DepotInfo>();
                         foreach (var depId in game.DepotIds)
                         {
@@ -818,20 +816,20 @@ namespace DepotDL.CLI.Tui
                         Console.Clear();
                         using (CenterConsoleOutput(80))
                         {
-                        Console.ForegroundColor = ConsoleColor.Red;
-                        Console.WriteLine("╔══════════════════════════════════════════════════════════════════════════════╗");
-                        Console.WriteLine("║                           CONFIRM UNINSTALLATION                             ║");
-                        Console.WriteLine("╚══════════════════════════════════════════════════════════════════════════════╝");
-                        Console.ResetColor();
-                        Console.WriteLine($"You are about to delete: {game.GameName}");
-                        Console.WriteLine($"This will recursively DELETE all files inside: {game.OutputDir}");
-                        Console.ForegroundColor = ConsoleColor.Yellow;
-                        Console.WriteLine("\nWARNING: THIS ACTION CANNOT BE UNDONE!");
-                        Console.ResetColor();
-                        Console.Write("\nAre you absolutely sure you want to uninstall and delete files? (y/N): ");
+                            Console.ForegroundColor = ConsoleColor.Red;
+                            Console.WriteLine("╔══════════════════════════════════════════════════════════════════════════════╗");
+                            Console.WriteLine("║                           CONFIRM UNINSTALLATION                             ║");
+                            Console.WriteLine("╚══════════════════════════════════════════════════════════════════════════════╝");
+                            Console.ResetColor();
+                            Console.WriteLine($"You are about to delete: {game.GameName}");
+                            Console.WriteLine($"This will recursively DELETE all files inside: {game.OutputDir}");
+                            Console.ForegroundColor = ConsoleColor.Yellow;
+                            Console.WriteLine("\nWARNING: THIS ACTION CANNOT BE UNDONE!");
+                            Console.ResetColor();
+                            Console.Write("\nAre you absolutely sure you want to uninstall and delete files? (y/N): ");
                         }
-                        
-                        string? input = Console.ReadLine()?.Trim().ToLower();
+
+                        var input = Console.ReadLine()?.Trim().ToLower();
                         if (input == "y" || input == "yes")
                         {
                             var deleted = LibraryManager.RobustDeleteDirectory(game.OutputDir);
@@ -857,7 +855,7 @@ namespace DepotDL.CLI.Tui
 
         private static void RunLibraryBatchActions(TuiSession session, string ddmodPath, string dotnetPath)
         {
-            int selectedIndex = 0;
+            var selectedIndex = 0;
             while (true)
             {
                 Console.Clear();
@@ -872,40 +870,40 @@ namespace DepotDL.CLI.Tui
 
                 using (CenterConsoleOutput(80))
                 {
-                Console.ForegroundColor = ConsoleColor.DarkGray;
-                Console.WriteLine("╔══════════════════════════════════════════════════════════════════════════════╗");
-                Console.Write("║ ");
-                Console.ForegroundColor = ConsoleColor.Cyan;
-                Console.Write(TuiText.Pad("LIBRARY BATCH OPERATIONS", 76));
-                Console.ForegroundColor = ConsoleColor.DarkGray;
-                Console.WriteLine(" ║");
-                Console.WriteLine("╚══════════════════════════════════════════════════════════════════════════════╝");
-                Console.ResetColor();
+                    Console.ForegroundColor = ConsoleColor.DarkGray;
+                    Console.WriteLine("╔══════════════════════════════════════════════════════════════════════════════╗");
+                    Console.Write("║ ");
+                    Console.ForegroundColor = ConsoleColor.Cyan;
+                    Console.Write(TuiText.Pad("LIBRARY BATCH OPERATIONS", 76));
+                    Console.ForegroundColor = ConsoleColor.DarkGray;
+                    Console.WriteLine(" ║");
+                    Console.WriteLine("╚══════════════════════════════════════════════════════════════════════════════╝");
+                    Console.ResetColor();
 
-                for (int i = 0; i < menuItems.Count; i++)
-                {
-                    if (i == selectedIndex)
+                    for (var i = 0; i < menuItems.Count; i++)
                     {
-                        Console.BackgroundColor = ConsoleColor.Cyan;
-                        Console.ForegroundColor = ConsoleColor.Black;
-                        Console.WriteLine($">  {menuItems[i]}");
-                        Console.ResetColor();
+                        if (i == selectedIndex)
+                        {
+                            Console.BackgroundColor = ConsoleColor.Cyan;
+                            Console.ForegroundColor = ConsoleColor.Black;
+                            Console.WriteLine($">  {menuItems[i]}");
+                            Console.ResetColor();
+                        }
+                        else
+                        {
+                            Console.ForegroundColor = ConsoleColor.White;
+                            Console.WriteLine($"   {menuItems[i]}");
+                            Console.ResetColor();
+                        }
                     }
-                    else
-                    {
-                        Console.ForegroundColor = ConsoleColor.White;
-                        Console.WriteLine($"   {menuItems[i]}");
-                        Console.ResetColor();
-                    }
-                }
 
-                Console.ForegroundColor = ConsoleColor.DarkCyan;
-                Console.WriteLine("\n══════════════════════════════════════════════════════════════════════════════════");
-                Console.ForegroundColor = ConsoleColor.Cyan;
-                Console.WriteLine("  [↑/↓] Navigate   [Enter] Confirm Action   [Esc] Return to Library Dashboard");
-                Console.ForegroundColor = ConsoleColor.DarkCyan;
-                Console.WriteLine("══════════════════════════════════════════════════════════════════════════════════");
-                Console.ResetColor();
+                    Console.ForegroundColor = ConsoleColor.DarkCyan;
+                    Console.WriteLine("\n══════════════════════════════════════════════════════════════════════════════════");
+                    Console.ForegroundColor = ConsoleColor.Cyan;
+                    Console.WriteLine("  [↑/↓] Navigate   [Enter] Confirm Action   [Esc] Return to Library Dashboard");
+                    Console.ForegroundColor = ConsoleColor.DarkCyan;
+                    Console.WriteLine("══════════════════════════════════════════════════════════════════════════════════");
+                    Console.ResetColor();
                 }
 
                 var key = Console.ReadKey(true).Key;
@@ -927,11 +925,11 @@ namespace DepotDL.CLI.Tui
                     {
                         Console.Clear();
                         var games = LibraryManager.LoadLibrary();
-                        int verifiedCount = 0;
-                        int missingCount = 0;
+                        var verifiedCount = 0;
+                        var missingCount = 0;
                         foreach (var g in games)
                         {
-                            bool exists = Directory.Exists(g.OutputDir);
+                            var exists = Directory.Exists(g.OutputDir);
                             g.IsVerified = exists;
                             g.TotalSizeBytes = exists ? LibraryManager.GetDirectorySize(g.OutputDir) : 0;
                             if (exists) verifiedCount++; else missingCount++;
@@ -943,9 +941,9 @@ namespace DepotDL.CLI.Tui
                     {
                         Console.Clear();
                         var games = LibraryManager.LoadLibrary();
-                        int initialCount = games.Count;
+                        var initialCount = games.Count;
                         games.RemoveAll(g => !Directory.Exists(g.OutputDir));
-                        int finalCount = games.Count;
+                        var finalCount = games.Count;
                         LibraryManager.SaveLibrary(games);
                         PromptText("BATCH PRUNE", $"Pruned {initialCount - finalCount} missing game record(s). Press Enter.", "");
                     }
@@ -980,26 +978,26 @@ namespace DepotDL.CLI.Tui
             Console.Clear();
             using (CenterConsoleOutput(80))
             {
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine("╔══════════════════════════════════════════════════════════════════════════════╗");
-            Console.WriteLine("║                      CONFIRM BULK UNINSTALLATION                            ║");
-            Console.WriteLine("╚══════════════════════════════════════════════════════════════════════════════╝");
-            Console.ResetColor();
-            Console.WriteLine($"You are about to delete {selected.Count} game(s) and ALL of their files from disk:");
-            foreach (var g in selected)
-            {
-                Console.WriteLine($"  - {g.GameName} ({g.OutputDir})");
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("╔══════════════════════════════════════════════════════════════════════════════╗");
+                Console.WriteLine("║                      CONFIRM BULK UNINSTALLATION                            ║");
+                Console.WriteLine("╚══════════════════════════════════════════════════════════════════════════════╝");
+                Console.ResetColor();
+                Console.WriteLine($"You are about to delete {selected.Count} game(s) and ALL of their files from disk:");
+                foreach (var g in selected)
+                {
+                    Console.WriteLine($"  - {g.GameName} ({g.OutputDir})");
+                }
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.WriteLine("\nWARNING: THIS WILL RECURSIVELY DELETE ALL GAME DIRECTORIES LISTED!");
+                Console.ResetColor();
+                Console.Write("\nAre you absolutely sure you want to proceed? (y/N): ");
             }
-            Console.ForegroundColor = ConsoleColor.Yellow;
-            Console.WriteLine("\nWARNING: THIS WILL RECURSIVELY DELETE ALL GAME DIRECTORIES LISTED!");
-            Console.ResetColor();
-            Console.Write("\nAre you absolutely sure you want to proceed? (y/N): ");
-            }
-            string? input = Console.ReadLine()?.Trim().ToLower();
+            var input = Console.ReadLine()?.Trim().ToLower();
             if (input == "y" || input == "yes")
             {
-                int successCount = 0;
-                int failCount = 0;
+                var successCount = 0;
+                var failCount = 0;
                 foreach (var g in selected)
                 {
                     var deleted = LibraryManager.RobustDeleteDirectory(g.OutputDir);
@@ -1039,32 +1037,32 @@ namespace DepotDL.CLI.Tui
             Console.Clear();
             using (CenterConsoleOutput(80))
             {
-            Console.ForegroundColor = ConsoleColor.Cyan;
-            Console.WriteLine("╔══════════════════════════════════════════════════════════════════════════════╗");
-            Console.WriteLine("║                     SEQUENTIAL BATCH DOWNLOAD QUEUE                          ║");
-            Console.WriteLine("╚══════════════════════════════════════════════════════════════════════════════╝");
-            Console.ResetColor();
-            Console.WriteLine($"You have selected {selected.Count} game(s) to download sequentially:\n");
-            for (int i = 0; i < selected.Count; i++)
-            {
-                Console.WriteLine($"  {i + 1}. {selected[i].GameName} (App ID: {selected[i].AppId})");
-            }
-            Console.Write("\nPress Enter to begin the batch queue or Escape to cancel...");
+                Console.ForegroundColor = ConsoleColor.Cyan;
+                Console.WriteLine("╔══════════════════════════════════════════════════════════════════════════════╗");
+                Console.WriteLine("║                     SEQUENTIAL BATCH DOWNLOAD QUEUE                          ║");
+                Console.WriteLine("╚══════════════════════════════════════════════════════════════════════════════╝");
+                Console.ResetColor();
+                Console.WriteLine($"You have selected {selected.Count} game(s) to download sequentially:\n");
+                for (var i = 0; i < selected.Count; i++)
+                {
+                    Console.WriteLine($"  {i + 1}. {selected[i].GameName} (App ID: {selected[i].AppId})");
+                }
+                Console.Write("\nPress Enter to begin the batch queue or Escape to cancel...");
             }
             var k = Console.ReadKey(true).Key;
             if (k != ConsoleKey.Enter) return;
 
-            for (int i = 0; i < selected.Count; i++)
+            for (var i = 0; i < selected.Count; i++)
             {
                 var game = selected[i];
                 Console.Clear();
                 using (CenterConsoleOutput(80))
                 {
-                Console.ForegroundColor = ConsoleColor.Cyan;
-                Console.WriteLine("╔══════════════════════════════════════════════════════════════════════════════╗");
-                Console.WriteLine($"║ {TuiText.Pad($"BATCH QUEUE: {i + 1} OF {selected.Count} - {game.GameName.ToUpper()}", 76)} ║");
-                Console.WriteLine("╚══════════════════════════════════════════════════════════════════════════════╝");
-                Console.ResetColor();
+                    Console.ForegroundColor = ConsoleColor.Cyan;
+                    Console.WriteLine("╔══════════════════════════════════════════════════════════════════════════════╗");
+                    Console.WriteLine($"║ {TuiText.Pad($"BATCH QUEUE: {i + 1} OF {selected.Count} - {game.GameName.ToUpper()}", 76)} ║");
+                    Console.WriteLine("╚══════════════════════════════════════════════════════════════════════════════╝");
+                    Console.ResetColor();
                 }
 
                 if (!File.Exists(game.LuaPath))
@@ -1103,7 +1101,7 @@ namespace DepotDL.CLI.Tui
                     batchSession.SelectedDepots = restoredDepots;
                 }
 
-                int exitCode = Program.TriggerDownloadProcess(
+                var exitCode = Program.TriggerDownloadProcess(
                     batchSession.LuaPath,
                     batchSession.ManifestsDir,
                     batchSession.OutputDir,
@@ -1138,7 +1136,7 @@ namespace DepotDL.CLI.Tui
 
         private static List<LibraryGame> RunCheckboxSelectorGames(string prompt, List<LibraryGame> options)
         {
-            int index = 0;
+            var index = 0;
             var selected = new bool[options.Count];
 
             while (true)
@@ -1146,52 +1144,52 @@ namespace DepotDL.CLI.Tui
                 Console.Clear();
                 using (CenterConsoleOutput(80))
                 {
-                Console.ForegroundColor = ConsoleColor.DarkGray;
-                Console.WriteLine("╔══════════════════════════════════════════════════════════════════════════════╗");
-                Console.Write("║ ");
-                Console.ForegroundColor = ConsoleColor.Cyan;
-                Console.Write(TuiText.Pad(prompt.ToUpper(), 76));
-                Console.ForegroundColor = ConsoleColor.DarkGray;
-                Console.WriteLine(" ║");
-                Console.WriteLine("╚══════════════════════════════════════════════════════════════════════════════╝");
-                Console.ResetColor();
+                    Console.ForegroundColor = ConsoleColor.DarkGray;
+                    Console.WriteLine("╔══════════════════════════════════════════════════════════════════════════════╗");
+                    Console.Write("║ ");
+                    Console.ForegroundColor = ConsoleColor.Cyan;
+                    Console.Write(TuiText.Pad(prompt.ToUpper(), 76));
+                    Console.ForegroundColor = ConsoleColor.DarkGray;
+                    Console.WriteLine(" ║");
+                    Console.WriteLine("╚══════════════════════════════════════════════════════════════════════════════╝");
+                    Console.ResetColor();
 
-                for (int i = 0; i < options.Count; i++)
-                {
-                    var isCurrent = i == index;
-                    var isChecked = selected[i];
-                    var checkbox = isChecked ? "[X]" : "[ ]";
+                    for (var i = 0; i < options.Count; i++)
+                    {
+                        var isCurrent = i == index;
+                        var isChecked = selected[i];
+                        var checkbox = isChecked ? "[X]" : "[ ]";
 
-                    if (isCurrent)
-                    {
-                        Console.BackgroundColor = ConsoleColor.Cyan;
-                        Console.ForegroundColor = ConsoleColor.Black;
-                        Console.WriteLine($">  {checkbox} {options[i].GameName} ({options[i].AppId})");
-                        Console.ResetColor();
-                    }
-                    else
-                    {
-                        if (isChecked)
+                        if (isCurrent)
                         {
-                            Console.ForegroundColor = ConsoleColor.Green;
-                            Console.WriteLine($"   {checkbox} {options[i].GameName} ({options[i].AppId})");
+                            Console.BackgroundColor = ConsoleColor.Cyan;
+                            Console.ForegroundColor = ConsoleColor.Black;
+                            Console.WriteLine($">  {checkbox} {options[i].GameName} ({options[i].AppId})");
+                            Console.ResetColor();
                         }
                         else
                         {
-                            Console.ForegroundColor = ConsoleColor.Gray;
-                            Console.WriteLine($"   {checkbox} {options[i].GameName} ({options[i].AppId})");
+                            if (isChecked)
+                            {
+                                Console.ForegroundColor = ConsoleColor.Green;
+                                Console.WriteLine($"   {checkbox} {options[i].GameName} ({options[i].AppId})");
+                            }
+                            else
+                            {
+                                Console.ForegroundColor = ConsoleColor.Gray;
+                                Console.WriteLine($"   {checkbox} {options[i].GameName} ({options[i].AppId})");
+                            }
+                            Console.ResetColor();
                         }
-                        Console.ResetColor();
                     }
-                }
 
-                Console.ForegroundColor = ConsoleColor.DarkCyan;
-                Console.WriteLine("\n══════════════════════════════════════════════════════════════════════════════════");
-                Console.ForegroundColor = ConsoleColor.Cyan;
-                Console.WriteLine("  [↑/↓] Navigate  [Space] Toggle  [A] Check All  [D] Clear All  [Enter] Confirm");
-                Console.ForegroundColor = ConsoleColor.DarkCyan;
-                Console.WriteLine("══════════════════════════════════════════════════════════════════════════════════");
-                Console.ResetColor();
+                    Console.ForegroundColor = ConsoleColor.DarkCyan;
+                    Console.WriteLine("\n══════════════════════════════════════════════════════════════════════════════════");
+                    Console.ForegroundColor = ConsoleColor.Cyan;
+                    Console.WriteLine("  [↑/↓] Navigate  [Space] Toggle  [A] Check All  [D] Clear All  [Enter] Confirm");
+                    Console.ForegroundColor = ConsoleColor.DarkCyan;
+                    Console.WriteLine("══════════════════════════════════════════════════════════════════════════════════");
+                    Console.ResetColor();
                 }
 
                 var key = Console.ReadKey(true).Key;
@@ -1209,16 +1207,16 @@ namespace DepotDL.CLI.Tui
                 }
                 else if (key == ConsoleKey.A)
                 {
-                    for (int i = 0; i < options.Count; i++) selected[i] = true;
+                    for (var i = 0; i < options.Count; i++) selected[i] = true;
                 }
                 else if (key == ConsoleKey.D)
                 {
-                    for (int i = 0; i < options.Count; i++) selected[i] = false;
+                    for (var i = 0; i < options.Count; i++) selected[i] = false;
                 }
                 else if (key == ConsoleKey.Enter)
                 {
                     var result = new List<LibraryGame>();
-                    for (int i = 0; i < options.Count; i++)
+                    for (var i = 0; i < options.Count; i++)
                     {
                         if (selected[i]) result.Add(options[i]);
                     }
@@ -1233,13 +1231,13 @@ namespace DepotDL.CLI.Tui
 
         private static void RunManifestCacheManager(TuiSession session)
         {
-            int selectedIndex = 0;
+            var selectedIndex = 0;
             while (true)
             {
                 Console.Clear();
-                string currentDir = session.ManifestsDir ?? "manifests";
-                int manifestCount = 0;
-                int luaCount = 0;
+                var currentDir = session.ManifestsDir ?? "manifests";
+                var manifestCount = 0;
+                var luaCount = 0;
                 long totalSize = 0;
 
                 try
@@ -1270,62 +1268,62 @@ namespace DepotDL.CLI.Tui
 
                 using (CenterConsoleOutput(80))
                 {
-                Console.ForegroundColor = ConsoleColor.DarkGray;
-                Console.WriteLine("╔══════════════════════════════════════════════════════════════════════════════╗");
-                Console.Write("║ ");
-                Console.ForegroundColor = ConsoleColor.Cyan;
-                Console.Write(TuiText.Pad("MANIFEST CACHE MANAGER", 76));
-                Console.ForegroundColor = ConsoleColor.DarkGray;
-                Console.WriteLine(" ║");
-                Console.WriteLine("╠══════════════════════════════════════════════════════════════════════════════╣");
-
-                void DrawCacheRow(string label, string val, ConsoleColor valColor)
-                {
                     Console.ForegroundColor = ConsoleColor.DarkGray;
-                    Console.Write("║  ");
+                    Console.WriteLine("╔══════════════════════════════════════════════════════════════════════════════╗");
+                    Console.Write("║ ");
+                    Console.ForegroundColor = ConsoleColor.Cyan;
+                    Console.Write(TuiText.Pad("MANIFEST CACHE MANAGER", 76));
+                    Console.ForegroundColor = ConsoleColor.DarkGray;
+                    Console.WriteLine(" ║");
+                    Console.WriteLine("╠══════════════════════════════════════════════════════════════════════════════╣");
+
+                    void DrawCacheRow(string label, string val, ConsoleColor valColor)
+                    {
+                        Console.ForegroundColor = ConsoleColor.DarkGray;
+                        Console.Write("║  ");
+                        Console.ForegroundColor = ConsoleColor.DarkCyan;
+                        Console.Write(TuiText.Pad(label, 22));
+                        Console.ForegroundColor = valColor;
+
+                        Console.Write(TuiText.Pad(val, 50));
+
+                        Console.ForegroundColor = ConsoleColor.DarkGray;
+                        Console.WriteLine("  ║");
+                    }
+
+                    DrawCacheRow("Cache Directory:", Path.GetFullPath(currentDir), ConsoleColor.White);
+                    DrawCacheRow("Manifest Files Count:", manifestCount.ToString(), ConsoleColor.Green);
+                    DrawCacheRow("Manifest Cache Size:", FormatSize(totalSize), ConsoleColor.Green);
+                    DrawCacheRow("Lua Configs Found:", luaCount.ToString(), ConsoleColor.White);
+
+                    Console.ForegroundColor = ConsoleColor.DarkGray;
+                    Console.WriteLine("╚══════════════════════════════════════════════════════════════════════════════╝");
+                    Console.ResetColor();
+
+                    for (var i = 0; i < menuItems.Count; i++)
+                    {
+                        if (i == selectedIndex)
+                        {
+                            Console.BackgroundColor = ConsoleColor.Cyan;
+                            Console.ForegroundColor = ConsoleColor.Black;
+                            Console.WriteLine($">  {menuItems[i]}");
+                            Console.ResetColor();
+                        }
+                        else
+                        {
+                            Console.ForegroundColor = ConsoleColor.White;
+                            Console.WriteLine($"   {menuItems[i]}");
+                            Console.ResetColor();
+                        }
+                    }
+
                     Console.ForegroundColor = ConsoleColor.DarkCyan;
-                    Console.Write(TuiText.Pad(label, 22));
-                    Console.ForegroundColor = valColor;
-                    
-                    Console.Write(TuiText.Pad(val, 50));
-                    
-                    Console.ForegroundColor = ConsoleColor.DarkGray;
-                    Console.WriteLine("  ║");
-                }
-
-                DrawCacheRow("Cache Directory:", Path.GetFullPath(currentDir), ConsoleColor.White);
-                DrawCacheRow("Manifest Files Count:", manifestCount.ToString(), ConsoleColor.Green);
-                DrawCacheRow("Manifest Cache Size:", FormatSize(totalSize), ConsoleColor.Green);
-                DrawCacheRow("Lua Configs Found:", luaCount.ToString(), ConsoleColor.White);
-
-                Console.ForegroundColor = ConsoleColor.DarkGray;
-                Console.WriteLine("╚══════════════════════════════════════════════════════════════════════════════╝");
-                Console.ResetColor();
-
-                for (int i = 0; i < menuItems.Count; i++)
-                {
-                    if (i == selectedIndex)
-                    {
-                        Console.BackgroundColor = ConsoleColor.Cyan;
-                        Console.ForegroundColor = ConsoleColor.Black;
-                        Console.WriteLine($">  {menuItems[i]}");
-                        Console.ResetColor();
-                    }
-                    else
-                    {
-                        Console.ForegroundColor = ConsoleColor.White;
-                        Console.WriteLine($"   {menuItems[i]}");
-                        Console.ResetColor();
-                    }
-                }
-
-                Console.ForegroundColor = ConsoleColor.DarkCyan;
-                Console.WriteLine("\n══════════════════════════════════════════════════════════════════════════════════");
-                Console.ForegroundColor = ConsoleColor.Cyan;
-                Console.WriteLine("  [↑/↓] Navigate   [Enter] Confirm Selected Action   [Esc] Return to Dashboard");
-                Console.ForegroundColor = ConsoleColor.DarkCyan;
-                Console.WriteLine("══════════════════════════════════════════════════════════════════════════════════");
-                Console.ResetColor();
+                    Console.WriteLine("\n══════════════════════════════════════════════════════════════════════════════════");
+                    Console.ForegroundColor = ConsoleColor.Cyan;
+                    Console.WriteLine("  [↑/↓] Navigate   [Enter] Confirm Selected Action   [Esc] Return to Dashboard");
+                    Console.ForegroundColor = ConsoleColor.DarkCyan;
+                    Console.WriteLine("══════════════════════════════════════════════════════════════════════════════════");
+                    Console.ResetColor();
                 }
 
                 var key = Console.ReadKey(true).Key;
@@ -1364,23 +1362,23 @@ namespace DepotDL.CLI.Tui
                         Console.Clear();
                         using (CenterConsoleOutput(80))
                         {
-                        Console.ForegroundColor = ConsoleColor.Red;
-                        Console.WriteLine("╔══════════════════════════════════════════════════════════════════════════════╗");
-                        Console.WriteLine("║                           CLEAR MANIFEST CACHE                               ║");
-                        Console.WriteLine("╚══════════════════════════════════════════════════════════════════════════════╝");
-                        Console.ResetColor();
-                        Console.WriteLine($"You are about to delete ALL manifest files inside: {Path.GetFullPath(currentDir)}");
-                        Console.ForegroundColor = ConsoleColor.Yellow;
-                        Console.WriteLine("\nWARNING: THIS WILL PERMANENTLY DELETE ALL CACHED *.MANIFEST FILES IN THIS FOLDER!");
-                        Console.ResetColor();
-                        Console.Write("\nAre you sure you want to clear the manifest cache? (y/N): ");
+                            Console.ForegroundColor = ConsoleColor.Red;
+                            Console.WriteLine("╔══════════════════════════════════════════════════════════════════════════════╗");
+                            Console.WriteLine("║                           CLEAR MANIFEST CACHE                               ║");
+                            Console.WriteLine("╚══════════════════════════════════════════════════════════════════════════════╝");
+                            Console.ResetColor();
+                            Console.WriteLine($"You are about to delete ALL manifest files inside: {Path.GetFullPath(currentDir)}");
+                            Console.ForegroundColor = ConsoleColor.Yellow;
+                            Console.WriteLine("\nWARNING: THIS WILL PERMANENTLY DELETE ALL CACHED *.MANIFEST FILES IN THIS FOLDER!");
+                            Console.ResetColor();
+                            Console.Write("\nAre you sure you want to clear the manifest cache? (y/N): ");
                         }
-                        string? input = Console.ReadLine()?.Trim().ToLower();
+                        var input = Console.ReadLine()?.Trim().ToLower();
                         if (input == "y" || input == "yes")
                         {
                             try
                             {
-                                int deletedCount = 0;
+                                var deletedCount = 0;
                                 if (Directory.Exists(currentDir))
                                 {
                                     var di = new DirectoryInfo(currentDir);
@@ -1409,7 +1407,7 @@ namespace DepotDL.CLI.Tui
         private static void RunScanCachedManifestDetails(TuiSession session)
         {
             Console.Clear();
-            string currentDir = session.ManifestsDir ?? "manifests";
+            var currentDir = session.ManifestsDir ?? "manifests";
             if (!Directory.Exists(currentDir))
             {
                 PromptText("MANIFEST DETAILS", "Manifest folder does not exist yet on disk. Press Enter.", "");
@@ -1425,48 +1423,48 @@ namespace DepotDL.CLI.Tui
 
             using (CenterConsoleOutput(80))
             {
-            Console.ForegroundColor = ConsoleColor.DarkGray;
-            Console.WriteLine("╔══════════════════════════════════════════════════════════════════════════════╗");
-            Console.Write("║ ");
-            Console.ForegroundColor = ConsoleColor.Cyan;
-            Console.Write(TuiText.Pad($"CACHED MANIFEST FILES ({files.Length} FOUND)", 76));
-            Console.ForegroundColor = ConsoleColor.DarkGray;
-            Console.WriteLine(" ║");
-            Console.WriteLine("╠══════════════════════════════════════════════════════════════════════════════╣");
-            Console.ResetColor();
+                Console.ForegroundColor = ConsoleColor.DarkGray;
+                Console.WriteLine("╔══════════════════════════════════════════════════════════════════════════════╗");
+                Console.Write("║ ");
+                Console.ForegroundColor = ConsoleColor.Cyan;
+                Console.Write(TuiText.Pad($"CACHED MANIFEST FILES ({files.Length} FOUND)", 76));
+                Console.ForegroundColor = ConsoleColor.DarkGray;
+                Console.WriteLine(" ║");
+                Console.WriteLine("╠══════════════════════════════════════════════════════════════════════════════╣");
+                Console.ResetColor();
 
-            Console.ForegroundColor = ConsoleColor.DarkCyan;
-            Console.WriteLine($"  {TuiText.Pad("Depot ID", 15)} │ {TuiText.Pad("Manifest ID", 22)} │ {TuiText.Pad("File Size", 15)} │ Filename");
-            Console.WriteLine(new string('═', 78));
-            Console.ResetColor();
+                Console.ForegroundColor = ConsoleColor.DarkCyan;
+                Console.WriteLine($"  {TuiText.Pad("Depot ID", 15)} │ {TuiText.Pad("Manifest ID", 22)} │ {TuiText.Pad("File Size", 15)} │ Filename");
+                Console.WriteLine(new string('═', 78));
+                Console.ResetColor();
 
-            foreach (var file in files)
-            {
-                var name = Path.GetFileNameWithoutExtension(file);
-                var fi = new FileInfo(file);
-                var sizeStr = FormatSize(fi.Length);
-
-                string depotId = "Unknown";
-                string manifestId = "Unknown";
-
-                var parts = name.Split('_');
-                if (parts.Length >= 2)
+                foreach (var file in files)
                 {
-                    depotId = parts[0];
-                    manifestId = parts[1];
-                }
-                else
-                {
-                    depotId = name;
+                    var name = Path.GetFileNameWithoutExtension(file);
+                    var fi = new FileInfo(file);
+                    var sizeStr = FormatSize(fi.Length);
+
+                    var depotId = "Unknown";
+                    var manifestId = "Unknown";
+
+                    var parts = name.Split('_');
+                    if (parts.Length >= 2)
+                    {
+                        depotId = parts[0];
+                        manifestId = parts[1];
+                    }
+                    else
+                    {
+                        depotId = name;
+                    }
+
+                    Console.WriteLine($"  {TuiText.Pad(depotId, 15)} │ {TuiText.Pad(manifestId, 22)} │ {TuiText.Pad(sizeStr, 15)} │ {Path.GetFileName(file)}");
                 }
 
-                Console.WriteLine($"  {TuiText.Pad(depotId, 15)} │ {TuiText.Pad(manifestId, 22)} │ {TuiText.Pad(sizeStr, 15)} │ {Path.GetFileName(file)}");
-            }
-
-            Console.ForegroundColor = ConsoleColor.DarkCyan;
-            Console.WriteLine("══════════════════════════════════════════════════════════════════════════════════");
-            Console.ResetColor();
-            Console.WriteLine("\nPress any key to return to Manifest Cache Manager.");
+                Console.ForegroundColor = ConsoleColor.DarkCyan;
+                Console.WriteLine("══════════════════════════════════════════════════════════════════════════════════");
+                Console.ResetColor();
+                Console.WriteLine("\nPress any key to return to Manifest Cache Manager.");
             }
             Console.ReadKey();
         }
@@ -1482,13 +1480,13 @@ namespace DepotDL.CLI.Tui
                 "[Cancel]"
             };
 
-            int sourceIndex = RunSelector("SELECT ZIP SOURCE", sourceOptions);
+            var sourceIndex = RunSelector("SELECT ZIP SOURCE", sourceOptions);
             if (sourceIndex == -1 || sourceOptions[sourceIndex] == "[Cancel]")
             {
                 return;
             }
 
-            string? zipPath = sourceIndex == 0 ? ResolveLocalZipPath()
+            var zipPath = sourceIndex == 0 ? ResolveLocalZipPath()
                 : sourceIndex == 1 ? RequestRyuuZipPackage(session)
                 : RequestHubcapZipPackage(session);
             if (string.IsNullOrEmpty(zipPath))
@@ -1502,7 +1500,7 @@ namespace DepotDL.CLI.Tui
         private static string? ResolveLocalZipPath()
         {
             string? zipPath = null;
-            bool hasNativePicker = OperatingSystem.IsWindows() || OperatingSystem.IsMacOS();
+            var hasNativePicker = OperatingSystem.IsWindows() || OperatingSystem.IsMacOS();
 
             if (hasNativePicker)
             {
@@ -1512,7 +1510,7 @@ namespace DepotDL.CLI.Tui
                     "[Type manual zip path...]",
                     "[Cancel]"
                 };
-                int selIndex = RunSelector("SELECT ZIP IMPORT METHOD", options);
+                var selIndex = RunSelector("SELECT ZIP IMPORT METHOD", options);
                 if (selIndex == -1 || options[selIndex] == "[Cancel]") return null;
 
                 if (selIndex == 0)
@@ -1537,14 +1535,14 @@ namespace DepotDL.CLI.Tui
 
         private static string? RequestRyuuZipPackage(TuiSession session)
         {
-            string defaultAppId = session.AppId ?? "";
-            string? appId = PromptText("RYUU API", "Enter Steam App ID:", defaultAppId);
+            var defaultAppId = session.AppId ?? "";
+            var appId = PromptText("RYUU API", "Enter Steam App ID:", defaultAppId);
             if (string.IsNullOrWhiteSpace(appId))
             {
                 return null;
             }
 
-            string? apiKey = PromptText("RYUU API", "Enter Ryuu API key:", session.RyuuApiKey ?? "");
+            var apiKey = PromptText("RYUU API", "Enter Ryuu API key:", session.RyuuApiKey ?? "");
             if (string.IsNullOrWhiteSpace(apiKey))
             {
                 PromptText("RYUU API", "Ryuu API key is required. Press Enter.", "");
@@ -1581,14 +1579,14 @@ namespace DepotDL.CLI.Tui
 
         private static string? RequestHubcapZipPackage(TuiSession session)
         {
-            string defaultAppId = session.AppId ?? "";
-            string? appId = PromptText("HUBCAP API", "Enter Steam App ID:", defaultAppId);
+            var defaultAppId = session.AppId ?? "";
+            var appId = PromptText("HUBCAP API", "Enter Steam App ID:", defaultAppId);
             if (string.IsNullOrWhiteSpace(appId))
             {
                 return null;
             }
 
-            string? apiKey = PromptText("HUBCAP API", "Enter Hubcap API key:", session.HubcapApiKey ?? "");
+            var apiKey = PromptText("HUBCAP API", "Enter Hubcap API key:", session.HubcapApiKey ?? "");
             if (string.IsNullOrWhiteSpace(apiKey))
             {
                 PromptText("HUBCAP API", "Hubcap API key is required. Press Enter.", "");
@@ -1630,14 +1628,14 @@ namespace DepotDL.CLI.Tui
                 "ZIP IMPORT",
                 new[] { $"Scanning and extracting archive: {TuiText.ShortenTail(zipPath, 58)}" },
                 ConsoleColor.Cyan);
-            
+
             var result = ZipHelper.ImportZip(zipPath);
             if (!string.IsNullOrEmpty(result.ManifestsDir))
             {
                 session.ManifestsDir = result.ManifestsDir;
                 session.ManifestsDirConfigured = false;
             }
-            
+
             WriteCenteredStatusBox(
                 "EXTRACTION COMPLETE",
                 new[]
@@ -1647,7 +1645,7 @@ namespace DepotDL.CLI.Tui
                     $"Extracted Steam Manifests: {result.ManifestCount}"
                 },
                 ConsoleColor.Green);
-            
+
             if (!string.IsNullOrEmpty(result.FirstLuaPath))
             {
                 session.LuaPath = result.FirstLuaPath;
@@ -1658,7 +1656,7 @@ namespace DepotDL.CLI.Tui
                     new[] { $"Loaded game configuration: {Path.GetFileName(result.FirstLuaPath)}" },
                     ConsoleColor.Green);
             }
-            
+
             WriteCenteredText("Press any key to return.", ConsoleColor.Cyan);
             Console.ReadKey();
         }
@@ -1667,7 +1665,7 @@ namespace DepotDL.CLI.Tui
         {
             var luaFiles = FindLuaFiles();
             var options = new List<string>();
-            bool hasNativePicker = OperatingSystem.IsWindows() || OperatingSystem.IsMacOS();
+            var hasNativePicker = OperatingSystem.IsWindows() || OperatingSystem.IsMacOS();
 
             if (hasNativePicker)
             {
@@ -1678,7 +1676,7 @@ namespace DepotDL.CLI.Tui
             options.Add("[Type manual path...]");
             options.Add("[Cancel]");
 
-            int selIndex = RunSelector("SELECT GAME LUA CONFIGURATION FILE", options);
+            var selIndex = RunSelector("SELECT GAME LUA CONFIGURATION FILE", options);
             if (selIndex == -1 || options[selIndex] == "[Cancel]")
             {
                 return;
@@ -1720,7 +1718,7 @@ namespace DepotDL.CLI.Tui
         private static void RunConfigureManifestsFolderAction(TuiSession session)
         {
             var options = new List<string>();
-            bool hasNativePicker = OperatingSystem.IsWindows() || OperatingSystem.IsMacOS();
+            var hasNativePicker = OperatingSystem.IsWindows() || OperatingSystem.IsMacOS();
 
             if (hasNativePicker)
             {
@@ -1729,7 +1727,7 @@ namespace DepotDL.CLI.Tui
             options.Add("[Type manual folder path...]");
             options.Add("[Cancel]");
 
-            int selIndex = RunSelector("CONFIGURE MANIFESTS CACHE FOLDER", options);
+            var selIndex = RunSelector("CONFIGURE MANIFESTS CACHE FOLDER", options);
             if (selIndex == -1 || options[selIndex] == "[Cancel]")
             {
                 return;
@@ -1774,7 +1772,7 @@ namespace DepotDL.CLI.Tui
             var targetDir = session.ManifestsDir ?? "manifests";
             Directory.CreateDirectory(targetDir);
 
-            int copiedCount = 0;
+            var copiedCount = 0;
             foreach (var file in selectedFiles)
             {
                 var dest = Path.Combine(targetDir, Path.GetFileName(file));
@@ -1797,7 +1795,7 @@ namespace DepotDL.CLI.Tui
         private static void RunConfigureOutputAction(TuiSession session)
         {
             var options = new List<string>();
-            bool hasNativePicker = OperatingSystem.IsWindows() || OperatingSystem.IsMacOS();
+            var hasNativePicker = OperatingSystem.IsWindows() || OperatingSystem.IsMacOS();
 
             if (hasNativePicker)
             {
@@ -1806,7 +1804,7 @@ namespace DepotDL.CLI.Tui
             options.Add("[Type manual path...]");
             options.Add("[Cancel]");
 
-            int selIndex = RunSelector("CONFIGURE OUTPUT DOWNLOAD FOLDER", options);
+            var selIndex = RunSelector("CONFIGURE OUTPUT DOWNLOAD FOLDER", options);
             if (selIndex == -1 || options[selIndex] == "[Cancel]")
             {
                 return;
@@ -1825,8 +1823,8 @@ namespace DepotDL.CLI.Tui
             }
             else
             {
-                string defaultOut = string.IsNullOrEmpty(session.OutputDir) 
-                    ? Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "downloads", GetGameName(session)) 
+                var defaultOut = string.IsNullOrEmpty(session.OutputDir)
+                    ? Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "downloads", GetGameName(session))
                     : session.OutputDir;
                 selectedPath = PromptText("OUTPUT PATH", "Output folder for downloaded game files:", defaultOut);
                 if (selectedPath == null)
@@ -1837,7 +1835,7 @@ namespace DepotDL.CLI.Tui
 
             if (!string.IsNullOrEmpty(selectedPath))
             {
-                string gameName = GetGameName(session);
+                var gameName = GetGameName(session);
                 session.DownloadBaseDir = NormalizeDownloadBaseDir(selectedPath, gameName);
                 session.OutputDir = Path.Combine(session.DownloadBaseDir, gameName);
                 SaveSession(session);
@@ -1848,7 +1846,7 @@ namespace DepotDL.CLI.Tui
         {
             if (string.IsNullOrEmpty(session.LuaPath) || !File.Exists(session.LuaPath)) return;
 
-            string luaContent = File.ReadAllText(session.LuaPath);
+            var luaContent = File.ReadAllText(session.LuaPath);
 
             string appId;
             var parsedDepots = LibraryManager.ParseLuaConfig(luaContent, out appId, session.LuaPath);
@@ -1860,15 +1858,15 @@ namespace DepotDL.CLI.Tui
             session.SelectedDepots = LibraryManager.FilterDownloadableDepots(session.AllDepots, appId);
             ApplyOsFilter(session);
 
-            string gameName = GetGameName(session);
+            var gameName = GetGameName(session);
             session.OutputDir = BuildOutputDir(session, gameName);
         }
 
         private static void ApplyOsFilter(TuiSession session)
         {
-            string currentOs = OperatingSystem.IsWindows() ? "windows"
-                             : OperatingSystem.IsLinux()   ? "linux"
-                             : OperatingSystem.IsMacOS()   ? "macos"
+            var currentOs = OperatingSystem.IsWindows() ? "windows"
+                             : OperatingSystem.IsLinux() ? "linux"
+                             : OperatingSystem.IsMacOS() ? "macos"
                              : string.Empty;
             if (string.IsNullOrEmpty(currentOs)) return;
             session.SelectedDepots = session.SelectedDepots
@@ -1883,7 +1881,7 @@ namespace DepotDL.CLI.Tui
 
         private static string BuildOutputDir(TuiSession session, string gameName)
         {
-            string baseDir = string.IsNullOrEmpty(session.DownloadBaseDir)
+            var baseDir = string.IsNullOrEmpty(session.DownloadBaseDir)
                 ? Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "downloads")
                 : session.DownloadBaseDir;
 
@@ -1892,8 +1890,8 @@ namespace DepotDL.CLI.Tui
 
         private static string NormalizeDownloadBaseDir(string selectedPath, string gameName)
         {
-            string trimmedPath = selectedPath.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
-            string lastFolder = Path.GetFileName(trimmedPath);
+            var trimmedPath = selectedPath.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+            var lastFolder = Path.GetFileName(trimmedPath);
 
             if (string.Equals(lastFolder, gameName, StringComparison.OrdinalIgnoreCase))
             {
@@ -1972,7 +1970,7 @@ namespace DepotDL.CLI.Tui
                     return;
                 }
 
-                foreach (char ch in value)
+                foreach (var ch in value)
                 {
                     Write(ch);
                 }
@@ -2023,17 +2021,17 @@ namespace DepotDL.CLI.Tui
         private static void WriteCenteredStatusBox(string title, IEnumerable<string> rows, ConsoleColor rowColor)
         {
             var lines = rows.Select(row => TuiText.ShortenTail(row, 64)).ToList();
-            int width = Math.Min(72, Math.Max(34, lines.Append(title).Max(line => line.Length) + 6));
+            var width = Math.Min(72, Math.Max(34, lines.Append(title).Max(line => line.Length) + 6));
             WriteCenteredBox(title, lines, rowColor, width, true);
         }
 
         private static void WriteCenteredBox(string title, IReadOnlyList<string> rows, ConsoleColor rowColor, int width, bool separator)
         {
-            int leftPad = GetLeftPad(width);
-            string horizontalBorder = new string('═', width - 2);
-            string titleLine = title.Length > width - 6 ? title.Substring(0, width - 6) : title;
-            int titlePadLeft = (width - 2 - titleLine.Length) / 2;
-            int titlePadRight = width - 2 - titleLine.Length - titlePadLeft;
+            var leftPad = GetLeftPad(width);
+            var horizontalBorder = new string('═', width - 2);
+            var titleLine = title.Length > width - 6 ? title.Substring(0, width - 6) : title;
+            var titlePadLeft = (width - 2 - titleLine.Length) / 2;
+            var titlePadRight = width - 2 - titleLine.Length - titlePadLeft;
 
             Console.ForegroundColor = ConsoleColor.DarkGray;
             Console.Write(new string(' ', leftPad));
@@ -2070,16 +2068,16 @@ namespace DepotDL.CLI.Tui
 
         private static int RunSelector(string prompt, List<string> options)
         {
-            int index = 0;
+            var index = 0;
             while (true)
             {
                 Console.Clear();
-                int selectorWidth = Math.Min(78, Math.Max(42, options.Append(prompt).Max(option => option.Length) + 8));
-                int leftPad = GetLeftPad(selectorWidth);
+                var selectorWidth = Math.Min(78, Math.Max(42, options.Append(prompt).Max(option => option.Length) + 8));
+                var leftPad = GetLeftPad(selectorWidth);
                 WriteCenteredHeader(prompt.ToUpper(), selectorWidth);
                 Console.WriteLine();
 
-                for (int i = 0; i < options.Count; i++)
+                for (var i = 0; i < options.Count; i++)
                 {
                     Console.Write(new string(' ', leftPad));
                     if (i == index)
@@ -2125,75 +2123,75 @@ namespace DepotDL.CLI.Tui
 
         private static List<DepotInfo>? RunCheckboxSelector(string prompt, List<DepotInfo> options, List<DepotInfo> currentlySelected)
         {
-            int index = 0;
+            var index = 0;
             var selected = new bool[options.Count];
-            for (int i = 0; i < options.Count; i++)
+            for (var i = 0; i < options.Count; i++)
             {
                 selected[i] = currentlySelected.Exists(d => d.DepotId == options[i].DepotId);
             }
-            bool showEmptyWarning = false;
+            var showEmptyWarning = false;
 
             while (true)
             {
-                bool _showEmptyWarning = showEmptyWarning;
+                var _showEmptyWarning = showEmptyWarning;
                 showEmptyWarning = false;
 
                 Console.Clear();
                 using (CenterConsoleOutput(80))
                 {
-                Console.ForegroundColor = ConsoleColor.DarkGray;
-                Console.WriteLine("╔══════════════════════════════════════════════════════════════════════════════╗");
-                Console.Write("║ ");
-                Console.ForegroundColor = ConsoleColor.Cyan;
-                Console.Write(TuiText.Pad(prompt.ToUpper(), 76));
-                Console.ForegroundColor = ConsoleColor.DarkGray;
-                Console.WriteLine(" ║");
-                Console.WriteLine("╚══════════════════════════════════════════════════════════════════════════════╝");
-                Console.ResetColor();
+                    Console.ForegroundColor = ConsoleColor.DarkGray;
+                    Console.WriteLine("╔══════════════════════════════════════════════════════════════════════════════╗");
+                    Console.Write("║ ");
+                    Console.ForegroundColor = ConsoleColor.Cyan;
+                    Console.Write(TuiText.Pad(prompt.ToUpper(), 76));
+                    Console.ForegroundColor = ConsoleColor.DarkGray;
+                    Console.WriteLine(" ║");
+                    Console.WriteLine("╚══════════════════════════════════════════════════════════════════════════════╝");
+                    Console.ResetColor();
 
-                for (int i = 0; i < options.Count; i++)
-                {
-                    var isCurrent = i == index;
-                    var isChecked = selected[i];
-                    var checkbox = isChecked ? "[X]" : "[ ]";
+                    for (var i = 0; i < options.Count; i++)
+                    {
+                        var isCurrent = i == index;
+                        var isChecked = selected[i];
+                        var checkbox = isChecked ? "[X]" : "[ ]";
 
-                    if (isCurrent)
-                    {
-                        Console.BackgroundColor = ConsoleColor.Cyan;
-                        Console.ForegroundColor = ConsoleColor.Black;
-                        Console.WriteLine($">  {checkbox} {FormatDepotSelectionLine(options[i])}");
-                        Console.ResetColor();
-                    }
-                    else
-                    {
-                        if (isChecked)
+                        if (isCurrent)
                         {
-                            Console.ForegroundColor = ConsoleColor.Green;
-                            Console.WriteLine($"   {checkbox} {FormatDepotSelectionLine(options[i])}");
+                            Console.BackgroundColor = ConsoleColor.Cyan;
+                            Console.ForegroundColor = ConsoleColor.Black;
+                            Console.WriteLine($">  {checkbox} {FormatDepotSelectionLine(options[i])}");
+                            Console.ResetColor();
                         }
                         else
                         {
-                            Console.ForegroundColor = ConsoleColor.Gray;
-                            Console.WriteLine($"   {checkbox} {FormatDepotSelectionLine(options[i])}");
+                            if (isChecked)
+                            {
+                                Console.ForegroundColor = ConsoleColor.Green;
+                                Console.WriteLine($"   {checkbox} {FormatDepotSelectionLine(options[i])}");
+                            }
+                            else
+                            {
+                                Console.ForegroundColor = ConsoleColor.Gray;
+                                Console.WriteLine($"   {checkbox} {FormatDepotSelectionLine(options[i])}");
+                            }
+                            Console.ResetColor();
                         }
+                    }
+
+                    if (_showEmptyWarning)
+                    {
+                        Console.ForegroundColor = ConsoleColor.Red;
+                        Console.WriteLine("\n  [!] Select at least one depot before confirming.");
                         Console.ResetColor();
                     }
-                }
 
-                if (_showEmptyWarning)
-                {
-                    Console.ForegroundColor = ConsoleColor.Red;
-                    Console.WriteLine("\n  [!] Select at least one depot before confirming.");
+                    Console.ForegroundColor = ConsoleColor.DarkCyan;
+                    Console.WriteLine("\n══════════════════════════════════════════════════════════════════════════════════");
+                    Console.ForegroundColor = ConsoleColor.Cyan;
+                    Console.WriteLine("  [↑/↓] Navigate  [Space] Toggle  [A] Check All  [D] Clear All  [Enter] Confirm");
+                    Console.ForegroundColor = ConsoleColor.DarkCyan;
+                    Console.WriteLine("══════════════════════════════════════════════════════════════════════════════════");
                     Console.ResetColor();
-                }
-
-                Console.ForegroundColor = ConsoleColor.DarkCyan;
-                Console.WriteLine("\n══════════════════════════════════════════════════════════════════════════════════");
-                Console.ForegroundColor = ConsoleColor.Cyan;
-                Console.WriteLine("  [↑/↓] Navigate  [Space] Toggle  [A] Check All  [D] Clear All  [Enter] Confirm");
-                Console.ForegroundColor = ConsoleColor.DarkCyan;
-                Console.WriteLine("══════════════════════════════════════════════════════════════════════════════════");
-                Console.ResetColor();
                 }
 
                 var key = Console.ReadKey(true).Key;
@@ -2211,16 +2209,16 @@ namespace DepotDL.CLI.Tui
                 }
                 else if (key == ConsoleKey.A)
                 {
-                    for (int i = 0; i < options.Count; i++) selected[i] = true;
+                    for (var i = 0; i < options.Count; i++) selected[i] = true;
                 }
                 else if (key == ConsoleKey.D)
                 {
-                    for (int i = 0; i < options.Count; i++) selected[i] = false;
+                    for (var i = 0; i < options.Count; i++) selected[i] = false;
                 }
                 else if (key == ConsoleKey.Enter)
                 {
                     var result = new List<DepotInfo>();
-                    for (int i = 0; i < options.Count; i++)
+                    for (var i = 0; i < options.Count; i++)
                     {
                         if (selected[i]) result.Add(options[i]);
                     }
@@ -2307,17 +2305,17 @@ namespace DepotDL.CLI.Tui
         private static string? PromptText(string title, string prompt, string defaultValue, bool mask = false)
         {
             Console.Clear();
-            int consoleWidth = 80;
+            var consoleWidth = 80;
             try { consoleWidth = Console.WindowWidth; } catch { }
             if (consoleWidth < 40) consoleWidth = 80;
 
-            int boxWidth = Math.Min(70, consoleWidth - 4);
-            int leftPad = (consoleWidth - boxWidth) / 2;
+            var boxWidth = Math.Min(70, consoleWidth - 4);
+            var leftPad = (consoleWidth - boxWidth) / 2;
 
-            string horizontalBorder = new string('═', boxWidth - 2);
-            string titleLine = title.Length > boxWidth - 6 ? title.Substring(0, boxWidth - 6) : title;
-            int titlePadLeft = (boxWidth - 2 - titleLine.Length) / 2;
-            int titlePadRight = boxWidth - 2 - titleLine.Length - titlePadLeft;
+            var horizontalBorder = new string('═', boxWidth - 2);
+            var titleLine = title.Length > boxWidth - 6 ? title.Substring(0, boxWidth - 6) : title;
+            var titlePadLeft = (boxWidth - 2 - titleLine.Length) / 2;
+            var titlePadRight = boxWidth - 2 - titleLine.Length - titlePadLeft;
 
             Console.ForegroundColor = ConsoleColor.DarkGray;
             Console.Write(new string(' ', leftPad));
@@ -2349,7 +2347,7 @@ namespace DepotDL.CLI.Tui
                 Console.Write(new string(' ', leftPad));
                 Console.Write("║ ");
                 Console.ForegroundColor = ConsoleColor.DarkGray;
-                string displayVal = mask ? new string('*', Math.Min(12, defaultValue.Length)) : defaultValue;
+                var displayVal = mask ? new string('*', Math.Min(12, defaultValue.Length)) : defaultValue;
                 Console.Write(TuiText.Pad("Current: " + displayVal, boxWidth - 4));
                 Console.ForegroundColor = ConsoleColor.DarkGray;
                 Console.Write(" ║\n");
@@ -2366,11 +2364,11 @@ namespace DepotDL.CLI.Tui
             Console.Write("╚" + horizontalBorder + "╝\n");
             Console.ResetColor();
 
-            int inputRow = Console.CursorTop - 2;
-            int inputCol = leftPad + 4;
+            var inputRow = Console.CursorTop - 2;
+            var inputCol = leftPad + 4;
             Console.SetCursorPosition(inputCol, inputRow);
 
-            string? result = ReadLineWithEscape(mask);
+            var result = ReadLineWithEscape(mask);
             if (result == null) return null;
 
             return string.IsNullOrEmpty(result) ? defaultValue : result.Trim();
@@ -2420,20 +2418,20 @@ namespace DepotDL.CLI.Tui
 
         private static void RunApplicationSettings(TuiSession session)
         {
-            int selectedIndex = 0;
+            var selectedIndex = 0;
             while (true)
             {
                 Console.Clear();
-                string maxParallelStr = session.MaxParallelDepots.ToString();
-                string manifestsDirStr = session.ManifestsDir ?? "[Not Configured]";
-                string outputDirStr = session.DownloadBaseDir ?? "[Auto]";
-                string maskedRyuuKey = string.IsNullOrEmpty(session.RyuuApiKey)
+                var maxParallelStr = session.MaxParallelDepots.ToString();
+                var manifestsDirStr = session.ManifestsDir ?? "[Not Configured]";
+                var outputDirStr = session.DownloadBaseDir ?? "[Auto]";
+                var maskedRyuuKey = string.IsNullOrEmpty(session.RyuuApiKey)
                     ? "[Not Configured]"
                     : new string('*', Math.Min(12, session.RyuuApiKey.Length));
-                string maskedHubcapKey = string.IsNullOrEmpty(session.HubcapApiKey)
+                var maskedHubcapKey = string.IsNullOrEmpty(session.HubcapApiKey)
                     ? "[Not Configured]"
                     : new string('*', Math.Min(12, session.HubcapApiKey.Length));
-                string maskedSteamKey = string.IsNullOrEmpty(session.SteamWebApiKey)
+                var maskedSteamKey = string.IsNullOrEmpty(session.SteamWebApiKey)
                     ? "[Not Configured]"
                     : new string('*', Math.Min(12, session.SteamWebApiKey.Length));
                 var menuItems = new List<string>
@@ -2483,7 +2481,7 @@ namespace DepotDL.CLI.Tui
                     Console.WriteLine("╚══════════════════════════════════════════════════════════════════════════════╝");
                     Console.ResetColor();
 
-                    for (int i = 0; i < menuItems.Count; i++)
+                    for (var i = 0; i < menuItems.Count; i++)
                     {
                         if (i == selectedIndex)
                         {
@@ -2609,7 +2607,7 @@ namespace DepotDL.CLI.Tui
         {
             string[] suffixes = { "B", "KB", "MB", "GB", "TB" };
             double val = bytes;
-            int order = 0;
+            var order = 0;
             while (val >= 1024 && order < suffixes.Length - 1)
             {
                 order++;
@@ -2621,7 +2619,7 @@ namespace DepotDL.CLI.Tui
         private static void RunStoreBrowser(TuiSession session, string ddmodPath, string dotnetPath)
         {
             List<StoreApiClient.StoreGame>? allGames = null;
-            string loadError = string.Empty;
+            var loadError = string.Empty;
 
             Console.Clear();
             WriteCenteredStatusBox("STEAM STORE BROWSER", new[] { "Connecting to Bonker API..." }, ConsoleColor.Cyan);
@@ -2631,16 +2629,16 @@ namespace DepotDL.CLI.Tui
 
             if (allGames == null || allGames.Count == 0)
             {
-                string msg = string.IsNullOrEmpty(loadError)
+                var msg = string.IsNullOrEmpty(loadError)
                     ? "No games found. Press Enter to return."
                     : $"Failed to load: {TuiText.Shorten(loadError, 60)}  Press Enter.";
                 PromptText("STEAM STORE BROWSER", msg, "");
                 return;
             }
 
-            string searchQuery = string.Empty;
-            int selectedIndex = 0;
-            int currentPage = 0;
+            var searchQuery = string.Empty;
+            var selectedIndex = 0;
+            var currentPage = 0;
             const int pageSize = 16;
 
             while (true)
@@ -2649,10 +2647,10 @@ namespace DepotDL.CLI.Tui
                     ? allGames
                     : allGames.Where(g => g.Name.Contains(searchQuery, StringComparison.OrdinalIgnoreCase)).ToList();
 
-                int totalPages = Math.Max(1, (filtered.Count + pageSize - 1) / pageSize);
+                var totalPages = Math.Max(1, (filtered.Count + pageSize - 1) / pageSize);
                 currentPage = Math.Clamp(currentPage, 0, totalPages - 1);
                 var pageItems = filtered.Skip(currentPage * pageSize).Take(pageSize).ToList();
-                int pageCount = pageItems.Count;
+                var pageCount = pageItems.Count;
                 selectedIndex = Math.Clamp(selectedIndex, 0, Math.Max(0, pageCount - 1));
 
                 Console.Clear();
@@ -2665,7 +2663,7 @@ namespace DepotDL.CLI.Tui
                     Console.ForegroundColor = ConsoleColor.Cyan;
                     Console.Write(TuiText.Pad("STEAM STORE BROWSER", 52));
                     Console.ForegroundColor = ConsoleColor.DarkGray;
-                    string pageInfo = $"Page {currentPage + 1}/{totalPages}";
+                    var pageInfo = $"Page {currentPage + 1}/{totalPages}";
                     Console.Write(TuiText.Pad(pageInfo, 23));
                     Console.ForegroundColor = ConsoleColor.DarkGray;
                     Console.WriteLine(" ║");
@@ -2675,29 +2673,29 @@ namespace DepotDL.CLI.Tui
                     Console.Write("║ ");
                     Console.ForegroundColor = ConsoleColor.DarkCyan;
                     Console.Write("Search: ");
-                    bool hasQuery = !string.IsNullOrEmpty(searchQuery);
+                    var hasQuery = !string.IsNullOrEmpty(searchQuery);
                     Console.ForegroundColor = hasQuery ? ConsoleColor.White : ConsoleColor.DarkGray;
-                    string searchDisplay = hasQuery ? searchQuery : "(type to filter)";
+                    var searchDisplay = hasQuery ? searchQuery : "(type to filter)";
                     Console.Write(TuiText.Pad(TuiText.Shorten(searchDisplay, 44), 44));
                     Console.ForegroundColor = ConsoleColor.DarkGray;
-                    string countStr = $"{filtered.Count:N0} games";
+                    var countStr = $"{filtered.Count:N0} games";
                     Console.Write(TuiText.Pad(countStr, 23));
                     Console.ForegroundColor = ConsoleColor.DarkGray;
                     Console.WriteLine(" ║");
 
                     Console.WriteLine("╠══════════════════════════════════════════════════════════════════════════════╣");
 
-                    for (int i = 0; i < pageSize; i++)
+                    for (var i = 0; i < pageSize; i++)
                     {
                         Console.ForegroundColor = ConsoleColor.DarkGray;
                         Console.Write("║ ");
                         if (i < pageItems.Count)
                         {
                             var game = pageItems[i];
-                            string appIdStr = $"[{game.AppId}]";
-                            int nameWidth = 73 - appIdStr.Length;
-                            string nameStr = TuiText.Shorten(game.Name, nameWidth);
-                            string row = nameStr.PadRight(nameWidth) + " " + appIdStr;
+                            var appIdStr = $"[{game.AppId}]";
+                            var nameWidth = 73 - appIdStr.Length;
+                            var nameStr = TuiText.Shorten(game.Name, nameWidth);
+                            var row = nameStr.PadRight(nameWidth) + " " + appIdStr;
 
                             if (i == selectedIndex)
                             {
@@ -2809,17 +2807,17 @@ namespace DepotDL.CLI.Tui
             try { detail = StoreApiClient.GetAppDetail(appId); }
             catch { }
 
-            string name       = detail?.Name ?? fallbackName;
-            string developer  = detail?.Developer ?? string.Empty;
-            string publisher  = detail?.Publisher ?? string.Empty;
-            string genres     = detail?.Genres?.Count > 0 ? string.Join(", ", detail.Genres) : "Unknown";
-            string price      = detail?.PriceText ?? "Unknown";
-            string owners     = detail?.Owners ?? string.Empty;
-            string desc       = detail?.ShortDescription ?? string.Empty;
-            int pos           = detail?.Positive ?? 0;
-            int neg           = detail?.Negative ?? 0;
-            int total         = pos + neg;
-            double score      = total > 0 ? (double)pos / total * 100 : -1;
+            var name = detail?.Name ?? fallbackName;
+            var developer = detail?.Developer ?? string.Empty;
+            var publisher = detail?.Publisher ?? string.Empty;
+            var genres = detail?.Genres?.Count > 0 ? string.Join(", ", detail.Genres) : "Unknown";
+            var price = detail?.PriceText ?? "Unknown";
+            var owners = detail?.Owners ?? string.Empty;
+            var desc = detail?.ShortDescription ?? string.Empty;
+            var pos = detail?.Positive ?? 0;
+            var neg = detail?.Negative ?? 0;
+            var total = pos + neg;
+            var score = total > 0 ? (double)pos / total * 100 : -1;
 
             while (true)
             {
@@ -2831,10 +2829,10 @@ namespace DepotDL.CLI.Tui
 
                     Console.Write("║ ");
                     Console.ForegroundColor = ConsoleColor.Cyan;
-                    string nameShort = TuiText.Shorten(name, 50);
+                    var nameShort = TuiText.Shorten(name, 50);
                     Console.Write(nameShort);
                     Console.ForegroundColor = ConsoleColor.DarkGray;
-                    int spacingNeeded = 76 - nameShort.Length - 15;
+                    var spacingNeeded = 76 - nameShort.Length - 15;
                     Console.Write(new string(' ', Math.Max(1, spacingNeeded)));
                     Console.Write("AppID: ");
                     Console.ForegroundColor = ConsoleColor.Green;
@@ -2851,9 +2849,9 @@ namespace DepotDL.CLI.Tui
 
                     if (score >= 0)
                     {
-                        int barWidth = 20;
-                        int filled = (int)(score / 100 * barWidth);
-                        string bar = new string('█', filled) + new string('░', barWidth - filled);
+                        var barWidth = 20;
+                        var filled = (int)(score / 100 * barWidth);
+                        var bar = new string('█', filled) + new string('░', barWidth - filled);
                         WriteStoreDetailRow("Rating:", $"{bar}  {score:F0}%  ({total:N0} reviews)");
                     }
 
@@ -2939,7 +2937,7 @@ namespace DepotDL.CLI.Tui
                     SaveSession(session);
 
                     Console.Clear();
-                    int exitCode = Program.TriggerDownloadProcess(session.LuaPath, session.ManifestsDir, session.OutputDir, ddmodPath, dotnetPath, session.SelectedDepots, session.MaxParallelDepots, ryuuApiKey: session.RyuuApiKey, hubcapApiKey: session.HubcapApiKey);
+                    var exitCode = Program.TriggerDownloadProcess(session.LuaPath, session.ManifestsDir, session.OutputDir, ddmodPath, dotnetPath, session.SelectedDepots, session.MaxParallelDepots, ryuuApiKey: session.RyuuApiKey, hubcapApiKey: session.HubcapApiKey);
                     if (exitCode == 0)
                         PromptText("DOWNLOAD SUCCESS", "Game downloaded and registered successfully! Press Enter.", "");
                     else

@@ -1,5 +1,6 @@
-using System;
-using System.Collections.Generic;
+// This file is subject to the terms and conditions defined
+// in file 'LICENSE', which is part of this source code package.
+
 using System.Globalization;
 using System.IO;
 using System.Security.Cryptography;
@@ -26,35 +27,35 @@ namespace DepotDL.GUI.Services
             s.RyuuApiKey = Get(values, "ryuu.api_key");
             s.HubcapApiKey = Get(values, "hubcap.api_key");
             s.SteamWebApiKey = Get(values, "steam.web_api_key");
-            if (int.TryParse(Get(values, "settings.max_parallel_depots"), out int mp))
+            if (int.TryParse(Get(values, "settings.max_parallel_depots"), out var mp))
                 s.MaxParallelDepots = Math.Clamp(mp, 1, 8);
 
-            if (bool.TryParse(Get(values, "settings.download_achievement_icons"), out bool dai))
+            if (bool.TryParse(Get(values, "settings.download_achievement_icons"), out var dai))
                 s.DownloadAchievementIcons = dai;
             else
                 s.DownloadAchievementIcons = true;
 
-            if (int.TryParse(Get(values, "settings.store_cache_hours"), out int sch))
+            if (int.TryParse(Get(values, "settings.store_cache_hours"), out var sch))
                 s.StoreCacheHours = Math.Clamp(sch, 1, 168);
             else s.StoreCacheHours = 24;
 
-            if (int.TryParse(Get(values, "settings.gpu_cache_days"), out int gcd))
+            if (int.TryParse(Get(values, "settings.gpu_cache_days"), out var gcd))
                 s.GpuCacheDays = Math.Clamp(gcd, 1, 30);
             else s.GpuCacheDays = 7;
 
-            if (int.TryParse(Get(values, "settings.store_page_size"), out int sps))
+            if (int.TryParse(Get(values, "settings.store_page_size"), out var sps))
                 s.StorePageSize = Math.Clamp(sps, 12, 120);
             else s.StorePageSize = 48;
 
-            if (int.TryParse(Get(values, "settings.search_debounce_ms"), out int sd))
+            if (int.TryParse(Get(values, "settings.search_debounce_ms"), out var sd))
                 s.SearchDebounceMs = Math.Clamp(sd, 0, 2000);
             else s.SearchDebounceMs = 250;
 
-            if (double.TryParse(Get(values, "settings.scroll_sensitivity"), out double ss))
+            if (double.TryParse(Get(values, "settings.scroll_sensitivity"), out var ss))
                 s.ScrollSensitivity = Math.Clamp(ss, 0.1, 10.0);
             else s.ScrollSensitivity = 1.5;
 
-            if (int.TryParse(Get(values, "settings.scroll_duration_ms"), out int sdms))
+            if (int.TryParse(Get(values, "settings.scroll_duration_ms"), out var sdms))
                 s.ScrollDurationMs = Math.Clamp(sdms, 50, 1000);
             else s.ScrollDurationMs = 230;
 
@@ -106,13 +107,13 @@ namespace DepotDL.GUI.Services
         private static Dictionary<string, string> ParseIni(string path)
         {
             var d = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-            string section = "";
+            var section = "";
             foreach (var raw in File.ReadAllLines(path))
             {
                 var line = raw.Trim();
                 if (line.Length == 0 || line[0] == ';' || line[0] == '#') continue;
                 if (line[0] == '[' && line[^1] == ']') { section = line[1..^1].Trim(); continue; }
-                int eq = line.IndexOf('=');
+                var eq = line.IndexOf('=');
                 if (eq <= 0) continue;
                 d[$"{section}.{line[..eq].Trim()}"] = Unescape(line[(eq + 1)..].Trim());
             }
@@ -148,7 +149,7 @@ namespace DepotDL.GUI.Services
         private static string Unescape(string v)
         {
             var sb = new System.Text.StringBuilder();
-            for (int i = 0; i < v.Length; i++)
+            for (var i = 0; i < v.Length; i++)
             {
                 if (v[i] == '\\' && i + 1 < v.Length)
                 {

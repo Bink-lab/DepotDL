@@ -1,6 +1,6 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
+// This file is subject to the terms and conditions defined
+// in file 'LICENSE', which is part of this source code package.
+
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using DepotDL.CLI.Services;
@@ -32,7 +32,7 @@ namespace DepotDL.CLI
             try
             {
                 if (!File.Exists(LibraryFilePath)) return new List<LibraryGame>();
-                string json = File.ReadAllText(LibraryFilePath);
+                var json = File.ReadAllText(LibraryFilePath);
                 return JsonSerializer.Deserialize<List<LibraryGame>>(json) ?? new List<LibraryGame>();
             }
             catch
@@ -47,7 +47,7 @@ namespace DepotDL.CLI
             {
                 Directory.CreateDirectory(Path.GetDirectoryName(LibraryFilePath)!);
                 var options = new JsonSerializerOptions { WriteIndented = true };
-                string json = JsonSerializer.Serialize(games, options);
+                var json = JsonSerializer.Serialize(games, options);
                 File.WriteAllText(LibraryFilePath, json);
             }
             catch { }
@@ -56,7 +56,7 @@ namespace DepotDL.CLI
         public static void AddOrUpdateGame(LibraryGame game)
         {
             var library = LoadLibrary();
-            int idx = library.FindIndex(g => g.AppId == game.AppId);
+            var idx = library.FindIndex(g => g.AppId == game.AppId);
             if (idx >= 0)
             {
                 library[idx] = game;
@@ -81,10 +81,10 @@ namespace DepotDL.CLI
             totalCount = library.Count;
             missingCount = 0;
 
-            bool changed = false;
+            var changed = false;
             foreach (var game in library)
             {
-                bool exists = Directory.Exists(game.OutputDir);
+                var exists = Directory.Exists(game.OutputDir);
                 if (game.IsVerified != exists)
                 {
                     game.IsVerified = exists;
@@ -115,10 +115,10 @@ namespace DepotDL.CLI
 
                 while (queue.Count > 0)
                 {
-                    string currentDir = queue.Dequeue();
+                    var currentDir = queue.Dequeue();
                     try
                     {
-                        foreach (string file in Directory.GetFiles(currentDir))
+                        foreach (var file in Directory.GetFiles(currentDir))
                         {
                             try
                             {
@@ -127,7 +127,7 @@ namespace DepotDL.CLI
                             catch { }
                         }
 
-                        foreach (string subDir in Directory.GetDirectories(currentDir))
+                        foreach (var subDir in Directory.GetDirectories(currentDir))
                         {
                             queue.Enqueue(subDir);
                         }
@@ -143,7 +143,7 @@ namespace DepotDL.CLI
         {
             if (!Directory.Exists(path)) return true;
 
-            for (int i = 0; i < 10; i++)
+            for (var i = 0; i < 10; i++)
             {
                 try
                 {

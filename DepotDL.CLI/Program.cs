@@ -1,13 +1,10 @@
-using System;
+// This file is subject to the terms and conditions defined
+// in file 'LICENSE', which is part of this source code package.
+
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
-using System.IO;
-using System.Linq;
 using System.Text.RegularExpressions;
-using System.Threading;
-using System.Threading.Tasks;
 using DepotDL.CLI.Models;
 using DepotDL.CLI.Services;
 using DepotDL.CLI.Tui;
@@ -63,7 +60,7 @@ namespace DepotDL.CLI
                 {
                     var tempSession = new TuiSession();
                     IniSettings.LoadInto(tempSession);
-                    string? currentSha = UpdateChecker.GetCurrentSha();
+                    var currentSha = UpdateChecker.GetCurrentSha();
                     UpdateInfo? updateInfo = null;
 
                     if (UpdateChecker.ShouldCheck(tempSession))
@@ -78,8 +75,8 @@ namespace DepotDL.CLI
                         updateInfo = new UpdateInfo
                         {
                             UpdateAvailable = true,
-                            LatestTag       = tempSession.LastKnownReleaseTag,
-                            HtmlUrl         = UpdateChecker.BuildReleaseUrl(tempSession.LastKnownReleaseTag)
+                            LatestTag = tempSession.LastKnownReleaseTag,
+                            HtmlUrl = UpdateChecker.BuildReleaseUrl(tempSession.LastKnownReleaseTag)
                         };
                     }
 
@@ -108,11 +105,11 @@ namespace DepotDL.CLI
             string? outputPath = null;
             string? ddmodPath = null;
             string? dotnetPath = null;
-            int maxDownloads = DepotDownloadDefaults.MaxDownloads;
-            int maxParallelDepots = 2;
-            bool showHelp = false;
+            var maxDownloads = DepotDownloadDefaults.MaxDownloads;
+            var maxParallelDepots = 2;
+            var showHelp = false;
 
-            for (int i = 0; i < args.Length; i++)
+            for (var i = 0; i < args.Length; i++)
             {
                 switch (args[i])
                 {
@@ -197,8 +194,8 @@ namespace DepotDL.CLI
         {
             void LogError(string message) => WriteColored(message, ConsoleColor.Red);
 
-            bool initialCursorVisible = true;
-            try { if (OperatingSystem.IsWindows()) { initialCursorVisible = Console.CursorVisible; Console.CursorVisible = false; } } catch {}
+            var initialCursorVisible = true;
+            try { if (OperatingSystem.IsWindows()) { initialCursorVisible = Console.CursorVisible; Console.CursorVisible = false; } } catch { }
 
             // Register console cancel handlers for safe VDF cleanup
             AppDomain.CurrentDomain.ProcessExit += (s, e) => SafeCleanupKeys();
@@ -206,7 +203,7 @@ namespace DepotDL.CLI
 
             try
             {
-                string luaContent = File.ReadAllText(luaPath);
+                var luaContent = File.ReadAllText(luaPath);
 
                 string appId;
                 var allParsedDepots = LibraryManager.ParseLuaConfig(luaContent, out appId, luaPath);
@@ -256,7 +253,7 @@ namespace DepotDL.CLI
 
                 if (string.IsNullOrEmpty(outputPath))
                 {
-                    string gameName = SteamAppInfoProvider.GetAppName(appId);
+                    var gameName = SteamAppInfoProvider.GetAppName(appId);
                     if (string.IsNullOrEmpty(gameName))
                     {
                         gameName = Path.GetFileNameWithoutExtension(luaPath);
@@ -270,7 +267,7 @@ namespace DepotDL.CLI
                 outputPath = Path.GetFullPath(outputPath);
 
                 var completedDepots = LoadCompletedDepots(outputPath);
-                int skippedCount = 0;
+                var skippedCount = 0;
                 if (completedDepots.Count > 0)
                 {
                     var toSkip = depots.Keys.Where(k => completedDepots.Contains(k)).ToList();
@@ -340,18 +337,18 @@ namespace DepotDL.CLI
                 _depotResultLog.Clear();
 
                 var depotQueue = new ConcurrentQueue<DepotInfo>(depots.Values);
-                int totalDepots = depots.Count;
-                int successfulDepots = 0;
-                bool hadErrors = false;
+                var totalDepots = depots.Count;
+                var successfulDepots = 0;
+                var hadErrors = false;
                 var allOkLock = new object();
 
-                int numWorkers = Math.Clamp(maxParallelDepots, 1, Math.Min(8, totalDepots));
+                var numWorkers = Math.Clamp(maxParallelDepots, 1, Math.Min(8, totalDepots));
 
                 lock (_drawLock)
                 {
                     _slots = new DepotSlotState[numWorkers];
                     _lastSlotLengths = new int[numWorkers];
-                    for (int s = 0; s < numWorkers; s++)
+                    for (var s = 0; s < numWorkers; s++)
                     {
                         _slots[s] = new DepotSlotState();
                     }
@@ -359,7 +356,7 @@ namespace DepotDL.CLI
 
                 if (_isTty)
                 {
-                    for (int s = 0; s < numWorkers; s++)
+                    for (var s = 0; s < numWorkers; s++)
                     {
                         Console.WriteLine();
                     }
@@ -407,9 +404,9 @@ namespace DepotDL.CLI
 
                 var workerTasks = new List<Task>();
 
-                for (int i = 0; i < numWorkers; i++)
+                for (var i = 0; i < numWorkers; i++)
                 {
-                    int slotId = i;
+                    var slotId = i;
                     workerTasks.Add(Task.Run(async () =>
                     {
                         while (depotQueue.TryDequeue(out var depot))
@@ -434,7 +431,7 @@ namespace DepotDL.CLI
                             }
                             DrawSlots(force: true);
 
-                            bool depotOk = false;
+                            var depotOk = false;
 
                             var argsList = new List<string>
                             {
@@ -481,8 +478,8 @@ namespace DepotDL.CLI
                                 }
                             }
 
-                            int maxRetries = 3;
-                            int retryCount = 0;
+                            var maxRetries = 3;
+                            var retryCount = 0;
                             while (retryCount < maxRetries)
                             {
                                 if (retryCount > 0)
@@ -502,13 +499,13 @@ namespace DepotDL.CLI
                                 if (watchdogKilled)
                                 {
                                     retryCount++;
-                                    string wdDepotId = depot.DepotId;
+                                    var wdDepotId = depot.DepotId;
                                     lock (_drawLock)
                                     {
                                         _slots[slotId].Status = $"Retrying ({retryCount}/{maxRetries - 1})...";
                                         _slots[slotId].ActiveValidationFile = null;
                                         _slots[slotId].LastProgressTime = DateTime.MinValue;
-                                        string wdMsg = retryCount < maxRetries
+                                        var wdMsg = retryCount < maxRetries
                                             ? $"Depot {wdDepotId} stuck for {WatchdogTimeoutSeconds}s, killed. Retrying..."
                                             : $"Depot {wdDepotId} stuck repeatedly — giving up after {maxRetries} attempts";
                                         _pendingLogs.Enqueue(() => DownloadTui.WriteStatus("Watchdog", wdMsg, ConsoleColor.Yellow));
@@ -523,8 +520,8 @@ namespace DepotDL.CLI
                                     retryCount++;
                                     if (retryCount < maxRetries)
                                     {
-                                        string depotId = depot.DepotId;
-                                        string retryReason = errorReason ?? "unknown error";
+                                        var depotId = depot.DepotId;
+                                        var retryReason = errorReason ?? "unknown error";
                                         lock (_drawLock)
                                         {
                                             _pendingLogs.Enqueue(() => DownloadTui.WriteStatus("Retry", $"Depot {depotId} failed (attempt {retryCount}/{maxRetries}). Error: {retryReason}. Retrying...", ConsoleColor.Yellow));
@@ -533,8 +530,8 @@ namespace DepotDL.CLI
                                         continue;
                                     }
 
-                                    string finalDepotId = depot.DepotId;
-                                    string finalReason = errorReason ?? "unknown error";
+                                    var finalDepotId = depot.DepotId;
+                                    var finalReason = errorReason ?? "unknown error";
                                     lock (_drawLock)
                                     {
                                         _pendingLogs.Enqueue(() => DownloadTui.WriteStatus("Failed", $"Depot {finalDepotId}: {finalReason} (after {maxRetries} attempts)", ConsoleColor.Red));
@@ -543,7 +540,7 @@ namespace DepotDL.CLI
                                 }
 
                                 depotOk = true;
-                                string doneDepotId = depot.DepotId;
+                                var doneDepotId = depot.DepotId;
                                 MarkDepotComplete(outputPath, doneDepotId);
                                 lock (_drawLock)
                                 {
@@ -568,7 +565,7 @@ namespace DepotDL.CLI
                                         try { fallbackManifestMap = await Task.Run(() => GetProviderManifests(providerName, fetchFunc)); }
                                         catch (Exception fetchEx)
                                         {
-                                            string pn = providerName; string di = depot.DepotId; string em = fetchEx.Message;
+                                            var pn = providerName; var di = depot.DepotId; var em = fetchEx.Message;
                                             lock (_drawLock) { _pendingLogs.Enqueue(() => DownloadTui.WriteStatus(pn, $"Depot {di}: {pn} error — {em}", ConsoleColor.DarkYellow)); }
                                             DrawSlots(force: true);
                                             continue;
@@ -603,7 +600,7 @@ namespace DepotDL.CLI
                                         fallbackArgs.Add("-manifestfile");
                                         fallbackArgs.Add(providerManifestFile);
 
-                                        string pName = providerName; string dId = depot.DepotId;
+                                        var pName = providerName; var dId = depot.DepotId;
                                         lock (_drawLock)
                                         {
                                             _slots[slotId].Status = $"Trying {pName}...";
@@ -619,12 +616,12 @@ namespace DepotDL.CLI
                                         {
                                             depotOk = true;
                                             MarkDepotComplete(outputPath, depot.DepotId);
-                                            string sid = depot.DepotId; string pn2 = providerName;
+                                            var sid = depot.DepotId; var pn2 = providerName;
                                             lock (_drawLock) { _pendingLogs.Enqueue(() => DownloadTui.WriteStatus("Complete", $"Depot {sid} downloaded via {pn2}", ConsoleColor.Green)); }
                                         }
                                         else
                                         {
-                                            string sid = depot.DepotId; string pn2 = providerName; string err = fallbackError ?? "unknown error";
+                                            var sid = depot.DepotId; var pn2 = providerName; var err = fallbackError ?? "unknown error";
                                             lock (_drawLock) { _pendingLogs.Enqueue(() => DownloadTui.WriteStatus("Failed", $"Depot {sid}: {pn2} fallback failed: {err}", ConsoleColor.Red)); }
                                         }
                                     }
@@ -680,14 +677,14 @@ namespace DepotDL.CLI
                     {
                         try
                         {
-                            int startTop = Math.Max(0, Console.CursorTop - _slots.Length);
+                            var startTop = Math.Max(0, Console.CursorTop - _slots.Length);
                             Console.SetCursorPosition(0, startTop);
                             while (_pendingLogs.Count > 0)
                             {
                                 ClearCurrentLine();
                                 _pendingLogs.Dequeue()();
                             }
-                            for (int s = 0; s < _slots.Length; s++)
+                            for (var s = 0; s < _slots.Length; s++)
                             {
                                 ClearCurrentLine();
                                 Console.WriteLine();
@@ -736,7 +733,7 @@ namespace DepotDL.CLI
 
                 try
                 {
-                    string gameName = SteamAppInfoProvider.GetAppName(appId);
+                    var gameName = SteamAppInfoProvider.GetAppName(appId);
                     if (string.IsNullOrEmpty(gameName)) gameName = Path.GetFileNameWithoutExtension(luaPath);
                     if (string.IsNullOrEmpty(gameName)) gameName = $"{appId}";
 
@@ -777,7 +774,7 @@ namespace DepotDL.CLI
             }
             finally
             {
-                try { if (OperatingSystem.IsWindows()) { Console.CursorVisible = initialCursorVisible; } } catch {}
+                try { if (OperatingSystem.IsWindows()) { Console.CursorVisible = initialCursorVisible; } } catch { }
                 SafeCleanupKeys();
                 SafeCleanupDepotDownloaderFolder(outputPath, ddmodPath);
             }
@@ -809,9 +806,9 @@ namespace DepotDL.CLI
         private static void PrintUpdateBanner(UpdateInfo info)
         {
             const int width = 72;
-            int leftPad = TuiDashboard.GetCenterLeftPad(width);
-            string pad = new string(' ', leftPad);
-            string hr = new string('═', width - 2);
+            var leftPad = TuiDashboard.GetCenterLeftPad(width);
+            var pad = new string(' ', leftPad);
+            var hr = new string('═', width - 2);
 
             Console.WriteLine();
             Console.ForegroundColor = ConsoleColor.DarkGray;
@@ -895,8 +892,8 @@ namespace DepotDL.CLI
                         }
                         DrawSlots(force: true);
 
-                        string rawPath = line.Substring(14).Trim();
-                        string resolvedPath = rawPath;
+                        var rawPath = line.Substring(14).Trim();
+                        var resolvedPath = rawPath;
                         if (!Path.IsPathRooted(resolvedPath) && !string.IsNullOrEmpty(slot.OutputPath))
                         {
                             resolvedPath = Path.Combine(slot.OutputPath, rawPath);
@@ -904,13 +901,13 @@ namespace DepotDL.CLI
 
                         Task.Run(async () =>
                         {
-                            for (int attempt = 0; attempt < 5; attempt++)
+                            for (var attempt = 0; attempt < 5; attempt++)
                             {
                                 try
                                 {
                                     if (File.Exists(resolvedPath))
                                     {
-                                        long size = new FileInfo(resolvedPath).Length;
+                                        var size = new FileInfo(resolvedPath).Length;
                                         if (size > 0)
                                         {
                                             lock (_drawLock)
@@ -924,7 +921,7 @@ namespace DepotDL.CLI
                                         }
                                     }
                                 }
-                                catch {}
+                                catch { }
                                 await Task.Delay(20);
                             }
                         });
@@ -948,8 +945,8 @@ namespace DepotDL.CLI
                 var pctMatch = Regex.Match(line, @"(\d+(?:[.,]\d+)?)%");
                 if (pctMatch.Success)
                 {
-                    string pctStr = pctMatch.Groups[1].Value.Replace(',', '.');
-                    if (double.TryParse(pctStr, NumberStyles.Any, CultureInfo.InvariantCulture, out double percentage))
+                    var pctStr = pctMatch.Groups[1].Value.Replace(',', '.');
+                    if (double.TryParse(pctStr, NumberStyles.Any, CultureInfo.InvariantCulture, out var percentage))
                     {
                         lock (_drawLock)
                         {
@@ -968,9 +965,9 @@ namespace DepotDL.CLI
                                 slot.SpeedOverrideString = null;
                             }
 
-                            int fileStart = pctMatch.Index + pctMatch.Length;
+                            var fileStart = pctMatch.Index + pctMatch.Length;
                             while (fileStart < line.Length && line[fileStart] == ' ') fileStart++;
-                            int fileEnd = speedMatch.Success ? speedMatch.Index : line.Length;
+                            var fileEnd = speedMatch.Success ? speedMatch.Index : line.Length;
                             if (fileStart < fileEnd)
                             {
                                 var filePart = Path.GetFileName(line[fileStart..fileEnd].Trim());
@@ -990,14 +987,14 @@ namespace DepotDL.CLI
                             }
                             else
                             {
-                                double timeDiffSec = (now - slot.LastSpeedUpdateTime).TotalSeconds;
+                                var timeDiffSec = (now - slot.LastSpeedUpdateTime).TotalSeconds;
                                 if (timeDiffSec >= 0.5)
                                 {
-                                    long currentTotalBytes = slot.TotalUncompressedSize;
+                                    var currentTotalBytes = slot.TotalUncompressedSize;
                                     double bytesDiff = currentTotalBytes - slot.LastSpeedTotalBytes;
                                     if (bytesDiff > 0)
                                     {
-                                        double speedBps = bytesDiff / timeDiffSec;
+                                        var speedBps = bytesDiff / timeDiffSec;
 
                                         if (slot.CurrentSpeedBps == 0)
                                         {
@@ -1034,13 +1031,13 @@ namespace DepotDL.CLI
         {
             try
             {
-                int width = Console.WindowWidth - 1;
+                var width = Console.WindowWidth - 1;
                 if (width > 0)
                 {
                     Console.Write(new string(' ', width) + "\r");
                 }
             }
-            catch {}
+            catch { }
         }
 
         private static string FormatSpeed(double speedBps)
@@ -1059,7 +1056,7 @@ namespace DepotDL.CLI
 
             if (slot.Percent != null && slot.Status == "Downloading" && slot.LastSpeedUpdateTime != DateTime.MinValue)
             {
-                double timeSinceUpdate = (DateTime.UtcNow - slot.LastSpeedUpdateTime).TotalSeconds;
+                var timeSinceUpdate = (DateTime.UtcNow - slot.LastSpeedUpdateTime).TotalSeconds;
                 if (timeSinceUpdate > 3.0)
                 {
                     if (timeSinceUpdate > 6.0)
@@ -1073,20 +1070,20 @@ namespace DepotDL.CLI
                 }
             }
 
-            int windowWidth = 120;
+            var windowWidth = 120;
             try { windowWidth = Console.WindowWidth; } catch { }
             if (windowWidth < 40) windowWidth = 120;
-            int maxChars = windowWidth - 1;
+            var maxChars = windowWidth - 1;
 
-            string pad = new string(' ', DownloadTui.LeftPad);
-            int charsWritten = pad.Length;
+            var pad = new string(' ', DownloadTui.LeftPad);
+            var charsWritten = pad.Length;
 
             Console.ForegroundColor = ConsoleColor.DarkGray;
             Console.Write(pad + "  │ ");
             charsWritten += 4;
 
             Console.ForegroundColor = ConsoleColor.DarkCyan;
-            string slotLabel = TuiText.Pad($"Slot {slotId + 1}", 16);
+            var slotLabel = TuiText.Pad($"Slot {slotId + 1}", 16);
             Console.Write(slotLabel);
             charsWritten += 16;
 
@@ -1104,23 +1101,23 @@ namespace DepotDL.CLI
             {
                 // Build the status message portion to match WriteStatus value style
                 Console.ForegroundColor = ConsoleColor.White;
-                string depotLabel = TuiText.Pad(slot.DepotId, 8);
+                var depotLabel = TuiText.Pad(slot.DepotId, 8);
                 Console.Write(depotLabel);
                 charsWritten += 8;
 
                 if (slot.Percent != null)
                 {
-                    double pct = slot.Percent.Value;
-                    int barWidth = 30;
-                    int filled = (int)Math.Round(pct / 100.0 * barWidth);
+                    var pct = slot.Percent.Value;
+                    var barWidth = 30;
+                    var filled = (int)Math.Round(pct / 100.0 * barWidth);
                     if (filled < 0) filled = 0;
                     if (filled > barWidth) filled = barWidth;
 
-                    string filledBar = new string('\u2588', filled);
-                    string emptyBar = new string('\u2591', barWidth - filled);
+                    var filledBar = new string('\u2588', filled);
+                    var emptyBar = new string('\u2591', barWidth - filled);
 
                     Console.ForegroundColor = ConsoleColor.Green;
-                    string pctStr = $"{pct,5:F1}%";
+                    var pctStr = $"{pct,5:F1}%";
                     Console.Write(pctStr);
                     charsWritten += pctStr.Length;
 
@@ -1140,7 +1137,7 @@ namespace DepotDL.CLI
                     charsWritten += 2;
 
                     Console.ForegroundColor = ConsoleColor.Gray;
-                    string speedStr = "";
+                    var speedStr = "";
                     if (!string.IsNullOrEmpty(slot.SpeedOverrideString))
                     {
                         speedStr = $" ({slot.SpeedOverrideString})";
@@ -1149,7 +1146,7 @@ namespace DepotDL.CLI
                     {
                         speedStr = $" ({FormatSpeed(slot.CurrentSpeedBps)})";
                     }
-                    string etaStr = "";
+                    var etaStr = "";
                     if (slot.Status == "Downloading" && pct > 0.5 && pct < 99.5 && slot.DownloadStartTime != null)
                     {
                         double etaSec = 0;
@@ -1159,14 +1156,14 @@ namespace DepotDL.CLI
                         }
                         else if (pct > 1.0)
                         {
-                            double elapsed = (DateTime.UtcNow - slot.DownloadStartTime.Value).TotalSeconds;
+                            var elapsed = (DateTime.UtcNow - slot.DownloadStartTime.Value).TotalSeconds;
                             etaSec = elapsed * (100.0 - pct) / pct;
                         }
                         if (etaSec > 5 && etaSec < 86400)
                             etaStr = $"  ETA {FormatEta(etaSec)}";
                     }
-                    string statusText = slot.Status + speedStr + etaStr;
-                    int statusAvail = maxChars - charsWritten;
+                    var statusText = slot.Status + speedStr + etaStr;
+                    var statusAvail = maxChars - charsWritten;
                     if (statusAvail > 0)
                     {
                         if (statusText.Length > statusAvail)
@@ -1178,8 +1175,8 @@ namespace DepotDL.CLI
                 else
                 {
                     Console.ForegroundColor = ConsoleColor.Gray;
-                    int statusAvail = maxChars - charsWritten;
-                    string statusText = slot.Status;
+                    var statusAvail = maxChars - charsWritten;
+                    var statusText = slot.Status;
                     if (statusAvail > 0)
                     {
                         if (statusText.Length > statusAvail)
@@ -1191,11 +1188,11 @@ namespace DepotDL.CLI
 
                 if (!string.IsNullOrEmpty(slot.ActiveValidationFile))
                 {
-                    int valAvail = maxChars - charsWritten;
+                    var valAvail = maxChars - charsWritten;
                     if (valAvail > 4)
                     {
                         Console.ForegroundColor = ConsoleColor.DarkGray;
-                        string valStr = $"  {TuiText.Shorten(slot.ActiveValidationFile, Math.Max(1, valAvail - 2))}";
+                        var valStr = $"  {TuiText.Shorten(slot.ActiveValidationFile, Math.Max(1, valAvail - 2))}";
                         Console.Write(valStr);
                         charsWritten += valStr.Length;
                     }
@@ -1203,10 +1200,10 @@ namespace DepotDL.CLI
             }
 
             // Pad the rest of the line with spaces if it's shorter than the previous write for this slot.
-            int lastLen = _lastSlotLengths[slotId];
+            var lastLen = _lastSlotLengths[slotId];
             if (charsWritten < lastLen)
             {
-                int padNeeded = Math.Min(lastLen - charsWritten, maxChars - charsWritten);
+                var padNeeded = Math.Min(lastLen - charsWritten, maxChars - charsWritten);
                 if (padNeeded > 0)
                     Console.Write(new string(' ', padNeeded));
             }
@@ -1224,9 +1221,9 @@ namespace DepotDL.CLI
             if (!_isTty || _slots == null) return;
             try
             {
-                int startTop = Math.Max(0, Console.CursorTop - _slots.Length);
+                var startTop = Math.Max(0, Console.CursorTop - _slots.Length);
                 Console.SetCursorPosition(0, startTop);
-                for (int s = 0; s < _slots.Length; s++)
+                for (var s = 0; s < _slots.Length; s++)
                 {
                     ClearCurrentLine();
                     Console.WriteLine();
@@ -1252,7 +1249,7 @@ namespace DepotDL.CLI
                     try
                     {
                         // Move cursor up to where slot lines start
-                        int startTop = Math.Max(0, Console.CursorTop - _slots.Length);
+                        var startTop = Math.Max(0, Console.CursorTop - _slots.Length);
                         Console.SetCursorPosition(0, startTop);
 
                         // Flush any pending permanent log lines (completion/failure messages)
@@ -1265,7 +1262,7 @@ namespace DepotDL.CLI
 
                         // Redraw the slot lines without clear-blanking to avoid flickering.
                         // Any leftover characters are cleared via character-based padding inside DrawSlotLine.
-                        for (int s = 0; s < _slots.Length; s++)
+                        for (var s = 0; s < _slots.Length; s++)
                         {
                             DrawSlotLine(s);
                             Console.WriteLine();
@@ -1294,20 +1291,20 @@ namespace DepotDL.CLI
         private static void SafeCleanupDepotDownloaderFolder(string? outputPath, string ddmodPath)
         {
             var pathsToTry = new List<string>();
-            
+
             if (!string.IsNullOrEmpty(outputPath))
             {
                 pathsToTry.Add(Path.Combine(outputPath, ".DepotDownloader"));
             }
-            
+
             pathsToTry.Add(Path.Combine(Directory.GetCurrentDirectory(), ".DepotDownloader"));
-            
-            string? ddmodDir = Path.GetDirectoryName(ddmodPath);
+
+            var ddmodDir = Path.GetDirectoryName(ddmodPath);
             if (!string.IsNullOrEmpty(ddmodDir))
             {
                 pathsToTry.Add(Path.Combine(ddmodDir, ".DepotDownloader"));
             }
-            
+
             pathsToTry.Add(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ".DepotDownloader"));
 
             foreach (var path in pathsToTry)
@@ -1395,12 +1392,12 @@ namespace DepotDL.CLI
             process.BeginOutputReadLine();
             process.BeginErrorReadLine();
 
-            bool killedByWatchdog = false;
+            var killedByWatchdog = false;
             using var watchdogCts = new CancellationTokenSource();
             var watchdogTask = Task.Run(async () =>
             {
                 double seenPct = -1;
-                string seenStatus = "";
+                var seenStatus = "";
                 while (!watchdogCts.Token.IsCancellationRequested)
                 {
                     try { await Task.Delay(15_000, watchdogCts.Token); }
@@ -1409,14 +1406,14 @@ namespace DepotDL.CLI
                     double nowPct; string nowStatus; DateTime lastProg;
                     lock (_drawLock)
                     {
-                        nowPct    = _slots[slotId].Percent ?? -1;
+                        nowPct = _slots[slotId].Percent ?? -1;
                         nowStatus = _slots[slotId].Status;
-                        lastProg  = _slots[slotId].LastProgressTime;
+                        lastProg = _slots[slotId].LastProgressTime;
                     }
 
                     if (nowPct > seenPct || nowStatus != seenStatus)
                     {
-                        seenPct    = nowPct;
+                        seenPct = nowPct;
                         seenStatus = nowStatus;
                     }
                     else if (lastProg != DateTime.MinValue &&
@@ -1450,7 +1447,7 @@ namespace DepotDL.CLI
                 else if (!string.IsNullOrWhiteSpace(lastOutputLine))
                 {
                     var msgPart = lastOutputLine;
-                    int nlIdx = msgPart.IndexOf('\n');
+                    var nlIdx = msgPart.IndexOf('\n');
                     if (nlIdx > 0) msgPart = msgPart.Substring(0, nlIdx);
                     reason = TuiText.Shorten($"{msgPart} (exit code {process.ExitCode})", 60);
                 }

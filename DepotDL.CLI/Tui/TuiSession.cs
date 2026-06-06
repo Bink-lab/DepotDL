@@ -1,4 +1,5 @@
-using System.Collections.Generic;
+// This file is subject to the terms and conditions defined
+// in file 'LICENSE', which is part of this source code package.
 
 namespace DepotDL.CLI.Tui
 {
@@ -27,8 +28,8 @@ namespace DepotDL.CLI.Tui
         public bool DownloadAchievementIcons { get; set; } = true;
         public List<DepotInfo> AllDepots { get; set; } = new();
         public List<DepotInfo> SelectedDepots { get; set; } = new();
-        public DateTime?     LastUpdateCheckUtc  { get; set; }
-        public string?       LastKnownReleaseTag { get; set; }
-        public string?       DismissedUpdateTag  { get; set; }
+        public DateTime? LastUpdateCheckUtc { get; set; }
+        public string? LastKnownReleaseTag { get; set; }
+        public string? DismissedUpdateTag { get; set; }
     }
 }

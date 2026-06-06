@@ -1,7 +1,7 @@
-using System;
-using System.Collections.Generic;
+// This file is subject to the terms and conditions defined
+// in file 'LICENSE', which is part of this source code package.
+
 using System.Diagnostics;
-using System.IO;
 
 namespace DepotDL.CLI.Utilities
 {
@@ -31,7 +31,7 @@ namespace DepotDL.CLI.Utilities
                     using var process = Process.Start(psi);
                     if (process == null) return null;
 
-                    string output = process.StandardOutput.ReadToEnd().Trim();
+                    var output = process.StandardOutput.ReadToEnd().Trim();
                     process.WaitForExit();
 
                     return string.IsNullOrEmpty(output) ? null : output;
@@ -72,7 +72,7 @@ namespace DepotDL.CLI.Utilities
                     using var process = Process.Start(psi);
                     if (process == null) return results;
 
-                    string output = process.StandardOutput.ReadToEnd().Trim();
+                    var output = process.StandardOutput.ReadToEnd().Trim();
                     process.WaitForExit();
 
                     if (!string.IsNullOrEmpty(output))
@@ -88,14 +88,14 @@ namespace DepotDL.CLI.Utilities
             }
             else if (OperatingSystem.IsMacOS())
             {
-                string script =
+                var script =
                     $"set output to \"\"\n" +
                     $"set chosen to choose file with prompt \"{EscapeOsascript(title)}\" with multiple selections allowed\n" +
                     $"repeat with f in chosen\n" +
                     $"set output to output & (POSIX path of f) & \";\"\n" +
                     $"end repeat\n" +
                     $"output";
-                string? raw = RunOsascript(script);
+                var raw = RunOsascript(script);
                 if (!string.IsNullOrEmpty(raw))
                 {
                     foreach (var p in raw.Split(';', StringSplitOptions.RemoveEmptyEntries))
@@ -132,7 +132,7 @@ namespace DepotDL.CLI.Utilities
                     using var process = Process.Start(psi);
                     if (process == null) return null;
 
-                    string output = process.StandardOutput.ReadToEnd().Trim();
+                    var output = process.StandardOutput.ReadToEnd().Trim();
                     process.WaitForExit();
 
                     return string.IsNullOrEmpty(output) ? null : output;
@@ -163,7 +163,7 @@ namespace DepotDL.CLI.Utilities
                 };
                 using var process = Process.Start(psi);
                 if (process == null) return null;
-                string output = process.StandardOutput.ReadToEnd().Trim();
+                var output = process.StandardOutput.ReadToEnd().Trim();
                 process.WaitForExit(15000);
                 return string.IsNullOrEmpty(output) ? null : output;
             }
@@ -195,7 +195,7 @@ namespace DepotDL.CLI.Utilities
                     }
                 };
                 checkProc.Start();
-                string output = checkProc.StandardOutput.ReadToEnd();
+                var output = checkProc.StandardOutput.ReadToEnd();
                 checkProc.WaitForExit();
                 if (output.Contains("Microsoft.NETCore.App 9."))
                 {

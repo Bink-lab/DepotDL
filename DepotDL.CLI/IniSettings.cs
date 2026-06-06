@@ -1,7 +1,7 @@
-using System;
-using System.Collections.Generic;
+// This file is subject to the terms and conditions defined
+// in file 'LICENSE', which is part of this source code package.
+
 using System.Globalization;
-using System.IO;
 using DepotDL.CLI.Tui;
 
 namespace DepotDL.CLI
@@ -49,7 +49,7 @@ namespace DepotDL.CLI
                 session.LastUpdateCheckUtc = lastCheck;
 
             session.LastKnownReleaseTag = Get(values, "settings.last_known_release_tag");
-            session.DismissedUpdateTag  = Get(values, "settings.dismissed_update_tag");
+            session.DismissedUpdateTag = Get(values, "settings.dismissed_update_tag");
         }
 
         public static void Save(TuiSession session)
@@ -85,7 +85,7 @@ namespace DepotDL.CLI
                 return values;
             }
 
-            string section = "";
+            var section = "";
             foreach (var rawLine in File.ReadAllLines(IniPath))
             {
                 var line = rawLine.Trim();
@@ -132,7 +132,7 @@ namespace DepotDL.CLI
         private static string Unescape(string value)
         {
             var result = new System.Text.StringBuilder();
-            for (int i = 0; i < value.Length; i++)
+            for (var i = 0; i < value.Length; i++)
             {
                 if (value[i] == '\\' && i + 1 < value.Length)
                 {

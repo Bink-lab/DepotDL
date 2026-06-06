@@ -1,3 +1,6 @@
+// This file is subject to the terms and conditions defined
+// in file 'LICENSE', which is part of this source code package.
+
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -25,7 +28,7 @@ namespace DepotDL.GUI.Views
         private void ScreenshotScroller_MouseMove(object sender, MouseEventArgs e)
         {
             if (!_isDragging) return;
-            double delta = _dragStart.X - e.GetPosition(ScreenshotScroller).X;
+            var delta = _dragStart.X - e.GetPosition(ScreenshotScroller).X;
             ScreenshotScroller.ScrollToHorizontalOffset(_scrollStart + delta);
         }
 

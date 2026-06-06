@@ -1,17 +1,16 @@
-using System;
+// This file is subject to the terms and conditions defined
+// in file 'LICENSE', which is part of this source code package.
+
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Windows.Media.Imaging;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using DepotDL.CLI;
 using DepotDL.GUI.Helpers;
 using DepotDL.GUI.Models;
 using DepotDL.GUI.Services;
-using DepotDL.CLI;
 
 namespace DepotDL.GUI.ViewModels
 {
@@ -67,12 +66,12 @@ namespace DepotDL.GUI.ViewModels
 
         private void FilterGames()
         {
-            string query = SearchText.Trim().ToLowerInvariant();
-            int visibleCount = 0;
+            var query = SearchText.Trim().ToLowerInvariant();
+            var visibleCount = 0;
             long totalBytes = 0;
             foreach (var g in Games)
             {
-                bool match = string.IsNullOrEmpty(query) ||
+                var match = string.IsNullOrEmpty(query) ||
                              g.Game.GameName.ToLowerInvariant().Contains(query) ||
                              g.Game.AppId.Contains(query);
                 g.IsVisible = match;
@@ -114,7 +113,7 @@ namespace DepotDL.GUI.ViewModels
             IsRemoveOverlayVisible = false;
             GameToRemove = null;
 
-            string? error = await Task.Run(() => _lib.Remove(vm.Game.AppId, DeleteFiles ? vm.Game.OutputDir : null));
+            var error = await Task.Run(() => _lib.Remove(vm.Game.AppId, DeleteFiles ? vm.Game.OutputDir : null));
             Games.Remove(vm);
             FilterGames();
             if (error != null)
@@ -180,13 +179,13 @@ namespace DepotDL.GUI.ViewModels
             if (!vm.Game.OnlineFixApplied)
             {
                 var loadedSettings = _settings.Load();
-                string? webApiKey = loadedSettings.SteamWebApiKey;
-                bool downloadAchievementIcons = loadedSettings.DownloadAchievementIcons;
-                bool fixSuccess = await Task.Run(() => GameLauncher.EnsureGbeApplied(vm.Game.AppId, vm.Game.OutputDir, vm.Game.LuaPath, webApiKey, downloadAchievementIcons));
+                var webApiKey = loadedSettings.SteamWebApiKey;
+                var downloadAchievementIcons = loadedSettings.DownloadAchievementIcons;
+                var fixSuccess = await Task.Run(() => GameLauncher.EnsureGbeApplied(vm.Game.AppId, vm.Game.OutputDir, vm.Game.LuaPath, webApiKey, downloadAchievementIcons));
                 if (!fixSuccess)
                 {
-                    string logPath = Path.Combine(vm.Game.OutputDir, "sff_fix_error.log");
-                    string errorMsg = "Failed to apply Goldberg Steam Emulator fix to the game.";
+                    var logPath = Path.Combine(vm.Game.OutputDir, "sff_fix_error.log");
+                    var errorMsg = "Failed to apply Goldberg Steam Emulator fix to the game.";
                     if (File.Exists(logPath))
                     {
                         try
@@ -201,7 +200,7 @@ namespace DepotDL.GUI.ViewModels
                 }
             }
 
-            string? exePath = GameLauncher.FindLaunchTarget(vm.Game.OutputDir);
+            var exePath = GameLauncher.FindLaunchTarget(vm.Game.OutputDir);
             if (string.IsNullOrEmpty(exePath))
             {
                 DialogService.ShowError("Launch Failed", "Could not find any suitable executable or launch script in the game folder.");
@@ -224,7 +223,7 @@ namespace DepotDL.GUI.ViewModels
         private void RenameGame(LibraryGameViewModel? vm)
         {
             if (vm == null) return;
-            string? newName = DialogService.ShowInput("Rename Game", vm.Game.GameName);
+            var newName = DialogService.ShowInput("Rename Game", vm.Game.GameName);
             if (newName == null || newName == vm.Game.GameName) return;
             vm.ApplyRename(newName);
             _lib.AddOrUpdate(vm.Game);
@@ -284,7 +283,7 @@ namespace DepotDL.GUI.ViewModels
 
             if (!OnlineFixService.IsChromiumInstalled())
             {
-                bool proceed = DialogService.ShowConfirm("Browser Engine Required",
+                var proceed = DialogService.ShowConfirm("Browser Engine Required",
                     "OnlineFix requires a browser engine (~170 MB) to be downloaded once.\n\nDownload it now?");
                 if (!proceed) return;
             }
@@ -349,7 +348,7 @@ namespace DepotDL.GUI.ViewModels
                 foreach (var vm in Games)
                 {
                     if (!Directory.Exists(vm.Game.OutputDir)) continue;
-                    long size = LibraryService.GetDirectorySize(vm.Game.OutputDir);
+                    var size = LibraryService.GetDirectorySize(vm.Game.OutputDir);
                     if (size != vm.Game.TotalSizeBytes)
                     {
                         vm.Game.TotalSizeBytes = size;
@@ -407,8 +406,8 @@ namespace DepotDL.GUI.ViewModels
 
         public Task LoadImageAsync(CancellationToken ct = default)
         {
-            if (!int.TryParse(Game.AppId, out int appId)) return Task.CompletedTask;
-            string url = $"https://api.bonker.dev/api/image-cache/app_{appId}_header.jpg";
+            if (!int.TryParse(Game.AppId, out var appId)) return Task.CompletedTask;
+            var url = $"https://api.bonker.dev/api/image-cache/app_{appId}_header.jpg";
             return ImageLoader.LoadGameImageAsync(this, appId, url, ct);
         }
     }
