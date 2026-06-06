@@ -31,6 +31,9 @@ namespace DepotDL.GUI.Services
             Directory.CreateDirectory(importDir);
             Directory.CreateDirectory(manifestsDir);
 
+            var importDirRoot = Path.GetFullPath(importDir + Path.DirectorySeparatorChar);
+            var manifestsDirRoot = Path.GetFullPath(manifestsDir + Path.DirectorySeparatorChar);
+
             foreach (var entry in archive.Entries)
             {
                 var ext = Path.GetExtension(entry.FullName).ToLowerInvariant();
@@ -39,14 +42,20 @@ namespace DepotDL.GUI.Services
 
                 if (ext == ".lua")
                 {
-                    var target = Path.Combine(importDir, fileName);
+                    var target = Path.GetFullPath(Path.Combine(importDir, fileName));
+                    if (!target.StartsWith(importDirRoot, StringComparison.OrdinalIgnoreCase))
+                        throw new InvalidOperationException($"Entry resolves outside import directory: {entry.FullName}");
+
                     entry.ExtractToFile(target, overwrite: true);
                     luaCount++;
-                    firstLuaPath ??= Path.GetFullPath(target);
+                    firstLuaPath ??= target;
                 }
                 else if (ext == ".manifest")
                 {
-                    var target = Path.Combine(manifestsDir, fileName);
+                    var target = Path.GetFullPath(Path.Combine(manifestsDir, fileName));
+                    if (!target.StartsWith(manifestsDirRoot, StringComparison.OrdinalIgnoreCase))
+                        throw new InvalidOperationException($"Entry resolves outside manifests directory: {entry.FullName}");
+
                     entry.ExtractToFile(target, overwrite: true);
                     manifestCount++;
                 }
@@ -73,7 +82,12 @@ namespace DepotDL.GUI.Services
             folderName = SanitizeFolderName(folderName);
             if (string.IsNullOrWhiteSpace(folderName)) folderName = "import";
 
-            return Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "imports", folderName));
+            var importsRoot = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "imports") + Path.DirectorySeparatorChar);
+            var importDir = Path.GetFullPath(Path.Combine(importsRoot, folderName));
+            if (!importDir.StartsWith(importsRoot, StringComparison.OrdinalIgnoreCase))
+                throw new InvalidOperationException($"Import directory resolves outside imports root: {folderName}");
+
+            return importDir;
         }
 
         private static string SanitizeFolderName(string value)
