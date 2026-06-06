@@ -25,7 +25,7 @@ namespace DepotDL.CLI.Tui
             session.ManifestsDir = defaultManifestsDir;
             IniSettings.LoadInto(session);
 
-            Console.Clear();
+            try { Console.Clear(); } catch { }
             WriteCenteredStatusBox("DEPOTDL", new[] { "Initializing library and scanning systems" }, ConsoleColor.Cyan);
 
             var verified = LibraryManager.VerifyLibraryOnStartup(out var totalCount, out var missingCount);
@@ -34,7 +34,7 @@ namespace DepotDL.CLI.Tui
             var menuIndex = 0;
             while (true)
             {
-                Console.Clear();
+                try { Console.Clear(); } catch { }
 
                 var luaName = string.IsNullOrEmpty(session.LuaPath) ? "[None Loaded]" : Path.GetFileName(session.LuaPath);
                 luaName = TuiText.Shorten(luaName, 21);
@@ -186,7 +186,7 @@ namespace DepotDL.CLI.Tui
                 else if (key == ConsoleKey.Escape)
                 {
                     SaveSession(session);
-                    Console.Clear();
+                    try { Console.Clear(); } catch { }
                     try { if (OperatingSystem.IsWindows()) Console.CursorVisible = true; } catch { }
                     return 0;
                 }
@@ -200,6 +200,7 @@ namespace DepotDL.CLI.Tui
                 {
                     if (menuIndex == 0)
                     {
+                        try { Console.Clear(); } catch { }
                         RunLibraryDashboard(session, ddmodPath, dotnetPath);
                         SaveSession(session);
                         verified = LibraryManager.VerifyLibraryOnStartup(out totalCount, out missingCount);
@@ -301,12 +302,12 @@ namespace DepotDL.CLI.Tui
                             if (alreadyDone > 0)
                                 summaryLines.Add($"Resume: {alreadyDone} previously-completed depot(s) will be skipped");
 
-                            Console.Clear();
+                            try { Console.Clear(); } catch { }
                             WriteCenteredStatusBox("STARTING DOWNLOAD", summaryLines, ConsoleColor.Cyan);
                             System.Threading.Thread.Sleep(1000);
                         }
 
-                        Console.Clear();
+                        try { Console.Clear(); } catch { }
 
                         var exitCode = Program.TriggerDownloadProcess(session.LuaPath, session.ManifestsDir, session.OutputDir, ddmodPath, dotnetPath, session.SelectedDepots, session.MaxParallelDepots, ryuuApiKey: session.RyuuApiKey, hubcapApiKey: session.HubcapApiKey);
 
@@ -327,7 +328,7 @@ namespace DepotDL.CLI.Tui
                     else if (menuIndex == 8)
                     {
                         SaveSession(session);
-                        Console.Clear();
+                        try { Console.Clear(); } catch { }
                         try { if (OperatingSystem.IsWindows()) Console.CursorVisible = true; } catch { }
                         return 0;
                     }
@@ -340,7 +341,7 @@ namespace DepotDL.CLI.Tui
             var selectedIndex = 0;
             while (true)
             {
-                Console.Clear();
+                try { Console.Clear(); } catch { }
                 var games = LibraryManager.LoadLibrary();
                 var totalMenuItems = games.Count + 2;
                 if (selectedIndex >= totalMenuItems) selectedIndex = totalMenuItems - 1;
@@ -543,7 +544,7 @@ namespace DepotDL.CLI.Tui
             var selectedIndex = 0;
             while (true)
             {
-                Console.Clear();
+                try { Console.Clear(); } catch { }
                 var menuItems = new List<string>
                 {
                     "1. Launch Game",
@@ -647,7 +648,7 @@ namespace DepotDL.CLI.Tui
                 {
                     if (selectedIndex == 0)
                     {
-                        Console.Clear();
+                        try { Console.Clear(); } catch { }
                         Console.ForegroundColor = ConsoleColor.Cyan;
                         Console.WriteLine("Applying Goldberg Steam Emulator...");
                         Console.ResetColor();
@@ -684,7 +685,7 @@ namespace DepotDL.CLI.Tui
                     }
                     else if (selectedIndex == 1)
                     {
-                        Console.Clear();
+                        try { Console.Clear(); } catch { }
                         try
                         {
                             if (Directory.Exists(game.OutputDir))
@@ -711,7 +712,7 @@ namespace DepotDL.CLI.Tui
                     }
                     else if (selectedIndex == 2)
                     {
-                        Console.Clear();
+                        try { Console.Clear(); } catch { }
                         var exists = Directory.Exists(game.OutputDir);
                         var size = exists ? LibraryManager.GetDirectorySize(game.OutputDir) : 0;
 
@@ -731,7 +732,7 @@ namespace DepotDL.CLI.Tui
                     }
                     else if (selectedIndex == 3)
                     {
-                        Console.Clear();
+                        try { Console.Clear(); } catch { }
                         var repairSession = new TuiSession
                         {
                             LuaPath = game.LuaPath,
@@ -784,7 +785,7 @@ namespace DepotDL.CLI.Tui
                     }
                     else if (selectedIndex == 4)
                     {
-                        Console.Clear();
+                        try { Console.Clear(); } catch { }
                         session.LuaPath = game.LuaPath;
                         session.OutputDir = game.OutputDir;
 
@@ -813,7 +814,7 @@ namespace DepotDL.CLI.Tui
                     }
                     else if (selectedIndex == 5)
                     {
-                        Console.Clear();
+                        try { Console.Clear(); } catch { }
                         using (CenterConsoleOutput(80))
                         {
                             Console.ForegroundColor = ConsoleColor.Red;
@@ -858,7 +859,7 @@ namespace DepotDL.CLI.Tui
             var selectedIndex = 0;
             while (true)
             {
-                Console.Clear();
+                try { Console.Clear(); } catch { }
                 var menuItems = new List<string>
                 {
                     "1. Batch Verify All Games (Rescans folder sizes)",
@@ -923,7 +924,7 @@ namespace DepotDL.CLI.Tui
                 {
                     if (selectedIndex == 0)
                     {
-                        Console.Clear();
+                        try { Console.Clear(); } catch { }
                         var games = LibraryManager.LoadLibrary();
                         var verifiedCount = 0;
                         var missingCount = 0;
@@ -939,7 +940,7 @@ namespace DepotDL.CLI.Tui
                     }
                     else if (selectedIndex == 1)
                     {
-                        Console.Clear();
+                        try { Console.Clear(); } catch { }
                         var games = LibraryManager.LoadLibrary();
                         var initialCount = games.Count;
                         games.RemoveAll(g => !Directory.Exists(g.OutputDir));
@@ -975,7 +976,7 @@ namespace DepotDL.CLI.Tui
             var selected = RunCheckboxSelectorGames("SELECT GAMES FOR BULK UNINSTALL", games);
             if (selected.Count == 0) return;
 
-            Console.Clear();
+            try { Console.Clear(); } catch { }
             using (CenterConsoleOutput(80))
             {
                 Console.ForegroundColor = ConsoleColor.Red;
@@ -1034,7 +1035,7 @@ namespace DepotDL.CLI.Tui
             var selected = RunCheckboxSelectorGames("SELECT GAMES FOR SEQUENTIAL DOWNLOAD QUEUE", games);
             if (selected.Count == 0) return;
 
-            Console.Clear();
+            try { Console.Clear(); } catch { }
             using (CenterConsoleOutput(80))
             {
                 Console.ForegroundColor = ConsoleColor.Cyan;
@@ -1055,7 +1056,7 @@ namespace DepotDL.CLI.Tui
             for (var i = 0; i < selected.Count; i++)
             {
                 var game = selected[i];
-                Console.Clear();
+                try { Console.Clear(); } catch { }
                 using (CenterConsoleOutput(80))
                 {
                     Console.ForegroundColor = ConsoleColor.Cyan;
@@ -1141,7 +1142,7 @@ namespace DepotDL.CLI.Tui
 
             while (true)
             {
-                Console.Clear();
+                try { Console.Clear(); } catch { }
                 using (CenterConsoleOutput(80))
                 {
                     Console.ForegroundColor = ConsoleColor.DarkGray;
@@ -1234,7 +1235,7 @@ namespace DepotDL.CLI.Tui
             var selectedIndex = 0;
             while (true)
             {
-                Console.Clear();
+                try { Console.Clear(); } catch { }
                 var currentDir = session.ManifestsDir ?? "manifests";
                 var manifestCount = 0;
                 var luaCount = 0;
@@ -1359,7 +1360,7 @@ namespace DepotDL.CLI.Tui
                     }
                     else if (selectedIndex == 4)
                     {
-                        Console.Clear();
+                        try { Console.Clear(); } catch { }
                         using (CenterConsoleOutput(80))
                         {
                             Console.ForegroundColor = ConsoleColor.Red;
@@ -1406,7 +1407,7 @@ namespace DepotDL.CLI.Tui
 
         private static void RunScanCachedManifestDetails(TuiSession session)
         {
-            Console.Clear();
+            try { Console.Clear(); } catch { }
             var currentDir = session.ManifestsDir ?? "manifests";
             if (!Directory.Exists(currentDir))
             {
@@ -1471,7 +1472,7 @@ namespace DepotDL.CLI.Tui
 
         private static void RunZipImportAction(TuiSession session)
         {
-            Console.Clear();
+            try { Console.Clear(); } catch { }
             var sourceOptions = new List<string>
             {
                 "Use local .zip file",
@@ -1515,7 +1516,7 @@ namespace DepotDL.CLI.Tui
 
                 if (selIndex == 0)
                 {
-                    Console.Clear();
+                    try { Console.Clear(); } catch { }
                     zipPath = DialogHelpers.OpenWindowsFileDialog("Select ZIP Archive Containing Configs/Manifests", "ZIP Archives (*.zip)|*.zip|All Files (*.*)|*.*");
                 }
             }
@@ -1552,7 +1553,7 @@ namespace DepotDL.CLI.Tui
             session.RyuuApiKey = apiKey.Trim();
             SaveSession(session);
 
-            Console.Clear();
+            try { Console.Clear(); } catch { }
             WriteCenteredStatusBox(
                 "RYUU API",
                 new[] { $"Requesting ZIP package for App ID {appId.Trim()}..." },
@@ -1596,7 +1597,7 @@ namespace DepotDL.CLI.Tui
             session.HubcapApiKey = apiKey.Trim();
             SaveSession(session);
 
-            Console.Clear();
+            try { Console.Clear(); } catch { }
             WriteCenteredStatusBox(
                 "HUBCAP API",
                 new[] { $"Requesting ZIP package for App ID {appId.Trim()}..." },
@@ -1623,7 +1624,7 @@ namespace DepotDL.CLI.Tui
 
         private static void ImportZipIntoSession(TuiSession session, string zipPath)
         {
-            Console.Clear();
+            try { Console.Clear(); } catch { }
             WriteCenteredStatusBox(
                 "ZIP IMPORT",
                 new[] { $"Scanning and extracting archive: {TuiText.ShortenTail(zipPath, 58)}" },
@@ -1685,7 +1686,7 @@ namespace DepotDL.CLI.Tui
             string? selectedPath = null;
             if (hasNativePicker && options[selIndex] == "[Open File Picker...]")
             {
-                Console.Clear();
+                try { Console.Clear(); } catch { }
                 selectedPath = DialogHelpers.OpenWindowsFileDialog("Select Game Lua Configuration File", "Lua Files (*.lua)|*.lua|All Files (*.*)|*.*");
                 if (string.IsNullOrEmpty(selectedPath))
                 {
@@ -1735,7 +1736,7 @@ namespace DepotDL.CLI.Tui
 
             if (hasNativePicker && options[selIndex] == "[Open Folder Picker...]")
             {
-                Console.Clear();
+                try { Console.Clear(); } catch { }
                 var selectedPath = DialogHelpers.OpenWindowsFolderDialog("Select Manifests Folder");
                 if (string.IsNullOrEmpty(selectedPath))
                 {
@@ -1761,7 +1762,7 @@ namespace DepotDL.CLI.Tui
 
         private static void RunImportIndividualManifestFilesAction(TuiSession session)
         {
-            Console.Clear();
+            try { Console.Clear(); } catch { }
             var selectedFiles = DialogHelpers.OpenWindowsMultiFileDialog("Select Manifest Files", "Manifest Files (*.manifest)|*.manifest|All Files (*.*)|*.*");
             if (selectedFiles.Count == 0)
             {
@@ -1813,7 +1814,7 @@ namespace DepotDL.CLI.Tui
             string? selectedPath = null;
             if (hasNativePicker && options[selIndex] == "[Open Folder Picker...]")
             {
-                Console.Clear();
+                try { Console.Clear(); } catch { }
                 selectedPath = DialogHelpers.OpenWindowsFolderDialog("Select Output Download Folder");
                 if (string.IsNullOrEmpty(selectedPath))
                 {
@@ -2071,7 +2072,7 @@ namespace DepotDL.CLI.Tui
             var index = 0;
             while (true)
             {
-                Console.Clear();
+                try { Console.Clear(); } catch { }
                 var selectorWidth = Math.Min(78, Math.Max(42, options.Append(prompt).Max(option => option.Length) + 8));
                 var leftPad = GetLeftPad(selectorWidth);
                 WriteCenteredHeader(prompt.ToUpper(), selectorWidth);
@@ -2136,7 +2137,7 @@ namespace DepotDL.CLI.Tui
                 var _showEmptyWarning = showEmptyWarning;
                 showEmptyWarning = false;
 
-                Console.Clear();
+                try { Console.Clear(); } catch { }
                 using (CenterConsoleOutput(80))
                 {
                     Console.ForegroundColor = ConsoleColor.DarkGray;
@@ -2304,7 +2305,7 @@ namespace DepotDL.CLI.Tui
 
         private static string? PromptText(string title, string prompt, string defaultValue, bool mask = false)
         {
-            Console.Clear();
+            try { Console.Clear(); } catch { }
             var consoleWidth = 80;
             try { consoleWidth = Console.WindowWidth; } catch { }
             if (consoleWidth < 40) consoleWidth = 80;
@@ -2421,7 +2422,7 @@ namespace DepotDL.CLI.Tui
             var selectedIndex = 0;
             while (true)
             {
-                Console.Clear();
+                try { Console.Clear(); } catch { }
                 var maxParallelStr = session.MaxParallelDepots.ToString();
                 var manifestsDirStr = session.ManifestsDir ?? "[Not Configured]";
                 var outputDirStr = session.DownloadBaseDir ?? "[Auto]";
@@ -2621,7 +2622,7 @@ namespace DepotDL.CLI.Tui
             List<StoreApiClient.StoreGame>? allGames = null;
             var loadError = string.Empty;
 
-            Console.Clear();
+            try { Console.Clear(); } catch { }
             WriteCenteredStatusBox("STEAM STORE BROWSER", new[] { "Connecting to Bonker API..." }, ConsoleColor.Cyan);
 
             try { allGames = StoreApiClient.GetAllGames(); }
@@ -2653,7 +2654,7 @@ namespace DepotDL.CLI.Tui
                 var pageCount = pageItems.Count;
                 selectedIndex = Math.Clamp(selectedIndex, 0, Math.Max(0, pageCount - 1));
 
-                Console.Clear();
+                try { Console.Clear(); } catch { }
                 using (CenterConsoleOutput(80))
                 {
                     Console.ForegroundColor = ConsoleColor.DarkGray;
@@ -2800,7 +2801,7 @@ namespace DepotDL.CLI.Tui
 
         private static void RunStoreDetailView(TuiSession session, int appId, string fallbackName, string ddmodPath, string dotnetPath)
         {
-            Console.Clear();
+            try { Console.Clear(); } catch { }
             WriteCenteredStatusBox("STEAM STORE BROWSER", new[] { $"Loading details for {TuiText.Shorten(fallbackName, 50)}..." }, ConsoleColor.Cyan);
 
             StoreApiClient.StoreDetail? detail = null;
@@ -2821,7 +2822,7 @@ namespace DepotDL.CLI.Tui
 
             while (true)
             {
-                Console.Clear();
+                try { Console.Clear(); } catch { }
                 using (CenterConsoleOutput(80))
                 {
                     Console.ForegroundColor = ConsoleColor.DarkGray;
@@ -2907,7 +2908,7 @@ namespace DepotDL.CLI.Tui
                 if (key == ConsoleKey.S)
                 {
                     session.AppId = appId.ToString();
-                    Console.Clear();
+                    try { Console.Clear(); } catch { }
                     WriteCenteredStatusBox("APP ID SET", new[] { $"Active AppID set to {appId}", $"({TuiText.Shorten(name, 60)})" }, ConsoleColor.Green);
                     System.Threading.Thread.Sleep(1200);
                     return;
@@ -2936,7 +2937,7 @@ namespace DepotDL.CLI.Tui
                         session.OutputDir = BuildOutputDir(session, GetGameName(session));
                     SaveSession(session);
 
-                    Console.Clear();
+                    try { Console.Clear(); } catch { }
                     var exitCode = Program.TriggerDownloadProcess(session.LuaPath, session.ManifestsDir, session.OutputDir, ddmodPath, dotnetPath, session.SelectedDepots, session.MaxParallelDepots, ryuuApiKey: session.RyuuApiKey, hubcapApiKey: session.HubcapApiKey);
                     if (exitCode == 0)
                         PromptText("DOWNLOAD SUCCESS", "Game downloaded and registered successfully! Press Enter.", "");

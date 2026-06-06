@@ -38,7 +38,7 @@ namespace DepotDL.CLI
 
                 if (dotnetPath == null)
                 {
-                    Console.Clear();
+                    try { Console.Clear(); } catch { }
                     WriteColored("[Error] .NET 9 SDK or Runtime could not be found.", ConsoleColor.Red);
                     WriteColored("Please install the .NET 9 runtime to run this tool.", ConsoleColor.Red);
                     Console.WriteLine("\nPress any key to exit.");
@@ -48,7 +48,7 @@ namespace DepotDL.CLI
 
                 if (ddmodPath == null || !File.Exists(ddmodPath))
                 {
-                    Console.Clear();
+                    try { Console.Clear(); } catch { }
                     WriteColored("[Error] DepotDownloaderMod.dll not found in default search locations.", ConsoleColor.Red);
                     WriteColored("Please ensure DepotDownloaderMod.dll is adjacent to this tool.", ConsoleColor.Red);
                     Console.WriteLine("\nPress any key to exit.");
