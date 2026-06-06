@@ -84,7 +84,10 @@ namespace DepotDL.GUI.Services
                 : Path.GetFileNameWithoutExtension(firstLua.FullName);
 
             folderName = SanitizeFolderName(folderName);
-            if (string.IsNullOrWhiteSpace(folderName)) folderName = "import";
+            if (string.IsNullOrWhiteSpace(folderName))
+            {
+                folderName = "import";
+            }
 
             var importsRoot = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "imports") + Path.DirectorySeparatorChar);
             var importDir = Path.GetFullPath(Path.Combine(importsRoot, folderName));

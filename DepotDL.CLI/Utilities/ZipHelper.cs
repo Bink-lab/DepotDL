@@ -32,38 +32,33 @@ namespace DepotDL.CLI.Utilities
                     return new ZipImportResult();
                 }
 
-                using (var archive = ZipFile.OpenRead(zipPath))
+                using var archive = ZipFile.OpenRead(zipPath);
+                importDir = BuildImportDir(zipPath, archive);
+                manifestsDir = Path.Combine(importDir, "manifests");
+                Directory.CreateDirectory(importDir);
+                Directory.CreateDirectory(manifestsDir);
+
+                var fullImportDirPath = Path.GetFullPath(importDir + Path.DirectorySeparatorChar);
+                var fullManifestsDirPath = Path.GetFullPath(manifestsDir + Path.DirectorySeparatorChar);
+
+                foreach (var entry in archive.Entries)
                 {
-                    importDir = BuildImportDir(zipPath, archive);
-                    manifestsDir = Path.Combine(importDir, "manifests");
-                    Directory.CreateDirectory(importDir);
-                    Directory.CreateDirectory(manifestsDir);
+                    var fileName = Path.GetFileName(entry.FullName);
+                    if (string.IsNullOrEmpty(fileName)) continue;
 
-                    var fullImportDirPath = Path.GetFullPath(importDir + Path.DirectorySeparatorChar);
-                    var fullManifestsDirPath = Path.GetFullPath(manifestsDir + Path.DirectorySeparatorChar);
-
-                    foreach (var entry in archive.Entries)
+                    var ext = Path.GetExtension(entry.FullName).ToLower();
+                    if (ext == ".lua")
                     {
-                        var ext = Path.GetExtension(entry.FullName).ToLower();
-                        if (ext == ".lua")
-                        {
-                            var fileName = Path.GetFileName(entry.FullName);
-                            if (string.IsNullOrEmpty(fileName)) continue;
-
-                            var targetPath = ResolveEntryPath(importDir, fullImportDirPath, fileName, entry.FullName);
-                            entry.ExtractToFile(targetPath, overwrite: true);
-                            luaCount++;
-                            firstLuaPath ??= targetPath;
-                        }
-                        else if (ext == ".manifest")
-                        {
-                            var fileName = Path.GetFileName(entry.FullName);
-                            if (string.IsNullOrEmpty(fileName)) continue;
-
-                            var targetPath = ResolveEntryPath(manifestsDir, fullManifestsDirPath, fileName, entry.FullName);
-                            entry.ExtractToFile(targetPath, overwrite: true);
-                            manifestCount++;
-                        }
+                        var targetPath = ResolveEntryPath(importDir, fullImportDirPath, fileName, entry.FullName);
+                        entry.ExtractToFile(targetPath, overwrite: true);
+                        luaCount++;
+                        firstLuaPath ??= targetPath;
+                    }
+                    else if (ext == ".manifest")
+                    {
+                        var targetPath = ResolveEntryPath(manifestsDir, fullManifestsDirPath, fileName, entry.FullName);
+                        entry.ExtractToFile(targetPath, overwrite: true);
+                        manifestCount++;
                     }
                 }
             }
