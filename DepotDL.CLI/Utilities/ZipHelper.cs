@@ -47,6 +47,8 @@ namespace DepotDL.CLI.Utilities
                     if (string.IsNullOrEmpty(fileName)) continue;
 
                     var ext = Path.GetExtension(entry.FullName).ToLower();
+                    if (ext != ".lua" && ext != ".manifest") continue;
+
                     if (ext == ".lua")
                     {
                         var targetPath = ResolveEntryPath(importDir, fullImportDirPath, fileName, entry.FullName);
@@ -54,7 +56,7 @@ namespace DepotDL.CLI.Utilities
                         luaCount++;
                         firstLuaPath ??= targetPath;
                     }
-                    else if (ext == ".manifest")
+                    else
                     {
                         var targetPath = ResolveEntryPath(manifestsDir, fullManifestsDirPath, fileName, entry.FullName);
                         entry.ExtractToFile(targetPath, overwrite: true);
