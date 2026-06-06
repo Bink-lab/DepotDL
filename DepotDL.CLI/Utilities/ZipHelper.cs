@@ -86,7 +86,9 @@ namespace DepotDL.CLI.Utilities
         {
             var targetPath = Path.GetFullPath(Path.Combine(baseDir, fileName));
             if (!targetPath.StartsWith(fullBaseDirPath, StringComparison.Ordinal))
+            {
                 throw new InvalidOperationException($"Entry is outside target directory: {entryFullName}");
+            }
             return targetPath;
         }
 
