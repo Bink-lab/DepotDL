@@ -12,7 +12,7 @@ namespace DepotDL.GUI
     public partial class MainWindow : Window
     {
         private bool _isDragging;
-        private System.Windows.Point _dragStart;
+        private Point _dragStart;
         private readonly CancellationTokenSource _cts = new();
 
         private FrameworkElement? _currentPage;
