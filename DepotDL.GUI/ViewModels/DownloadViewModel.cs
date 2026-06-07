@@ -2,8 +2,10 @@
 // in file 'LICENSE', which is part of this source code package.
 
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.IO;
 using System.Windows;
+using System.Windows.Data;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using DepotDL.GUI.Models;
@@ -39,6 +41,17 @@ namespace DepotDL.GUI.ViewModels
         [ObservableProperty] private string _zipError = string.Empty;
 
         [ObservableProperty] private ObservableCollection<DepotSelectionItem> _depots = new();
+
+        [ObservableProperty] private string _depotSearchText = string.Empty;
+        [ObservableProperty] private bool _filterWindows = true;
+        [ObservableProperty] private bool _filterLinux = true;
+        [ObservableProperty] private bool _filterMacOs = true;
+        [ObservableProperty] private bool _filterCommon = true;
+
+        private ICollectionView? _filteredDepots;
+        public ICollectionView? FilteredDepots => _filteredDepots;
+        public int FilteredCount => (_filteredDepots as System.Windows.Data.CollectionView)?.Count ?? 0;
+
         [ObservableProperty] private string _outputDir = string.Empty;
         [ObservableProperty] private string _manifestsDir = string.Empty;
         [ObservableProperty] private int _maxParallel = 2;
@@ -106,8 +119,49 @@ namespace DepotDL.GUI.ViewModels
                 foreach (var item in newValue)
                     item.PropertyChanged += OnDepotItemPropertyChanged;
             }
+            _filteredDepots = CollectionViewSource.GetDefaultView(newValue);
+            _filteredDepots.Filter = DepotFilterPredicate;
+            OnPropertyChanged(nameof(FilteredDepots));
+            OnPropertyChanged(nameof(FilteredCount));
             UpdateCanStart();
         }
+
+        private bool DepotFilterPredicate(object obj)
+        {
+            if (obj is not DepotSelectionItem item) return false;
+            if (!string.IsNullOrWhiteSpace(DepotSearchText))
+            {
+                var q = DepotSearchText.Trim();
+                if (!item.DisplayName.Contains(q, StringComparison.OrdinalIgnoreCase) &&
+                    !item.DepotId.Contains(q, StringComparison.OrdinalIgnoreCase))
+                    return false;
+            }
+            var os = item.OsList;
+            if (string.IsNullOrWhiteSpace(os))
+                return FilterCommon;
+            var tags = os.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+            if (FilterWindows && tags.Any(t => t.Equals("windows", StringComparison.OrdinalIgnoreCase))) return true;
+            if (FilterLinux && tags.Any(t => t.Equals("linux", StringComparison.OrdinalIgnoreCase))) return true;
+            if (FilterMacOs && tags.Any(t => t.Equals("macos", StringComparison.OrdinalIgnoreCase))) return true;
+            bool hasKnownTag = tags.Any(t =>
+                t.Equals("windows", StringComparison.OrdinalIgnoreCase) ||
+                t.Equals("linux", StringComparison.OrdinalIgnoreCase) ||
+                t.Equals("macos", StringComparison.OrdinalIgnoreCase));
+            if (!hasKnownTag) return FilterCommon;
+            return false;
+        }
+
+        private void RefreshFilter()
+        {
+            _filteredDepots?.Refresh();
+            OnPropertyChanged(nameof(FilteredCount));
+        }
+
+        partial void OnDepotSearchTextChanged(string value) => RefreshFilter();
+        partial void OnFilterWindowsChanged(bool value) => RefreshFilter();
+        partial void OnFilterLinuxChanged(bool value) => RefreshFilter();
+        partial void OnFilterMacOsChanged(bool value) => RefreshFilter();
+        partial void OnFilterCommonChanged(bool value) => RefreshFilter();
 
         private void OnDepotsCollectionChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
         {
@@ -351,14 +405,16 @@ namespace DepotDL.GUI.ViewModels
         [RelayCommand]
         private void SelectAllDepots()
         {
-            foreach (var d in Depots) d.IsSelected = true;
+            if (_filteredDepots == null) return;
+            foreach (DepotSelectionItem d in _filteredDepots) d.IsSelected = true;
             UpdateCanStart();
         }
 
         [RelayCommand]
         private void SelectNoDepots()
         {
-            foreach (var d in Depots) d.IsSelected = false;
+            if (_filteredDepots == null) return;
+            foreach (DepotSelectionItem d in _filteredDepots) d.IsSelected = false;
             UpdateCanStart();
         }
 
@@ -640,6 +696,11 @@ namespace DepotDL.GUI.ViewModels
             RyuuError = string.Empty;
             HubcapError = string.Empty;
             Depots.Clear();
+            DepotSearchText = string.Empty;
+            FilterWindows = true;
+            FilterLinux = true;
+            FilterMacOs = true;
+            FilterCommon = true;
             DownloadStates.Clear();
             IsDownloading = false;
             DownloadComplete = false;
