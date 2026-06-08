@@ -29,6 +29,7 @@ namespace DepotDL.CLI.Tui
             WriteCenteredStatusBox("DEPOTDL", new[] { "Initializing library and scanning systems" }, ConsoleColor.Cyan);
 
             var verified = LibraryManager.VerifyLibraryOnStartup(out var totalCount, out var missingCount);
+            SteamDlcClient.Prefetch();
             System.Threading.Thread.Sleep(800);
 
             var menuIndex = 0;
@@ -2263,6 +2264,11 @@ namespace DepotDL.CLI.Tui
             if (!string.IsNullOrWhiteSpace(depot.Name))
             {
                 parts.Add(TuiText.Shorten(depot.Name, 24));
+            }
+
+            if (Services.SteamDlcClient.IsDlc(depot.DepotId))
+            {
+                parts.Add("[DLC]");
             }
 
             var os = FormatDepotOs(depot);

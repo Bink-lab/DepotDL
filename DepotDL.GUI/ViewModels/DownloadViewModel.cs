@@ -47,6 +47,7 @@ namespace DepotDL.GUI.ViewModels
         [ObservableProperty] private bool _filterLinux = true;
         [ObservableProperty] private bool _filterMacOs = true;
         [ObservableProperty] private bool _filterCommon = true;
+        [ObservableProperty] private bool _filterDlc = true;
 
         private ICollectionView? _filteredDepots;
         public ICollectionView? FilteredDepots => _filteredDepots;
@@ -136,6 +137,7 @@ namespace DepotDL.GUI.ViewModels
                     !item.DepotId.Contains(q, StringComparison.OrdinalIgnoreCase))
                     return false;
             }
+            if (!FilterDlc && item.IsDlc) return false;
             var os = item.OsList;
             if (string.IsNullOrWhiteSpace(os))
                 return FilterCommon;
@@ -162,6 +164,7 @@ namespace DepotDL.GUI.ViewModels
         partial void OnFilterLinuxChanged(bool value) => RefreshFilter();
         partial void OnFilterMacOsChanged(bool value) => RefreshFilter();
         partial void OnFilterCommonChanged(bool value) => RefreshFilter();
+        partial void OnFilterDlcChanged(bool value) => RefreshFilter();
 
         private void OnDepotsCollectionChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
         {
@@ -351,6 +354,7 @@ namespace DepotDL.GUI.ViewModels
                     ApplySmartOsFilter(Depots);
 
                 _ = EnrichDepotsOsAsync(appId, Depots.ToList());
+                _ = EnrichDepotsDlcAsync(appId, Depots.ToList());
 
                 LuaLoaded = true;
 
@@ -480,6 +484,23 @@ namespace DepotDL.GUI.ViewModels
                     }
 
                     UpdateCanStart();
+                });
+            }
+            catch { }
+        }
+
+        private async Task EnrichDepotsDlcAsync(string appId, List<DepotSelectionItem> items)
+        {
+            try
+            {
+                var dlcIds = await SteamDlcService.GetDlcIdsAsync();
+                if (dlcIds.Count == 0) return;
+                await Application.Current.Dispatcher.InvokeAsync(() =>
+                {
+                    if (AppId != appId) return;
+                    foreach (var item in items)
+                        item.IsDlc = dlcIds.Contains(item.DepotId);
+                    RefreshFilter();
                 });
             }
             catch { }
@@ -701,6 +722,7 @@ namespace DepotDL.GUI.ViewModels
             FilterLinux = true;
             FilterMacOs = true;
             FilterCommon = true;
+            FilterDlc = true;
             DownloadStates.Clear();
             IsDownloading = false;
             DownloadComplete = false;
@@ -809,6 +831,7 @@ namespace DepotDL.GUI.ViewModels
     {
         public DepotInfo Depot { get; }
         [ObservableProperty] private bool _isSelected = true;
+        [ObservableProperty] private bool _isDlc;
         [ObservableProperty] private string _osList = string.Empty;
         [ObservableProperty] private string _osArch = string.Empty;
         [ObservableProperty] private string _displayName = string.Empty;

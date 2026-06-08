@@ -39,6 +39,8 @@
     <SolidColorBrush x:Key="TextMuted"       Color="#9C8E82"/>
     <SolidColorBrush x:Key="Border"          Color="#DDD0C2"/>
     <SolidColorBrush x:Key="BorderFocus"     Color="#C07840"/>
+    <SolidColorBrush x:Key="DlcBadgeBg"      Color="#EDE8F5"/>
+    <SolidColorBrush x:Key="DlcBadgeFg"      Color="#6B4FA0"/>
     <SolidColorBrush x:Key="Success"         Color="#4A7C59"/>
     <SolidColorBrush x:Key="SuccessBg"       Color="#EAF4EE"/>
     <SolidColorBrush x:Key="SuccessLight"    Color="#EAF4EE"/>

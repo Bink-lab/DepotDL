@@ -409,6 +409,22 @@
 
                         <Separator Margin="0,16"/>
 
+                        <!-- DLC filter -->
+                        <TextBlock Text="CONTENT TYPE" Style="{StaticResource TextLabel}"/>
+                        <StackPanel Margin="0,8,0,0">
+                            <CheckBox IsChecked="{Binding FilterDlc}">
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <TextBlock Text="DLC" FontSize="12.5" VerticalAlignment="Center"/>
+                                    <Border CornerRadius="4" Padding="5,2" Margin="6,0,0,0"
+                                            Background="{StaticResource DlcBadgeBg}" VerticalAlignment="Center">
+                                        <TextBlock Text="DLC" FontSize="9" FontWeight="Bold" Foreground="{StaticResource DlcBadgeFg}"/>
+                                    </Border>
+                                </StackPanel>
+                            </CheckBox>
+                        </StackPanel>
+
+                        <Separator Margin="0,16"/>
+
                         <!-- Count -->
                         <TextBlock FontSize="12" Foreground="{StaticResource TextMuted}">
                             <Run Text="{Binding FilteredCount, Mode=OneWay}"
@@ -500,15 +516,26 @@
                                                                FontFamily="Consolas"
                                                                Text="{Binding DepotId}"/>
                                                 </StackPanel>
-                                                <Border Grid.Column="3"
-                                                        CornerRadius="6" Padding="8,4"
-                                                        Background="{StaticResource AccentVeryLight}"
-                                                        VerticalAlignment="Center"
-                                                        Visibility="{Binding OsText, Converter={StaticResource NotEmptyToVis}}">
-                                                    <TextBlock Text="{Binding OsText}"
-                                                               FontSize="9.5" FontWeight="Bold"
-                                                               Foreground="{StaticResource Accent}"/>
-                                                </Border>
+                                                <StackPanel Grid.Column="3" Orientation="Horizontal"
+                                                            VerticalAlignment="Center">
+                                                    <Border CornerRadius="6" Padding="8,4"
+                                                            Margin="0,0,4,0"
+                                                            Background="{StaticResource DlcBadgeBg}"
+                                                            VerticalAlignment="Center"
+                                                            Visibility="{Binding IsDlc, Converter={StaticResource BoolToVis}}">
+                                                        <TextBlock Text="DLC"
+                                                                   FontSize="9.5" FontWeight="Bold"
+                                                                   Foreground="{StaticResource DlcBadgeFg}"/>
+                                                    </Border>
+                                                    <Border CornerRadius="6" Padding="8,4"
+                                                            Background="{StaticResource AccentVeryLight}"
+                                                            VerticalAlignment="Center"
+                                                            Visibility="{Binding OsText, Converter={StaticResource NotEmptyToVis}}">
+                                                        <TextBlock Text="{Binding OsText}"
+                                                                   FontSize="9.5" FontWeight="Bold"
+                                                                   Foreground="{StaticResource Accent}"/>
+                                                    </Border>
+                                                </StackPanel>
                                             </Grid>
                                         </Border>
                                     </DataTemplate>
