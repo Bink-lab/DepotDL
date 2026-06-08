@@ -44,6 +44,7 @@ namespace DepotDL.GUI.Services
             CancellationToken ct = default)
         {
             Directory.CreateDirectory(CacheDir);
+            await Task.Run(PruneExpiredDetailCache, ct);
 
             if (File.Exists(AllGamesPath) && File.Exists(MetaPath))
             {
@@ -210,6 +211,23 @@ namespace DepotDL.GUI.Services
                 };
             }
             catch { return null; }
+        }
+
+        private void PruneExpiredDetailCache()
+        {
+            try
+            {
+                foreach (var f in Directory.GetFiles(CacheDir, "detail_v2_*.json"))
+                {
+                    try
+                    {
+                        if ((DateTime.UtcNow - new FileInfo(f).LastWriteTimeUtc).TotalHours >= _cacheHours)
+                            File.Delete(f);
+                    }
+                    catch { }
+                }
+            }
+            catch { }
         }
 
         private static string FormatPrice(string? raw) => PriceFormatter.Format(raw, "Free to Play");

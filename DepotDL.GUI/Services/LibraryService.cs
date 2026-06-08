@@ -88,28 +88,12 @@ namespace DepotDL.GUI.Services
         public static long GetDirectorySize(string path)
         {
             if (string.IsNullOrEmpty(path) || !Directory.Exists(path)) return 0;
-            long size = 0;
             try
             {
-                var queue = new Queue<string>();
-                queue.Enqueue(path);
-                while (queue.Count > 0)
-                {
-                    var dir = queue.Dequeue();
-                    try
-                    {
-                        foreach (var f in Directory.GetFiles(dir))
-                        {
-                            try { size += new FileInfo(f).Length; } catch { }
-                        }
-                        foreach (var sd in Directory.GetDirectories(dir))
-                            queue.Enqueue(sd);
-                    }
-                    catch { }
-                }
+                return Directory.EnumerateFiles(path, "*", SearchOption.AllDirectories)
+                    .Sum(f => { try { return new FileInfo(f).Length; } catch { return 0L; } });
             }
-            catch { }
-            return size;
+            catch { return 0; }
         }
 
     }

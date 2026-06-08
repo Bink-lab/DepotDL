@@ -12,22 +12,12 @@ namespace DepotDL.GUI.Helpers
 {
     public static class SmoothScroll
     {
-        private static AppSettings? _cachedSettings;
-
         private static AppSettings GetSettings()
         {
-            if (_cachedSettings != null) return _cachedSettings;
-            try
-            {
-                return _cachedSettings = new SettingsService().Load();
-            }
-            catch
-            {
-                return new AppSettings();
-            }
+            try { return new SettingsService().Load(); }
+            catch { return new AppSettings(); }
         }
 
-        public static void ResetCache() => _cachedSettings = null;
         // Animatable proxy — ScrollViewer.VerticalOffset is read-only, so we drive
         // ScrollToVerticalOffset through this attached property instead.
         public static readonly DependencyProperty VerticalOffsetProperty =
@@ -61,7 +51,10 @@ namespace DepotDL.GUI.Helpers
             if ((bool)e.NewValue)
                 sv.PreviewMouseWheel += OnPreviewMouseWheel;
             else
+            {
                 sv.PreviewMouseWheel -= OnPreviewMouseWheel;
+                sv.BeginAnimation(VerticalOffsetProperty, null);
+            }
         }
 
         private static void OnPreviewMouseWheel(object sender, MouseWheelEventArgs e)

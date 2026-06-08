@@ -359,20 +359,21 @@
                                                     <Style.Triggers>
                                                         <DataTrigger Binding="{Binding IsImageLoading}" Value="True">
                                                             <Setter Property="Visibility" Value="Visible"/>
+                                                            <DataTrigger.EnterActions>
+                                                                <BeginStoryboard x:Name="ShimmerSB">
+                                                                    <Storyboard RepeatBehavior="Forever" AutoReverse="True">
+                                                                        <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                                                                                         From="0.4" To="0.85" Duration="0:0:0.8"/>
+                                                                    </Storyboard>
+                                                                </BeginStoryboard>
+                                                            </DataTrigger.EnterActions>
+                                                            <DataTrigger.ExitActions>
+                                                                <StopStoryboard BeginStoryboardName="ShimmerSB"/>
+                                                            </DataTrigger.ExitActions>
                                                         </DataTrigger>
                                                     </Style.Triggers>
                                                 </Style>
                                             </Border.Style>
-                                            <Border.Triggers>
-                                                <EventTrigger RoutedEvent="Border.Loaded">
-                                                    <BeginStoryboard>
-                                                        <Storyboard RepeatBehavior="Forever" AutoReverse="True">
-                                                            <DoubleAnimation Storyboard.TargetProperty="Opacity"
-                                                                             From="0.4" To="0.85" Duration="0:0:0.8"/>
-                                                        </Storyboard>
-                                                    </BeginStoryboard>
-                                                </EventTrigger>
-                                            </Border.Triggers>
                                         </Border>
 
                                         <!-- Content below image -->

@@ -14,6 +14,9 @@ namespace DepotDL.GUI.Helpers
             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
             "DepotDL.GUI", "imagecache");
 
+        private const int MaxCacheFiles = 500;
+        private static readonly object _evictLock = new();
+
         private static readonly HttpClient Http = new()
         {
             Timeout = TimeSpan.FromSeconds(15)
@@ -40,6 +43,7 @@ namespace DepotDL.GUI.Helpers
                 {
                     data = await Http.GetByteArrayAsync(url, ct);
                     await File.WriteAllBytesAsync(cachePath, data, ct);
+                    EvictIfNeeded();
                 }
 
                 using var ms = new MemoryStream(data);
@@ -62,6 +66,23 @@ namespace DepotDL.GUI.Helpers
                 }
                 catch { }
                 return null;
+            }
+        }
+
+        private static void EvictIfNeeded()
+        {
+            lock (_evictLock)
+            {
+                try
+                {
+                    var files = new DirectoryInfo(CacheDir).GetFiles("*");
+                    if (files.Length <= MaxCacheFiles) return;
+                    foreach (var f in files.OrderBy(f => f.LastWriteTimeUtc).Take(files.Length - MaxCacheFiles))
+                    {
+                        try { f.Delete(); } catch { }
+                    }
+                }
+                catch { }
             }
         }
 

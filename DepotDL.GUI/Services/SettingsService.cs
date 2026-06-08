@@ -11,14 +11,17 @@ namespace DepotDL.GUI.Services
 {
     public class SettingsService
     {
+        private static AppSettings? _cached;
+
         private static readonly string IniPath = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
             "DepotDL.CLI", "DepotDL.CLI.ini");
 
         public AppSettings Load()
         {
+            if (_cached != null) return _cached;
             var s = new AppSettings();
-            if (!File.Exists(IniPath)) return s;
+            if (!File.Exists(IniPath)) return _cached = s;
 
             var values = ParseIni(IniPath);
             s.ManifestsDir = Get(values, "paths.manifests_dir");
@@ -67,7 +70,7 @@ namespace DepotDL.GUI.Services
             s.OnlineFixUser = Get(values, "onlinefix.user");
             s.OnlineFixPass = UnprotectString(Get(values, "onlinefix.pass"));
 
-            return s;
+            return _cached = s;
         }
 
         public void Save(AppSettings s)
@@ -102,6 +105,7 @@ namespace DepotDL.GUI.Services
             w.WriteLine("[onlinefix]");
             w.WriteLine($"user={Escape(s.OnlineFixUser ?? "")}");
             w.WriteLine($"pass={Escape(ProtectString(s.OnlineFixPass) ?? "")}");
+            _cached = s;
         }
 
         private static Dictionary<string, string> ParseIni(string path)

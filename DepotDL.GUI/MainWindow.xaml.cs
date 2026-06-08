@@ -26,6 +26,7 @@ namespace DepotDL.GUI
             Loaded += MainWindow_Loaded;
             Closing += (_, _) => _cts.Cancel();
             SizeChanged += (_, _) => UpdateContentClip();
+            StateChanged += (_, _) => Margin = new Thickness(WindowState == WindowState.Maximized ? 7 : 0);
 
             _pages = new Dictionary<NavPage, FrameworkElement>
             {

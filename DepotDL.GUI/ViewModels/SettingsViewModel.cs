@@ -105,7 +105,6 @@ namespace DepotDL.GUI.ViewModels
                 OnlineFixPass = string.IsNullOrWhiteSpace(OnlineFixPass) ? null : OnlineFixPass,
             });
 
-            DepotDL.GUI.Helpers.SmoothScroll.ResetCache();
             SaveSuccess = true;
 
             System.Windows.Threading.DispatcherTimer timer = new()

@@ -49,5 +49,11 @@ namespace DepotDL.GUI.Views
             ScreenshotScroller.ReleaseMouseCapture();
             ScreenshotScroller.Cursor = Cursors.Hand;
         }
+
+        private void ScreenshotScroller_MouseWheel(object sender, MouseWheelEventArgs e)
+        {
+            ScreenshotScroller.ScrollToHorizontalOffset(ScreenshotScroller.HorizontalOffset - e.Delta / 3.0);
+            e.Handled = true;
+        }
     }
 }

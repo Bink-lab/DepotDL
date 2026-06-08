@@ -167,10 +167,7 @@ namespace DepotDL.GUI.ViewModels
 
             try
             {
-                var progress = new Progress<(int fetched, string status)>(p =>
-                {
-                    Application.Current.Dispatcher.Invoke(() => LoadingStatus = p.status);
-                });
+                var progress = new Progress<(int fetched, string status)>(p => LoadingStatus = p.status);
 
                 var games = await _svc.GetAllGamesAsync(progress, ct);
 

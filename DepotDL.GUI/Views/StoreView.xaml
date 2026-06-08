@@ -311,20 +311,21 @@
                                                         <Style.Triggers>
                                                             <DataTrigger Binding="{Binding IsImageLoading}" Value="True">
                                                                 <Setter Property="Visibility" Value="Visible"/>
+                                                                <DataTrigger.EnterActions>
+                                                                    <BeginStoryboard x:Name="StoreShimmerSB">
+                                                                        <Storyboard RepeatBehavior="Forever" AutoReverse="True">
+                                                                            <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                                                                                             From="0.4" To="0.9" Duration="0:0:0.75"/>
+                                                                        </Storyboard>
+                                                                    </BeginStoryboard>
+                                                                </DataTrigger.EnterActions>
+                                                                <DataTrigger.ExitActions>
+                                                                    <StopStoryboard BeginStoryboardName="StoreShimmerSB"/>
+                                                                </DataTrigger.ExitActions>
                                                             </DataTrigger>
                                                         </Style.Triggers>
                                                     </Style>
                                                 </Border.Style>
-                                                <Border.Triggers>
-                                                    <EventTrigger RoutedEvent="Border.Loaded">
-                                                        <BeginStoryboard>
-                                                            <Storyboard RepeatBehavior="Forever" AutoReverse="True">
-                                                                <DoubleAnimation Storyboard.TargetProperty="Opacity"
-                                                                                 From="0.4" To="0.9" Duration="0:0:0.75"/>
-                                                            </Storyboard>
-                                                        </BeginStoryboard>
-                                                    </EventTrigger>
-                                                </Border.Triggers>
                                             </Border>
 
                                             <!-- Game name -->
@@ -900,7 +901,8 @@
                                                           PreviewMouseLeftButtonDown="ScreenshotScroller_MouseDown"
                                                           PreviewMouseMove="ScreenshotScroller_MouseMove"
                                                           PreviewMouseLeftButtonUp="ScreenshotScroller_MouseUp"
-                                                          MouseLeave="ScreenshotScroller_MouseLeave">
+                                                          MouseLeave="ScreenshotScroller_MouseLeave"
+                                                          PreviewMouseWheel="ScreenshotScroller_MouseWheel">
                                                 <ItemsControl ItemsSource="{Binding SelectedDetail.Screenshots}">
                                                     <ItemsControl.ItemsPanel>
                                                         <ItemsPanelTemplate>

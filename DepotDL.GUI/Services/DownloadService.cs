@@ -9,10 +9,12 @@ using DepotDL.GUI.Models;
 
 namespace DepotDL.GUI.Services
 {
-    public class DownloadService
+    public partial class DownloadService
     {
-        private static readonly Regex PctRx = new(@"(\d+(?:[.,]\d+)?)%");
-        private static readonly Regex SpeedRx = new(@"\(([^)]+)\)\s*$");
+        [GeneratedRegex(@"(\d+(?:[.,]\d+)?)%")]
+        private static partial Regex PctRx();
+        [GeneratedRegex(@"\(([^)]+)\)\s*$")]
+        private static partial Regex SpeedRx();
 
         private const int MaxRetries = 3;
         private const int StuckTimeoutSeconds = 120;
@@ -423,7 +425,7 @@ namespace DepotDL.GUI.Services
                 return;
             }
 
-            var pctMatch = PctRx.Match(line);
+            var pctMatch = PctRx().Match(line);
             if (pctMatch.Success &&
                 double.TryParse(pctMatch.Groups[1].Value.Replace(',', '.'),
                     NumberStyles.Any, CultureInfo.InvariantCulture, out var pct))
@@ -431,7 +433,7 @@ namespace DepotDL.GUI.Services
                 state.Percent = pct;
                 state.Status = DepotStatus.Downloading;
                 state.StatusText = "Downloading";
-                var sm = SpeedRx.Match(line);
+                var sm = SpeedRx().Match(line);
                 state.SpeedText = sm.Success ? sm.Groups[1].Value : string.Empty;
 
                 // Line format: "  5.40% path/to/file.dll (speed)"
