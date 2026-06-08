@@ -145,7 +145,7 @@ namespace DepotDL.GUI.Services
             Action<int>? onProgress = null, CancellationToken ct = default)
         {
             var mgr = MakeManager(channel);
-            var info = await mgr.CheckForUpdatesAsync(ct).ConfigureAwait(false);
+            var info = await mgr.CheckForUpdatesAsync().ConfigureAwait(false);
             if (info == null) return;
             await mgr.DownloadUpdatesAsync(info, onProgress, ct).ConfigureAwait(false);
             mgr.ApplyUpdatesAndRestart(info);
