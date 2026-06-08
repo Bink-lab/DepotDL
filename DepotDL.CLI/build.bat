@@ -8,7 +8,7 @@ if %ERRORLEVEL% NEQ 0 (
     if /I not "%CI%"=="true" pause
     exit /b %ERRORLEVEL%
 )
-echo Publishing DepotDL.CLI as self-contained single-file exe...
+echo Publishing DepotDL.CLI...
 dotnet publish -c Release -r win-x64 --self-contained true /p:PublishSingleFile=true
 if %ERRORLEVEL% NEQ 0 (
     echo [ERROR] Publish failed!
@@ -16,16 +16,13 @@ if %ERRORLEVEL% NEQ 0 (
     if /I not "%CI%"=="true" pause
     exit /b %ERRORLEVEL%
 )
-for %%F in (..\DepotDownloaderMod\bin\Release\net9.0\*.*) do (
-    if /I not "%%~xF"==".exe" copy /Y "%%F" "bin\Release\net9.0\win-x64\publish\" >nul
-)
-if %ERRORLEVEL% NEQ 0 (
+robocopy "..\DepotDownloaderMod\bin\Release\net9.0" "bin\Release\net9.0\win-x64\publish" /XF *.exe /NFL /NJH /NJS /NC /NS /NP
+if %ERRORLEVEL% GTR 7 (
     echo [ERROR] Failed to copy DepotDownloaderMod files!
     popd
     if /I not "%CI%"=="true" pause
-    exit /b %ERRORLEVEL%
+    exit /b 1
 )
-echo [SUCCESS] Publish succeeded!
-echo Files are located in: bin\Release\net9.0\win-x64\publish\
+echo [SUCCESS] Build complete: bin\Release\net9.0\win-x64\publish\
 popd
 if /I not "%CI%"=="true" pause

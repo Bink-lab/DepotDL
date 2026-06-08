@@ -66,22 +66,7 @@ $cliWin   = Invoke-Publish "DepotDL.CLI" "win-x64"  "net9.0"
 $cliLinux = Invoke-Publish "DepotDL.CLI" "linux-x64" "net9.0"
 $cliMac   = Invoke-Publish "DepotDL.CLI" "osx-arm64" "net9.0"
 
-Step "Publishing DepotDL.GUI  [win-x64]"
-Push-Location (Join-Path $root "DepotDL.GUI")
-try {
-    dotnet publish `
-        -c Release `
-        -r win-x64 `
-        --self-contained true `
-        /p:PublishSingleFile=true `
-        /p:Version=$Version `
-        /p:SourceRevisionId=$sha | Out-Host
-    if ($LASTEXITCODE -ne 0) { Die "GUI publish failed." }
-} finally { Pop-Location }
-
-$guiWin = Join-Path $root "DepotDL.GUI\bin\Release\net9.0-windows\win-x64\publish"
-Get-ChildItem $ddmodSrc -File | Where-Object { $_.Extension -ne ".exe" } |
-    ForEach-Object { Copy-Item $_.FullName $guiWin -Force }
+$guiWin = Invoke-Publish "DepotDL.GUI" "win-x64" "net9.0-windows"
 
 if (-not $SkipVelopack) {
     Step "Packing GUI with Velopack  (v$Version)"

@@ -20,12 +20,6 @@ jobs:
         with:
           dotnet-version: '9.0.x'
 
-      - name: Build DepotDownloaderMod
-        working-directory: DepotDownloaderMod
-        run: .\build.bat
-        env:
-          CI: true
-
       - name: Build DepotDL CLI (Windows)
         working-directory: DepotDL.CLI
         run: .\build.bat
@@ -90,14 +84,6 @@ jobs:
         with:
           dotnet-version: '9.0.x'
 
-      - name: Build DepotDownloaderMod
-        working-directory: DepotDownloaderMod
-        run: |
-          chmod +x build.sh
-          ./build.sh
-        env:
-          CI: true
-
       - name: Build DepotDL CLI (Linux)
         working-directory: DepotDL.CLI
         run: |
@@ -125,14 +111,6 @@ jobs:
         uses: actions/setup-dotnet@3e891b0cb619bf60e2c25674b222b8940e2c1c25 # v4.2.0
         with:
           dotnet-version: '9.0.x'
-
-      - name: Build DepotDownloaderMod
-        working-directory: DepotDownloaderMod
-        run: |
-          chmod +x build.sh
-          ./build.sh
-        env:
-          CI: true
 
       - name: Build DepotDL CLI (macOS)
         working-directory: DepotDL.CLI
