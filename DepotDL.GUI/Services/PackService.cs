@@ -31,22 +31,30 @@ namespace DepotDL.GUI.Services
 
                 progress.Report((0, $"0 / {total:N0} files"));
 
-                using (var archive = ZipFile.Open(tmpPath, ZipArchiveMode.Create))
+                try
                 {
-                    foreach (var file in files)
+                    using (var archive = ZipFile.Open(tmpPath, ZipArchiveMode.Create))
                     {
-                        ct.ThrowIfCancellationRequested();
-                        var entryName = Path.GetRelativePath(dir, file);
-                        archive.CreateEntryFromFile(file, entryName, compression);
-                        done++;
-                        var pctInt = total == 0 ? 100 : (int)((double)done / total * 100.0);
-                        if (pctInt != lastPct)
+                        foreach (var file in files)
                         {
-                            lastPct = pctInt;
-                            var snap = done;
-                            progress.Report((pctInt, $"{snap:N0} / {total:N0} files"));
+                            ct.ThrowIfCancellationRequested();
+                            var entryName = Path.GetRelativePath(dir, file);
+                            archive.CreateEntryFromFile(file, entryName, compression);
+                            done++;
+                            var pctInt = total == 0 ? 100 : (int)((double)done / total * 100.0);
+                            if (pctInt != lastPct)
+                            {
+                                lastPct = pctInt;
+                                var snap = done;
+                                progress.Report((pctInt, $"{snap:N0} / {total:N0} files"));
+                            }
                         }
                     }
+                }
+                catch (OperationCanceledException)
+                {
+                    if (File.Exists(tmpPath)) File.Delete(tmpPath);
+                    throw;
                 }
 
                 if (File.Exists(zipPath)) File.Delete(zipPath);

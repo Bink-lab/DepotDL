@@ -583,7 +583,7 @@
                                         <RowDefinition Height="Auto"/>
                                     </Grid.RowDefinitions>
 
-                                    <!-- Title + percent -->
+                                    <!-- Title + percent + cancel -->
                                     <Grid Grid.Row="0">
                                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                             <Path Data="{StaticResource LucidePackage}"
@@ -595,14 +595,30 @@
                                                        Foreground="{StaticResource TextPrimary}"
                                                        VerticalAlignment="Center"
                                                        Text="{Binding Library.PackGameName}"
-                                                       MaxWidth="170"
+                                                       MaxWidth="150"
                                                        TextTrimming="CharacterEllipsis"/>
                                         </StackPanel>
-                                        <TextBlock HorizontalAlignment="Right" FontSize="13" FontWeight="Bold"
-                                                   Foreground="{StaticResource Accent}" VerticalAlignment="Center">
-                                            <Run Text="{Binding Library.PackPercent, StringFormat={}{0:F0}}"/>
-                                            <Run Text="%"/>
-                                        </TextBlock>
+                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                                            <TextBlock FontSize="13" FontWeight="Bold"
+                                                       Foreground="{StaticResource Accent}" VerticalAlignment="Center"
+                                                       Margin="0,0,6,0">
+                                                <Run Text="{Binding Library.PackPercent, StringFormat={}{0:F0}}"/>
+                                                <Run Text="%"/>
+                                            </TextBlock>
+                                            <Button Command="{Binding Library.CancelPackCommand}"
+                                                    Width="18" Height="18"
+                                                    Padding="0"
+                                                    Background="Transparent"
+                                                    BorderThickness="0"
+                                                    Cursor="Hand"
+                                                    ToolTip="Cancel and delete unfinished pack">
+                                                <Path Data="{StaticResource LucideX}"
+                                                      Width="10" Height="10" Stretch="Uniform"
+                                                      Stroke="{StaticResource TextMuted}" StrokeThickness="2"
+                                                      Fill="Transparent" StrokeStartLineCap="Round"
+                                                      StrokeEndLineCap="Round" StrokeLineJoin="Round"/>
+                                            </Button>
+                                        </StackPanel>
                                     </Grid>
 
                                     <!-- Status text -->

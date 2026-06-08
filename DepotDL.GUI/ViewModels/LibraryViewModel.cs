@@ -19,6 +19,7 @@ namespace DepotDL.GUI.ViewModels
         private readonly LibraryService _lib = new();
         private readonly SettingsService _settings = new();
         private readonly PackService _pack = new();
+        private CancellationTokenSource? _packCts;
 
         [ObservableProperty] private ObservableCollection<LibraryGameViewModel> _games = new();
         [ObservableProperty] private string _searchText = string.Empty;
@@ -232,6 +233,7 @@ namespace DepotDL.GUI.ViewModels
             PackStatus = "Preparing...";
             IsPackingGame = true;
 
+            _packCts = new CancellationTokenSource();
             try
             {
                 var progress = new Progress<(double percent, string status)>(p =>
@@ -239,7 +241,7 @@ namespace DepotDL.GUI.ViewModels
                     PackPercent = p.percent;
                     PackStatus = p.status;
                 });
-                await _pack.PackAsync(vm.Game.OutputDir, progress);
+                await _pack.PackAsync(vm.Game.OutputDir, progress, _packCts.Token);
                 PackPercent = 100;
                 PackStatus = "Done!";
                 await Task.Delay(2500);
@@ -256,8 +258,16 @@ namespace DepotDL.GUI.ViewModels
             }
             finally
             {
+                _packCts.Dispose();
+                _packCts = null;
                 IsPackingGame = false;
             }
+        }
+
+        [RelayCommand]
+        private void CancelPack()
+        {
+            _packCts?.Cancel();
         }
 
         [RelayCommand]
