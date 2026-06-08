@@ -9,6 +9,7 @@
 
   <ItemGroup>
     <PackageReference Include="SteamKit2" Version="3.2.0" />
+    <PackageReference Include="Velopack" Version="0.0.1298" />
   </ItemGroup>
 
   <ItemGroup>

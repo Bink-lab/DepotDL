@@ -4,6 +4,7 @@
 using System.Diagnostics;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using DepotDL.GUI.Models;
 using DepotDL.GUI.Services;
 
 namespace DepotDL.GUI.ViewModels
@@ -21,6 +22,9 @@ namespace DepotDL.GUI.ViewModels
         [ObservableProperty] private bool _updateAvailable;
         [ObservableProperty] private string? _updateBannerText;
         [ObservableProperty] private string? _updateHtmlUrl;
+        [ObservableProperty] private bool _canInstallUpdate;
+        [ObservableProperty] private bool _isUpdating;
+        [ObservableProperty] private int _updateProgress;
 
         public StoreViewModel Store { get; }
 
@@ -77,6 +81,7 @@ namespace DepotDL.GUI.ViewModels
             {
                 var s = _settingsService.Load();
                 var currentSha = UpdateCheckerService.GetCurrentSha();
+                var channel = s.UpdateChannel;
 
                 var shouldCheck = s.LastUpdateCheckUtc == null ||
                                    (DateTime.UtcNow - s.LastUpdateCheckUtc.Value).TotalHours >= 24;
@@ -85,7 +90,7 @@ namespace DepotDL.GUI.ViewModels
 
                 if (shouldCheck)
                 {
-                    result = await UpdateCheckerService.CheckAsync(currentSha, ct);
+                    result = await UpdateCheckerService.CheckAsync(currentSha, channel, ct);
                     s.LastUpdateCheckUtc = DateTime.UtcNow;
                     if (result?.LatestTag != null) s.LastKnownReleaseTag = result.LatestTag;
                     _settingsService.Save(s);
@@ -98,22 +103,29 @@ namespace DepotDL.GUI.ViewModels
                         LatestTag = s.LastKnownReleaseTag,
                         HtmlUrl = s.LastKnownReleaseTag != null
                             ? UpdateCheckerService.BuildReleaseUrl(s.LastKnownReleaseTag)
-                            : null
+                            : null,
+                        Channel = channel
                     };
                 }
 
                 if (result?.UpdateAvailable == true)
                 {
-                    UpdateBannerText = FormatUpdateBannerText(result.LatestTag, result.LatestSha);
+                    UpdateBannerText = FormatUpdateBannerText(result.LatestTag, result.LatestSha, channel);
                     UpdateHtmlUrl = result.HtmlUrl;
+                    CanInstallUpdate = UpdateCheckerService.IsVelopackManaged(channel);
+                    _activeChannel = channel;
                     UpdateAvailable = true;
                 }
             }
             catch { }
         }
 
-        private static string FormatUpdateBannerText(string? tag, string? sha)
+        private UpdateChannel _activeChannel = UpdateChannel.Nightly;
+
+        private static string FormatUpdateBannerText(string? tag, string? sha,
+            UpdateChannel channel = UpdateChannel.Nightly)
         {
+            var label = channel == UpdateChannel.Production ? "Production update" : "Nightly update";
             if (tag != null)
             {
                 var p = tag.Split('-');
@@ -121,11 +133,11 @@ namespace DepotDL.GUI.ViewModels
                 {
                     var d = p[1];
                     var date = $"{d[..4]}-{d[4..6]}-{d[6..8]}";
-                    return $"New build available  ·  {p[^1]}  ·  {date}";
+                    return $"{label} available  ·  {p[^1]}  ·  {date}";
                 }
-                return $"New build available  ·  {tag}";
+                return $"{label} available  ·  {tag}";
             }
-            return sha != null ? $"New build available  ·  {sha}" : "New build available";
+            return sha != null ? $"{label} available  ·  {sha}" : $"{label} available";
         }
 
         [RelayCommand]
@@ -144,6 +156,26 @@ namespace DepotDL.GUI.ViewModels
                 });
             }
             catch { }
+        }
+
+        [RelayCommand]
+        private async Task InstallUpdate()
+        {
+            if (IsUpdating) return;
+            IsUpdating = true;
+            UpdateProgress = 0;
+            try
+            {
+                await UpdateCheckerService.InstallUpdateAsync(_activeChannel, pct =>
+                {
+                    UpdateProgress = pct;
+                });
+            }
+            catch
+            {
+                IsUpdating = false;
+                OpenUpdateUrl();
+            }
         }
 
         [RelayCommand] private async Task NavigateLibrary() { if (CurrentPage == NavPage.Library) return; CurrentPage = NavPage.Library; await Library.LoadAsync(); }

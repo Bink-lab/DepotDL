@@ -31,5 +31,6 @@ namespace DepotDL.CLI.Tui
         public DateTime? LastUpdateCheckUtc { get; set; }
         public string? LastKnownReleaseTag { get; set; }
         public string? DismissedUpdateTag { get; set; }
+        public string UpdateChannel { get; set; } = "Nightly";
     }
 }

@@ -514,49 +514,80 @@
                     <Border VerticalAlignment="Bottom" HorizontalAlignment="Left"
                             Margin="16,0,0,16" Panel.ZIndex="6" CornerRadius="12"
                             BorderThickness="1" BorderBrush="#DDB060" Background="#FEF3E2"
-                            MaxWidth="380" Padding="14,10"
+                            MaxWidth="420" Padding="14,10"
                             Visibility="{Binding UpdateAvailable, Converter={StaticResource BoolToVis}}">
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="8"/>
-                                <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="8"/>
-                                <ColumnDefinition Width="Auto"/>
-                            </Grid.ColumnDefinitions>
+                        <StackPanel>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="8"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="8"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="8"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
 
-                            <Path Grid.Column="0" Data="{StaticResource LucideAlertTriangle}"
-                                  Width="15" Height="15" Stretch="Uniform" Margin="0,0,10,0"
-                                  Stroke="#C07012" StrokeThickness="1.8" Fill="Transparent"
-                                  StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"/>
+                                <Path Grid.Column="0" Data="{StaticResource LucideAlertTriangle}"
+                                      Width="15" Height="15" Stretch="Uniform" Margin="0,0,10,0"
+                                      Stroke="#C07012" StrokeThickness="1.8" Fill="Transparent"
+                                      StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"/>
 
-                            <TextBlock Grid.Column="1"
-                                       Text="{Binding UpdateBannerText}"
-                                       FontSize="12.5" Foreground="#7A5500"
-                                       VerticalAlignment="Center"
-                                       TextTrimming="CharacterEllipsis"/>
+                                <TextBlock Grid.Column="1"
+                                           Text="{Binding UpdateBannerText}"
+                                           FontSize="12.5" Foreground="#7A5500"
+                                           VerticalAlignment="Center"
+                                           TextTrimming="CharacterEllipsis"/>
 
-                            <Button Grid.Column="3"
-                                    Command="{Binding OpenUpdateUrlCommand}"
-                                    Background="Transparent" BorderThickness="0"
-                                    Cursor="Hand" Padding="0">
-                                <TextBlock Text="View release" FontSize="12"
-                                           Foreground="#1A73E8"
-                                           TextDecorations="Underline"
-                                           VerticalAlignment="Center"/>
-                            </Button>
+                                <Button Grid.Column="3"
+                                        Command="{Binding InstallUpdateCommand}"
+                                        Background="Transparent" BorderThickness="0"
+                                        Cursor="Hand" Padding="0"
+                                        IsEnabled="{Binding IsUpdating, Converter={StaticResource InvBool}}"
+                                        Visibility="{Binding CanInstallUpdate, Converter={StaticResource BoolToVis}}">
+                                    <TextBlock FontSize="12" Foreground="#1A73E8"
+                                               TextDecorations="Underline" VerticalAlignment="Center">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Text" Value="Install update"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IsUpdating}" Value="True">
+                                                        <Setter Property="Text" Value="{Binding UpdateProgress, StringFormat='Downloading… {0}%'}"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                </Button>
 
-                            <Button Grid.Column="5"
-                                    Command="{Binding DismissUpdateCommand}"
-                                    Background="Transparent" BorderThickness="0"
-                                    Cursor="Hand" Padding="2,0" VerticalAlignment="Center">
-                                <Path Data="{StaticResource LucideX}"
-                                      Width="8" Height="8" Stretch="Uniform"
-                                      Stroke="#9C8E82" StrokeThickness="1.5"
-                                      StrokeStartLineCap="Round" StrokeEndLineCap="Round" Fill="Transparent"/>
-                            </Button>
-                        </Grid>
+                                <Button Grid.Column="5"
+                                        Command="{Binding OpenUpdateUrlCommand}"
+                                        Background="Transparent" BorderThickness="0"
+                                        Cursor="Hand" Padding="0">
+                                    <TextBlock Text="View release" FontSize="12"
+                                               Foreground="#1A73E8"
+                                               TextDecorations="Underline"
+                                               VerticalAlignment="Center"/>
+                                </Button>
+
+                                <Button Grid.Column="7"
+                                        Command="{Binding DismissUpdateCommand}"
+                                        Background="Transparent" BorderThickness="0"
+                                        Cursor="Hand" Padding="2,0" VerticalAlignment="Center"
+                                        IsEnabled="{Binding IsUpdating, Converter={StaticResource InvBool}}">
+                                    <Path Data="{StaticResource LucideX}"
+                                          Width="8" Height="8" Stretch="Uniform"
+                                          Stroke="#9C8E82" StrokeThickness="1.5"
+                                          StrokeStartLineCap="Round" StrokeEndLineCap="Round" Fill="Transparent"/>
+                                </Button>
+                            </Grid>
+
+                            <ProgressBar Height="3" Margin="0,6,0,0" Minimum="0" Maximum="100"
+                                         Value="{Binding UpdateProgress}"
+                                         Background="#F5E0B0" Foreground="#C07012" BorderThickness="0"
+                                         Visibility="{Binding IsUpdating, Converter={StaticResource BoolToVis}}"/>
+                        </StackPanel>
                     </Border>
 
                     <!-- Floating widgets (bottom-right) -->

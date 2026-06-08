@@ -29,9 +29,11 @@ namespace DepotDL.GUI.ViewModels
         [ObservableProperty] private bool _saveSuccess;
         [ObservableProperty] private string _onlineFixUser = string.Empty;
         [ObservableProperty] private string _onlineFixPass = string.Empty;
+        [ObservableProperty] private UpdateChannel _updateChannel = UpdateChannel.Nightly;
 
         private DateTime? _lastUpdateCheckUtc;
         private string? _lastKnownReleaseTag;
+        private UpdateChannel _loadedChannel = UpdateChannel.Nightly;
 
         public void Load()
         {
@@ -52,6 +54,8 @@ namespace DepotDL.GUI.ViewModels
             DownloadAchievementIcons = s.DownloadAchievementIcons;
             _lastUpdateCheckUtc = s.LastUpdateCheckUtc;
             _lastKnownReleaseTag = s.LastKnownReleaseTag;
+            UpdateChannel = s.UpdateChannel;
+            _loadedChannel = s.UpdateChannel;
             OnlineFixUser = s.OnlineFixUser ?? string.Empty;
             OnlineFixPass = s.OnlineFixPass ?? string.Empty;
         }
@@ -99,11 +103,14 @@ namespace DepotDL.GUI.ViewModels
                 ScrollDurationMs = ScrollDurationMs,
                 AutoSelectOsByOs = AutoSelectOsByOs,
                 DownloadAchievementIcons = DownloadAchievementIcons,
-                LastUpdateCheckUtc = _lastUpdateCheckUtc,
-                LastKnownReleaseTag = _lastKnownReleaseTag,
+                LastUpdateCheckUtc = UpdateChannel != _loadedChannel ? null : _lastUpdateCheckUtc,
+                LastKnownReleaseTag = UpdateChannel != _loadedChannel ? null : _lastKnownReleaseTag,
+                UpdateChannel = UpdateChannel,
                 OnlineFixUser = string.IsNullOrWhiteSpace(OnlineFixUser) ? null : OnlineFixUser,
                 OnlineFixPass = string.IsNullOrWhiteSpace(OnlineFixPass) ? null : OnlineFixPass,
             });
+
+            _loadedChannel = UpdateChannel;
 
             SaveSuccess = true;
 

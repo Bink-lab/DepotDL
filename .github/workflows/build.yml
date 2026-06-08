@@ -55,6 +55,21 @@ jobs:
         run: |
           Compress-Archive -Path DepotDL.GUI/bin/Release/net9.0-windows/win-x64/publish/* -DestinationPath DepotDL.GUI-Windows-x64-${{ steps.build_info.outputs.SHA }}.zip -Force
 
+      - name: Install vpk tool
+        run: dotnet tool install -g vpk --version 0.0.1298
+
+      - name: Pack GUI with Velopack
+        shell: pwsh
+        run: |
+          $version = "1.0.${{ github.run_number }}"
+          vpk pack `
+            --packId DepotDL `
+            --packVersion $version `
+            --packDir DepotDL.GUI/bin/Release/net9.0-windows/win-x64/publish `
+            --mainExe DepotDL.GUI.exe `
+            --packTitle "DepotDL" `
+            --outputDir velopack_releases
+
       - name: Upload CLI (Windows)
         uses: actions/upload-artifact@6f51ac03b9356f520e9adb1b1b7802705f340c2b # v4.6.0
         with:
@@ -66,6 +81,12 @@ jobs:
         with:
           name: DepotDL.GUI-Windows-x64-${{ steps.build_info.outputs.SHA }}
           path: DepotDL.GUI-Windows-x64-${{ steps.build_info.outputs.SHA }}.zip
+
+      - name: Upload Velopack Installer
+        uses: actions/upload-artifact@6f51ac03b9356f520e9adb1b1b7802705f340c2b # v4.6.0
+        with:
+          name: DepotDL-Setup-${{ steps.build_info.outputs.SHA }}
+          path: velopack_releases/
 
   build-linux:
     name: Build Linux
@@ -215,6 +236,11 @@ jobs:
 
           CLI_MAC=$(find artifacts -name "DepotDL.CLI-macOS-arm64-*.zip" | head -n 1)
           cp "$CLI_MAC" "release_assets/DepotDL.CLI-macOS-arm64-$SHA.zip"
+
+          SETUP_DIR=$(find artifacts -name "DepotDL-Setup-*" -type d | head -n 1)
+          if [ -n "$SETUP_DIR" ]; then
+            cp "$SETUP_DIR"/* release_assets/ 2>/dev/null || true
+          fi
 
           echo "Final assets for release:"
           ls -R release_assets/

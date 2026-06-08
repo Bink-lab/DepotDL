@@ -402,7 +402,30 @@
                 </StackPanel>
             </Border>
 
+            <!-- Update Channel -->
             <Border Grid.Row="12" Style="{StaticResource Card}" Padding="20">
+                <StackPanel>
+                    <TextBlock Text="UPDATES" Style="{StaticResource TextLabel}" Margin="0,0,0,16"/>
+
+                    <TextBlock Text="Release Channel"
+                               Style="{StaticResource TextH3}" Margin="0,0,0,4"/>
+                    <TextBlock Style="{StaticResource BodyText}" Margin="0,0,0,16"
+                               Text="Nightly receives automated builds on every commit. Production receives manually-tagged stable releases."/>
+
+                    <StackPanel Orientation="Horizontal">
+                        <RadioButton Content="Nightly"
+                                     IsChecked="{Binding UpdateChannel, Converter={StaticResource EqToBool}, ConverterParameter=Nightly}"
+                                     GroupName="UpdateChannel"
+                                     VerticalContentAlignment="Center"/>
+                        <RadioButton Content="Production" Margin="20,0,0,0"
+                                     IsChecked="{Binding UpdateChannel, Converter={StaticResource EqToBool}, ConverterParameter=Production}"
+                                     GroupName="UpdateChannel"
+                                     VerticalContentAlignment="Center"/>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <Border Grid.Row="14" Style="{StaticResource Card}" Padding="20">
                 <StackPanel>
                     <TextBlock Text="ONLINEFIX" Style="{StaticResource TextLabel}" Margin="0,0,0,16"/>
 

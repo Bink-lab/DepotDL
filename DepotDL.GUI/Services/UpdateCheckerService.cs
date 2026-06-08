@@ -7,12 +7,15 @@ using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using DepotDL.GUI.Models;
+using Velopack;
+using Velopack.Sources;
 
 namespace DepotDL.GUI.Services
 {
     public static class UpdateCheckerService
     {
-        private const string NightlyUrl = "https://api.github.com/repos/Bink-lab/DepotDL/releases?per_page=1";
+        private const string ReleasesUrl = "https://api.github.com/repos/Bink-lab/DepotDL/releases?per_page=100";
+        private const string GithubRepo = "https://github.com/Bink-lab/DepotDL";
 
         private static readonly HttpClient Http = new() { Timeout = TimeSpan.FromSeconds(5) };
 
@@ -57,6 +60,9 @@ namespace DepotDL.GUI.Services
                 ? dt.ToUniversalTime() : null;
         }
 
+        private static bool IsNightlyRelease(GitHubRelease r)
+            => r.Prerelease || (r.Name?.Contains("Nightly", StringComparison.OrdinalIgnoreCase) ?? false);
+
         public static bool IsUpdateAvailableFromCache(AppSettings settings)
         {
             if (string.IsNullOrEmpty(settings.LastKnownReleaseTag)) return false;
@@ -68,11 +74,12 @@ namespace DepotDL.GUI.Services
         }
 
         public static async Task<UpdateCheckResult?> CheckAsync(string? currentSha,
+            UpdateChannel channel = UpdateChannel.Nightly,
             CancellationToken ct = default)
         {
             try
             {
-                using var req = new HttpRequestMessage(HttpMethod.Get, NightlyUrl);
+                using var req = new HttpRequestMessage(HttpMethod.Get, ReleasesUrl);
                 req.Headers.UserAgent.ParseAdd("DepotDL-GUI/1.0");
                 req.Headers.Accept.ParseAdd("application/vnd.github+json");
 
@@ -82,7 +89,15 @@ namespace DepotDL.GUI.Services
                 await using var stream = await resp.Content.ReadAsStreamAsync().ConfigureAwait(false);
 
                 var arr = await JsonSerializer.DeserializeAsync<GitHubRelease[]>(stream).ConfigureAwait(false);
-                var release = arr?.Length > 0 ? arr[0] : null;
+                if (arr == null || arr.Length == 0) return null;
+
+                var filtered = channel == UpdateChannel.Nightly
+                    ? arr.Where(IsNightlyRelease)
+                    : arr.Where(r => !IsNightlyRelease(r));
+
+                var release = filtered
+                    .OrderByDescending(r => ParseTagTime(r.TagName ?? "") ?? DateTime.MinValue)
+                    .FirstOrDefault();
 
                 if (release?.TagName == null) return null;
 
@@ -107,7 +122,8 @@ namespace DepotDL.GUI.Services
                     UpdateAvailable = updateAvailable,
                     LatestTag = release.TagName,
                     HtmlUrl = release.HtmlUrl ?? BuildReleaseUrl(release.TagName),
-                    LatestSha = latestSha
+                    LatestSha = latestSha,
+                    Channel = channel
                 };
             }
             catch
@@ -116,10 +132,31 @@ namespace DepotDL.GUI.Services
             }
         }
 
+        private static UpdateManager MakeManager(UpdateChannel channel)
+            => new(new GithubSource(GithubRepo, null, channel == UpdateChannel.Nightly));
+
+        public static bool IsVelopackManaged(UpdateChannel channel = UpdateChannel.Nightly)
+        {
+            try { return MakeManager(channel).IsInstalled; }
+            catch { return false; }
+        }
+
+        public static async Task InstallUpdateAsync(UpdateChannel channel = UpdateChannel.Nightly,
+            Action<int>? onProgress = null, CancellationToken ct = default)
+        {
+            var mgr = MakeManager(channel);
+            var info = await mgr.CheckForUpdatesAsync(ct).ConfigureAwait(false);
+            if (info == null) return;
+            await mgr.DownloadUpdatesAsync(info, onProgress, ct).ConfigureAwait(false);
+            mgr.ApplyUpdatesAndRestart(info);
+        }
+
         private sealed class GitHubRelease
         {
             [JsonPropertyName("tag_name")] public string? TagName { get; set; }
             [JsonPropertyName("html_url")] public string? HtmlUrl { get; set; }
+            [JsonPropertyName("prerelease")] public bool Prerelease { get; set; }
+            [JsonPropertyName("name")] public string? Name { get; set; }
         }
     }
 
@@ -129,5 +166,6 @@ namespace DepotDL.GUI.Services
         public string? LatestTag { get; init; }
         public string? HtmlUrl { get; init; }
         public string? LatestSha { get; init; }
+        public UpdateChannel Channel { get; init; }
     }
 }

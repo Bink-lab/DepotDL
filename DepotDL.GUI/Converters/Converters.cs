@@ -120,6 +120,11 @@ namespace DepotDL.GUI.Converters
     {
         public object Convert(object v, Type t, object p, CultureInfo c)
             => Equals(v, p) || (v != null && v.ToString() == p?.ToString());
-        public object ConvertBack(object v, Type t, object p, CultureInfo c) => DependencyProperty.UnsetValue;
+        public object ConvertBack(object v, Type t, object p, CultureInfo c)
+        {
+            if (v is bool b && b && p != null && t.IsEnum)
+                return Enum.Parse(t, p.ToString()!);
+            return DependencyProperty.UnsetValue;
+        }
     }
 }

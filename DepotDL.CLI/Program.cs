@@ -9,6 +9,7 @@ using DepotDL.CLI.Models;
 using DepotDL.CLI.Services;
 using DepotDL.CLI.Tui;
 using DepotDL.CLI.Utilities;
+using Velopack;
 
 namespace DepotDL.CLI
 {
@@ -28,6 +29,8 @@ namespace DepotDL.CLI
 
         static int Main(string[] args)
         {
+            VelopackApp.Build().Run();
+
             Console.Title = "DepotDL.CLI - Steam Depot Downloader Orchestrator";
 
             if (args.Length == 0)
@@ -61,18 +64,19 @@ namespace DepotDL.CLI
                     var tempSession = new TuiSession();
                     IniSettings.LoadInto(tempSession);
                     var currentSha = UpdateChecker.GetCurrentSha();
-                    UpdateInfo? updateInfo = null;
+                    var channel = tempSession.UpdateChannel;
+                    AppUpdateInfo? updateInfo = null;
 
                     if (UpdateChecker.ShouldCheck(tempSession))
                     {
-                        updateInfo = UpdateChecker.Check(currentSha);
+                        updateInfo = UpdateChecker.Check(currentSha, channel);
                         UpdateChecker.RecordCheck(tempSession, updateInfo);
                         IniSettings.Save(tempSession);
                     }
                     else if (!string.IsNullOrEmpty(tempSession.LastKnownReleaseTag) &&
                              UpdateChecker.IsUpdateAvailableFromCache(tempSession))
                     {
-                        updateInfo = new UpdateInfo
+                        updateInfo = new AppUpdateInfo
                         {
                             UpdateAvailable = true,
                             LatestTag = tempSession.LastKnownReleaseTag,
@@ -83,7 +87,27 @@ namespace DepotDL.CLI
                     if (updateInfo?.UpdateAvailable == true &&
                         tempSession.LastKnownReleaseTag != tempSession.DismissedUpdateTag)
                     {
-                        PrintUpdateBanner(updateInfo);
+                        var canInstall = UpdateChecker.IsVelopackManaged(channel);
+                        PrintUpdateBanner(updateInfo, channel, canInstall);
+                        if (canInstall)
+                        {
+                            var key = Console.ReadKey(intercept: true);
+                            if (key.Key == ConsoleKey.U)
+                            {
+                                Console.WriteLine("\nDownloading update...");
+                                try
+                                {
+                                    UpdateChecker.InstallUpdate(channel);
+                                    return 0;
+                                }
+                                catch
+                                {
+                                    Console.ForegroundColor = ConsoleColor.Red;
+                                    Console.WriteLine($"Update failed. Download manually: {updateInfo.HtmlUrl ?? UpdateChecker.BuildReleaseUrl(tempSession.LastKnownReleaseTag ?? "")}");
+                                    Console.ResetColor();
+                                }
+                            }
+                        }
                         tempSession.DismissedUpdateTag = tempSession.LastKnownReleaseTag;
                         IniSettings.Save(tempSession);
                     }
@@ -809,19 +833,22 @@ namespace DepotDL.CLI
             }
         }
 
-        private static void PrintUpdateBanner(UpdateInfo info)
+        private static void PrintUpdateBanner(AppUpdateInfo info, string channel = "Nightly",
+            bool canInstall = false)
         {
             const int width = 72;
             var leftPad = TuiDashboard.GetCenterLeftPad(width);
             var pad = new string(' ', leftPad);
             var hr = new string('═', width - 2);
+            var channelLabel = string.Equals(channel, "Production", StringComparison.OrdinalIgnoreCase)
+                ? "PRODUCTION" : "NIGHTLY";
 
             Console.WriteLine();
             Console.ForegroundColor = ConsoleColor.DarkGray;
             Console.WriteLine(pad + "╔" + hr + "╗");
             Console.Write(pad + "║  ");
             Console.ForegroundColor = ConsoleColor.Yellow;
-            Console.Write(TuiText.Pad("  ★  UPDATE AVAILABLE", width - 6));
+            Console.Write(TuiText.Pad($"  ★  {channelLabel} UPDATE AVAILABLE", width - 6));
             Console.ForegroundColor = ConsoleColor.DarkGray;
             Console.WriteLine("  ║");
             Console.WriteLine(pad + "╠" + hr + "╣");
@@ -841,9 +868,14 @@ namespace DepotDL.CLI
             Console.WriteLine(pad + "╚" + hr + "╝");
             Console.WriteLine();
             Console.ForegroundColor = ConsoleColor.DarkGray;
-            Console.WriteLine(pad + "  Press any key to continue...");
+            if (canInstall)
+                Console.WriteLine(pad + "  Press U to install update, any other key to continue...");
+            else
+                Console.WriteLine(pad + "  Press any key to continue...");
             Console.ResetColor();
-            Console.ReadKey(true);
+
+            if (!canInstall)
+                Console.ReadKey(true);
         }
 
         private static void WriteColored(string text, ConsoleColor color)

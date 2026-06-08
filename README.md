@@ -59,7 +59,8 @@ DepotDL.CLI.exe --lua "path/to/game.lua" --manifests-dir "path/to/manifests/" --
 
 - .NET 9 SDK (to build)
 - .NET 9 Runtime (to run)
-- Windows x64
+- GUI: Windows x64 only (WPF)
+- CLI: Windows x64, Linux x64, macOS arm64
 
 ## How It Works
 
@@ -75,6 +76,32 @@ DepotDL.CLI.exe --lua "path/to/game.lua" --manifests-dir "path/to/manifests/" --
 ```bash
 dotnet build -c Release
 ```
+
+## Production Build
+
+`build-prod.ps1` builds all targets, bakes version + git SHA into assemblies, and drops everything into `dist/`.
+
+```powershell
+# full build — CLI (Win/Linux/macOS) + GUI (Win) + Velopack setup + ZIPs
+.\build-prod.ps1 -Version 1.2.0
+
+# ZIPs only, no Velopack installer
+.\build-prod.ps1 -Version 1.2.0 -SkipVelopack
+
+# publish only, no packaging
+.\build-prod.ps1 -Version 1.2.0 -SkipVelopack -SkipPackage
+```
+
+Output in `dist/`:
+```
+DepotDL.CLI-Windows-x64-<version>-<sha>.zip
+DepotDL.CLI-Linux-x64-<version>-<sha>.zip
+DepotDL.CLI-macOS-arm64-<version>-<sha>.zip
+DepotDL.GUI-Windows-x64-<version>-<sha>.zip
+setup/   ← Velopack installer + delta patches (Windows)
+```
+
+Requires `vpk` for Velopack packaging — installed automatically if missing.
 
 ## Archive
 

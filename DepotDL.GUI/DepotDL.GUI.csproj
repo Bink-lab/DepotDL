@@ -9,6 +9,7 @@
     <AssemblyName>DepotDL.GUI</AssemblyName>
     <RootNamespace>DepotDL.GUI</RootNamespace>
     <ApplicationManifest>app.manifest</ApplicationManifest>
+    <StartupObject>DepotDL.GUI.Program</StartupObject>
     <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
   </PropertyGroup>
 
@@ -25,6 +26,7 @@
 
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.3.2" />
+    <PackageReference Include="Velopack" Version="0.0.1298" />
     <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.135" />
     <PackageReference Include="PuppeteerSharp" Version="20.0.2" />
     <PackageReference Include="SharpCompress" Version="0.40.0" NoWarn="NU1902" />
