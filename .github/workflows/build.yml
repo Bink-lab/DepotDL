@@ -26,13 +26,6 @@ jobs:
         env:
           CI: true
 
-      - name: Get Build Info
-        id: build_info
-        shell: bash
-        run: |
-          SHA_SHORT=$(git rev-parse --short HEAD)
-          echo "SHA=$SHA_SHORT" >> $GITHUB_OUTPUT
-
       - name: Build DepotDL CLI (Windows)
         working-directory: DepotDL.CLI
         run: .\build.bat
@@ -47,13 +40,11 @@ jobs:
 
       - name: Package CLI (Windows)
         shell: pwsh
-        run: |
-          Compress-Archive -Path DepotDL.CLI/bin/Release/net9.0/win-x64/publish/* -DestinationPath DepotDL.CLI-Windows-x64-${{ steps.build_info.outputs.SHA }}.zip -Force
+        run: Compress-Archive -Path DepotDL.CLI/bin/Release/net9.0/win-x64/publish/* -DestinationPath cli-windows.zip -Force
 
       - name: Package GUI (Windows)
         shell: pwsh
-        run: |
-          Compress-Archive -Path DepotDL.GUI/bin/Release/net9.0-windows/win-x64/publish/* -DestinationPath DepotDL.GUI-Windows-x64-${{ steps.build_info.outputs.SHA }}.zip -Force
+        run: Compress-Archive -Path DepotDL.GUI/bin/Release/net9.0-windows/win-x64/publish/* -DestinationPath gui-windows.zip -Force
 
       - name: Install vpk tool
         run: dotnet tool install -g vpk --version 0.0.1298
@@ -73,19 +64,19 @@ jobs:
       - name: Upload CLI (Windows)
         uses: actions/upload-artifact@6f51ac03b9356f520e9adb1b1b7802705f340c2b # v4.6.0
         with:
-          name: DepotDL.CLI-Windows-x64-${{ steps.build_info.outputs.SHA }}
-          path: DepotDL.CLI-Windows-x64-${{ steps.build_info.outputs.SHA }}.zip
+          name: cli-windows
+          path: cli-windows.zip
 
       - name: Upload GUI (Windows)
         uses: actions/upload-artifact@6f51ac03b9356f520e9adb1b1b7802705f340c2b # v4.6.0
         with:
-          name: DepotDL.GUI-Windows-x64-${{ steps.build_info.outputs.SHA }}
-          path: DepotDL.GUI-Windows-x64-${{ steps.build_info.outputs.SHA }}.zip
+          name: gui-windows
+          path: gui-windows.zip
 
       - name: Upload Velopack Installer
         uses: actions/upload-artifact@6f51ac03b9356f520e9adb1b1b7802705f340c2b # v4.6.0
         with:
-          name: DepotDL-Setup-${{ steps.build_info.outputs.SHA }}
+          name: velopack
           path: velopack_releases/
 
   build-linux:
@@ -104,29 +95,25 @@ jobs:
         run: |
           chmod +x build.sh
           ./build.sh
-
-      - name: Get Build Info
-        id: build_info
-        shell: bash
-        run: |
-          SHA_SHORT=$(git rev-parse --short HEAD)
-          echo "SHA=$SHA_SHORT" >> $GITHUB_OUTPUT
+        env:
+          CI: true
 
       - name: Build DepotDL CLI (Linux)
         working-directory: DepotDL.CLI
         run: |
           chmod +x build.sh
           ./build.sh
+        env:
+          CI: true
 
       - name: Package CLI (Linux)
-        run: |
-          zip -j DepotDL.CLI-Linux-x64-${{ steps.build_info.outputs.SHA }}.zip DepotDL.CLI/bin/Release/net9.0/linux-x64/publish/*
+        run: zip -j cli-linux.zip DepotDL.CLI/bin/Release/net9.0/linux-x64/publish/*
 
       - name: Upload CLI (Linux)
         uses: actions/upload-artifact@6f51ac03b9356f520e9adb1b1b7802705f340c2b # v4.6.0
         with:
-          name: DepotDL.CLI-Linux-x64-${{ steps.build_info.outputs.SHA }}
-          path: DepotDL.CLI-Linux-x64-${{ steps.build_info.outputs.SHA }}.zip
+          name: cli-linux
+          path: cli-linux.zip
 
   build-macos:
     name: Build macOS
@@ -144,29 +131,25 @@ jobs:
         run: |
           chmod +x build.sh
           ./build.sh
-
-      - name: Get Build Info
-        id: build_info
-        shell: bash
-        run: |
-          SHA_SHORT=$(git rev-parse --short HEAD)
-          echo "SHA=$SHA_SHORT" >> $GITHUB_OUTPUT
+        env:
+          CI: true
 
       - name: Build DepotDL CLI (macOS)
         working-directory: DepotDL.CLI
         run: |
           chmod +x build-macos.sh
           ./build-macos.sh osx-arm64
+        env:
+          CI: true
 
       - name: Package CLI (macOS)
-        run: |
-          zip -j DepotDL.CLI-macOS-arm64-${{ steps.build_info.outputs.SHA }}.zip DepotDL.CLI/bin/Release/net9.0/osx-arm64/publish/*
+        run: zip -j cli-macos.zip DepotDL.CLI/bin/Release/net9.0/osx-arm64/publish/*
 
       - name: Upload CLI (macOS)
         uses: actions/upload-artifact@6f51ac03b9356f520e9adb1b1b7802705f340c2b # v4.6.0
         with:
-          name: DepotDL.CLI-macOS-arm64-${{ steps.build_info.outputs.SHA }}
-          path: DepotDL.CLI-macOS-arm64-${{ steps.build_info.outputs.SHA }}.zip
+          name: cli-macos
+          path: cli-macos.zip
 
   create-nightly:
     name: Create Nightly Release
@@ -189,30 +172,25 @@ jobs:
       - name: Generate Release Notes
         id: generate_notes
         run: |
-          PREVIOUS_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
-
-          if [ -z "$PREVIOUS_TAG" ]; then
-            PREVIOUS_TAG=$(git rev-list --max-parents=0 HEAD)
-          fi
-
+          PREVIOUS_TAG=$(git describe --tags --abbrev=0 2>/dev/null || git rev-list --max-parents=0 HEAD)
           echo "Using $PREVIOUS_TAG as base for changelog"
 
-          echo "## Nightly Build (${{ steps.build_info.outputs.SHA }})" > release_notes.md
-          echo "Automated build from the latest commit on the \`main\` branch." >> release_notes.md
-          echo "Nightly builds may be unstable." >> release_notes.md
-          echo "" >> release_notes.md
-
-          NEW_COMMITS=$(git log $PREVIOUS_TAG..HEAD --oneline)
-          if [ -z "$NEW_COMMITS" ]; then
-            echo "No new changes since last build." >> release_notes.md
-          else
-            echo "### Changes since $PREVIOUS_TAG" >> release_notes.md
-            git log $PREVIOUS_TAG..HEAD --oneline --pretty=format:"* %s (%h)" >> release_notes.md
-          fi
-
-          echo "" >> release_notes.md
-          echo "" >> release_notes.md
-          echo "**Compare:** https://github.com/${{ github.repository }}/compare/$PREVIOUS_TAG...main" >> release_notes.md
+          {
+            echo "## Nightly Build (${{ steps.build_info.outputs.SHA }})"
+            echo "Automated build from the latest commit on the \`main\` branch."
+            echo "Nightly builds may be unstable."
+            echo ""
+            CHANGES=$(git log "$PREVIOUS_TAG"..HEAD --pretty=format:"* %s (%h)")
+            if [ -z "$CHANGES" ]; then
+              echo "No new changes since last build."
+            else
+              echo "### Changes since $PREVIOUS_TAG"
+              echo "$CHANGES"
+            fi
+            echo ""
+            echo ""
+            echo "**Compare:** https://github.com/${{ github.repository }}/compare/$PREVIOUS_TAG...main"
+          } > release_notes.md
 
       - name: Download Artifacts
         uses: actions/download-artifact@v4
@@ -221,29 +199,13 @@ jobs:
 
       - name: Prepare Assets
         run: |
-          mkdir release_assets
           SHA=${{ steps.build_info.outputs.SHA }}
-          echo "Commit SHA: $SHA"
-
-          CLI_WIN=$(find artifacts -name "DepotDL.CLI-Windows-x64-*.zip" | head -n 1)
-          cp "$CLI_WIN" "release_assets/DepotDL.CLI-Windows-x64-$SHA.zip"
-
-          GUI_WIN=$(find artifacts -name "DepotDL.GUI-Windows-x64-*.zip" | head -n 1)
-          cp "$GUI_WIN" "release_assets/DepotDL.GUI-Windows-x64-$SHA.zip"
-
-          CLI_LIN=$(find artifacts -name "DepotDL.CLI-Linux-x64-*.zip" | head -n 1)
-          cp "$CLI_LIN" "release_assets/DepotDL.CLI-Linux-x64-$SHA.zip"
-
-          CLI_MAC=$(find artifacts -name "DepotDL.CLI-macOS-arm64-*.zip" | head -n 1)
-          cp "$CLI_MAC" "release_assets/DepotDL.CLI-macOS-arm64-$SHA.zip"
-
-          SETUP_DIR=$(find artifacts -name "DepotDL-Setup-*" -type d | head -n 1)
-          if [ -n "$SETUP_DIR" ]; then
-            cp "$SETUP_DIR"/* release_assets/ 2>/dev/null || true
-          fi
-
-          echo "Final assets for release:"
-          ls -R release_assets/
+          mkdir release_assets
+          cp artifacts/cli-windows/cli-windows.zip release_assets/DepotDL.CLI-Windows-x64-$SHA.zip
+          cp artifacts/gui-windows/gui-windows.zip release_assets/DepotDL.GUI-Windows-x64-$SHA.zip
+          cp artifacts/cli-linux/cli-linux.zip     release_assets/DepotDL.CLI-Linux-x64-$SHA.zip
+          cp artifacts/cli-macos/cli-macos.zip     release_assets/DepotDL.CLI-macOS-arm64-$SHA.zip
+          cp -r artifacts/velopack/.                release_assets/
 
       - name: Create Annotated Tag
         run: |
