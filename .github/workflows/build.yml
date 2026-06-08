@@ -115,7 +115,7 @@ jobs:
       - name: Build DepotDL CLI (macOS)
         working-directory: DepotDL.CLI
         run: |
-          chmod +x build-macos.sh
+          chmod +x build-macos.sh build.sh
           ./build-macos.sh osx-arm64
         env:
           CI: true

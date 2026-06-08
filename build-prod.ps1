@@ -90,7 +90,15 @@ if (-not $SkipVelopack) {
         --outputDir   $vpkOut | Out-Host
 
     if ($LASTEXITCODE -ne 0) { Die "vpk pack failed." }
-    Ok "Setup files → dist\setup\"
+
+    Step "Staging Velopack release assets"
+    Get-ChildItem $vpkOut -File | ForEach-Object {
+        $destName = if ($_.Extension -eq ".exe") {
+            "$($_.BaseName)-$tag$($_.Extension)"
+        } else { $_.Name }
+        Copy-Item $_.FullName (Join-Path $dist $destName) -Force
+        Ok $destName
+    }
 }
 
 if (-not $SkipPackage) {
