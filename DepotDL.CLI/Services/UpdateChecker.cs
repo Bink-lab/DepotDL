@@ -25,8 +25,9 @@ namespace DepotDL.CLI.Services
 
         public static void RecordCheck(TuiSession session, AppUpdateInfo? info)
         {
+            if (info == null) return;
             session.LastUpdateCheckUtc = DateTime.UtcNow;
-            if (info?.LatestTag != null) session.LastKnownReleaseTag = info.LatestTag;
+            if (info.LatestTag != null) session.LastKnownReleaseTag = info.LatestTag;
         }
 
         public static bool IsUpdateAvailableFromCache(TuiSession session)

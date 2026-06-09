@@ -71,6 +71,11 @@ namespace DepotDL.Shared
             var tagTime = ParseTagTime(tag);
             if (buildTime != null && tagTime != null)
                 return tagTime > buildTime;
+            var currentSha = GetCurrentSha();
+            var parts = tag.Split('-');
+            var tagSha = parts.Length >= 4 ? parts[^1] : null;
+            if (!string.IsNullOrEmpty(currentSha) && !string.IsNullOrEmpty(tagSha))
+                return !string.Equals(currentSha, tagSha, StringComparison.OrdinalIgnoreCase);
             return false;
         }
 
