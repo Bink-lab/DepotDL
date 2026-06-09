@@ -431,8 +431,11 @@ namespace DepotDL.GUI.Services
                     NumberStyles.Any, CultureInfo.InvariantCulture, out var pct))
             {
                 state.Percent = pct;
-                state.Status = DepotStatus.Downloading;
-                state.StatusText = "Downloading";
+                if (state.Status != DepotStatus.Validating)
+                {
+                    state.Status = DepotStatus.Downloading;
+                    state.StatusText = "Downloading";
+                }
                 var sm = SpeedRx().Match(line);
                 state.SpeedText = sm.Success ? sm.Groups[1].Value : string.Empty;
 

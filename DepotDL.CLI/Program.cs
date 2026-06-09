@@ -990,7 +990,8 @@ namespace DepotDL.CLI
                         {
                             var slot = _slots[slotId];
                             slot.Percent = percentage;
-                            slot.Status = "Downloading";
+                            if (slot.Status != "Validating")
+                                slot.Status = "Downloading";
                             slot.LastProgressTime = DateTime.UtcNow;
 
                             var speedMatch = Regex.Match(line, @"\(([^)]+)\)\s*$");
