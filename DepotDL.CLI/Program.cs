@@ -28,7 +28,7 @@ namespace DepotDL.CLI
         private const int WatchdogTimeoutSeconds = 120;
         private static readonly Regex DepotDownloadedRx = new(@"^Depot \d+ - Downloaded.*\((\d+) bytes uncompressed\)", RegexOptions.Compiled);
 
-        static int Main(string[] args)
+        static async Task<int> Main(string[] args)
         {
             VelopackApp.Build().Run();
 
@@ -36,6 +36,14 @@ namespace DepotDL.CLI
 
             if (args.Length == 0)
             {
+                // Start update check early so it runs concurrently with path resolution
+                var tempSession = new TuiSession();
+                IniSettings.LoadInto(tempSession);
+                var updateChannel = tempSession.UpdateChannel;
+                Task<AppUpdateInfo?>? updateTask = UpdateChecker.ShouldCheck(tempSession)
+                    ? UpdateChecker.CheckAsync(UpdateChecker.GetCurrentSha(), updateChannel)
+                    : null;
+
                 // Resolve runtimes
                 var dotnetPath = DialogHelpers.ResolveDotnetPath(null);
                 var ddmodPath = DialogHelpers.ResolveDDModPath(null);
@@ -60,58 +68,55 @@ namespace DepotDL.CLI
                     return 1;
                 }
 
-                // Check for updates before entering TUI
+                // Collect update result (cap at 3s in case network is slow)
+                AppUpdateInfo? updateInfo = null;
+                if (updateTask != null)
                 {
-                    var tempSession = new TuiSession();
-                    IniSettings.LoadInto(tempSession);
-                    var currentSha = UpdateChecker.GetCurrentSha();
-                    var channel = tempSession.UpdateChannel;
-                    AppUpdateInfo? updateInfo = null;
-
-                    if (UpdateChecker.ShouldCheck(tempSession))
+                    try
                     {
-                        updateInfo = UpdateChecker.Check(currentSha, channel);
+                        updateInfo = await updateTask.WaitAsync(TimeSpan.FromSeconds(3));
                         UpdateChecker.RecordCheck(tempSession, updateInfo);
                         IniSettings.Save(tempSession);
                     }
-                    else if (!string.IsNullOrEmpty(tempSession.LastKnownReleaseTag) &&
-                             UpdateChecker.IsUpdateAvailableFromCache(tempSession))
+                    catch (TimeoutException) { }
+                }
+                else if (!string.IsNullOrEmpty(tempSession.LastKnownReleaseTag) &&
+                         UpdateChecker.IsUpdateAvailableFromCache(tempSession))
+                {
+                    updateInfo = new AppUpdateInfo
                     {
-                        updateInfo = new AppUpdateInfo
-                        {
-                            UpdateAvailable = true,
-                            LatestTag = tempSession.LastKnownReleaseTag,
-                            HtmlUrl = UpdateChecker.BuildReleaseUrl(tempSession.LastKnownReleaseTag)
-                        };
-                    }
+                        UpdateAvailable = true,
+                        LatestTag = tempSession.LastKnownReleaseTag,
+                        HtmlUrl = UpdateChecker.BuildReleaseUrl(tempSession.LastKnownReleaseTag)
+                    };
+                }
 
-                    if (updateInfo?.UpdateAvailable == true &&
-                        tempSession.LastKnownReleaseTag != tempSession.DismissedUpdateTag)
+                if (updateInfo?.UpdateAvailable == true &&
+                    tempSession.LastKnownReleaseTag != tempSession.DismissedUpdateTag)
+                {
+                    var canInstall = UpdateChecker.IsVelopackManaged(updateChannel);
+                    PrintUpdateBanner(updateInfo, updateChannel, canInstall);
+                    if (canInstall)
                     {
-                        var canInstall = UpdateChecker.IsVelopackManaged(channel);
-                        PrintUpdateBanner(updateInfo, channel, canInstall);
-                        if (canInstall)
+                        var key = Console.ReadKey(intercept: true);
+                        if (key.Key == ConsoleKey.U)
                         {
-                            var key = Console.ReadKey(intercept: true);
-                            if (key.Key == ConsoleKey.U)
+                            Console.WriteLine("\nDownloading update...");
+                            try
                             {
-                                Console.WriteLine("\nDownloading update...");
-                                try
-                                {
-                                    UpdateChecker.InstallUpdate(channel);
-                                    return 0;
-                                }
-                                catch
-                                {
-                                    Console.ForegroundColor = ConsoleColor.Red;
-                                    Console.WriteLine($"Update failed. Download manually: {updateInfo.HtmlUrl ?? UpdateChecker.BuildReleaseUrl(tempSession.LastKnownReleaseTag ?? "")}");
-                                    Console.ResetColor();
-                                }
+                                UpdateChecker.InstallUpdate(updateChannel);
+                                return 0;
+                            }
+                            catch
+                            {
+                                Console.ForegroundColor = ConsoleColor.Red;
+                                Console.WriteLine($"Update failed. Download manually: {updateInfo.HtmlUrl ?? UpdateChecker.BuildReleaseUrl(tempSession.LastKnownReleaseTag ?? "")}");
+                                Console.ResetColor();
                             }
                         }
-                        tempSession.DismissedUpdateTag = tempSession.LastKnownReleaseTag;
-                        IniSettings.Save(tempSession);
                     }
+                    tempSession.DismissedUpdateTag = tempSession.LastKnownReleaseTag;
+                    IniSettings.Save(tempSession);
                 }
 
                 if (Console.IsInputRedirected || Console.IsOutputRedirected)

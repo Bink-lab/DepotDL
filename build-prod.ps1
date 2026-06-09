@@ -73,12 +73,13 @@ if (-not $SkipVelopack) {
     $vpkOut = Join-Path $dist "setup"
     New-Item $vpkOut -ItemType Directory | Out-Null
 
+    $vpkVersion = "1.2.0"
     if (-not (Get-Command vpk -ErrorAction SilentlyContinue)) {
-        Write-Host "  vpk not found — installing..." -ForegroundColor Yellow
-        dotnet tool install -g vpk | Out-Host
+        Write-Host "  vpk not found — installing v$vpkVersion..." -ForegroundColor Yellow
+        dotnet tool install -g vpk --version $vpkVersion | Out-Host
         if ($LASTEXITCODE -ne 0) { Die "vpk install failed." }
     } else {
-        dotnet tool update -g vpk | Out-Host
+        dotnet tool update -g vpk --version $vpkVersion | Out-Host
     }
 
     vpk pack `

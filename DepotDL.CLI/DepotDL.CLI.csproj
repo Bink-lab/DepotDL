@@ -9,7 +9,7 @@
 
   <ItemGroup>
     <PackageReference Include="SteamKit2" Version="3.2.0" />
-    <PackageReference Include="Velopack" Version="0.0.1298" />
+    <PackageReference Include="Velopack" Version="1.2.0" />
   </ItemGroup>
 
   <ItemGroup>
@@ -23,6 +23,7 @@
     <ProjectReference Include="..\DepotDownloaderMod\DepotDownloaderMod.csproj">
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
+    <ProjectReference Include="..\DepotDL.Shared\DepotDL.Shared.csproj" />
   </ItemGroup>
 
   <ItemGroup>

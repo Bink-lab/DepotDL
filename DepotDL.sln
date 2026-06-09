@@ -9,6 +9,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DepotDL.GUI", "DepotDL.GUI\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DepotDownloaderMod", "DepotDownloaderMod\DepotDownloaderMod.csproj", "{39159C47-ACD3-449F-96CA-4F30C8ED147A}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DepotDL.Shared", "DepotDL.Shared\DepotDL.Shared.csproj", "{C3D4E5F6-A7B8-9012-CDEF-123456789012}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{39159C47-ACD3-449F-96CA-4F30C8ED147A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{39159C47-ACD3-449F-96CA-4F30C8ED147A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{39159C47-ACD3-449F-96CA-4F30C8ED147A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C3D4E5F6-A7B8-9012-CDEF-123456789012}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C3D4E5F6-A7B8-9012-CDEF-123456789012}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C3D4E5F6-A7B8-9012-CDEF-123456789012}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C3D4E5F6-A7B8-9012-CDEF-123456789012}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
