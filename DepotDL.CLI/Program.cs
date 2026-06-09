@@ -26,6 +26,7 @@ namespace DepotDL.CLI
         private static readonly TimeSpan _drawThrottleInterval = TimeSpan.FromMilliseconds(100);
         private static int[] _lastSlotLengths = Array.Empty<int>();
         private const int WatchdogTimeoutSeconds = 120;
+        private static readonly Regex DepotDownloadedRx = new(@"^Depot \d+ - Downloaded.*\((\d+) bytes uncompressed\)", RegexOptions.Compiled);
 
         static int Main(string[] args)
         {
@@ -783,7 +784,10 @@ namespace DepotDL.CLI
                         InstallDate = DateTime.Now,
                         TotalSizeBytes = LibraryManager.GetDirectorySize(outputPath),
                         IsVerified = true,
-                        BuildId = SteamAppInfoProvider.GetBuildId(appId, depots.Values.Select(d => d.ManifestId).ToList())
+                        BuildId = SteamAppInfoProvider.GetBuildId(appId, depots.Values.Select(d => d.ManifestId).ToList()),
+                        DepotSizes = (_slots ?? Array.Empty<DepotSlotState>())
+                            .Where(s => s?.DepotId != null && s.DownloadedUncompressedBytes > 0)
+                            .ToDictionary(s => s.DepotId!, s => s.DownloadedUncompressedBytes)
                     };
                     LibraryManager.AddOrUpdateGame(libGame);
                     DownloadTui.WriteStatus("Library", $"Registered '{gameName}' in the local library index", ConsoleColor.Green);
@@ -963,6 +967,16 @@ namespace DepotDL.CLI
                                 await Task.Delay(20);
                             }
                         });
+                    }
+                    else if (DepotDownloadedRx.Match(line) is { Success: true } m2)
+                    {
+                        if (long.TryParse(m2.Groups[1].Value, out var uncompressedBytes))
+                        {
+                            lock (_drawLock)
+                            {
+                                _slots[slotId].DownloadedUncompressedBytes = uncompressedBytes;
+                            }
+                        }
                     }
                     return;
                 }

@@ -12,6 +12,7 @@ namespace DepotDL.CLI.Models
         public string? OutputPath { get; set; }
 
         public long TotalUncompressedSize { get; set; } = 0;
+        public long DownloadedUncompressedBytes { get; set; } = 0;
         public long LastSpeedTotalBytes { get; set; } = 0;
         public Dictionary<string, long> FileSizes { get; } = new(StringComparer.OrdinalIgnoreCase);
         public DateTime? DownloadStartTime { get; set; }

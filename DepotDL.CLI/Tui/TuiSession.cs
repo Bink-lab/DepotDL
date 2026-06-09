@@ -11,6 +11,7 @@ namespace DepotDL.CLI.Tui
         public string OsArch { get; set; } = string.Empty;
         public string DecryptionKey { get; set; } = string.Empty;
         public string ManifestId { get; set; } = string.Empty;
+        public long SizeBytes { get; set; }
     }
 
     public class TuiSession

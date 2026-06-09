@@ -346,8 +346,14 @@ namespace DepotDL.GUI.ViewModels
                 }
 
                 AppId = appId;
-                Depots = new ObservableCollection<DepotSelectionItem>(
-                    depots.Select(d => new DepotSelectionItem(d)));
+                var libGame = _library.Load().FirstOrDefault(g => g.AppId == appId);
+                Depots = new ObservableCollection<DepotSelectionItem>(depots.Select(d =>
+                {
+                    var item = new DepotSelectionItem(d);
+                    if (libGame?.DepotSizes.TryGetValue(d.DepotId, out var sz) == true)
+                        item.SizeBytes = sz;
+                    return item;
+                }));
 
                 var settings2 = _settings.Load();
                 if (settings2.AutoSelectOsByOs)
@@ -355,6 +361,7 @@ namespace DepotDL.GUI.ViewModels
 
                 _ = EnrichDepotsOsAsync(appId, Depots.ToList());
                 _ = EnrichDepotsDlcAsync(appId, Depots.ToList());
+                _ = EnrichDepotsSizeAsync(appId, ManifestsDir, Depots.ToList());
 
                 LuaLoaded = true;
 
@@ -506,6 +513,30 @@ namespace DepotDL.GUI.ViewModels
             catch { }
         }
 
+        private async Task EnrichDepotsSizeAsync(string appId, string manifestsDir, List<DepotSelectionItem> items)
+        {
+            try
+            {
+                var sizes = await Task.Run(() =>
+                    items.Select(item => (item.DepotId, Size: item.SizeBytes > 0
+                        ? item.SizeBytes
+                        : ManifestSizeReader.TryGetSize(manifestsDir, item.DepotId, item.Depot.ManifestId)))
+                         .ToList());
+
+                await Application.Current.Dispatcher.InvokeAsync(() =>
+                {
+                    if (AppId != appId) return;
+                    foreach (var (depotId, size) in sizes)
+                    {
+                        if (size <= 0) continue;
+                        var item = items.FirstOrDefault(i => i.DepotId == depotId);
+                        if (item != null) item.SizeBytes = size;
+                    }
+                });
+            }
+            catch { }
+        }
+
         private void UpdateCanStart()
         {
             if (!LuaLoaded)
@@ -649,7 +680,10 @@ namespace DepotDL.GUI.ViewModels
                         InstallDate = DateTime.Now,
                         TotalSizeBytes = LibraryService.GetDirectorySize(OutputDir),
                         IsVerified = true,
-                        BuildId = SteamMetadataService.GetBuildId(AppId, depots.Select(d => d.ManifestId).ToList())
+                        BuildId = SteamMetadataService.GetBuildId(AppId, depots.Select(d => d.ManifestId).ToList()),
+                        DepotSizes = states
+                            .Where(s => s.DownloadedUncompressedBytes > 0)
+                            .ToDictionary(s => s.DepotId, s => s.DownloadedUncompressedBytes)
                     };
                     _library.AddOrUpdate(game);
                 }
@@ -835,8 +869,16 @@ namespace DepotDL.GUI.ViewModels
         [ObservableProperty] private string _osList = string.Empty;
         [ObservableProperty] private string _osArch = string.Empty;
         [ObservableProperty] private string _displayName = string.Empty;
+        [ObservableProperty] private long _sizeBytes;
 
         public string DepotId => Depot.DepotId;
+        public string SizeText => SizeBytes > 0 ? LibraryService.FormatSize(SizeBytes) : string.Empty;
+        public string DepotIdLine => SizeBytes > 0 ? $"{Depot.DepotId} · {LibraryService.FormatSize(SizeBytes)}" : Depot.DepotId;
+        partial void OnSizeBytesChanged(long value)
+        {
+            OnPropertyChanged(nameof(SizeText));
+            OnPropertyChanged(nameof(DepotIdLine));
+        }
 
         public string OsText
         {

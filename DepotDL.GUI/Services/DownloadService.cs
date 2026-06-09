@@ -15,6 +15,8 @@ namespace DepotDL.GUI.Services
         private static partial Regex PctRx();
         [GeneratedRegex(@"\(([^)]+)\)\s*$")]
         private static partial Regex SpeedRx();
+        [GeneratedRegex(@"\((\d+) bytes uncompressed\)")]
+        private static partial Regex DepotDownloadedRx();
 
         private const int MaxRetries = 3;
         private const int StuckTimeoutSeconds = 120;
@@ -422,6 +424,14 @@ namespace DepotDL.GUI.Services
                 state.Status = DepotStatus.Validating;
                 state.StatusText = "Validating";
                 state.ActiveFile = Path.GetFileName(line[11..].Trim());
+                return;
+            }
+            if (line.StartsWith("Depot ", StringComparison.OrdinalIgnoreCase) &&
+                line.Contains("Downloaded", StringComparison.OrdinalIgnoreCase))
+            {
+                var m = DepotDownloadedRx().Match(line);
+                if (m.Success && long.TryParse(m.Groups[1].Value, out var sz))
+                    state.DownloadedUncompressedBytes = sz;
                 return;
             }
 

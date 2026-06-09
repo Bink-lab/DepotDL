@@ -31,6 +31,8 @@ namespace DepotDL.GUI.Models
         [ObservableProperty] private string _activeFile = string.Empty;
         [ObservableProperty] private string? _errorMessage;
 
+        public long DownloadedUncompressedBytes { get; set; }
+
         public string DisplayName => !string.IsNullOrWhiteSpace(DepotName)
             ? DepotName
             : $"Depot {DepotId}";

@@ -20,6 +20,7 @@ namespace DepotDL.CLI
         public bool IsVerified { get; set; } = true;
         public string BuildId { get; set; } = string.Empty;
         public bool OnlineFixApplied { get; set; }
+        public Dictionary<string, long> DepotSizes { get; set; } = new();
     }
 
     public static class LibraryManager

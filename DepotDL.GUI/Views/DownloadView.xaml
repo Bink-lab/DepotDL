@@ -514,7 +514,7 @@
                                                                FontSize="10.5"
                                                                Foreground="{StaticResource TextMuted}"
                                                                FontFamily="Consolas"
-                                                               Text="{Binding DepotId}"/>
+                                                               Text="{Binding DepotIdLine}"/>
                                                 </StackPanel>
                                                 <StackPanel Grid.Column="3" Orientation="Horizontal"
                                                             VerticalAlignment="Center">

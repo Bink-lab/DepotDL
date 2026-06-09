@@ -242,6 +242,16 @@ namespace DepotDL.CLI.Tui
                             continue;
                         }
 
+                        var libGames = LibraryManager.LoadLibrary();
+                        var libGame = libGames.FirstOrDefault(g => g.AppId == session.AppId);
+                        foreach (var d in downloadableDepots)
+                        {
+                            if (libGame?.DepotSizes.TryGetValue(d.DepotId, out var libSz) == true && libSz > 0)
+                                d.SizeBytes = libSz;
+                            else if (d.SizeBytes == 0)
+                                d.SizeBytes = Services.ManifestSizeReader.TryGetSize(session.ManifestsDir, d.DepotId, d.ManifestId);
+                        }
+
                         var selectedDownloadableDepots = LibraryManager.FilterDownloadableDepots(session.SelectedDepots, session.AppId);
                         var chosenDepots = RunCheckboxSelector($"SELECT DEPOTS FOR APP {session.AppId}", downloadableDepots, selectedDownloadableDepots);
                         if (chosenDepots == null)
@@ -2280,6 +2290,11 @@ namespace DepotDL.CLI.Tui
             if (!string.IsNullOrWhiteSpace(depot.ManifestId))
             {
                 parts.Add($"Manifest ID: {depot.ManifestId}");
+            }
+
+            if (depot.SizeBytes > 0)
+            {
+                parts.Add(FormatSize(depot.SizeBytes));
             }
 
             return string.Join(" | ", parts);
