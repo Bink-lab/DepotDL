@@ -43,7 +43,7 @@ static class Ansi
 
     public static void Progress(ulong downloaded, ulong total)
     {
-        var progress = (byte)MathF.Round(downloaded / (float)total * 100.0f);
+        var progress = total > 0 ? (byte)MathF.Round(downloaded / (float)total * 100.0f) : (byte)0;
         Progress(ProgressState.Default, progress);
     }
 

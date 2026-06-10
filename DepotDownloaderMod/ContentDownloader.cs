@@ -993,6 +993,11 @@ namespace DepotDownloader
 
             if (!failedChunks.IsEmpty)
             {
+                foreach (var fsd in failedChunks.Select(q => q.fileStreamData).Distinct())
+                {
+                    try { fsd.fileStream?.Dispose(); } catch { }
+                    fsd.fileStream = null;
+                }
                 Console.WriteLine("Permanently failed {0} chunk(s) for depot {1}. Aborting.", failedChunks.Count, depot.DepotId);
                 cts.Cancel();
                 cts.Token.ThrowIfCancellationRequested();
@@ -1094,6 +1099,7 @@ namespace DepotDownloader
                         // we have a version of this file, but it doesn't fully match what we want
                         if (Config.VerifyAll)
                         {
+                            Ansi.Progress(Ansi.ProgressState.Indeterminate);
                             Console.WriteLine("Validating {0}", fileFinalPath);
                         }
 
@@ -1183,6 +1189,7 @@ namespace DepotDownloader
                         }
                     }
 
+                    Ansi.Progress(Ansi.ProgressState.Indeterminate);
                     Console.WriteLine("Validating {0}", fileFinalPath);
                     neededChunks = Util.ValidateSteam3FileChecksums(fs, [.. file.Chunks.OrderBy(x => x.Offset)]);
                 }
@@ -1195,7 +1202,7 @@ namespace DepotDownloader
                         var elapsedSec = (DateTime.UtcNow - downloadStartTime).TotalSeconds;
                         var speedBps = elapsedSec > 0.1 ? (depotDownloadCounter.depotBytesCompressed / elapsedSec) : 0;
                         var speedStr = speedBps > 0 ? $" ({FormatSpeed(speedBps)})" : "";
-                        Console.WriteLine("{0,6:#00.00}% {1}{2}", (depotDownloadCounter.sizeDownloaded / (float)depotDownloadCounter.completeDownloadSize) * 100.0f, fileFinalPath, speedStr);
+                        Console.WriteLine("{0,6:#00.00}% {1}{2}", depotDownloadCounter.completeDownloadSize > 0 ? (depotDownloadCounter.sizeDownloaded / (float)depotDownloadCounter.completeDownloadSize) * 100.0f : 0f, fileFinalPath, speedStr);
                     }
 
                     lock (downloadCounter)
@@ -1390,7 +1397,7 @@ namespace DepotDownloader
                 var elapsedSec = (DateTime.UtcNow - downloadStartTime).TotalSeconds;
                 var speedBps = elapsedSec > 0.1 ? (depotDownloadCounter.depotBytesCompressed / elapsedSec) : 0;
                 var speedStr = speedBps > 0 ? $" ({FormatSpeed(speedBps)})" : "";
-                Console.WriteLine("{0,6:#00.00}% {1}{2}", (sizeDownloaded / (float)depotDownloadCounter.completeDownloadSize) * 100.0f, fileFinalPath, speedStr);
+                Console.WriteLine("{0,6:#00.00}% {1}{2}", depotDownloadCounter.completeDownloadSize > 0 ? (sizeDownloaded / (float)depotDownloadCounter.completeDownloadSize) * 100.0f : 0f, fileFinalPath, speedStr);
                 lock (depotDownloadCounter) { depotDownloadCounter.lastProgressTicks = DateTime.UtcNow.Ticks; }
             }
             else
@@ -1409,7 +1416,7 @@ namespace DepotDownloader
                     var elapsedSec = (DateTime.UtcNow - downloadStartTime).TotalSeconds;
                     var speedBps = elapsedSec > 0.1 ? (depotDownloadCounter.depotBytesCompressed / elapsedSec) : 0;
                     var speedStr = speedBps > 0 ? $" ({FormatSpeed(speedBps)})" : "";
-                    Console.WriteLine("{0,6:#00.00}%{1}", (sizeDownloaded / (float)depotDownloadCounter.completeDownloadSize) * 100.0f, speedStr);
+                    Console.WriteLine("{0,6:#00.00}%{1}", depotDownloadCounter.completeDownloadSize > 0 ? (sizeDownloaded / (float)depotDownloadCounter.completeDownloadSize) * 100.0f : 0f, speedStr);
                 }
             }
 
