@@ -85,7 +85,7 @@ namespace DepotDownloader
                     Directory.CreateDirectory(Path.Combine(installDir, STAGING_DIR));
                 }
             }
-            catch
+            catch (Exception)
             {
                 return false;
             }

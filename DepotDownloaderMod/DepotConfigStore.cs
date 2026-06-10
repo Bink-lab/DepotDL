@@ -28,6 +28,7 @@ namespace DepotDownloader
         }
 
         public static DepotConfigStore Instance;
+        private static readonly object _syncRoot = new();
 
         public static void LoadFromFile(string filename)
         {
@@ -50,15 +51,26 @@ namespace DepotDownloader
 
         public static void Save()
         {
-            if (!Loaded)
-                throw new InvalidOperationException("Saved config before loading");
+            lock (_syncRoot)
+            {
+                if (!Loaded)
+                    throw new InvalidOperationException("Saved config before loading");
 
-            var tmpFile = Instance.FileName + ".tmp";
-            using (var fs = File.Open(tmpFile, FileMode.Create))
-            using (var ds = new DeflateStream(fs, CompressionMode.Compress))
-                Serializer.Serialize(ds, Instance);
+                var tmpFile = Instance.FileName + ".tmp";
+                try
+                {
+                    using (var fs = File.Open(tmpFile, FileMode.Create))
+                    using (var ds = new DeflateStream(fs, CompressionMode.Compress))
+                        Serializer.Serialize(ds, Instance);
 
-            File.Move(tmpFile, Instance.FileName, overwrite: true);
+                    File.Move(tmpFile, Instance.FileName, overwrite: true);
+                }
+                finally
+                {
+                    if (File.Exists(tmpFile))
+                        File.Delete(tmpFile);
+                }
+            }
         }
     }
 }

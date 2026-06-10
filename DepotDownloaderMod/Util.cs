@@ -202,11 +202,11 @@ namespace DepotDownloader
                 var filename = Path.Combine(directory, string.Format("{0}_{1}.manifest", manifest.DepotID, manifest.ManifestGID));
                 manifest.SaveToFile(filename);
                 File.WriteAllBytes(filename + ".sha", FileSHAHash(filename));
-                return true; // If serialization completes without throwing an exception, return true
+                return true;
             }
             catch (Exception)
             {
-                return false; // Return false if an error occurs
+                return false;
             }
         }
 
@@ -214,6 +214,9 @@ namespace DepotDownloader
         {
             if (hex == null)
                 return null;
+
+            if (hex.Length % 2 != 0)
+                throw new ArgumentException("Hex string must have even length.", nameof(hex));
 
             var chars = hex.Length;
             var bytes = new byte[chars / 2];

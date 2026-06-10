@@ -86,7 +86,7 @@ internal static class AnsiDetector
                 return ansiFromTerm;
             }
 
-            if ((mode & CONSOLE_MODE.ENABLE_VIRTUAL_TERMINAL_PROCESSING) == 0||true)
+            if ((mode & CONSOLE_MODE.ENABLE_VIRTUAL_TERMINAL_PROCESSING) == 0)
             {
                 isLegacy = true;
 

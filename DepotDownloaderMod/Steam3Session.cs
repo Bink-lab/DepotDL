@@ -49,8 +49,8 @@ namespace DepotDownloader
         volatile bool bExpectingDisconnectRemote;
         volatile bool bDidDisconnect;
         volatile bool bIsConnectionRecovery;
-        int connectionBackoff;
-        int seq; // more hack fixes
+        volatile int connectionBackoff;
+        volatile int seq;
         AuthSession authSession;
         readonly CancellationTokenSource abortedToken = new();
 
