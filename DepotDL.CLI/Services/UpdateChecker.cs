@@ -25,9 +25,8 @@ namespace DepotDL.CLI.Services
 
         public static void RecordCheck(TuiSession session, AppUpdateInfo? info)
         {
-            if (info == null) return;
             session.LastUpdateCheckUtc = DateTime.UtcNow;
-            if (info.LatestTag != null) session.LastKnownReleaseTag = info.LatestTag;
+            if (info?.LatestTag != null) session.LastKnownReleaseTag = info.LatestTag;
         }
 
         public static bool IsUpdateAvailableFromCache(TuiSession session)
@@ -53,8 +52,7 @@ namespace DepotDL.CLI.Services
         public static bool IsVelopackManaged(string channel = "Nightly")
             => UpdateCheckerCore.IsVelopackManaged(string.Equals(channel, "Nightly", StringComparison.OrdinalIgnoreCase));
 
-        public static void InstallUpdate(string channel = "Nightly")
-            => UpdateCheckerCore.InstallUpdateAsync(string.Equals(channel, "Nightly", StringComparison.OrdinalIgnoreCase))
-                .GetAwaiter().GetResult();
+        public static Task InstallUpdateAsync(string channel = "Nightly")
+            => UpdateCheckerCore.InstallUpdateAsync(string.Equals(channel, "Nightly", StringComparison.OrdinalIgnoreCase));
     }
 }

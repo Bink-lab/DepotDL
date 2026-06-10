@@ -3,7 +3,6 @@
 
 using System.IO;
 using System.IO.Compression;
-using System.Text.RegularExpressions;
 
 namespace DepotDL.GUI.Services
 {
@@ -99,10 +98,7 @@ namespace DepotDL.GUI.Services
             return importDir;
         }
 
-        private static string SanitizeFolderName(string value)
-        {
-            var invalid = Regex.Escape(new string(Path.GetInvalidFileNameChars()));
-            return Regex.Replace(value, $"[{invalid}]+", "_").Trim();
-        }
+        private static string SanitizeFolderName(string value) =>
+            LibraryService.SanitizeFolderName(value);
     }
 }

@@ -52,13 +52,22 @@ namespace DepotDL.GUI.Services
 
             if (!string.IsNullOrEmpty(filePathToDelete) && Directory.Exists(filePathToDelete))
             {
-                try
+                ClearReadOnly(new DirectoryInfo(filePathToDelete));
+                for (var attempt = 0; attempt < 10; attempt++)
                 {
-                    Directory.Delete(filePathToDelete, recursive: true);
-                }
-                catch (Exception ex)
-                {
-                    return ex.Message;
+                    try
+                    {
+                        Directory.Delete(filePathToDelete, recursive: true);
+                        break;
+                    }
+                    catch when (attempt < 9)
+                    {
+                        System.Threading.Thread.Sleep(150);
+                    }
+                    catch (Exception ex)
+                    {
+                        return ex.Message;
+                    }
                 }
             }
 
@@ -83,6 +92,25 @@ namespace DepotDL.GUI.Services
             if (bytes < 1024 * 1024) return $"{bytes / 1024.0:F1} KB";
             if (bytes < 1024L * 1024 * 1024) return $"{bytes / (1024.0 * 1024):F1} MB";
             return $"{bytes / (1024.0 * 1024 * 1024):F2} GB";
+        }
+
+        private static void ClearReadOnly(DirectoryInfo dir)
+        {
+            if (!dir.Exists) return;
+            foreach (var f in dir.GetFiles())
+                try { if (f.IsReadOnly) f.IsReadOnly = false; } catch { }
+            foreach (var sub in dir.GetDirectories())
+                ClearReadOnly(sub);
+        }
+
+        public static string SanitizeFolderName(string name)
+        {
+            if (string.IsNullOrWhiteSpace(name)) return string.Empty;
+            var invalid = Path.GetInvalidFileNameChars();
+            foreach (var c in invalid)
+                name = name.Replace(c, '_');
+            name = string.Join("_", name.Split('_', StringSplitOptions.RemoveEmptyEntries));
+            return name.Trim();
         }
 
         public static long GetDirectorySize(string path)

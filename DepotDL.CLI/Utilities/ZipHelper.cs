@@ -2,7 +2,6 @@
 // in file 'LICENSE', which is part of this source code package.
 
 using System.IO.Compression;
-using System.Text.RegularExpressions;
 
 namespace DepotDL.CLI.Utilities
 {
@@ -105,10 +104,7 @@ namespace DepotDL.CLI.Utilities
             return Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "imports", folderName));
         }
 
-        private static string SanitizeFolderName(string value)
-        {
-            var invalid = Regex.Escape(new string(Path.GetInvalidFileNameChars()));
-            return Regex.Replace(value, $"[{invalid}]+", "_").Trim();
-        }
+        private static string SanitizeFolderName(string value) =>
+            LibraryManager.SanitizeFolderName(value);
     }
 }

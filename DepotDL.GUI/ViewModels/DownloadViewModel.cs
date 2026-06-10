@@ -849,16 +849,8 @@ namespace DepotDL.GUI.ViewModels
             }
         }
 
-        private static string SanitizeFolderName(string name)
-        {
-            if (string.IsNullOrWhiteSpace(name)) return string.Empty;
-            var invalid = Path.GetInvalidFileNameChars();
-            foreach (var c in invalid)
-            {
-                name = name.Replace(c, ' ');
-            }
-            return string.Join(" ", name.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries)).Trim();
-        }
+        private static string SanitizeFolderName(string name) =>
+            LibraryService.SanitizeFolderName(name);
     }
 
     public partial class DepotSelectionItem : ObservableObject

@@ -54,6 +54,13 @@ namespace DepotDL.GUI.ViewModels
                 Download.PreFillFromLibraryGame(game, clearCheckpoints: true);
                 CurrentPage = NavPage.Download;
             };
+
+            Settings.PropertyChanged += async (_, e) =>
+            {
+                if (e.PropertyName == nameof(SettingsViewModel.SaveSuccess) && Settings.SaveSuccess
+                    && Settings.UpdateChannel != _activeChannel)
+                    await CheckForUpdateAsync();
+            };
         }
 
         public bool ShowDownloadWidget => Download.IsDownloading && !IsDownloadPage;
@@ -176,8 +183,11 @@ namespace DepotDL.GUI.ViewModels
             }
             catch
             {
-                IsUpdating = false;
                 OpenUpdateUrl();
+            }
+            finally
+            {
+                IsUpdating = false;
             }
         }
 

@@ -6,6 +6,7 @@ using System.Globalization;
 using System.IO;
 using System.Text.RegularExpressions;
 using DepotDL.GUI.Models;
+using DepotDL.Shared;
 
 namespace DepotDL.GUI.Services
 {
@@ -71,8 +72,11 @@ namespace DepotDL.GUI.Services
                     if (states[i].Status != DepotStatus.Skipped)
                         queue.Enqueue((depots[i], states[i]));
 
-                var workers = Math.Min(maxParallel, queue.Count);
-                if (workers == 0) return;
+                if (queue.IsEmpty) return;
+
+                var groupLocks = ConflictGroupBuilder.Build(
+                    depots.Select(d => (d.DepotId, (string?)d.ManifestId)).ToArray(),
+                    manifestMap);
 
                 var providerCache = new System.Collections.Concurrent.ConcurrentDictionary<string, Lazy<Task<Dictionary<string, string>?>>>();
 
@@ -99,7 +103,7 @@ namespace DepotDL.GUI.Services
                     return lazy.Value;
                 }
 
-                var semaphore = new SemaphoreSlim(workers, workers);
+                var globalSemaphore = new SemaphoreSlim(Math.Max(1, maxParallel), Math.Max(1, maxParallel));
                 var tasks = new List<Task>();
 
                 while (!queue.IsEmpty)
@@ -107,12 +111,19 @@ namespace DepotDL.GUI.Services
                     ct.ThrowIfCancellationRequested();
                     if (!queue.TryDequeue(out var item)) break;
 
-                    await semaphore.WaitAsync(ct);
+                    await globalSemaphore.WaitAsync(ct);
                     var (depot, state) = item;
+                    var groupLock = groupLocks.GetValueOrDefault(depot.DepotId);
                     tasks.Add(Task.Run(async () =>
                     {
+                        var groupAcquired = false;
                         try
                         {
+                            if (groupLock != null)
+                            {
+                                await groupLock.WaitAsync(ct);
+                                groupAcquired = true;
+                            }
                             await DownloadDepotWithRetryAsync(
                                 appId, depot, outputDir, keysFile, manifestMap, state, ct,
                                 GetProviderManifestsAsync, ryuuApiKey, hubcapApiKey);
@@ -121,7 +132,11 @@ namespace DepotDL.GUI.Services
                                 await File.WriteAllTextAsync(
                                     Path.Combine(checkpointDir, $"{depot.DepotId}.done"), "");
                         }
-                        finally { semaphore.Release(); }
+                        finally
+                        {
+                            if (groupAcquired) groupLock!.Release();
+                            globalSemaphore.Release();
+                        }
                     }, ct));
                 }
 
@@ -274,7 +289,7 @@ namespace DepotDL.GUI.Services
             psi.ArgumentList.Add("-app"); psi.ArgumentList.Add(appId);
             psi.ArgumentList.Add("-depot"); psi.ArgumentList.Add(depot.DepotId);
             psi.ArgumentList.Add("-depotkeys"); psi.ArgumentList.Add(keysFile);
-            psi.ArgumentList.Add("-max-downloads"); psi.ArgumentList.Add("64");
+            psi.ArgumentList.Add("-max-downloads"); psi.ArgumentList.Add(DepotDL.CLI.Models.DepotDownloadDefaults.MaxDownloads.ToString());
             psi.ArgumentList.Add("-os"); psi.ArgumentList.Add("windows");
             psi.ArgumentList.Add("-validate");
             psi.ArgumentList.Add("-dir"); psi.ArgumentList.Add(outputDir);
@@ -333,6 +348,7 @@ namespace DepotDL.GUI.Services
             {
                 double seenPct = -1;
                 DepotStatus seenStatus = DepotStatus.Queued;
+                string? seenFile = null;
                 var lastProgressTicks = DateTime.UtcNow.Ticks;
 
                 while (!watchdogCts.Token.IsCancellationRequested)
@@ -342,11 +358,13 @@ namespace DepotDL.GUI.Services
 
                     var nowPct = state.Percent;
                     DepotStatus nowStatus = state.Status;
+                    var nowFile = state.ActiveFile;
 
-                    if (nowPct > seenPct || nowStatus != seenStatus)
+                    if (nowPct > seenPct || nowStatus != seenStatus || nowFile != seenFile)
                     {
                         seenPct = nowPct;
                         seenStatus = nowStatus;
+                        seenFile = nowFile;
                         lastProgressTicks = DateTime.UtcNow.Ticks;
                     }
                     else
@@ -402,7 +420,9 @@ namespace DepotDL.GUI.Services
             line.Contains("AccessDenied", StringComparison.OrdinalIgnoreCase) ||
             line.Contains("No valid depot key", StringComparison.OrdinalIgnoreCase) ||
             line.Contains("unable to download", StringComparison.OrdinalIgnoreCase) ||
-            line.Contains("missing public subsection", StringComparison.OrdinalIgnoreCase);
+            line.Contains("missing public subsection", StringComparison.OrdinalIgnoreCase) ||
+            line.Contains("used by another process", StringComparison.OrdinalIgnoreCase) ||
+            line.Contains("Permanently failed", StringComparison.OrdinalIgnoreCase);
 
         private static void ProcessLine(string line, DepotDownloadState state)
         {

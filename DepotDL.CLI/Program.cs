@@ -9,13 +9,14 @@ using DepotDL.CLI.Models;
 using DepotDL.CLI.Services;
 using DepotDL.CLI.Tui;
 using DepotDL.CLI.Utilities;
+using DepotDL.Shared;
 using Velopack;
 
 namespace DepotDL.CLI
 {
     public class Program
     {
-        private static string? _tempKeysPath;
+        private static readonly ConcurrentBag<string> _tempKeysPaths = new();
 
         private static DepotSlotState[] _slots = Array.Empty<DepotSlotState>();
         private static readonly ConcurrentDictionary<string, bool> _depotResultLog = new();
@@ -27,6 +28,9 @@ namespace DepotDL.CLI
         private static int[] _lastSlotLengths = Array.Empty<int>();
         private const int WatchdogTimeoutSeconds = 120;
         private static readonly Regex DepotDownloadedRx = new(@"^Depot \d+ - Downloaded.*\((\d+) bytes uncompressed\)", RegexOptions.Compiled);
+        private static readonly Regex ProgressPctRx = new(@"(\d+(?:[.,]\d+)?)%", RegexOptions.Compiled);
+        private static readonly Regex ProgressSpeedRx = new(@"\(([^)]+)\)\s*$", RegexOptions.Compiled);
+        private static int _cleanupHandlersRegistered;
 
         static async Task<int> Main(string[] args)
         {
@@ -40,8 +44,9 @@ namespace DepotDL.CLI
                 var tempSession = new TuiSession();
                 IniSettings.LoadInto(tempSession);
                 var updateChannel = tempSession.UpdateChannel;
-                Task<AppUpdateInfo?>? updateTask = UpdateChecker.ShouldCheck(tempSession)
-                    ? UpdateChecker.CheckAsync(UpdateChecker.GetCurrentSha(), updateChannel)
+                using var updateCts = new CancellationTokenSource(TimeSpan.FromSeconds(3));
+                var updateTask = UpdateChecker.ShouldCheck(tempSession)
+                    ? UpdateChecker.CheckAsync(UpdateChecker.GetCurrentSha(), updateChannel, updateCts.Token)
                     : null;
 
                 // Resolve runtimes
@@ -68,17 +73,16 @@ namespace DepotDL.CLI
                     return 1;
                 }
 
-                // Collect update result (cap at 3s in case network is slow)
                 AppUpdateInfo? updateInfo = null;
                 if (updateTask != null)
                 {
                     try
                     {
-                        updateInfo = await updateTask.WaitAsync(TimeSpan.FromSeconds(3));
+                        updateInfo = await updateTask;
                         UpdateChecker.RecordCheck(tempSession, updateInfo);
                         IniSettings.Save(tempSession);
                     }
-                    catch (TimeoutException) { }
+                    catch (OperationCanceledException) { }
                 }
                 else if (!string.IsNullOrEmpty(tempSession.LastKnownReleaseTag) &&
                          UpdateChecker.IsUpdateAvailableFromCache(tempSession))
@@ -104,7 +108,7 @@ namespace DepotDL.CLI
                             Console.WriteLine("\nDownloading update...");
                             try
                             {
-                                UpdateChecker.InstallUpdate(updateChannel);
+                                await UpdateChecker.InstallUpdateAsync(updateChannel);
                                 return 0;
                             }
                             catch
@@ -233,9 +237,11 @@ namespace DepotDL.CLI
             var initialCursorVisible = true;
             try { if (OperatingSystem.IsWindows()) { initialCursorVisible = Console.CursorVisible; Console.CursorVisible = false; } } catch { }
 
-            // Register console cancel handlers for safe VDF cleanup
-            AppDomain.CurrentDomain.ProcessExit += (s, e) => SafeCleanupKeys();
-            Console.CancelKeyPress += (s, e) => SafeCleanupKeys();
+            if (Interlocked.CompareExchange(ref _cleanupHandlersRegistered, 1, 0) == 0)
+            {
+                AppDomain.CurrentDomain.ProcessExit += (s, e) => SafeCleanupKeys();
+                Console.CancelKeyPress += (s, e) => SafeCleanupKeys();
+            }
 
             try
             {
@@ -353,8 +359,9 @@ namespace DepotDL.CLI
                     }
                 }
 
-                _tempKeysPath = Path.Combine(Path.GetTempPath(), $"depotdl_keys_{Guid.NewGuid():N}.vdf");
-                File.WriteAllLines(_tempKeysPath, tempKeysContent);
+                var tempKeysPath = Path.Combine(Path.GetTempPath(), $"depotdl_keys_{Guid.NewGuid():N}.vdf");
+                File.WriteAllLines(tempKeysPath, tempKeysContent);
+                _tempKeysPaths.Add(tempKeysPath);
 
                 Directory.CreateDirectory(outputPath);
                 DownloadTui.LeftPad = TuiDashboard.GetCenterLeftPad(80);
@@ -367,7 +374,7 @@ namespace DepotDL.CLI
                 {
                     DownloadTui.WriteSetup("Manifest Cache", manifestScanStatus, ConsoleColor.Gray);
                 }
-                DownloadTui.WriteSetup("Keys File", Path.GetFileName(_tempKeysPath), ConsoleColor.DarkGray);
+                DownloadTui.WriteSetup("Keys File", Path.GetFileName(tempKeysPath), ConsoleColor.DarkGray);
 
                 _isTty = !Console.IsOutputRedirected;
                 _depotResultLog.Clear();
@@ -379,6 +386,9 @@ namespace DepotDL.CLI
                 var allOkLock = new object();
 
                 var numWorkers = Math.Clamp(maxParallelDepots, 1, Math.Min(8, totalDepots));
+                var groupLocks = ConflictGroupBuilder.Build(
+                    depots.Values.Select(d => (d.DepotId, (string?)d.ManifestId)).ToArray(),
+                    manifestFiles);
 
                 lock (_drawLock)
                 {
@@ -398,44 +408,36 @@ namespace DepotDL.CLI
                     }
                 }
 
-                var providerCacheLock = new object();
-                var providerManifestCache = new Dictionary<string, Dictionary<string, string>?>(StringComparer.OrdinalIgnoreCase);
-                var providerExtractDirs = new List<string>();
+                var providerExtractDirs = new ConcurrentBag<string>();
+                var providerLazies = new ConcurrentDictionary<string, Lazy<Dictionary<string, string>?>>(StringComparer.OrdinalIgnoreCase);
 
                 Dictionary<string, string>? GetProviderManifests(string providerName, Func<ManifestDownloadResult> fetch)
                 {
-                    lock (providerCacheLock)
+                    return providerLazies.GetOrAdd(providerName, _ => new Lazy<Dictionary<string, string>?>(() =>
                     {
-                        if (providerManifestCache.TryGetValue(providerName, out var cached))
-                            return cached;
-                    }
-
-                    Dictionary<string, string>? map = null;
-                    var fetchResult = fetch();
-                    if (fetchResult.HasZip && !string.IsNullOrEmpty(fetchResult.ZipPath))
-                    {
-                        var imported = ZipHelper.ImportZip(fetchResult.ZipPath);
-                        try { File.Delete(fetchResult.ZipPath); } catch { }
-                        if (imported.ManifestCount > 0)
+                        Dictionary<string, string>? map = null;
+                        var fetchResult = fetch();
+                        if (fetchResult.HasZip && !string.IsNullOrEmpty(fetchResult.ZipPath))
                         {
-                            map = BuildManifestMapFromDir(imported.ManifestsDir);
-                            if (!string.IsNullOrEmpty(imported.ImportDir))
+                            var imported = ZipHelper.ImportZip(fetchResult.ZipPath);
+                            try { File.Delete(fetchResult.ZipPath); } catch { }
+                            if (imported.ManifestCount > 0)
                             {
-                                lock (providerCacheLock) { providerExtractDirs.Add(imported.ImportDir); }
+                                map = BuildManifestMapFromDir(imported.ManifestsDir);
+                                if (!string.IsNullOrEmpty(imported.ImportDir))
+                                    providerExtractDirs.Add(imported.ImportDir);
+                            }
+                            else if (!string.IsNullOrEmpty(imported.ImportDir))
+                            {
+                                try { Directory.Delete(imported.ImportDir, true); } catch { }
                             }
                         }
-                        else if (!string.IsNullOrEmpty(imported.ImportDir))
+                        else if (!string.IsNullOrEmpty(fetchResult.ZipPath))
                         {
-                            try { Directory.Delete(imported.ImportDir, true); } catch { }
+                            try { File.Delete(fetchResult.ZipPath); } catch { }
                         }
-                    }
-                    else if (!string.IsNullOrEmpty(fetchResult.ZipPath))
-                    {
-                        try { File.Delete(fetchResult.ZipPath); } catch { }
-                    }
-
-                    lock (providerCacheLock) { providerManifestCache[providerName] = map; }
-                    return map;
+                        return map;
+                    })).Value;
                 }
 
                 var workerTasks = new List<Task>();
@@ -467,14 +469,24 @@ namespace DepotDL.CLI
                             }
                             DrawSlots(force: true);
 
+                            var groupLock = groupLocks.GetValueOrDefault(depot.DepotId);
+                            if (groupLock != null)
+                            {
+                                lock (_drawLock) { _slots[slotId].Status = "Queued"; }
+                                DrawSlots();
+                                await groupLock.WaitAsync();
+                            }
+
                             var depotOk = false;
+                            try
+                            {
 
                             var argsList = new List<string>
                             {
                                 ddmodPath,
                                 "-app", appId,
                                 "-depot", depot.DepotId,
-                                "-depotkeys", _tempKeysPath,
+                                "-depotkeys", tempKeysPath,
                                 "-max-downloads", DepotDownloadDefaults.NormalizeMaxDownloads(maxDownloads).ToString(CultureInfo.InvariantCulture),
                                 "-os", "windows",
                                 "-validate",
@@ -624,7 +636,7 @@ namespace DepotDL.CLI
                                         var fallbackArgs = new List<string>
                                         {
                                             ddmodPath, "-app", appId, "-depot", depot.DepotId,
-                                            "-depotkeys", _tempKeysPath!,
+                                            "-depotkeys", tempKeysPath,
                                             "-max-downloads", DepotDownloadDefaults.NormalizeMaxDownloads(maxDownloads).ToString(CultureInfo.InvariantCulture),
                                             "-os", "windows", "-validate", "-dir", outputPath
                                         };
@@ -664,6 +676,9 @@ namespace DepotDL.CLI
                                     DrawSlots(force: true);
                                 }
                             }
+
+                            }
+                            finally { groupLock?.Release(); }
 
                             lock (allOkLock)
                             {
@@ -826,20 +841,16 @@ namespace DepotDL.CLI
             return line.Contains("AccessDenied", StringComparison.OrdinalIgnoreCase) ||
                 line.Contains("No valid depot key", StringComparison.OrdinalIgnoreCase) ||
                 line.Contains("unable to download", StringComparison.OrdinalIgnoreCase) ||
-                line.Contains("missing public subsection or manifest section", StringComparison.OrdinalIgnoreCase);
+                line.Contains("missing public subsection or manifest section", StringComparison.OrdinalIgnoreCase) ||
+                line.Contains("used by another process", StringComparison.OrdinalIgnoreCase) ||
+                line.Contains("Permanently failed", StringComparison.OrdinalIgnoreCase);
         }
 
         private static void SafeCleanupKeys()
         {
-            if (!string.IsNullOrEmpty(_tempKeysPath) && File.Exists(_tempKeysPath))
-            {
-                try
-                {
-                    File.Delete(_tempKeysPath);
-                    _tempKeysPath = null;
-                }
-                catch { }
-            }
+            while (_tempKeysPaths.TryTake(out var path))
+                if (!string.IsNullOrEmpty(path) && File.Exists(path))
+                    try { File.Delete(path); } catch { }
         }
 
         private static void PrintUpdateBanner(AppUpdateInfo info, string channel = "Nightly",
@@ -999,7 +1010,7 @@ namespace DepotDL.CLI
                     return;
                 }
 
-                var pctMatch = Regex.Match(line, @"(\d+(?:[.,]\d+)?)%");
+                var pctMatch = ProgressPctRx.Match(line);
                 if (pctMatch.Success)
                 {
                     var pctStr = pctMatch.Groups[1].Value.Replace(',', '.');
@@ -1013,7 +1024,7 @@ namespace DepotDL.CLI
                                 slot.Status = "Downloading";
                             slot.LastProgressTime = DateTime.UtcNow;
 
-                            var speedMatch = Regex.Match(line, @"\(([^)]+)\)\s*$");
+                            var speedMatch = ProgressSpeedRx.Match(line);
                             if (speedMatch.Success)
                             {
                                 slot.SpeedOverrideString = speedMatch.Groups[1].Value;

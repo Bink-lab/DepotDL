@@ -225,10 +225,9 @@ namespace DepotDL.CLI
             if (string.IsNullOrWhiteSpace(name)) return string.Empty;
             var invalid = Path.GetInvalidFileNameChars();
             foreach (var c in invalid)
-            {
-                name = name.Replace(c, ' ');
-            }
-            return string.Join(" ", name.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries)).Trim();
+                name = name.Replace(c, '_');
+            name = string.Join("_", name.Split('_', StringSplitOptions.RemoveEmptyEntries));
+            return name.Trim();
         }
 
         public static bool IsDownloadableDepot(DepotInfo depot, string? appId = null)

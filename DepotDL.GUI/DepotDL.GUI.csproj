@@ -44,6 +44,7 @@
   <ItemGroup>
     <Compile Include="..\DepotDL.CLI\AppLogger.cs" Link="Services\AppLogger.cs" />
     <Compile Include="..\DepotDL.CLI\GameLauncher.cs" Link="Services\GameLauncher.cs" />
+    <Compile Include="..\DepotDL.CLI\Models\DepotDownloadDefaults.cs" Link="Models\DepotDownloadDefaults.cs" />
   </ItemGroup>
 
   <ItemGroup>

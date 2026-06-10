@@ -3,7 +3,7 @@
 
 namespace DepotDL.CLI.Models
 {
-    internal static class DepotDownloadDefaults
+    public static class DepotDownloadDefaults
     {
         public const int MaxDownloads = 64;
 

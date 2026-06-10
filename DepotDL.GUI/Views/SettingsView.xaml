@@ -410,15 +410,11 @@
                     <TextBlock Text="Release Channel"
                                Style="{StaticResource TextH3}" Margin="0,0,0,4"/>
                     <TextBlock Style="{StaticResource BodyText}" Margin="0,0,0,16"
-                               Text="Nightly receives automated builds on every commit. Production receives manually-tagged stable releases."/>
+                               Text="Nightly receives automated builds on every commit."/>
 
                     <StackPanel Orientation="Horizontal">
                         <RadioButton Content="Nightly"
                                      IsChecked="{Binding UpdateChannel, Converter={StaticResource EqToBool}, ConverterParameter=Nightly}"
-                                     GroupName="UpdateChannel"
-                                     VerticalContentAlignment="Center"/>
-                        <RadioButton Content="Production" Margin="20,0,0,0"
-                                     IsChecked="{Binding UpdateChannel, Converter={StaticResource EqToBool}, ConverterParameter=Production}"
                                      GroupName="UpdateChannel"
                                      VerticalContentAlignment="Center"/>
                     </StackPanel>

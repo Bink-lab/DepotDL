@@ -38,6 +38,11 @@ namespace DepotDL.GUI.Services
             else
                 s.DownloadAchievementIcons = true;
 
+            if (bool.TryParse(Get(values, "settings.auto_select_os_by_os"), out var aso))
+                s.AutoSelectOsByOs = aso;
+            else
+                s.AutoSelectOsByOs = true;
+
             if (int.TryParse(Get(values, "settings.store_cache_hours"), out var sch))
                 s.StoreCacheHours = Math.Clamp(sch, 1, 168);
             else s.StoreCacheHours = 24;
@@ -68,7 +73,7 @@ namespace DepotDL.GUI.Services
 
             s.LastKnownReleaseTag = Get(values, "settings.last_known_release_tag");
             if (Enum.TryParse<UpdateChannel>(Get(values, "settings.update_channel"), true, out var uc))
-                s.UpdateChannel = uc;
+                s.UpdateChannel = uc == UpdateChannel.Production ? UpdateChannel.Nightly : uc;
 
             s.OnlineFixUser = Get(values, "onlinefix.user");
             s.OnlineFixPass = UnprotectString(Get(values, "onlinefix.pass"));
@@ -96,6 +101,7 @@ namespace DepotDL.GUI.Services
             w.WriteLine("[settings]");
             w.WriteLine($"max_parallel_depots={s.MaxParallelDepots}");
             w.WriteLine($"download_achievement_icons={s.DownloadAchievementIcons.ToString().ToLowerInvariant()}");
+            w.WriteLine($"auto_select_os_by_os={s.AutoSelectOsByOs.ToString().ToLowerInvariant()}");
             w.WriteLine($"store_cache_hours={s.StoreCacheHours}");
             w.WriteLine($"gpu_cache_days={s.GpuCacheDays}");
             w.WriteLine($"store_page_size={s.StorePageSize}");

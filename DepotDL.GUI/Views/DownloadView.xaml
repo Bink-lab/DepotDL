@@ -806,11 +806,18 @@
                                             <ColumnDefinition Width="Auto"/>
                                         </Grid.ColumnDefinitions>
 
-                                        <TextBlock Grid.Column="0"
-                                                   FontSize="10.5"
-                                                   Foreground="{StaticResource TextMuted}"
-                                                   TextWrapping="Wrap"
-                                                   Text="{Binding ActiveFile}"/>
+                                        <StackPanel Grid.Column="0">
+                                            <TextBlock FontSize="10.5"
+                                                       Foreground="{StaticResource TextMuted}"
+                                                       TextWrapping="Wrap"
+                                                       Text="{Binding ActiveFile}"
+                                                       Visibility="{Binding ErrorMessage, Converter={StaticResource EmptyToVis}}"/>
+                                            <TextBlock FontSize="10.5"
+                                                       Foreground="#E05555"
+                                                       TextWrapping="Wrap"
+                                                       Text="{Binding ErrorMessage}"
+                                                       Visibility="{Binding ErrorMessage, Converter={StaticResource NotEmptyToVis}}"/>
+                                        </StackPanel>
 
                                         <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
                                             <TextBlock Text="{Binding SpeedText}"

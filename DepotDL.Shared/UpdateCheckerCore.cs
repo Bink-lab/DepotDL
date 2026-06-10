@@ -149,7 +149,7 @@ namespace DepotDL.Shared
         public static async Task InstallUpdateAsync(bool isNightly = true, Action<int>? onProgress = null, CancellationToken ct = default)
         {
             var mgr = MakeManager(isNightly);
-            var info = await mgr.CheckForUpdatesAsync().ConfigureAwait(false);
+            var info = await mgr.CheckForUpdatesAsync().WaitAsync(ct).ConfigureAwait(false);
             if (info == null) return;
             await mgr.DownloadUpdatesAsync(info, onProgress, ct).ConfigureAwait(false);
             mgr.ApplyUpdatesAndRestart(info);
