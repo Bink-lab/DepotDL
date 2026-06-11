@@ -53,13 +53,13 @@ namespace DepotDL.GUI.Services
                             await w.WriteLineAsync($"{d.DepotId};{d.DecryptionKey}");
 
                 var manifestMap = BuildManifestMap(manifestsDir);
-                var checkpointDir = Path.Combine(outputDir, ".depotdl_progress");
+                var checkpointDir = DepotCheckpoint.GetCheckpointDir(outputDir);
                 Directory.CreateDirectory(checkpointDir);
 
+                var completedDepots = DepotCheckpoint.LoadCompletedDepots(outputDir);
                 for (var i = 0; i < depots.Count; i++)
                 {
-                    var doneFile = Path.Combine(checkpointDir, $"{depots[i].DepotId}.done");
-                    if (File.Exists(doneFile) && states[i].Status != DepotStatus.Done)
+                    if (completedDepots.Contains(depots[i].DepotId) && states[i].Status != DepotStatus.Done)
                     {
                         states[i].Status = DepotStatus.Skipped;
                         states[i].StatusText = "Already done";
@@ -129,8 +129,7 @@ namespace DepotDL.GUI.Services
                                 GetProviderManifestsAsync, ryuuApiKey, hubcapApiKey);
 
                             if (state.Status == DepotStatus.Done)
-                                await File.WriteAllTextAsync(
-                                    Path.Combine(checkpointDir, $"{depot.DepotId}.done"), "");
+                                DepotCheckpoint.MarkDepotComplete(outputDir, depot.DepotId);
                         }
                         finally
                         {
@@ -147,7 +146,7 @@ namespace DepotDL.GUI.Services
                     if (s.Status != DepotStatus.Done && s.Status != DepotStatus.Skipped)
                     { allDone = false; break; }
                 if (allDone)
-                    try { Directory.Delete(checkpointDir, true); } catch { }
+                    DepotCheckpoint.ClearCheckpoints(outputDir);
             }
             finally
             {
@@ -481,55 +480,11 @@ namespace DepotDL.GUI.Services
             }
         }
 
-        private static Dictionary<string, string> BuildManifestMap(string? dir)
-        {
-            var map = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-            if (string.IsNullOrEmpty(dir) || !Directory.Exists(dir)) return map;
-            foreach (var f in Directory.GetFiles(dir, "*.manifest"))
-            {
-                var n = Path.GetFileNameWithoutExtension(f);
-                var parts = n.Split('_');
-                if (parts.Length >= 2) { map[$"{parts[0]}_{parts[1]}"] = f; map[parts[0]] = f; }
-                else map[n] = f;
-            }
-            return map;
-        }
+        private static Dictionary<string, string> BuildManifestMap(string? dir) =>
+            ManifestHelper.BuildManifestMap(dir);
 
-        private static string? ResolveDotnet()
-        {
-            try
-            {
-                var p = new Process
-                {
-                    StartInfo = new ProcessStartInfo
-                    {
-                        FileName = "dotnet",
-                        Arguments = "--list-runtimes",
-                        UseShellExecute = false,
-                        RedirectStandardOutput = true,
-                        CreateNoWindow = true
-                    }
-                };
-                p.Start();
-                var o = p.StandardOutput.ReadToEnd(); p.WaitForExit();
-                if (o.Contains("Microsoft.NETCore.App 9.")) return "dotnet";
-            }
-            catch { }
-            var local = Path.Combine(
-                Environment.GetEnvironmentVariable("LOCALAPPDATA") ??
-                Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "AppData", "Local"),
-                "Microsoft", "dotnet", "dotnet.exe");
-            return File.Exists(local) ? local : null;
-        }
+        private static string? ResolveDotnet() => RuntimeResolver.ResolveDotnetPath();
 
-        private static string? ResolveDDMod()
-        {
-            var b = AppDomain.CurrentDomain.BaseDirectory;
-            string[] c = {
-                Path.Combine(b, "DepotDownloaderMod.dll"),
-            };
-            foreach (var p in c) if (File.Exists(p)) return Path.GetFullPath(p);
-            return null;
-        }
+        private static string? ResolveDDMod() => RuntimeResolver.ResolveDDModPath();
     }
 }

@@ -3,7 +3,7 @@
 
 using System.Text;
 using System.Text.Json;
-using DepotDL.CLI.Models;
+using DepotDL.Shared;
 
 namespace DepotDL.CLI.Services
 {

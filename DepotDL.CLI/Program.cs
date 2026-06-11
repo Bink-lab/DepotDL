@@ -308,7 +308,7 @@ namespace DepotDL.CLI
                 }
                 outputPath = Path.GetFullPath(outputPath);
 
-                var completedDepots = LoadCompletedDepots(outputPath);
+                var completedDepots = DepotCheckpoint.LoadCompletedDepots(outputPath);
                 var skippedCount = 0;
                 if (completedDepots.Count > 0)
                 {
@@ -423,7 +423,7 @@ namespace DepotDL.CLI
                             try { File.Delete(fetchResult.ZipPath); } catch { }
                             if (imported.ManifestCount > 0)
                             {
-                                map = BuildManifestMapFromDir(imported.ManifestsDir);
+                                map = ManifestHelper.BuildManifestMap(imported.ManifestsDir);
                                 if (!string.IsNullOrEmpty(imported.ImportDir))
                                     providerExtractDirs.Add(imported.ImportDir);
                             }
@@ -589,7 +589,7 @@ namespace DepotDL.CLI
 
                                 depotOk = true;
                                 var doneDepotId = depot.DepotId;
-                                MarkDepotComplete(outputPath, doneDepotId);
+                                DepotCheckpoint.MarkDepotComplete(outputPath, doneDepotId);
                                 lock (_drawLock)
                                 {
                                     _pendingLogs.Enqueue(() => DownloadTui.WriteStatus("Complete", $"Depot {doneDepotId} downloaded successfully", ConsoleColor.Green));
@@ -663,7 +663,7 @@ namespace DepotDL.CLI
                                         if (fallbackOk)
                                         {
                                             depotOk = true;
-                                            MarkDepotComplete(outputPath, depot.DepotId);
+                                            DepotCheckpoint.MarkDepotComplete(outputPath, depot.DepotId);
                                             var sid = depot.DepotId; var pn2 = providerName;
                                             lock (_drawLock) { _pendingLogs.Enqueue(() => DownloadTui.WriteStatus("Complete", $"Depot {sid} downloaded via {pn2}", ConsoleColor.Green)); }
                                         }
@@ -774,7 +774,7 @@ namespace DepotDL.CLI
 
                 if (!hadErrors)
                 {
-                    ClearCheckpoints(outputPath);
+                    DepotCheckpoint.ClearCheckpoints(outputPath);
                 }
 
                 if (hadErrors)
@@ -1382,43 +1382,6 @@ namespace DepotDL.CLI
             }
         }
 
-        private static string GetCheckpointDir(string outputPath) =>
-            Path.Combine(outputPath, ".depotdl_progress");
-
-        private static HashSet<string> LoadCompletedDepots(string outputPath)
-        {
-            try
-            {
-                var dir = GetCheckpointDir(outputPath);
-                if (!Directory.Exists(dir)) return new HashSet<string>();
-                return Directory.GetFiles(dir, "*.done")
-                    .Select(f => Path.GetFileNameWithoutExtension(f))
-                    .ToHashSet(StringComparer.OrdinalIgnoreCase);
-            }
-            catch { return new HashSet<string>(); }
-        }
-
-        private static void MarkDepotComplete(string outputPath, string depotId)
-        {
-            try
-            {
-                var dir = GetCheckpointDir(outputPath);
-                Directory.CreateDirectory(dir);
-                File.WriteAllText(Path.Combine(dir, $"{depotId}.done"), "");
-            }
-            catch { }
-        }
-
-        private static void ClearCheckpoints(string outputPath)
-        {
-            try
-            {
-                var dir = GetCheckpointDir(outputPath);
-                if (Directory.Exists(dir)) Directory.Delete(dir, true);
-            }
-            catch { }
-        }
-
         private static async Task<(bool success, bool watchdogKilled, string? errorReason)> RunDepotProcess(
             int slotId, string dotnetPath, List<string> argsList)
         {
@@ -1527,28 +1490,6 @@ namespace DepotDL.CLI
             }
 
             return (true, false, null);
-        }
-
-        private static Dictionary<string, string> BuildManifestMapFromDir(string dir)
-        {
-            var map = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-            if (string.IsNullOrEmpty(dir) || !Directory.Exists(dir)) return map;
-            foreach (var file in Directory.GetFiles(dir, "*.manifest"))
-            {
-                var name = Path.GetFileNameWithoutExtension(file);
-                var parts = name.Split('_');
-                if (parts.Length >= 2)
-                {
-                    map[$"{parts[0]}_{parts[1]}"] = file;
-                    map[parts[0]] = file;
-                    map[parts[1]] = file;
-                }
-                else
-                {
-                    map[name] = file;
-                }
-            }
-            return map;
         }
 
         private static string FormatEta(double seconds)

@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Text;
 using DepotDL.CLI.Services;
 using DepotDL.CLI.Utilities;
+using DepotDL.Shared;
 
 namespace DepotDL.CLI.Tui
 {
@@ -249,7 +250,7 @@ namespace DepotDL.CLI.Tui
                             if (libGame?.DepotSizes.TryGetValue(d.DepotId, out var libSz) == true && libSz > 0)
                                 d.SizeBytes = libSz;
                             else if (d.SizeBytes == 0)
-                                d.SizeBytes = Services.ManifestSizeReader.TryGetSize(session.ManifestsDir, d.DepotId, d.ManifestId);
+                                d.SizeBytes = ManifestSizeReader.TryGetSize(session.ManifestsDir, d.DepotId, d.ManifestId);
                         }
 
                         var selectedDownloadableDepots = LibraryManager.FilterDownloadableDepots(session.SelectedDepots, session.AppId);

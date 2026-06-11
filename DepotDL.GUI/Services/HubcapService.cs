@@ -6,7 +6,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
-using DepotDL.GUI.Models;
+using DepotDL.Shared;
 
 namespace DepotDL.GUI.Services
 {

@@ -2,6 +2,7 @@
 // in file 'LICENSE', which is part of this source code package.
 
 using System.Diagnostics;
+using DepotDL.Shared;
 
 namespace DepotDL.CLI.Utilities
 {
@@ -174,80 +175,10 @@ namespace DepotDL.CLI.Utilities
         private static string EscapeOsascript(string s) =>
             s.Replace("\\", "\\\\").Replace("\"", "\\\"");
 
-        public static string? ResolveDotnetPath(string? customPath)
-        {
-            if (!string.IsNullOrEmpty(customPath) && File.Exists(customPath))
-            {
-                return customPath;
-            }
+        public static string? ResolveDotnetPath(string? customPath) =>
+            RuntimeResolver.ResolveDotnetPath(customPath);
 
-            try
-            {
-                var checkProc = new Process
-                {
-                    StartInfo = new ProcessStartInfo
-                    {
-                        FileName = "dotnet",
-                        Arguments = "--list-runtimes",
-                        UseShellExecute = false,
-                        RedirectStandardOutput = true,
-                        CreateNoWindow = true
-                    }
-                };
-                checkProc.Start();
-                var output = checkProc.StandardOutput.ReadToEnd();
-                checkProc.WaitForExit();
-                if (output.Contains("Microsoft.NETCore.App 9."))
-                {
-                    return "dotnet";
-                }
-            }
-            catch { }
-
-            if (OperatingSystem.IsWindows())
-            {
-                var localAppData = Environment.GetEnvironmentVariable("LOCALAPPDATA") ??
-                                   Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "AppData", "Local");
-                var winLocalDotnet = Path.Combine(localAppData, "Microsoft", "dotnet", "dotnet.exe");
-                if (File.Exists(winLocalDotnet))
-                {
-                    return winLocalDotnet;
-                }
-            }
-            else
-            {
-                var unixLocalDotnet = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".dotnet", "dotnet");
-                if (File.Exists(unixLocalDotnet))
-                {
-                    return unixLocalDotnet;
-                }
-            }
-
-            return null;
-        }
-
-        public static string? ResolveDDModPath(string? customPath)
-        {
-            if (!string.IsNullOrEmpty(customPath))
-            {
-                return Path.GetFullPath(customPath);
-            }
-
-            var baseDir = AppDomain.CurrentDomain.BaseDirectory;
-
-            string[] candidates = {
-                Path.Combine(baseDir, "DepotDownloaderMod.dll"),
-            };
-
-            foreach (var candidate in candidates)
-            {
-                if (File.Exists(candidate))
-                {
-                    return Path.GetFullPath(candidate);
-                }
-            }
-
-            return null;
-        }
+        public static string? ResolveDDModPath(string? customPath) =>
+            RuntimeResolver.ResolveDDModPath(customPath);
     }
 }

@@ -10,6 +10,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using DepotDL.GUI.Models;
 using DepotDL.GUI.Services;
+using DepotDL.Shared;
 
 namespace DepotDL.GUI.ViewModels
 {

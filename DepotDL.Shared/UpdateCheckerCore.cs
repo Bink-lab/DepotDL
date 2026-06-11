@@ -71,9 +71,9 @@ namespace DepotDL.Shared
             var tagTime = ParseTagTime(tag);
             if (buildTime != null && tagTime != null)
                 return tagTime > buildTime;
-            var currentSha = GetCurrentSha();
             var parts = tag.Split('-');
             var tagSha = parts.Length >= 4 ? parts[^1] : null;
+            var currentSha = GetCurrentSha();
             if (!string.IsNullOrEmpty(currentSha) && !string.IsNullOrEmpty(tagSha))
                 return !string.Equals(currentSha, tagSha, StringComparison.OrdinalIgnoreCase);
             return false;
@@ -113,15 +113,12 @@ namespace DepotDL.Shared
                 var buildTime = GetBuildTime();
                 var tagTime = ParseTagTime(release.TagName);
                 bool updateAvailable;
-                if (!string.IsNullOrEmpty(currentSha) && !string.IsNullOrEmpty(latestSha) &&
-                    string.Equals(currentSha, latestSha, StringComparison.OrdinalIgnoreCase))
-                    updateAvailable = false;
+                if (!string.IsNullOrEmpty(currentSha) && !string.IsNullOrEmpty(latestSha))
+                    updateAvailable = !string.Equals(currentSha, latestSha, StringComparison.OrdinalIgnoreCase);
                 else if (buildTime != null && tagTime != null)
                     updateAvailable = tagTime > buildTime;
                 else
-                    updateAvailable = !string.IsNullOrEmpty(currentSha) &&
-                                      !string.IsNullOrEmpty(latestSha) &&
-                                      !string.Equals(currentSha, latestSha, StringComparison.OrdinalIgnoreCase);
+                    updateAvailable = false;
 
                 return new UpdateInfo
                 {

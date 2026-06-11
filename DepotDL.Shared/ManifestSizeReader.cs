@@ -4,7 +4,7 @@
 using System.IO;
 using SteamKit2;
 
-namespace DepotDL.CLI.Services
+namespace DepotDL.Shared
 {
     public static class ManifestSizeReader
     {
