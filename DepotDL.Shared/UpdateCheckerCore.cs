@@ -70,23 +70,32 @@ namespace DepotDL.Shared
 
         public static bool IsNewerThanBuild(string tag)
         {
-            var buildTime = GetBuildTime();
-            var tagTime = ParseTagTime(tag);
-            if (buildTime != null && tagTime != null)
-                return tagTime > buildTime;
             var parts = tag.Split('-');
             var tagSha = ShortSha(parts.Length >= 4 ? parts[^1] : null);
-            var currentSha = ShortSha(GetCurrentSha());
-            if (!string.IsNullOrEmpty(currentSha) && !string.IsNullOrEmpty(tagSha))
-                return !string.Equals(currentSha, tagSha, StringComparison.OrdinalIgnoreCase);
+            return IsUpdate(ShortSha(GetCurrentSha()), tagSha, GetBuildTime(), ParseTagTime(tag));
+        }
+
+        // SHA identity decides "same build" before time does, because the CI release
+        // job stamps a tag timestamp a few minutes AFTER the assembly's embedded
+        // BuildTime for the very same commit — comparing time first would nag about
+        // the build that is already installed. Time only resolves direction once the
+        // commit actually differs, so an older release never reads as an upgrade.
+        private static bool IsUpdate(string? currentSha, string? latestSha, DateTime? buildTime, DateTime? tagTime)
+        {
+            if (!string.IsNullOrEmpty(currentSha) && !string.IsNullOrEmpty(latestSha))
+            {
+                if (string.Equals(currentSha, latestSha, StringComparison.OrdinalIgnoreCase))
+                    return false;
+                if (buildTime != null && tagTime != null)
+                    return tagTime > buildTime;
+                return true;
+            }
+            if (buildTime != null && tagTime != null)
+                return tagTime > buildTime;
             return false;
         }
 
-        // Must match Velopack's GithubSource(prerelease) definition of "nightly",
-        // otherwise the checker can flag an update the installer can't deliver.
-        private static bool IsNightlyRelease(GitHubRelease r) => r.Prerelease;
-
-        public static async Task<UpdateInfo?> CheckAsync(string? currentSha, bool isNightly, CancellationToken ct = default)
+        public static async Task<UpdateInfo?> CheckAsync(string? currentSha, CancellationToken ct = default)
         {
             try
             {
@@ -95,17 +104,17 @@ namespace DepotDL.Shared
                 req.Headers.Accept.ParseAdd("application/vnd.github+json");
 
                 using var resp = await Http.SendAsync(req, ct).ConfigureAwait(false);
-                if (!resp.IsSuccessStatusCode) return null;
+                if (!resp.IsSuccessStatusCode)
+                {
+                    Log($"update check HTTP {(int)resp.StatusCode}");
+                    return null;
+                }
 
                 await using var stream = await resp.Content.ReadAsStreamAsync(ct).ConfigureAwait(false);
                 var arr = await JsonSerializer.DeserializeAsync<GitHubRelease[]>(stream, cancellationToken: ct).ConfigureAwait(false);
                 if (arr == null || arr.Length == 0) return null;
 
-                var filtered = isNightly
-                    ? arr.Where(IsNightlyRelease)
-                    : arr.Where(r => !IsNightlyRelease(r));
-
-                var release = filtered
+                var release = arr
                     .OrderByDescending(r => ParseTagTime(r.TagName ?? "") ?? DateTime.MinValue)
                     .FirstOrDefault();
 
@@ -113,17 +122,9 @@ namespace DepotDL.Shared
 
                 var parts = release.TagName.Split('-');
                 var latestSha = ShortSha(parts.Length >= 4 ? parts[^1] : null);
-                var currentShaShort = ShortSha(currentSha);
 
-                var buildTime = GetBuildTime();
-                var tagTime = ParseTagTime(release.TagName);
-                bool updateAvailable;
-                if (!string.IsNullOrEmpty(currentShaShort) && !string.IsNullOrEmpty(latestSha))
-                    updateAvailable = !string.Equals(currentShaShort, latestSha, StringComparison.OrdinalIgnoreCase);
-                else if (buildTime != null && tagTime != null)
-                    updateAvailable = tagTime > buildTime;
-                else
-                    updateAvailable = false;
+                var updateAvailable = IsUpdate(ShortSha(currentSha), latestSha,
+                    GetBuildTime(), ParseTagTime(release.TagName));
 
                 return new UpdateInfo
                 {
@@ -133,32 +134,49 @@ namespace DepotDL.Shared
                     LatestSha = latestSha
                 };
             }
-            catch
+            catch (Exception ex)
             {
+                Log($"update check failed: {ex.Message}");
                 return null;
             }
         }
 
-        private static UpdateManager MakeManager(bool isNightly)
-            => new(new GithubSource(GithubRepo, null, isNightly));
+        // The project publishes only prerelease (nightly) builds, so the Velopack
+        // feed must always be opened with prerelease support enabled.
+        private static UpdateManager MakeManager()
+            => new(new GithubSource(GithubRepo, null, prerelease: true));
 
-        public static bool IsVelopackManaged(bool isNightly = true)
+        public static bool IsVelopackManaged()
         {
-            try { return MakeManager(isNightly).IsInstalled; }
+            try { return MakeManager().IsInstalled; }
             catch { return false; }
         }
 
-        // Returns false when Velopack has no applicable package for this channel
-        // (e.g. a GitHub tag exists but carries no Velopack assets), so callers
-        // can fall back to a manual download instead of failing silently.
-        public static async Task<bool> InstallUpdateAsync(bool isNightly = true, Action<int>? onProgress = null, CancellationToken ct = default)
+        // Returns false when Velopack has no applicable package for this platform
+        // (e.g. a GitHub tag exists but carries no Velopack assets for this OS/arch),
+        // so callers can fall back to a manual download instead of failing silently.
+        public static async Task<bool> InstallUpdateAsync(Action<int>? onProgress = null, CancellationToken ct = default)
         {
-            var mgr = MakeManager(isNightly);
-            var info = await mgr.CheckForUpdatesAsync().WaitAsync(ct).ConfigureAwait(false);
-            if (info == null) return false;
-            await mgr.DownloadUpdatesAsync(info, onProgress, ct).ConfigureAwait(false);
-            mgr.ApplyUpdatesAndRestart(info);
-            return true;
+            try
+            {
+                var mgr = MakeManager();
+                if (!mgr.IsInstalled) return false;
+                var info = await mgr.CheckForUpdatesAsync().WaitAsync(ct).ConfigureAwait(false);
+                if (info == null) return false;
+                await mgr.DownloadUpdatesAsync(info, onProgress, ct).ConfigureAwait(false);
+                mgr.ApplyUpdatesAndRestart(info);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Log($"update install failed: {ex.Message}");
+                return false;
+            }
+        }
+
+        private static void Log(string msg)
+        {
+            try { Console.Error.WriteLine($"[DepotDL.Update] {msg}"); } catch { }
         }
 
         private sealed class GitHubRelease

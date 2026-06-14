@@ -55,12 +55,6 @@ namespace DepotDL.GUI.ViewModels
                 CurrentPage = NavPage.Download;
             };
 
-            Settings.PropertyChanged += async (_, e) =>
-            {
-                if (e.PropertyName == nameof(SettingsViewModel.SaveSuccess) && Settings.SaveSuccess
-                    && Settings.UpdateChannel != _activeChannel)
-                    await CheckForUpdateAsync();
-            };
         }
 
         public bool ShowDownloadWidget => Download.IsDownloading && !IsDownloadPage;
@@ -88,7 +82,6 @@ namespace DepotDL.GUI.ViewModels
             {
                 var s = _settingsService.Load();
                 var currentSha = UpdateCheckerService.GetCurrentSha();
-                var channel = s.UpdateChannel;
 
                 var shouldCheck = s.LastUpdateCheckUtc == null ||
                                    (DateTime.UtcNow - s.LastUpdateCheckUtc.Value).TotalHours >= 24;
@@ -97,7 +90,7 @@ namespace DepotDL.GUI.ViewModels
 
                 if (shouldCheck)
                 {
-                    result = await UpdateCheckerService.CheckAsync(currentSha, channel, ct);
+                    result = await UpdateCheckerService.CheckAsync(currentSha, ct);
                     if (result != null)
                     {
                         s.LastUpdateCheckUtc = DateTime.UtcNow;
@@ -114,29 +107,24 @@ namespace DepotDL.GUI.ViewModels
                         LatestTag = s.LastKnownReleaseTag,
                         HtmlUrl = s.LastKnownReleaseTag != null
                             ? UpdateCheckerService.BuildReleaseUrl(s.LastKnownReleaseTag)
-                            : null,
-                        Channel = channel
+                            : null
                     };
                 }
 
                 if (result?.UpdateAvailable == true)
                 {
-                    UpdateBannerText = FormatUpdateBannerText(result.LatestTag, result.LatestSha, channel);
+                    UpdateBannerText = FormatUpdateBannerText(result.LatestTag, result.LatestSha);
                     UpdateHtmlUrl = result.HtmlUrl;
-                    CanInstallUpdate = UpdateCheckerService.IsVelopackManaged(channel);
-                    _activeChannel = channel;
+                    CanInstallUpdate = UpdateCheckerService.IsVelopackManaged();
                     UpdateAvailable = true;
                 }
             }
             catch { }
         }
 
-        private UpdateChannel _activeChannel = UpdateChannel.Nightly;
-
-        private static string FormatUpdateBannerText(string? tag, string? sha,
-            UpdateChannel channel = UpdateChannel.Nightly)
+        private static string FormatUpdateBannerText(string? tag, string? sha)
         {
-            var label = channel == UpdateChannel.Production ? "Production update" : "Nightly update";
+            const string label = "Nightly update";
             if (tag != null)
             {
                 var p = tag.Split('-');
@@ -177,7 +165,7 @@ namespace DepotDL.GUI.ViewModels
             UpdateProgress = 0;
             try
             {
-                var installed = await UpdateCheckerService.InstallUpdateAsync(_activeChannel, pct =>
+                var installed = await UpdateCheckerService.InstallUpdateAsync(pct =>
                 {
                     UpdateProgress = pct;
                 });

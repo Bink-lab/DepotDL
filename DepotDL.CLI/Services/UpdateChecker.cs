@@ -35,10 +35,9 @@ namespace DepotDL.CLI.Services
             return UpdateCheckerCore.IsNewerThanBuild(session.LastKnownReleaseTag);
         }
 
-        public static async Task<AppUpdateInfo?> CheckAsync(string? currentSha, string channel = "Nightly", CancellationToken ct = default)
+        public static async Task<AppUpdateInfo?> CheckAsync(string? currentSha, CancellationToken ct = default)
         {
-            var isNightly = string.Equals(channel, "Nightly", StringComparison.OrdinalIgnoreCase);
-            var info = await UpdateCheckerCore.CheckAsync(currentSha, isNightly, ct).ConfigureAwait(false);
+            var info = await UpdateCheckerCore.CheckAsync(currentSha, ct).ConfigureAwait(false);
             if (info == null) return null;
             return new AppUpdateInfo
             {
@@ -49,10 +48,10 @@ namespace DepotDL.CLI.Services
             };
         }
 
-        public static bool IsVelopackManaged(string channel = "Nightly")
-            => UpdateCheckerCore.IsVelopackManaged(string.Equals(channel, "Nightly", StringComparison.OrdinalIgnoreCase));
+        public static bool IsVelopackManaged()
+            => UpdateCheckerCore.IsVelopackManaged();
 
-        public static Task<bool> InstallUpdateAsync(string channel = "Nightly")
-            => UpdateCheckerCore.InstallUpdateAsync(string.Equals(channel, "Nightly", StringComparison.OrdinalIgnoreCase));
+        public static Task<bool> InstallUpdateAsync()
+            => UpdateCheckerCore.InstallUpdateAsync();
     }
 }

@@ -72,8 +72,6 @@ namespace DepotDL.GUI.Services
                 s.LastUpdateCheckUtc = luc;
 
             s.LastKnownReleaseTag = Get(values, "settings.last_known_release_tag");
-            if (Enum.TryParse<UpdateChannel>(Get(values, "settings.update_channel"), true, out var uc))
-                s.UpdateChannel = uc == UpdateChannel.Production ? UpdateChannel.Nightly : uc;
 
             s.OnlineFixUser = Get(values, "onlinefix.user");
             s.OnlineFixPass = UnprotectString(Get(values, "onlinefix.pass"));
@@ -110,7 +108,6 @@ namespace DepotDL.GUI.Services
             w.WriteLine($"scroll_duration_ms={s.ScrollDurationMs}");
             w.WriteLine($"last_update_check={Escape(s.LastUpdateCheckUtc?.ToString("O") ?? "")}");
             w.WriteLine($"last_known_release_tag={Escape(s.LastKnownReleaseTag ?? "")}");
-            w.WriteLine($"update_channel={s.UpdateChannel}");
             w.WriteLine();
             w.WriteLine("[onlinefix]");
             w.WriteLine($"user={Escape(s.OnlineFixUser ?? "")}");

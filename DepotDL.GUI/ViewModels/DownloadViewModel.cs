@@ -861,9 +861,7 @@ namespace DepotDL.GUI.ViewModels
         {
             get
             {
-                if (string.IsNullOrWhiteSpace(OsList) && string.IsNullOrWhiteSpace(OsArch))
-                    return string.Empty;
-                var os = string.IsNullOrWhiteSpace(OsList) ? "any" : OsList.Replace(",", "/");
+                var os = string.IsNullOrWhiteSpace(OsList) ? "all" : OsList.Replace(",", "/");
                 return string.IsNullOrWhiteSpace(OsArch) ? os : $"{os} {OsArch}";
             }
         }

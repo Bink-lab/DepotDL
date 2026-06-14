@@ -24,8 +24,10 @@ function Ok([string]$msg) {
 
 $sha = git rev-parse HEAD 2>$null
 if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace($sha)) { Die "Not in a git repo or git not found." }
-$shaShort = $sha.Substring(0, 7)
-$tag      = "$Version-$shaShort"
+$shaShort  = $sha.Substring(0, 7)
+# Tag must match UpdateCheckerCore.ParseTagTime: <prefix>-<yyyyMMdd>-<HHmmss>-<sha>.
+$buildTime = [DateTime]::UtcNow.ToString("yyyyMMdd-HHmmss")
+$tag       = "nightly-$buildTime-$shaShort"
 
 Step "Production build  v$Version  ($shaShort)"
 Write-Host "  InformationalVersion: $Version+$sha" -ForegroundColor DarkGray

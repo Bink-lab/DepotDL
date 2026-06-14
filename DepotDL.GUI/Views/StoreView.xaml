@@ -151,6 +151,9 @@
         <Style Selector="ScrollViewer.transitioning">
             <Setter Property="Opacity" Value="0"/>
         </Style>
+        <Style Selector="Grid.overlayGrid">
+            <Setter Property="Opacity" Value="0"/>
+        </Style>
         <Style Selector="Grid.overlayGrid.overlayVisible">
             <Setter Property="Opacity" Value="1"/>
         </Style>
@@ -362,7 +365,7 @@
         </Grid>
 
         <!-- ══ Game detail overlay ══════════════════════════════════════════ -->
-        <Grid Classes="overlayGrid" ZIndex="50" Opacity="0"
+        <Grid Classes="overlayGrid" ZIndex="50"
               IsHitTestVisible="{Binding OverlayVisible}"
               Classes.overlayVisible="{Binding OverlayVisible}">
             <Grid.Transitions>

@@ -338,14 +338,8 @@
                 <StackPanel>
                     <TextBlock Text="UPDATES" Classes="Label" Margin="0,0,0,16"/>
                     <TextBlock Text="Release Channel" Classes="H3" Margin="0,0,0,4"/>
-                    <TextBlock Classes="BodyText" Margin="0,0,0,16"
-                               Text="Nightly receives automated builds on every commit."/>
-                    <StackPanel Orientation="Horizontal">
-                        <RadioButton Content="Nightly"
-                                     IsChecked="{Binding UpdateChannel, Converter={StaticResource EqToBool}, ConverterParameter=Nightly}"
-                                     GroupName="UpdateChannel"
-                                     VerticalContentAlignment="Center"/>
-                    </StackPanel>
+                    <TextBlock Classes="BodyText"
+                               Text="DepotDL ships nightly builds, produced automatically on every commit to main."/>
                 </StackPanel>
             </Border>
 

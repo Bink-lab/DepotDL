@@ -18,27 +18,24 @@ namespace DepotDL.GUI.Services
         }
 
         public static async Task<UpdateCheckResult?> CheckAsync(string? currentSha,
-            UpdateChannel channel = UpdateChannel.Nightly,
             CancellationToken ct = default)
         {
-            var info = await UpdateCheckerCore.CheckAsync(currentSha, channel == UpdateChannel.Nightly, ct).ConfigureAwait(false);
+            var info = await UpdateCheckerCore.CheckAsync(currentSha, ct).ConfigureAwait(false);
             if (info == null) return null;
             return new UpdateCheckResult
             {
                 UpdateAvailable = info.UpdateAvailable,
                 LatestTag = info.LatestTag,
                 HtmlUrl = info.HtmlUrl,
-                LatestSha = info.LatestSha,
-                Channel = channel
+                LatestSha = info.LatestSha
             };
         }
 
-        public static bool IsVelopackManaged(UpdateChannel channel = UpdateChannel.Nightly)
-            => UpdateCheckerCore.IsVelopackManaged(channel == UpdateChannel.Nightly);
+        public static bool IsVelopackManaged()
+            => UpdateCheckerCore.IsVelopackManaged();
 
-        public static async Task<bool> InstallUpdateAsync(UpdateChannel channel = UpdateChannel.Nightly,
-            Action<int>? onProgress = null, CancellationToken ct = default)
-            => await UpdateCheckerCore.InstallUpdateAsync(channel == UpdateChannel.Nightly, onProgress, ct).ConfigureAwait(false);
+        public static async Task<bool> InstallUpdateAsync(Action<int>? onProgress = null, CancellationToken ct = default)
+            => await UpdateCheckerCore.InstallUpdateAsync(onProgress, ct).ConfigureAwait(false);
     }
 
     public sealed class UpdateCheckResult
@@ -47,6 +44,5 @@ namespace DepotDL.GUI.Services
         public string? LatestTag { get; init; }
         public string? HtmlUrl { get; init; }
         public string? LatestSha { get; init; }
-        public UpdateChannel Channel { get; init; }
     }
 }

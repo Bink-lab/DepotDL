@@ -141,6 +141,8 @@
                                 </Path>
                             </Grid>
                             <ContentPresenter Name="PART_ContentPresenter" Margin="8,0,0,0" VerticalAlignment="Center"
+                                              Content="{TemplateBinding Content}"
+                                              ContentTemplate="{TemplateBinding ContentTemplate}"
                                               RecognizesAccessKey="True"/>
                         </StackPanel>
                     </ControlTemplate>

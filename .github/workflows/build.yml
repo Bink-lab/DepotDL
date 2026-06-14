@@ -118,6 +118,30 @@ jobs:
           name: gui-linux
           path: gui-linux.zip
 
+      - name: Install vpk tool
+        continue-on-error: true
+        run: dotnet tool install -g vpk --version 1.2.0
+
+      - name: Pack GUI with Velopack (Linux)
+        continue-on-error: true
+        run: |
+          export PATH="$PATH:$HOME/.dotnet/tools"
+          version="1.0.${{ github.run_number }}"
+          vpk pack \
+            --packId DepotDL \
+            --packVersion "$version" \
+            --packDir DepotDL.GUI/bin/Release/net9.0/linux-x64/publish \
+            --mainExe DepotDL.GUI \
+            --packTitle "DepotDL" \
+            --outputDir velopack_releases
+
+      - name: Upload Velopack Installer (Linux)
+        continue-on-error: true
+        uses: actions/upload-artifact@6f51ac03b9356f520e9adb1b1b7802705f340c2b # v4.6.0
+        with:
+          name: velopack-linux
+          path: velopack_releases/
+
   build-macos:
     name: Build macOS
     runs-on: macos-latest
@@ -162,6 +186,30 @@ jobs:
         with:
           name: gui-macos
           path: gui-macos.zip
+
+      - name: Install vpk tool
+        continue-on-error: true
+        run: dotnet tool install -g vpk --version 1.2.0
+
+      - name: Pack GUI with Velopack (macOS)
+        continue-on-error: true
+        run: |
+          export PATH="$PATH:$HOME/.dotnet/tools"
+          version="1.0.${{ github.run_number }}"
+          vpk pack \
+            --packId DepotDL \
+            --packVersion "$version" \
+            --packDir DepotDL.GUI/bin/Release/net9.0/osx-arm64/publish \
+            --mainExe DepotDL.GUI \
+            --packTitle "DepotDL" \
+            --outputDir velopack_releases
+
+      - name: Upload Velopack Installer (macOS)
+        continue-on-error: true
+        uses: actions/upload-artifact@6f51ac03b9356f520e9adb1b1b7802705f340c2b # v4.6.0
+        with:
+          name: velopack-macos
+          path: velopack_releases/
 
   create-nightly:
     name: Create Nightly Release
@@ -219,7 +267,10 @@ jobs:
           cp artifacts/gui-linux/gui-linux.zip     release_assets/DepotDL.GUI-Linux-x64-$SHA.zip
           cp artifacts/cli-macos/cli-macos.zip     release_assets/DepotDL.CLI-macOS-arm64-$SHA.zip
           cp artifacts/gui-macos/gui-macos.zip     release_assets/DepotDL.GUI-macOS-arm64-$SHA.zip
-          cp -r artifacts/velopack/.                release_assets/
+          cp -r artifacts/velopack/.               release_assets/
+          # Per-OS Velopack feeds are best-effort (continue-on-error in build jobs).
+          [ -d artifacts/velopack-linux ] && cp -r artifacts/velopack-linux/. release_assets/ || true
+          [ -d artifacts/velopack-macos ] && cp -r artifacts/velopack-macos/. release_assets/ || true
 
       - name: Create Annotated Tag
         run: |
@@ -243,3 +294,20 @@ jobs:
           make_latest: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Prune old nightly releases
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          KEEP: 10
+        run: |
+          # Delete all but the newest $KEEP nightly prereleases (and their tags)
+          # so nightlies don't accumulate forever.
+          mapfile -t OLD < <(gh release list --limit 200 \
+            --json tagName,isPrerelease,createdAt \
+            --jq 'map(select(.isPrerelease and (.tagName | startswith("nightly-"))))
+                  | sort_by(.createdAt) | reverse | .['"$KEEP"':] | .[].tagName')
+          for tag in "${OLD[@]}"; do
+            [ -z "$tag" ] && continue
+            echo "Deleting old nightly: $tag"
+            gh release delete "$tag" --cleanup-tag --yes || true
+          done

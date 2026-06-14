@@ -43,10 +43,9 @@ namespace DepotDL.CLI
                 // Start update check early so it runs concurrently with path resolution
                 var tempSession = new TuiSession();
                 IniSettings.LoadInto(tempSession);
-                var updateChannel = tempSession.UpdateChannel;
                 using var updateCts = new CancellationTokenSource(TimeSpan.FromSeconds(3));
                 var updateTask = UpdateChecker.ShouldCheck(tempSession)
-                    ? UpdateChecker.CheckAsync(UpdateChecker.GetCurrentSha(), updateChannel, updateCts.Token)
+                    ? UpdateChecker.CheckAsync(UpdateChecker.GetCurrentSha(), updateCts.Token)
                     : null;
 
                 // Resolve runtimes
@@ -100,8 +99,8 @@ namespace DepotDL.CLI
                 if (updateInfo?.UpdateAvailable == true &&
                     tempSession.LastKnownReleaseTag != tempSession.DismissedUpdateTag)
                 {
-                    var canInstall = UpdateChecker.IsVelopackManaged(updateChannel);
-                    PrintUpdateBanner(updateInfo, updateChannel, canInstall);
+                    var canInstall = UpdateChecker.IsVelopackManaged();
+                    PrintUpdateBanner(updateInfo, canInstall);
                     if (canInstall)
                     {
                         var key = Console.ReadKey(intercept: true);
@@ -111,7 +110,7 @@ namespace DepotDL.CLI
                             var installed = false;
                             try
                             {
-                                installed = await UpdateChecker.InstallUpdateAsync(updateChannel);
+                                installed = await UpdateChecker.InstallUpdateAsync();
                                 if (installed) return 0;
                             }
                             catch { }
@@ -858,15 +857,13 @@ namespace DepotDL.CLI
                     try { File.Delete(path); } catch { }
         }
 
-        private static void PrintUpdateBanner(AppUpdateInfo info, string channel = "Nightly",
-            bool canInstall = false)
+        private static void PrintUpdateBanner(AppUpdateInfo info, bool canInstall = false)
         {
             const int width = 72;
             var leftPad = TuiDashboard.GetCenterLeftPad(width);
             var pad = new string(' ', leftPad);
             var hr = new string('═', width - 2);
-            var channelLabel = string.Equals(channel, "Production", StringComparison.OrdinalIgnoreCase)
-                ? "PRODUCTION" : "NIGHTLY";
+            const string channelLabel = "NIGHTLY";
 
             Console.WriteLine();
             Console.ForegroundColor = ConsoleColor.DarkGray;
