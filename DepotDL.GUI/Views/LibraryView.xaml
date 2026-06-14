@@ -210,8 +210,7 @@
                                         Width="250">
                                     <Border Classes="Card gameCard"
                                             Padding="0"
-                                            ClipToBounds="True"
-                                            Tag="{Binding DataContext, RelativeSource={RelativeSource AncestorType=ItemsControl}}">
+                                            ClipToBounds="True">
                                         <Border.Transitions>
                                             <Transitions>
                                                 <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.15"/>
@@ -229,42 +228,42 @@
                                             <ContextMenu Theme="{StaticResource ModernContextMenu}">
                                                 <MenuItem Header="Open Download Folder"
                                                           Theme="{StaticResource ModernMenuItem}"
-                                                          Command="{Binding PlacementTarget.Tag.OpenFolderCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
-                                                          CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
+                                                          Command="{Binding LibVm.OpenFolderCommand}"
+                                                          CommandParameter="{Binding}"/>
                                                 <MenuItem Header="Rename"
                                                           Theme="{StaticResource ModernMenuItem}"
-                                                          Command="{Binding PlacementTarget.Tag.RenameGameCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
-                                                          CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
+                                                          Command="{Binding LibVm.RenameGameCommand}"
+                                                          CommandParameter="{Binding}"/>
                                                 <Separator/>
                                                 <MenuItem Header="Validate Files"
                                                           Theme="{StaticResource ModernMenuItem}"
-                                                          Command="{Binding PlacementTarget.Tag.ValidateFilesCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
-                                                          CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
+                                                          Command="{Binding LibVm.ValidateFilesCommand}"
+                                                          CommandParameter="{Binding}"/>
                                                 <MenuItem Header="Redownload"
                                                           Theme="{StaticResource ModernMenuItem}"
-                                                          Command="{Binding PlacementTarget.Tag.ConfirmRedownloadCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
-                                                          CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
+                                                          Command="{Binding LibVm.ConfirmRedownloadCommand}"
+                                                          CommandParameter="{Binding}"/>
                                                 <MenuItem Header="Pack"
                                                           Theme="{StaticResource ModernMenuItem}"
-                                                          Command="{Binding PlacementTarget.Tag.PackGameCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
-                                                          CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
+                                                          Command="{Binding LibVm.PackGameCommand}"
+                                                          CommandParameter="{Binding}"/>
                                                 <Separator/>
                                                 <MenuItem Header="Install OnlineFix"
                                                           Theme="{StaticResource ModernMenuItem}"
-                                                          Command="{Binding PlacementTarget.Tag.InstallOnlineFixCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
-                                                          CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
-                                                          IsVisible="{Binding PlacementTarget.DataContext.OnlineFixApplied, RelativeSource={RelativeSource AncestorType=ContextMenu}, Converter={StaticResource InvBoolToVis}}"/>
+                                                          Command="{Binding LibVm.InstallOnlineFixCommand}"
+                                                          CommandParameter="{Binding}"
+                                                          IsVisible="{Binding OnlineFixApplied, Converter={StaticResource InvBoolToVis}}"/>
                                                 <MenuItem Header="Remove OnlineFix"
                                                           Theme="{StaticResource ModernMenuItem}"
-                                                          Command="{Binding PlacementTarget.Tag.RemoveOnlineFixCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
-                                                          CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
-                                                          IsVisible="{Binding PlacementTarget.DataContext.OnlineFixApplied, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
+                                                          Command="{Binding LibVm.RemoveOnlineFixCommand}"
+                                                          CommandParameter="{Binding}"
+                                                          IsVisible="{Binding OnlineFixApplied}"/>
                                                 <Separator/>
                                                 <MenuItem Header="Remove from Library"
                                                           Theme="{StaticResource ModernMenuItem}"
                                                           Foreground="#B83B2A"
-                                                          Command="{Binding PlacementTarget.Tag.ConfirmRemoveCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
-                                                          CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
+                                                          Command="{Binding LibVm.ConfirmRemoveCommand}"
+                                                          CommandParameter="{Binding}"/>
                                             </ContextMenu>
                                         </Border.ContextMenu>
 

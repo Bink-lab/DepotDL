@@ -60,7 +60,7 @@ namespace DepotDL.GUI.ViewModels
             _imageCts = new CancellationTokenSource();
 
             Games = new ObservableCollection<LibraryGameViewModel>(
-                raw.Select(g => new LibraryGameViewModel(g)));
+                raw.Select(g => new LibraryGameViewModel(g, this)));
 
             FilterGames();
             _ = LoadImagesAsync(_imageCts.Token);
@@ -400,9 +400,12 @@ namespace DepotDL.GUI.ViewModels
         public bool FolderExists => Directory.Exists(Game.OutputDir);
         public bool OnlineFixApplied => Game.OnlineFixApplied;
 
-        public LibraryGameViewModel(LibraryGame game)
+        public LibraryViewModel LibVm { get; }
+
+        public LibraryGameViewModel(LibraryGame game, LibraryViewModel parent)
         {
             Game = game;
+            LibVm = parent;
             _gameName = game.GameName;
             SizeText = LibraryService.FormatSize(game.TotalSizeBytes);
         }
