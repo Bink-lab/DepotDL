@@ -36,7 +36,7 @@ namespace DepotDL.GUI.Services
         public static bool IsVelopackManaged(UpdateChannel channel = UpdateChannel.Nightly)
             => UpdateCheckerCore.IsVelopackManaged(channel == UpdateChannel.Nightly);
 
-        public static async Task InstallUpdateAsync(UpdateChannel channel = UpdateChannel.Nightly,
+        public static async Task<bool> InstallUpdateAsync(UpdateChannel channel = UpdateChannel.Nightly,
             Action<int>? onProgress = null, CancellationToken ct = default)
             => await UpdateCheckerCore.InstallUpdateAsync(channel == UpdateChannel.Nightly, onProgress, ct).ConfigureAwait(false);
     }

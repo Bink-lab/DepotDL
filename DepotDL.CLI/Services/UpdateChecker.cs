@@ -52,7 +52,7 @@ namespace DepotDL.CLI.Services
         public static bool IsVelopackManaged(string channel = "Nightly")
             => UpdateCheckerCore.IsVelopackManaged(string.Equals(channel, "Nightly", StringComparison.OrdinalIgnoreCase));
 
-        public static Task InstallUpdateAsync(string channel = "Nightly")
+        public static Task<bool> InstallUpdateAsync(string channel = "Nightly")
             => UpdateCheckerCore.InstallUpdateAsync(string.Equals(channel, "Nightly", StringComparison.OrdinalIgnoreCase));
     }
 }

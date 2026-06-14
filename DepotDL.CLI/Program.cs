@@ -84,8 +84,10 @@ namespace DepotDL.CLI
                     }
                     catch (OperationCanceledException) { }
                 }
-                else if (!string.IsNullOrEmpty(tempSession.LastKnownReleaseTag) &&
-                         UpdateChecker.IsUpdateAvailableFromCache(tempSession))
+
+                if (updateInfo == null &&
+                    !string.IsNullOrEmpty(tempSession.LastKnownReleaseTag) &&
+                    UpdateChecker.IsUpdateAvailableFromCache(tempSession))
                 {
                     updateInfo = new AppUpdateInfo
                     {
@@ -106,12 +108,15 @@ namespace DepotDL.CLI
                         if (key.Key == ConsoleKey.U)
                         {
                             Console.WriteLine("\nDownloading update...");
+                            var installed = false;
                             try
                             {
-                                await UpdateChecker.InstallUpdateAsync(updateChannel);
-                                return 0;
+                                installed = await UpdateChecker.InstallUpdateAsync(updateChannel);
+                                if (installed) return 0;
                             }
-                            catch
+                            catch { }
+
+                            if (!installed)
                             {
                                 Console.ForegroundColor = ConsoleColor.Red;
                                 Console.WriteLine($"Update failed. Download manually: {updateInfo.HtmlUrl ?? UpdateChecker.BuildReleaseUrl(tempSession.LastKnownReleaseTag ?? "")}");

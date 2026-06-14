@@ -105,7 +105,8 @@ namespace DepotDL.GUI.ViewModels
                         _settingsService.Save(s);
                     }
                 }
-                else if (UpdateCheckerService.IsUpdateAvailableFromCache(s))
+
+                if (result == null && UpdateCheckerService.IsUpdateAvailableFromCache(s))
                 {
                     result = new UpdateCheckResult
                     {
@@ -176,10 +177,11 @@ namespace DepotDL.GUI.ViewModels
             UpdateProgress = 0;
             try
             {
-                await UpdateCheckerService.InstallUpdateAsync(_activeChannel, pct =>
+                var installed = await UpdateCheckerService.InstallUpdateAsync(_activeChannel, pct =>
                 {
                     UpdateProgress = pct;
                 });
+                if (!installed) OpenUpdateUrl();
             }
             catch
             {

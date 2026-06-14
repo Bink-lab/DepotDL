@@ -65,6 +65,9 @@ namespace DepotDL.Shared
                 ? dt.ToUniversalTime() : null;
         }
 
+        private static string? ShortSha(string? sha)
+            => string.IsNullOrEmpty(sha) ? sha : (sha.Length > 7 ? sha[..7] : sha);
+
         public static bool IsNewerThanBuild(string tag)
         {
             var buildTime = GetBuildTime();
@@ -72,15 +75,16 @@ namespace DepotDL.Shared
             if (buildTime != null && tagTime != null)
                 return tagTime > buildTime;
             var parts = tag.Split('-');
-            var tagSha = parts.Length >= 4 ? parts[^1] : null;
-            var currentSha = GetCurrentSha();
+            var tagSha = ShortSha(parts.Length >= 4 ? parts[^1] : null);
+            var currentSha = ShortSha(GetCurrentSha());
             if (!string.IsNullOrEmpty(currentSha) && !string.IsNullOrEmpty(tagSha))
                 return !string.Equals(currentSha, tagSha, StringComparison.OrdinalIgnoreCase);
             return false;
         }
 
-        private static bool IsNightlyRelease(GitHubRelease r)
-            => r.Prerelease || (r.Name?.Contains("Nightly", StringComparison.OrdinalIgnoreCase) ?? false);
+        // Must match Velopack's GithubSource(prerelease) definition of "nightly",
+        // otherwise the checker can flag an update the installer can't deliver.
+        private static bool IsNightlyRelease(GitHubRelease r) => r.Prerelease;
 
         public static async Task<UpdateInfo?> CheckAsync(string? currentSha, bool isNightly, CancellationToken ct = default)
         {
@@ -108,13 +112,14 @@ namespace DepotDL.Shared
                 if (release?.TagName == null) return null;
 
                 var parts = release.TagName.Split('-');
-                var latestSha = parts.Length >= 4 ? parts[^1] : null;
+                var latestSha = ShortSha(parts.Length >= 4 ? parts[^1] : null);
+                var currentShaShort = ShortSha(currentSha);
 
                 var buildTime = GetBuildTime();
                 var tagTime = ParseTagTime(release.TagName);
                 bool updateAvailable;
-                if (!string.IsNullOrEmpty(currentSha) && !string.IsNullOrEmpty(latestSha))
-                    updateAvailable = !string.Equals(currentSha, latestSha, StringComparison.OrdinalIgnoreCase);
+                if (!string.IsNullOrEmpty(currentShaShort) && !string.IsNullOrEmpty(latestSha))
+                    updateAvailable = !string.Equals(currentShaShort, latestSha, StringComparison.OrdinalIgnoreCase);
                 else if (buildTime != null && tagTime != null)
                     updateAvailable = tagTime > buildTime;
                 else
@@ -143,13 +148,17 @@ namespace DepotDL.Shared
             catch { return false; }
         }
 
-        public static async Task InstallUpdateAsync(bool isNightly = true, Action<int>? onProgress = null, CancellationToken ct = default)
+        // Returns false when Velopack has no applicable package for this channel
+        // (e.g. a GitHub tag exists but carries no Velopack assets), so callers
+        // can fall back to a manual download instead of failing silently.
+        public static async Task<bool> InstallUpdateAsync(bool isNightly = true, Action<int>? onProgress = null, CancellationToken ct = default)
         {
             var mgr = MakeManager(isNightly);
             var info = await mgr.CheckForUpdatesAsync().WaitAsync(ct).ConfigureAwait(false);
-            if (info == null) return;
+            if (info == null) return false;
             await mgr.DownloadUpdatesAsync(info, onProgress, ct).ConfigureAwait(false);
             mgr.ApplyUpdatesAndRestart(info);
+            return true;
         }
 
         private sealed class GitHubRelease
