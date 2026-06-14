@@ -38,7 +38,7 @@ jobs:
 
       - name: Package GUI (Windows)
         shell: pwsh
-        run: Compress-Archive -Path DepotDL.GUI/bin/Release/net9.0-windows/win-x64/publish/* -DestinationPath gui-windows.zip -Force
+        run: Compress-Archive -Path DepotDL.GUI/bin/Release/net9.0/win-x64/publish/* -DestinationPath gui-windows.zip -Force
 
       - name: Install vpk tool
         run: dotnet tool install -g vpk --version 1.2.0
@@ -50,7 +50,7 @@ jobs:
           vpk pack `
             --packId DepotDL `
             --packVersion $version `
-            --packDir DepotDL.GUI/bin/Release/net9.0-windows/win-x64/publish `
+            --packDir DepotDL.GUI/bin/Release/net9.0/win-x64/publish `
             --mainExe DepotDL.GUI.exe `
             --packTitle "DepotDL" `
             --outputDir velopack_releases
@@ -92,14 +92,31 @@ jobs:
         env:
           CI: true
 
+      - name: Build DepotDL GUI (Linux)
+        working-directory: DepotDL.GUI
+        run: |
+          chmod +x build.sh
+          ./build.sh linux-x64
+        env:
+          CI: true
+
       - name: Package CLI (Linux)
         run: zip -j cli-linux.zip DepotDL.CLI/bin/Release/net9.0/linux-x64/publish/*
+
+      - name: Package GUI (Linux)
+        run: zip -j gui-linux.zip DepotDL.GUI/bin/Release/net9.0/linux-x64/publish/*
 
       - name: Upload CLI (Linux)
         uses: actions/upload-artifact@6f51ac03b9356f520e9adb1b1b7802705f340c2b # v4.6.0
         with:
           name: cli-linux
           path: cli-linux.zip
+
+      - name: Upload GUI (Linux)
+        uses: actions/upload-artifact@6f51ac03b9356f520e9adb1b1b7802705f340c2b # v4.6.0
+        with:
+          name: gui-linux
+          path: gui-linux.zip
 
   build-macos:
     name: Build macOS
@@ -120,14 +137,31 @@ jobs:
         env:
           CI: true
 
+      - name: Build DepotDL GUI (macOS)
+        working-directory: DepotDL.GUI
+        run: |
+          chmod +x build.sh
+          ./build.sh osx-arm64
+        env:
+          CI: true
+
       - name: Package CLI (macOS)
         run: zip -j cli-macos.zip DepotDL.CLI/bin/Release/net9.0/osx-arm64/publish/*
+
+      - name: Package GUI (macOS)
+        run: zip -j gui-macos.zip DepotDL.GUI/bin/Release/net9.0/osx-arm64/publish/*
 
       - name: Upload CLI (macOS)
         uses: actions/upload-artifact@6f51ac03b9356f520e9adb1b1b7802705f340c2b # v4.6.0
         with:
           name: cli-macos
           path: cli-macos.zip
+
+      - name: Upload GUI (macOS)
+        uses: actions/upload-artifact@6f51ac03b9356f520e9adb1b1b7802705f340c2b # v4.6.0
+        with:
+          name: gui-macos
+          path: gui-macos.zip
 
   create-nightly:
     name: Create Nightly Release
@@ -182,7 +216,9 @@ jobs:
           cp artifacts/cli-windows/cli-windows.zip release_assets/DepotDL.CLI-Windows-x64-$SHA.zip
           cp artifacts/gui-windows/gui-windows.zip release_assets/DepotDL.GUI-Windows-x64-$SHA.zip
           cp artifacts/cli-linux/cli-linux.zip     release_assets/DepotDL.CLI-Linux-x64-$SHA.zip
+          cp artifacts/gui-linux/gui-linux.zip     release_assets/DepotDL.GUI-Linux-x64-$SHA.zip
           cp artifacts/cli-macos/cli-macos.zip     release_assets/DepotDL.CLI-macOS-arm64-$SHA.zip
+          cp artifacts/gui-macos/gui-macos.zip     release_assets/DepotDL.GUI-macOS-arm64-$SHA.zip
           cp -r artifacts/velopack/.                release_assets/
 
       - name: Create Annotated Tag

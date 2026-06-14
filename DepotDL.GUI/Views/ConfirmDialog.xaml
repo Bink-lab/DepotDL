@@ -1,0 +1,49 @@
+<Window x:Class="DepotDL.GUI.Views.ConfirmDialog"
+        xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        SystemDecorations="None"
+        Background="Transparent"
+        TransparencyLevelHint="Transparent">
+
+    <Grid>
+        <!-- Backdrop -->
+        <Rectangle Fill="#1C1610" Opacity="0.6"/>
+
+        <!-- Card -->
+        <Border HorizontalAlignment="Center" VerticalAlignment="Center"
+                MinWidth="360" MaxWidth="480"
+                Background="{StaticResource BgCard}"
+                CornerRadius="14"
+                BorderBrush="{StaticResource Border}"
+                BorderThickness="1"
+                Padding="28,24"
+                BoxShadow="0 8 40 0 #33000000">
+            <StackPanel Spacing="0">
+                <!-- Title -->
+                <TextBlock Text="{Binding DialogTitle}"
+                           Classes="H2" Margin="0,0,0,10"/>
+
+                <!-- Message -->
+                <TextBlock Text="{Binding Message}"
+                           Classes="BodyText"
+                           TextWrapping="Wrap"
+                           Margin="0,0,0,24"/>
+
+                <!-- Buttons -->
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="10">
+                    <Button Theme="{StaticResource BtnSecondary}"
+                            Padding="20,9"
+                            Click="CancelButton_Click">
+                        Cancel
+                    </Button>
+                    <Button Theme="{StaticResource BtnPrimary}"
+                            Padding="20,9"
+                            Click="OkButton_Click">
+                        OK
+                    </Button>
+                </StackPanel>
+            </StackPanel>
+        </Border>
+    </Grid>
+
+</Window>

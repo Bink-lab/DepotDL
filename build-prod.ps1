@@ -66,7 +66,9 @@ $cliWin   = Invoke-Publish "DepotDL.CLI" "win-x64"  "net9.0"
 $cliLinux = Invoke-Publish "DepotDL.CLI" "linux-x64" "net9.0"
 $cliMac   = Invoke-Publish "DepotDL.CLI" "osx-arm64" "net9.0"
 
-$guiWin = Invoke-Publish "DepotDL.GUI" "win-x64" "net9.0-windows"
+$guiWin   = Invoke-Publish "DepotDL.GUI" "win-x64"   "net9.0"
+$guiLinux = Invoke-Publish "DepotDL.GUI" "linux-x64" "net9.0"
+$guiMac   = Invoke-Publish "DepotDL.GUI" "osx-arm64" "net9.0"
 
 if (-not $SkipVelopack) {
     Step "Packing GUI with Velopack  (v$Version)"
@@ -110,6 +112,8 @@ if (-not $SkipPackage) {
         @{ Src = $cliLinux; Name = "DepotDL.CLI-Linux-x64-$tag.zip"    }
         @{ Src = $cliMac;   Name = "DepotDL.CLI-macOS-arm64-$tag.zip"  }
         @{ Src = $guiWin;   Name = "DepotDL.GUI-Windows-x64-$tag.zip"  }
+        @{ Src = $guiLinux; Name = "DepotDL.GUI-Linux-x64-$tag.zip"    }
+        @{ Src = $guiMac;   Name = "DepotDL.GUI-macOS-arm64-$tag.zip"  }
     )
 
     foreach ($z in $zips) {

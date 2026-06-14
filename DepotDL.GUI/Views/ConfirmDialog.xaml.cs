@@ -6,14 +6,14 @@ using Avalonia.Interactivity;
 
 namespace DepotDL.GUI.Views
 {
-    public partial class ErrorDialog : Window
+    public partial class ConfirmDialog : Window
     {
         public string DialogTitle { get; }
         public string Message { get; }
 
-        public ErrorDialog() : this("Error", string.Empty) { }
+        public ConfirmDialog() : this("Confirm", string.Empty) { }
 
-        public ErrorDialog(string title, string message)
+        public ConfirmDialog(string title, string message)
         {
             DialogTitle = title;
             Message = message;
@@ -33,11 +33,12 @@ namespace DepotDL.GUI.Views
             else
             {
                 Width = 420;
-                Height = 300;
+                Height = 260;
                 WindowStartupLocation = WindowStartupLocation.CenterScreen;
             }
         }
 
-        private void OkButton_Click(object? sender, RoutedEventArgs e) => Close();
+        private void OkButton_Click(object? sender, RoutedEventArgs e) => Close(true);
+        private void CancelButton_Click(object? sender, RoutedEventArgs e) => Close(false);
     }
 }

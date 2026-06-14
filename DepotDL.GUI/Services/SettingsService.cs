@@ -140,9 +140,18 @@ namespace DepotDL.GUI.Services
         private static string? ProtectString(string? value)
         {
             if (string.IsNullOrEmpty(value)) return null;
-            var bytes = Encoding.UTF8.GetBytes(value);
-            var encrypted = ProtectedData.Protect(bytes, null, DataProtectionScope.CurrentUser);
-            return Convert.ToBase64String(encrypted);
+#if WINDOWS
+            if (OperatingSystem.IsWindows())
+            {
+                var bytes = Encoding.UTF8.GetBytes(value);
+                var encrypted = System.Security.Cryptography.ProtectedData.Protect(
+                    bytes, null, System.Security.Cryptography.DataProtectionScope.CurrentUser);
+                return Convert.ToBase64String(encrypted);
+            }
+            return Convert.ToBase64String(Encoding.UTF8.GetBytes(value));
+#else
+            return Convert.ToBase64String(Encoding.UTF8.GetBytes(value));
+#endif
         }
 
         private static string? UnprotectString(string? value)
@@ -150,9 +159,18 @@ namespace DepotDL.GUI.Services
             if (string.IsNullOrEmpty(value)) return null;
             try
             {
-                var encrypted = Convert.FromBase64String(value);
-                var bytes = ProtectedData.Unprotect(encrypted, null, DataProtectionScope.CurrentUser);
-                return Encoding.UTF8.GetString(bytes);
+#if WINDOWS
+                if (OperatingSystem.IsWindows())
+                {
+                    var encrypted = Convert.FromBase64String(value);
+                    var bytes = System.Security.Cryptography.ProtectedData.Unprotect(
+                        encrypted, null, System.Security.Cryptography.DataProtectionScope.CurrentUser);
+                    return Encoding.UTF8.GetString(bytes);
+                }
+                return Encoding.UTF8.GetString(Convert.FromBase64String(value));
+#else
+                return Encoding.UTF8.GetString(Convert.FromBase64String(value));
+#endif
             }
             catch { return null; }
         }

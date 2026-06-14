@@ -1,7 +1,7 @@
 // This file is subject to the terms and conditions defined
 // in file 'LICENSE', which is part of this source code package.
 
-using System.Windows.Media.Imaging;
+using Avalonia.Media.Imaging;
 using CommunityToolkit.Mvvm.ComponentModel;
 using DepotDL.GUI.Helpers;
 using DepotDL.GUI.Models;
@@ -12,7 +12,7 @@ namespace DepotDL.GUI.ViewModels
     {
         public StoreGame Game { get; }
 
-        [ObservableProperty] private BitmapImage? _headerImage;
+        [ObservableProperty] private Bitmap? _headerImage;
         [ObservableProperty] private bool _isImageLoading = true;
 
         public string OwnersShort

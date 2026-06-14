@@ -1,9 +1,9 @@
 // This file is subject to the terms and conditions defined
 // in file 'LICENSE', which is part of this source code package.
 
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Input;
+using Avalonia;
+using Avalonia.Controls;
+using Avalonia.Input;
 
 namespace DepotDL.GUI.Views
 {
@@ -12,47 +12,48 @@ namespace DepotDL.GUI.Views
         private bool _isDragging;
         private Point _dragStart;
         private double _scrollStart;
+        private IPointer? _capturedPointer;
 
         public StoreView() => InitializeComponent();
 
-        private void ScreenshotScroller_MouseDown(object sender, MouseButtonEventArgs e)
+        private void ScreenshotScroller_PointerPressed(object? sender, PointerPressedEventArgs e)
         {
+            if (!e.GetCurrentPoint(ScreenshotScroller).Properties.IsLeftButtonPressed) return;
             _isDragging = true;
             _dragStart = e.GetPosition(ScreenshotScroller);
-            _scrollStart = ScreenshotScroller.HorizontalOffset;
-            ScreenshotScroller.CaptureMouse();
-            ScreenshotScroller.Cursor = Cursors.SizeWE;
+            _scrollStart = ScreenshotScroller.Offset.X;
+            _capturedPointer = e.Pointer;
+            e.Pointer.Capture(ScreenshotScroller);
+            ScreenshotScroller.Cursor = new Cursor(StandardCursorType.SizeWestEast);
             e.Handled = true;
         }
 
-        private void ScreenshotScroller_MouseMove(object sender, MouseEventArgs e)
+        private void ScreenshotScroller_PointerMoved(object? sender, PointerEventArgs e)
         {
             if (!_isDragging) return;
             var delta = _dragStart.X - e.GetPosition(ScreenshotScroller).X;
-            ScreenshotScroller.ScrollToHorizontalOffset(_scrollStart + delta);
+            ScreenshotScroller.Offset = ScreenshotScroller.Offset.WithX(_scrollStart + delta);
         }
 
-        private void ScreenshotScroller_MouseUp(object sender, MouseButtonEventArgs e)
-        {
-            StopDrag();
-        }
+        private void ScreenshotScroller_PointerReleased(object? sender, PointerReleasedEventArgs e)
+            => StopDrag();
 
-        private void ScreenshotScroller_MouseLeave(object sender, MouseEventArgs e)
-        {
-            StopDrag();
-        }
+        private void ScreenshotScroller_PointerCaptureLost(object? sender, PointerCaptureLostEventArgs e)
+            => StopDrag();
 
         private void StopDrag()
         {
             if (!_isDragging) return;
             _isDragging = false;
-            ScreenshotScroller.ReleaseMouseCapture();
-            ScreenshotScroller.Cursor = Cursors.Hand;
+            _capturedPointer?.Capture(null);
+            _capturedPointer = null;
+            ScreenshotScroller.Cursor = new Cursor(StandardCursorType.Hand);
         }
 
-        private void ScreenshotScroller_MouseWheel(object sender, MouseWheelEventArgs e)
+        private void ScreenshotScroller_PointerWheelChanged(object? sender, PointerWheelEventArgs e)
         {
-            ScreenshotScroller.ScrollToHorizontalOffset(ScreenshotScroller.HorizontalOffset - e.Delta / 3.0);
+            ScreenshotScroller.Offset = ScreenshotScroller.Offset.WithX(
+                ScreenshotScroller.Offset.X - e.Delta.Y * 40);
             e.Handled = true;
         }
     }

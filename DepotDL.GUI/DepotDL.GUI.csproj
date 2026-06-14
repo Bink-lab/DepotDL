@@ -2,15 +2,19 @@
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net9.0-windows</TargetFramework>
+    <TargetFramework>net9.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <UseWPF>true</UseWPF>
     <AssemblyName>DepotDL.GUI</AssemblyName>
     <RootNamespace>DepotDL.GUI</RootNamespace>
-    <ApplicationManifest>app.manifest</ApplicationManifest>
     <StartupObject>DepotDL.GUI.Program</StartupObject>
     <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+    <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="$([MSBuild]::IsOSPlatform('Windows'))">
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <DefineConstants>$(DefineConstants);WINDOWS</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup>
@@ -25,13 +29,20 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Avalonia" Version="11.2.0" />
+    <PackageReference Include="Avalonia.Desktop" Version="11.2.0" />
+    <PackageReference Include="Avalonia.Themes.Simple" Version="11.2.0" />
+    <PackageReference Include="Avalonia.Fonts.Inter" Version="11.2.0" />
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.3.2" />
     <PackageReference Include="Velopack" Version="1.2.0" />
-    <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.135" />
     <PackageReference Include="PuppeteerSharp" Version="20.0.2" />
     <PackageReference Include="SharpCompress" Version="0.40.0" NoWarn="NU1902" />
     <PackageReference Include="SteamKit2" Version="3.2.0" />
+  </ItemGroup>
+
+  <ItemGroup Condition="$([MSBuild]::IsOSPlatform('Windows'))">
     <PackageReference Include="System.Management" Version="9.0.5" />
+    <PackageReference Include="System.Security.Cryptography.ProtectedData" Version="9.0.5" />
   </ItemGroup>
 
   <ItemGroup>
@@ -45,6 +56,13 @@
     <Compile Include="..\DepotDL.CLI\AppLogger.cs" Link="Services\AppLogger.cs" />
     <Compile Include="..\DepotDL.CLI\GameLauncher.cs" Link="Services\GameLauncher.cs" />
     <Compile Include="..\DepotDL.CLI\Models\DepotDownloadDefaults.cs" Link="Models\DepotDownloadDefaults.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <AvaloniaResource Include="App.xaml" />
+    <AvaloniaResource Include="Styles\**\*.xaml" />
+    <AvaloniaXaml Include="MainWindow.xaml" />
+    <AvaloniaXaml Include="Views\**\*.xaml" />
   </ItemGroup>
 
   <ItemGroup>

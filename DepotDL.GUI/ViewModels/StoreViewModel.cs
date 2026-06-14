@@ -2,7 +2,7 @@
 // in file 'LICENSE', which is part of this source code package.
 
 using System.Collections.ObjectModel;
-using System.Windows;
+using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using DepotDL.GUI.Helpers;
@@ -200,7 +200,7 @@ namespace DepotDL.GUI.ViewModels
                     .ContinueWith(_ =>
                     {
                         if (!cts.IsCancellationRequested)
-                            Application.Current.Dispatcher.Invoke(() => ApplyFilter(query));
+                            Dispatcher.UIThread.Post(() => ApplyFilter(query));
                     }, cts.Token, TaskContinuationOptions.OnlyOnRanToCompletion,
                        TaskScheduler.Default);
         }
@@ -480,7 +480,7 @@ namespace DepotDL.GUI.ViewModels
                 var minGpu = minGpuTask?.Result ?? BenchmarkScore.Unknown;
                 var recGpu = recGpuTask?.Result ?? BenchmarkScore.Unknown;
 
-                await Application.Current.Dispatcher.InvokeAsync(() =>
+                await Dispatcher.UIThread.InvokeAsync(() =>
                 {
                     if (cpuIdx >= 0 && cpuIdx < SpecRows.Count)
                     {

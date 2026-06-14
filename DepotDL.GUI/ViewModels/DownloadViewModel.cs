@@ -4,8 +4,7 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
-using System.Windows;
-using System.Windows.Data;
+using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using DepotDL.GUI.Models;
@@ -28,7 +27,7 @@ namespace DepotDL.GUI.ViewModels
         private readonly ZipImportService _zipper = new();
 
         private CancellationTokenSource? _cts;
-        private System.Windows.Threading.DispatcherTimer? _animTimer;
+        private DispatcherTimer? _animTimer;
         private List<DepotDownloadState>? _activeStates;
         private List<DepotInfo>? _lastSelectedDepots;
 
@@ -50,9 +49,9 @@ namespace DepotDL.GUI.ViewModels
         [ObservableProperty] private bool _filterCommon = true;
         [ObservableProperty] private bool _filterDlc = true;
 
-        private ICollectionView? _filteredDepots;
-        public ICollectionView? FilteredDepots => _filteredDepots;
-        public int FilteredCount => (_filteredDepots as System.Windows.Data.CollectionView)?.Count ?? 0;
+        private readonly ObservableCollection<DepotSelectionItem> _filteredDepots = new();
+        public ObservableCollection<DepotSelectionItem> FilteredDepots => _filteredDepots;
+        public int FilteredCount => _filteredDepots.Count;
 
         [ObservableProperty] private string _outputDir = string.Empty;
         [ObservableProperty] private string _manifestsDir = string.Empty;
@@ -121,10 +120,7 @@ namespace DepotDL.GUI.ViewModels
                 foreach (var item in newValue)
                     item.PropertyChanged += OnDepotItemPropertyChanged;
             }
-            _filteredDepots = CollectionViewSource.GetDefaultView(newValue);
-            _filteredDepots.Filter = DepotFilterPredicate;
-            OnPropertyChanged(nameof(FilteredDepots));
-            OnPropertyChanged(nameof(FilteredCount));
+            RebuildFilteredDepots();
             UpdateCanStart();
         }
 
@@ -154,11 +150,15 @@ namespace DepotDL.GUI.ViewModels
             return false;
         }
 
-        private void RefreshFilter()
+        private void RebuildFilteredDepots()
         {
-            _filteredDepots?.Refresh();
+            _filteredDepots.Clear();
+            foreach (var item in Depots.Where(d => DepotFilterPredicate(d)))
+                _filteredDepots.Add(item);
             OnPropertyChanged(nameof(FilteredCount));
         }
+
+        private void RefreshFilter() => RebuildFilteredDepots();
 
         partial void OnDepotSearchTextChanged(string value) => RefreshFilter();
         partial void OnFilterWindowsChanged(bool value) => RefreshFilter();
@@ -282,29 +282,19 @@ namespace DepotDL.GUI.ViewModels
         }
 
         [RelayCommand]
-        private void BrowseLuaFile()
+        private async Task BrowseLuaFile()
         {
-            var dialog = new Microsoft.Win32.OpenFileDialog
-            {
-                Title = "Select Lua Config File",
-                Filter = "Lua files (*.lua)|*.lua|All files (*.*)|*.*",
-                DefaultExt = ".lua"
-            };
-            if (dialog.ShowDialog() == true)
-                LoadLuaFile(dialog.FileName);
+            var path = await DialogService.OpenFileAsync("Select Lua Config File", "Lua files", new[] { "*.lua" });
+            if (path != null)
+                LoadLuaFile(path);
         }
 
         [RelayCommand]
-        private void BrowseZipFile()
+        private async Task BrowseZipFile()
         {
-            var dialog = new Microsoft.Win32.OpenFileDialog
-            {
-                Title = "Select ZIP Archive",
-                Filter = "ZIP archives (*.zip)|*.zip|All files (*.*)|*.*",
-                DefaultExt = ".zip"
-            };
-            if (dialog.ShowDialog() == true)
-                ImportZipFile(dialog.FileName);
+            var path = await DialogService.OpenFileAsync("Select ZIP Archive", "ZIP archives", new[] { "*.zip" });
+            if (path != null)
+                ImportZipFile(path);
         }
 
         public void ImportZipFile(string path)
@@ -393,25 +383,19 @@ namespace DepotDL.GUI.ViewModels
         }
 
         [RelayCommand]
-        private void BrowseOutputDir()
+        private async Task BrowseOutputDir()
         {
-            var dialog = new Microsoft.Win32.OpenFolderDialog
-            {
-                Title = "Select Download Output Folder"
-            };
-            if (dialog.ShowDialog() == true)
-                OutputDir = dialog.FolderName;
+            var path = await DialogService.OpenFolderAsync("Select Download Output Folder");
+            if (path != null)
+                OutputDir = path;
         }
 
         [RelayCommand]
-        private void BrowseManifestsDir()
+        private async Task BrowseManifestsDir()
         {
-            var dialog = new Microsoft.Win32.OpenFolderDialog
-            {
-                Title = "Select Manifests Cache Folder"
-            };
-            if (dialog.ShowDialog() == true)
-                ManifestsDir = dialog.FolderName;
+            var path = await DialogService.OpenFolderAsync("Select Manifests Cache Folder");
+            if (path != null)
+                ManifestsDir = path;
         }
 
         [RelayCommand]
@@ -457,7 +441,7 @@ namespace DepotDL.GUI.ViewModels
                 var meta = await SteamMetadataService.GetDepotMetaAsync(appId);
                 if (meta.Count == 0) return;
 
-                await Application.Current.Dispatcher.InvokeAsync(() =>
+                await Dispatcher.UIThread.InvokeAsync(() =>
                 {
                     if (AppId != appId) return;
                     var settings = _settings.Load();
@@ -503,7 +487,7 @@ namespace DepotDL.GUI.ViewModels
             {
                 var dlcIds = await SteamDlcService.GetDlcIdsAsync();
                 if (dlcIds.Count == 0) return;
-                await Application.Current.Dispatcher.InvokeAsync(() =>
+                await Dispatcher.UIThread.InvokeAsync(() =>
                 {
                     if (AppId != appId) return;
                     foreach (var item in items)
@@ -524,7 +508,7 @@ namespace DepotDL.GUI.ViewModels
                         : ManifestSizeReader.TryGetSize(manifestsDir, item.DepotId, item.Depot.ManifestId)))
                          .ToList());
 
-                await Application.Current.Dispatcher.InvokeAsync(() =>
+                await Dispatcher.UIThread.InvokeAsync(() =>
                 {
                     if (AppId != appId) return;
                     foreach (var (depotId, size) in sizes)
@@ -569,7 +553,7 @@ namespace DepotDL.GUI.ViewModels
 
             if (!_downloader.Initialize())
             {
-                DialogService.ShowError("Missing Dependencies",
+                await DialogService.ShowErrorAsync("Missing Dependencies",
                     "Could not find .NET 9 runtime or DepotDownloaderMod.dll.\n" +
                     "Make sure .NET 9 is installed and DepotDownloaderMod.dll is adjacent to this application.");
                 return;
@@ -641,7 +625,7 @@ namespace DepotDL.GUI.ViewModels
             _cts = new CancellationTokenSource();
             _activeStates = states;
 
-            _animTimer = new System.Windows.Threading.DispatcherTimer
+            _animTimer = new DispatcherTimer
             {
                 Interval = TimeSpan.FromMilliseconds(16)
             };
@@ -775,7 +759,7 @@ namespace DepotDL.GUI.ViewModels
 
             if (!File.Exists(game.LuaPath))
             {
-                DialogService.ShowError("Lua Not Found",
+                _ = DialogService.ShowErrorAsync("Lua Not Found",
                     $"The Lua configuration file for this game could not be found:\n{game.LuaPath}");
                 return;
             }

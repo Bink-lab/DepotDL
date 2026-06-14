@@ -1,81 +1,96 @@
-// This file is subject to the terms and conditions defined
-// in file 'LICENSE', which is part of this source code package.
-
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Input;
-using System.Windows.Media.Animation;
+using Avalonia;
+using Avalonia.Controls;
+using Avalonia.Input;
+using Avalonia.Threading;
 using DepotDL.GUI.Models;
 using DepotDL.GUI.Services;
 
 namespace DepotDL.GUI.Helpers
 {
-    public static class SmoothScroll
+    public class SmoothScroll
     {
-        private static AppSettings GetSettings()
+        private static AppSettings? _cachedSettings;
+        private static AppSettings GetSettings() =>
+            _cachedSettings ??= TryLoad();
+
+        private static AppSettings TryLoad()
         {
             try { return new SettingsService().Load(); }
             catch { return new AppSettings(); }
         }
 
-        // Animatable proxy — ScrollViewer.VerticalOffset is read-only, so we drive
-        // ScrollToVerticalOffset through this attached property instead.
-        public static readonly DependencyProperty VerticalOffsetProperty =
-            DependencyProperty.RegisterAttached(
-                "VerticalOffset", typeof(double), typeof(SmoothScroll),
-                new UIPropertyMetadata(0.0, OnVerticalOffsetChanged));
+        public static readonly AttachedProperty<bool> IsEnabledProperty =
+            AvaloniaProperty.RegisterAttached<SmoothScroll, ScrollViewer, bool>("IsEnabled");
 
-        public static double GetVerticalOffset(DependencyObject obj) =>
-            (double)obj.GetValue(VerticalOffsetProperty);
-        public static void SetVerticalOffset(DependencyObject obj, double value) =>
-            obj.SetValue(VerticalOffsetProperty, value);
+        public static bool GetIsEnabled(AvaloniaObject obj) => obj.GetValue(IsEnabledProperty);
+        public static void SetIsEnabled(AvaloniaObject obj, bool value) => obj.SetValue(IsEnabledProperty, value);
 
-        private static void OnVerticalOffsetChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        static SmoothScroll()
         {
-            if (d is ScrollViewer sv)
-                sv.ScrollToVerticalOffset((double)e.NewValue);
+            IsEnabledProperty.Changed.AddClassHandler<ScrollViewer>(OnIsEnabledChanged);
         }
 
-        // IsEnabled — attach to a ScrollViewer in XAML to opt in.
-        public static readonly DependencyProperty IsEnabledProperty =
-            DependencyProperty.RegisterAttached(
-                "IsEnabled", typeof(bool), typeof(SmoothScroll),
-                new PropertyMetadata(false, OnIsEnabledChanged));
-
-        public static bool GetIsEnabled(DependencyObject obj) => (bool)obj.GetValue(IsEnabledProperty);
-        public static void SetIsEnabled(DependencyObject obj, bool value) => obj.SetValue(IsEnabledProperty, value);
-
-        private static void OnIsEnabledChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        private static void OnIsEnabledChanged(ScrollViewer sv, AvaloniaPropertyChangedEventArgs e)
         {
-            if (d is not ScrollViewer sv) return;
-            if ((bool)e.NewValue)
-                sv.PreviewMouseWheel += OnPreviewMouseWheel;
+            if (e.NewValue is true)
+                sv.AddHandler(InputElement.PointerWheelChangedEvent, OnPointerWheelChanged,
+                    Avalonia.Interactivity.RoutingStrategies.Tunnel);
             else
             {
-                sv.PreviewMouseWheel -= OnPreviewMouseWheel;
-                sv.BeginAnimation(VerticalOffsetProperty, null);
+                sv.RemoveHandler(InputElement.PointerWheelChangedEvent, OnPointerWheelChanged);
+                if (_active.TryGetValue(sv, out var st))
+                {
+                    st.Timer.Stop();
+                    _active.Remove(sv);
+                }
             }
         }
 
-        private static void OnPreviewMouseWheel(object sender, MouseWheelEventArgs e)
+        private record AnimState(DispatcherTimer Timer, double TargetY);
+        private static readonly Dictionary<ScrollViewer, AnimState> _active = new();
+
+        private static void OnPointerWheelChanged(object? sender, PointerWheelEventArgs e)
         {
-            var sv = (ScrollViewer)sender;
+            if (sender is not ScrollViewer sv) return;
+            if (sv.ScrollBarMaximum.Y <= 0) return;
 
-            if (sv.ScrollableHeight <= 0) return;
-
-            var current = sv.VerticalOffset;
             var s = GetSettings();
-            var target = Math.Clamp(
-                current - e.Delta * s.ScrollSensitivity,
-                0, sv.ScrollableHeight);
+            var delta = e.Delta.Y * 40 * s.ScrollSensitivity;
 
-            var anim = new DoubleAnimation(current, target, TimeSpan.FromMilliseconds(s.ScrollDurationMs))
-            {
-                EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut }
-            };
+            // Chain from current target if animation in progress, otherwise from current offset
+            var baseY = _active.TryGetValue(sv, out var existing) ? existing.TargetY : sv.Offset.Y;
+            var targetY = Math.Clamp(baseY - delta, 0, sv.ScrollBarMaximum.Y);
 
-            sv.BeginAnimation(VerticalOffsetProperty, anim);
+            AnimateScrollTo(sv, targetY, TimeSpan.FromMilliseconds(s.ScrollDurationMs));
             e.Handled = true;
         }
+
+        private static void AnimateScrollTo(ScrollViewer sv, double targetY, TimeSpan duration)
+        {
+            // Cancel existing animation
+            if (_active.TryGetValue(sv, out var existing))
+                existing.Timer.Stop();
+
+            var startY = sv.Offset.Y;
+            var startTime = DateTime.UtcNow;
+
+            DispatcherTimer? timer = null;
+            timer = new DispatcherTimer(TimeSpan.FromMilliseconds(10), DispatcherPriority.Render, (_, _) =>
+            {
+                var elapsed = (DateTime.UtcNow - startTime).TotalMilliseconds;
+                var progress = Math.Min(1.0, elapsed / duration.TotalMilliseconds);
+                sv.Offset = sv.Offset.WithY(startY + (targetY - startY) * CubicEaseOut(progress));
+                if (progress >= 1.0)
+                {
+                    timer!.Stop();
+                    _active.Remove(sv);
+                }
+            });
+
+            _active[sv] = new AnimState(timer, targetY);
+            timer.Start();
+        }
+
+        private static double CubicEaseOut(double t) => 1 - Math.Pow(1 - t, 3);
     }
 }

@@ -4,7 +4,8 @@
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
-using System.Windows.Media.Imaging;
+using Avalonia.Media.Imaging;
+using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using DepotDL.CLI;
@@ -118,7 +119,7 @@ namespace DepotDL.GUI.ViewModels
             Games.Remove(vm);
             FilterGames();
             if (error != null)
-                DialogService.ShowError("Delete Failed",
+                await DialogService.ShowErrorAsync("Delete Failed",
                     $"Game removed from library, but files could not be deleted:\n{error}");
         }
 
@@ -145,7 +146,7 @@ namespace DepotDL.GUI.ViewModels
         }
 
         [RelayCommand]
-        private void DoRedownload()
+        private async Task DoRedownload()
         {
             if (GameToRedownload == null) return;
             var vm = GameToRedownload;
@@ -157,7 +158,7 @@ namespace DepotDL.GUI.ViewModels
                 try { Directory.Delete(vm.Game.OutputDir, true); }
                 catch (Exception ex)
                 {
-                    DialogService.ShowError("Delete Failed", $"Could not delete game files:\n{ex.Message}");
+                    await DialogService.ShowErrorAsync("Delete Failed", $"Could not delete game files:\n{ex.Message}");
                     return;
                 }
             }
@@ -188,7 +189,7 @@ namespace DepotDL.GUI.ViewModels
                     var errorMsg = "Failed to apply Goldberg Steam Emulator fix to the game.";
                     if (!string.IsNullOrEmpty(fixError))
                         errorMsg += "\n\nDetails:\n" + fixError;
-                    DialogService.ShowError("Fix Game Failed", errorMsg);
+                    await DialogService.ShowErrorAsync("Fix Game Failed", errorMsg);
                     return;
                 }
             }
@@ -196,27 +197,36 @@ namespace DepotDL.GUI.ViewModels
             var exePath = GameLauncher.FindLaunchTarget(vm.Game.OutputDir);
             if (string.IsNullOrEmpty(exePath))
             {
-                DialogService.ShowError("Launch Failed", "Could not find any suitable executable or launch script in the game folder.");
+                await DialogService.ShowErrorAsync("Launch Failed", "Could not find any suitable executable or launch script in the game folder.");
                 return;
             }
 
             var launchEx = GameLauncher.Launch(exePath, Path.GetDirectoryName(exePath) ?? vm.Game.OutputDir);
             if (launchEx != null)
-                DialogService.ShowError("Launch Failed", $"Could not start process:\n{launchEx.Message}");
+                await DialogService.ShowErrorAsync("Launch Failed", $"Could not start process:\n{launchEx.Message}");
         }
 
         [RelayCommand]
         private void OpenFolder(LibraryGameViewModel? vm)
         {
             if (vm == null || !Directory.Exists(vm.Game.OutputDir)) return;
-            try { Process.Start("explorer.exe", vm.Game.OutputDir); } catch { }
+            try
+            {
+                if (OperatingSystem.IsWindows())
+                    Process.Start("explorer.exe", vm.Game.OutputDir);
+                else if (OperatingSystem.IsMacOS())
+                    Process.Start("open", vm.Game.OutputDir);
+                else
+                    Process.Start("xdg-open", vm.Game.OutputDir);
+            }
+            catch { }
         }
 
         [RelayCommand]
-        private void RenameGame(LibraryGameViewModel? vm)
+        private async Task RenameGame(LibraryGameViewModel? vm)
         {
             if (vm == null) return;
-            var newName = DialogService.ShowInput("Rename Game", vm.Game.GameName);
+            var newName = await DialogService.ShowInputAsync("Rename Game", vm.Game.GameName);
             if (newName == null || newName == vm.Game.GameName) return;
             vm.ApplyRename(newName);
             _lib.AddOrUpdate(vm.Game);
@@ -278,14 +288,14 @@ namespace DepotDL.GUI.ViewModels
             var s = _settings.Load();
             if (string.IsNullOrWhiteSpace(s.OnlineFixUser) || string.IsNullOrWhiteSpace(s.OnlineFixPass))
             {
-                DialogService.ShowError("OnlineFix Credentials Missing",
+                await DialogService.ShowErrorAsync("OnlineFix Credentials Missing",
                     "Add your online-fix.me username and password in Settings before installing a fix.");
                 return;
             }
 
             if (!OnlineFixService.IsChromiumInstalled())
             {
-                var proceed = DialogService.ShowConfirm("Browser Engine Required",
+                var proceed = await DialogService.ShowConfirmAsync("Browser Engine Required",
                     "OnlineFix requires a browser engine (~170 MB) to be downloaded once.\n\nDownload it now?");
                 if (!proceed) return;
             }
@@ -311,7 +321,7 @@ namespace DepotDL.GUI.ViewModels
                 {
                     OnlineFixStatus = $"Failed: {error}";
                     await Task.Delay(3500);
-                    DialogService.ShowError("OnlineFix Failed", error ?? "Unknown error.");
+                    await DialogService.ShowErrorAsync("OnlineFix Failed", error ?? "Unknown error.");
                 }
             }
             catch (Exception ex)
@@ -338,7 +348,7 @@ namespace DepotDL.GUI.ViewModels
             }
             catch (Exception ex)
             {
-                DialogService.ShowError("Remove OnlineFix Failed", ex.Message);
+                _ = DialogService.ShowErrorAsync("Remove OnlineFix Failed", ex.Message);
             }
         }
 
@@ -364,7 +374,7 @@ namespace DepotDL.GUI.ViewModels
                     if (vm != null) g.TotalSizeBytes = vm.Game.TotalSizeBytes;
                 }
                 _lib.Save(lib.ToList());
-                System.Windows.Application.Current.Dispatcher.Invoke(FilterGames);
+                Dispatcher.UIThread.Post(FilterGames);
             });
         }
     }
@@ -375,7 +385,7 @@ namespace DepotDL.GUI.ViewModels
 
         [ObservableProperty] private bool _isVisible = true;
         [ObservableProperty] private string _sizeText = string.Empty;
-        [ObservableProperty] private BitmapImage? _headerImage;
+        [ObservableProperty] private Bitmap? _headerImage;
         [ObservableProperty] private bool _isImageLoading = true;
         [ObservableProperty] private string _gameName = string.Empty;
 

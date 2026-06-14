@@ -1,6 +1,7 @@
 // This file is subject to the terms and conditions defined
 // in file 'LICENSE', which is part of this source code package.
 
+using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using DepotDL.GUI.Models;
@@ -61,27 +62,19 @@ namespace DepotDL.GUI.ViewModels
         }
 
         [RelayCommand]
-        private void BrowseManifestsDir()
+        private async Task BrowseManifestsDir()
         {
-            var dialog = new Microsoft.Win32.OpenFolderDialog
-            {
-                Title = "Select Manifests Cache Folder",
-                InitialDirectory = ManifestsDir
-            };
-            if (dialog.ShowDialog() == true)
-                ManifestsDir = dialog.FolderName;
+            var path = await DialogService.OpenFolderAsync("Select Manifests Cache Folder");
+            if (path != null)
+                ManifestsDir = path;
         }
 
         [RelayCommand]
-        private void BrowseDownloadBaseDir()
+        private async Task BrowseDownloadBaseDir()
         {
-            var dialog = new Microsoft.Win32.OpenFolderDialog
-            {
-                Title = "Select Default Download Base Folder",
-                InitialDirectory = DownloadBaseDir
-            };
-            if (dialog.ShowDialog() == true)
-                DownloadBaseDir = dialog.FolderName;
+            var path = await DialogService.OpenFolderAsync("Select Default Download Base Folder");
+            if (path != null)
+                DownloadBaseDir = path;
         }
 
         [RelayCommand]
@@ -114,9 +107,9 @@ namespace DepotDL.GUI.ViewModels
 
             SaveSuccess = true;
 
-            System.Windows.Threading.DispatcherTimer timer = new()
+            DispatcherTimer timer = new()
             {
-                Interval = System.TimeSpan.FromSeconds(2)
+                Interval = TimeSpan.FromSeconds(2)
             };
             timer.Tick += (_, _) => { SaveSuccess = false; timer.Stop(); };
             timer.Start();

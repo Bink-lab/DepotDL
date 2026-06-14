@@ -2,42 +2,50 @@
 // in file 'LICENSE', which is part of this source code package.
 
 using System.IO;
-using System.Windows;
-using System.Windows.Controls;
+using Avalonia.Controls;
+using Avalonia.Input;
+using Avalonia.Platform.Storage;
 using DepotDL.GUI.ViewModels;
 
 namespace DepotDL.GUI.Views
 {
     public partial class DownloadView : UserControl
     {
-        public DownloadView() => InitializeComponent();
-
-        private void OnDragOver(object sender, DragEventArgs e)
+        public DownloadView()
         {
-            e.Effects = e.Data.GetDataPresent(DataFormats.FileDrop)
+            InitializeComponent();
+            AddHandler(DragDrop.DragOverEvent, OnDragOver);
+            AddHandler(DragDrop.DropEvent, OnDrop);
+        }
+
+        private void OnDragOver(object? sender, DragEventArgs e)
+        {
+            e.DragEffects = e.Data.Contains(DataFormats.Files)
                 ? DragDropEffects.Copy
                 : DragDropEffects.None;
             e.Handled = true;
         }
 
-        private void OnDrop(object sender, DragEventArgs e)
+        private void OnDrop(object? sender, DragEventArgs e)
         {
-            if (!e.Data.GetDataPresent(DataFormats.FileDrop)) return;
-            var files = (string[])e.Data.GetData(DataFormats.FileDrop);
-            if (files.Length == 0) return;
+            if (!e.Data.Contains(DataFormats.Files)) return;
+            var items = e.Data.GetFiles()?.ToList();
+            if (items == null || items.Count == 0) return;
             if (DataContext is not DownloadViewModel vm) return;
 
-            foreach (var f in files)
+            foreach (var item in items)
             {
-                var ext = Path.GetExtension(f);
-                if (ext.Equals(".zip", System.StringComparison.OrdinalIgnoreCase))
+                var path = item.TryGetLocalPath();
+                if (path == null) continue;
+                var ext = Path.GetExtension(path);
+                if (ext.Equals(".zip", StringComparison.OrdinalIgnoreCase))
                 {
-                    vm.ImportZipFile(f);
+                    vm.ImportZipFile(path);
                     return;
                 }
-                if (ext.Equals(".lua", System.StringComparison.OrdinalIgnoreCase))
+                if (ext.Equals(".lua", StringComparison.OrdinalIgnoreCase))
                 {
-                    vm.LoadLuaFile(f);
+                    vm.LoadLuaFile(path);
                     return;
                 }
             }

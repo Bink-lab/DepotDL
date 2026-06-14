@@ -1,38 +1,40 @@
 // This file is subject to the terms and conditions defined
 // in file 'LICENSE', which is part of this source code package.
 
+using System.Collections.Generic;
 using System.Globalization;
-using System.Windows;
-using System.Windows.Data;
-using System.Windows.Media;
+using Avalonia;
+using Avalonia.Data.Converters;
+using Avalonia.Media;
 using DepotDL.GUI.Models;
+#pragma warning disable CA1416
 
 namespace DepotDL.GUI.Converters
 {
     public class BoolToVisibilityConverter : IValueConverter
     {
         public bool Invert { get; set; }
-        public object Convert(object v, Type t, object p, CultureInfo c)
+        public object? Convert(object? v, Type t, object? p, CultureInfo c)
         {
             var b = v is bool bv && bv;
             if (Invert) b = !b;
-            return b ? Visibility.Visible : Visibility.Collapsed;
+            return b;
         }
-        public object ConvertBack(object v, Type t, object p, CultureInfo c)
-            => v is Visibility vis && vis == Visibility.Visible;
+        public object? ConvertBack(object? v, Type t, object? p, CultureInfo c)
+            => v is bool b && b;
     }
 
     public class InverseBoolConverter : IValueConverter
     {
-        public object Convert(object v, Type t, object p, CultureInfo c)
+        public object? Convert(object? v, Type t, object? p, CultureInfo c)
             => v is bool b && !b;
-        public object ConvertBack(object v, Type t, object p, CultureInfo c)
+        public object? ConvertBack(object? v, Type t, object? p, CultureInfo c)
             => v is bool b && !b;
     }
 
     public class DepotStatusToColorConverter : IValueConverter
     {
-        public object Convert(object v, Type t, object p, CultureInfo c)
+        public object? Convert(object? v, Type t, object? p, CultureInfo c)
         {
             if (v is DepotStatus s)
             {
@@ -49,12 +51,13 @@ namespace DepotDL.GUI.Converters
             }
             return new SolidColorBrush(Color.FromRgb(160, 144, 128));
         }
-        public object ConvertBack(object v, Type t, object p, CultureInfo c) => DependencyProperty.UnsetValue;
+        public object? ConvertBack(object? v, Type t, object? p, CultureInfo c)
+            => AvaloniaProperty.UnsetValue;
     }
 
     public class DepotStatusToTextConverter : IValueConverter
     {
-        public object Convert(object v, Type t, object p, CultureInfo c)
+        public object? Convert(object? v, Type t, object? p, CultureInfo c)
         {
             if (v is DepotStatus s)
             {
@@ -75,14 +78,15 @@ namespace DepotDL.GUI.Converters
             }
             return "Unknown";
         }
-        public object ConvertBack(object v, Type t, object p, CultureInfo c) => DependencyProperty.UnsetValue;
+        public object? ConvertBack(object? v, Type t, object? p, CultureInfo c)
+            => AvaloniaProperty.UnsetValue;
     }
 
     public class PercentToWidthConverter : IMultiValueConverter
     {
-        public object Convert(object[] values, Type t, object p, CultureInfo c)
+        public object? Convert(IList<object?> values, Type t, object? p, CultureInfo c)
         {
-            if (values.Length >= 2 &&
+            if (values.Count >= 2 &&
                 values[0] is double pct &&
                 values[1] is double totalWidth)
             {
@@ -90,41 +94,60 @@ namespace DepotDL.GUI.Converters
             }
             return 0.0;
         }
-        public object[] ConvertBack(object v, Type[] t, object p, CultureInfo c)
-            => Array.Empty<object>();
     }
 
     public class StringEmptyToVisibilityConverter : IValueConverter
     {
         public bool ShowWhenEmpty { get; set; }
-        public object Convert(object v, Type t, object p, CultureInfo c)
+        public object? Convert(object? v, Type t, object? p, CultureInfo c)
         {
             var empty = string.IsNullOrWhiteSpace(v as string);
-            var show = ShowWhenEmpty ? empty : !empty;
-            return show ? Visibility.Visible : Visibility.Collapsed;
+            return ShowWhenEmpty ? empty : !empty;
         }
-        public object ConvertBack(object v, Type t, object p, CultureInfo c) => DependencyProperty.UnsetValue;
+        public object? ConvertBack(object? v, Type t, object? p, CultureInfo c)
+            => AvaloniaProperty.UnsetValue;
     }
 
     public class EqualityToVisibilityConverter : IValueConverter
     {
-        public object Convert(object v, Type t, object p, CultureInfo c)
+        public object? Convert(object? v, Type t, object? p, CultureInfo c)
         {
             var equal = Equals(v, p) || (v != null && v.ToString() == p?.ToString());
-            return equal ? Visibility.Visible : Visibility.Collapsed;
+            return equal;
         }
-        public object ConvertBack(object v, Type t, object p, CultureInfo c) => DependencyProperty.UnsetValue;
+        public object? ConvertBack(object? v, Type t, object? p, CultureInfo c)
+            => AvaloniaProperty.UnsetValue;
     }
 
     public class EqualityToBoolConverter : IValueConverter
     {
-        public object Convert(object v, Type t, object p, CultureInfo c)
+        public object? Convert(object? v, Type t, object? p, CultureInfo c)
             => Equals(v, p) || (v != null && v.ToString() == p?.ToString());
-        public object ConvertBack(object v, Type t, object p, CultureInfo c)
+        public object? ConvertBack(object? v, Type t, object? p, CultureInfo c)
         {
             if (v is bool b && b && p != null && t.IsEnum)
                 return Enum.Parse(t, p.ToString()!);
-            return DependencyProperty.UnsetValue;
+            return AvaloniaProperty.UnsetValue;
         }
+    }
+
+    public class SpecStatusToBrushConverter : IValueConverter
+    {
+        public object? Convert(object? v, Type t, object? p, CultureInfo c)
+        {
+            if (v is SpecStatus s)
+            {
+                return s switch
+                {
+                    SpecStatus.MeetsRecommended => new SolidColorBrush(Color.Parse("#4CAF50")),
+                    SpecStatus.MeetsMinimum => new SolidColorBrush(Color.Parse("#FF9800")),
+                    SpecStatus.BelowMinimum => new SolidColorBrush(Color.Parse("#F44336")),
+                    _ => new SolidColorBrush(Color.Parse("#888888"))
+                };
+            }
+            return new SolidColorBrush(Color.Parse("#888888"));
+        }
+        public object? ConvertBack(object? v, Type t, object? p, CultureInfo c)
+            => AvaloniaProperty.UnsetValue;
     }
 }

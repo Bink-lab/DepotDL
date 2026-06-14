@@ -2,21 +2,21 @@
 // in file 'LICENSE', which is part of this source code package.
 
 using System.ComponentModel;
-using System.Windows;
-using System.Windows.Input;
-using System.Windows.Media.Animation;
+using Avalonia;
+using Avalonia.Controls;
+using Avalonia.Input;
+using Avalonia.Interactivity;
+using Avalonia.Media;
+using Avalonia.Threading;
 using DepotDL.GUI.ViewModels;
 
 namespace DepotDL.GUI
 {
     public partial class MainWindow : Window
     {
-        private bool _isDragging;
-        private Point _dragStart;
         private readonly CancellationTokenSource _cts = new();
-
-        private FrameworkElement? _currentPage;
-        private Dictionary<NavPage, FrameworkElement> _pages = new();
+        private Control? _currentPage;
+        private Dictionary<NavPage, Control> _pages = new();
         private int _navVersion;
 
         public MainWindow()
@@ -26,81 +26,50 @@ namespace DepotDL.GUI
             Loaded += MainWindow_Loaded;
             Closing += (_, _) => _cts.Cancel();
             SizeChanged += (_, _) => UpdateContentClip();
-            StateChanged += (_, _) => Margin = new Thickness(WindowState == WindowState.Maximized ? 7 : 0);
 
-            _pages = new Dictionary<NavPage, FrameworkElement>
+            _pages = new Dictionary<NavPage, Control>
             {
-                { NavPage.Store,     StoreViewEl },
-                { NavPage.Library,   LibraryViewEl },
-                { NavPage.Download,  DownloadViewEl },
-                { NavPage.Settings,  SettingsViewEl },
+                { NavPage.Store,    StoreViewEl },
+                { NavPage.Library,  LibraryViewEl },
+                { NavPage.Download, DownloadViewEl },
+                { NavPage.Settings, SettingsViewEl },
             };
             _currentPage = LibraryViewEl;
         }
 
-        private void TitleBar_MouseDown(object sender, MouseButtonEventArgs e)
+        private void TitleBar_PointerPressed(object? sender, PointerPressedEventArgs e)
         {
             if (e.ClickCount == 2)
             {
                 ToggleMaximize();
                 return;
             }
-            if (e.ChangedButton == MouseButton.Left)
-            {
-                _isDragging = true;
-                _dragStart = e.GetPosition(this);
-                ((System.Windows.FrameworkElement)sender).CaptureMouse();
-            }
+            if (e.GetCurrentPoint(this).Properties.IsLeftButtonPressed)
+                BeginMoveDrag(e);
         }
 
-        private void TitleBar_MouseUp(object sender, MouseButtonEventArgs e)
-        {
-            _isDragging = false;
-            ((System.Windows.FrameworkElement)sender).ReleaseMouseCapture();
-        }
-
-        private void TitleBar_MouseMove(object sender, MouseEventArgs e)
-        {
-            if (_isDragging && e.LeftButton == MouseButtonState.Pressed)
-            {
-                var pos = e.GetPosition(this);
-                var delta = pos - _dragStart;
-                Left += delta.X;
-                Top += delta.Y;
-            }
-        }
-
-        private void MinimizeBtn_Click(object sender, RoutedEventArgs e)
+        private void MinimizeBtn_Click(object? sender, RoutedEventArgs e)
             => WindowState = WindowState.Minimized;
 
-        private void MaximizeBtn_Click(object sender, RoutedEventArgs e)
+        private void MaximizeBtn_Click(object? sender, RoutedEventArgs e)
             => ToggleMaximize();
 
-        private void CloseBtn_Click(object sender, RoutedEventArgs e)
+        private void CloseBtn_Click(object? sender, RoutedEventArgs e)
             => Close();
-
-
 
         private void ToggleMaximize()
         {
-            if (WindowState == WindowState.Maximized)
-            {
-                WindowState = WindowState.Normal;
-                Margin = new Thickness(0);
-            }
-            else
-            {
-                WindowState = WindowState.Maximized;
-                Margin = new Thickness(7);
-            }
+            WindowState = WindowState == WindowState.Maximized
+                ? WindowState.Normal
+                : WindowState.Maximized;
         }
 
-        private async void MainWindow_Loaded(object sender, RoutedEventArgs e)
+        private async void MainWindow_Loaded(object? sender, RoutedEventArgs e)
         {
             UpdateContentClip();
             await RunSplashscreenAsync();
 
-            var vm = (MainViewModel)DataContext;
+            var vm = (MainViewModel)DataContext!;
             vm.PropertyChanged += OnVmPropertyChanged;
             if (vm.CurrentPage != NavPage.Library)
                 NavigateTo(vm.CurrentPage);
@@ -109,64 +78,50 @@ namespace DepotDL.GUI
         private void OnVmPropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
             if (e.PropertyName == nameof(MainViewModel.CurrentPage))
-                NavigateTo(((MainViewModel)DataContext).CurrentPage);
+                NavigateTo(((MainViewModel)DataContext!).CurrentPage);
         }
 
-        private void NavigateTo(NavPage page)
+        private async void NavigateTo(NavPage page)
         {
             if (!_pages.TryGetValue(page, out var newPage) || newPage == _currentPage) return;
 
             var oldPage = _currentPage;
             _currentPage = newPage;
-
             var myVersion = ++_navVersion;
-            var ease = new CubicEase { EasingMode = EasingMode.EaseOut };
-            var durIn = new Duration(TimeSpan.FromSeconds(0.20));
 
             foreach (var p in _pages.Values)
-            {
                 if (p != oldPage && p != newPage)
-                {
-                    p.BeginAnimation(OpacityProperty, null);
-                    p.Visibility = Visibility.Collapsed;
-                }
-            }
-
-            void ShowNew()
-            {
-                if (_navVersion != myVersion) return;
-                newPage.BeginAnimation(OpacityProperty, null);
-                newPage.Opacity = 0;
-                newPage.Visibility = Visibility.Visible;
-                newPage.BeginAnimation(OpacityProperty, new DoubleAnimation(1, durIn) { EasingFunction = ease });
-            }
+                    p.IsVisible = false;
 
             if (oldPage != null)
             {
-                var fadeOut = new DoubleAnimation(0, new Duration(TimeSpan.FromSeconds(0.15)));
-                fadeOut.Completed += (_, _) =>
-                {
-                    oldPage.Visibility = Visibility.Collapsed;
-                    ShowNew();
-                };
-                oldPage.BeginAnimation(OpacityProperty, fadeOut);
+                oldPage.Opacity = 0;
+                await Task.Delay(150);
+                if (_navVersion != myVersion) return;
+                oldPage.IsVisible = false;
             }
-            else
-            {
-                ShowNew();
-            }
+
+            newPage.Opacity = 0;
+            newPage.IsVisible = true;
+            await Dispatcher.UIThread.InvokeAsync(() => { });
+            if (_navVersion != myVersion) return;
+            newPage.Opacity = 1;
         }
 
         private void UpdateContentClip()
         {
-            ContentGrid.Clip = new System.Windows.Media.RectangleGeometry(
-                new Rect(0, 0, ContentGrid.ActualWidth, ContentGrid.ActualHeight), 14, 14);
+            ContentGrid.Clip = new RectangleGeometry
+            {
+                Rect = new Rect(0, 0, ContentGrid.Bounds.Width, ContentGrid.Bounds.Height),
+                RadiusX = 14,
+                RadiusY = 14
+            };
         }
 
-        private async System.Threading.Tasks.Task RunSplashscreenAsync()
+        private async Task RunSplashscreenAsync()
         {
             double totalWidth = 200;
-            var vm = (ViewModels.MainViewModel)DataContext;
+            var vm = (MainViewModel)DataContext!;
 
             var progress = new Progress<(double pct, string status)>(update =>
             {
@@ -175,56 +130,44 @@ namespace DepotDL.GUI
             });
 
             await vm.InitializeAsync(progress, _cts.Token);
-            await System.Threading.Tasks.Task.Delay(1000);
+            await Task.Delay(1000);
 
-            var sb = new System.Windows.Media.Animation.Storyboard();
-
-            var opacityAnim = new System.Windows.Media.Animation.DoubleAnimation
+            var tg = SplashOverlay.RenderTransform as TransformGroup;
+            ScaleTransform? scaleT = null;
+            TranslateTransform? translateT = null;
+            if (tg != null)
             {
-                To = 0,
-                Duration = new Duration(System.TimeSpan.FromSeconds(0.5)),
-                EasingFunction = new System.Windows.Media.Animation.CubicEase { EasingMode = System.Windows.Media.Animation.EasingMode.EaseInOut }
-            };
-            System.Windows.Media.Animation.Storyboard.SetTarget(opacityAnim, SplashOverlay);
-            System.Windows.Media.Animation.Storyboard.SetTargetProperty(opacityAnim, new PropertyPath("Opacity"));
-            sb.Children.Add(opacityAnim);
+                foreach (var t in tg.Children)
+                {
+                    if (t is ScaleTransform st) scaleT = st;
+                    else if (t is TranslateTransform tt) translateT = tt;
+                }
+            }
 
-            var scaleXAnim = new System.Windows.Media.Animation.DoubleAnimation
+            var startTime = DateTime.UtcNow;
+            const double durationMs = 500.0;
+            while (true)
             {
-                To = 1.06,
-                Duration = new Duration(System.TimeSpan.FromSeconds(0.55)),
-                EasingFunction = new System.Windows.Media.Animation.CubicEase { EasingMode = System.Windows.Media.Animation.EasingMode.EaseInOut }
-            };
-            System.Windows.Media.Animation.Storyboard.SetTarget(scaleXAnim, SplashOverlay);
-            System.Windows.Media.Animation.Storyboard.SetTargetProperty(scaleXAnim, new PropertyPath("(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleX)"));
-            sb.Children.Add(scaleXAnim);
-
-            var scaleYAnim = new System.Windows.Media.Animation.DoubleAnimation
-            {
-                To = 1.06,
-                Duration = new Duration(System.TimeSpan.FromSeconds(0.55)),
-                EasingFunction = new System.Windows.Media.Animation.CubicEase { EasingMode = System.Windows.Media.Animation.EasingMode.EaseInOut }
-            };
-            System.Windows.Media.Animation.Storyboard.SetTarget(scaleYAnim, SplashOverlay);
-            System.Windows.Media.Animation.Storyboard.SetTargetProperty(scaleYAnim, new PropertyPath("(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleY)"));
-            sb.Children.Add(scaleYAnim);
-
-            var translateYAnim = new System.Windows.Media.Animation.DoubleAnimation
-            {
-                To = -30,
-                Duration = new Duration(System.TimeSpan.FromSeconds(0.5)),
-                EasingFunction = new System.Windows.Media.Animation.CubicEase { EasingMode = System.Windows.Media.Animation.EasingMode.EaseInOut }
-            };
-            System.Windows.Media.Animation.Storyboard.SetTarget(translateYAnim, SplashOverlay);
-            System.Windows.Media.Animation.Storyboard.SetTargetProperty(translateYAnim, new PropertyPath("(UIElement.RenderTransform).(TransformGroup.Children)[1].(TranslateTransform.Y)"));
-            sb.Children.Add(translateYAnim);
-
-            sb.Completed += (s, ev) =>
-            {
-                SplashOverlay.Visibility = Visibility.Collapsed;
-            };
-
-            sb.Begin(this);
+                var elapsed = (DateTime.UtcNow - startTime).TotalMilliseconds;
+                var t = Math.Min(1.0, elapsed / durationMs);
+                var eased = CubicEaseInOut(t);
+                SplashOverlay.Opacity = 1 - eased;
+                if (scaleT != null) { scaleT.ScaleX = 1 + 0.06 * eased; scaleT.ScaleY = 1 + 0.06 * eased; }
+                if (translateT != null) translateT.Y = -30 * eased;
+                if (t >= 1.0) break;
+                await Task.Delay(16);
+            }
+            SplashOverlay.IsVisible = false;
         }
+
+        protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
+        {
+            base.OnPropertyChanged(change);
+            if (change.Property == WindowStateProperty)
+                Margin = new Thickness(change.GetNewValue<WindowState>() == WindowState.Maximized ? 7 : 0);
+        }
+
+        private static double CubicEaseInOut(double t)
+            => t < 0.5 ? 4 * t * t * t : 1 - Math.Pow(-2 * t + 2, 3) / 2;
     }
 }

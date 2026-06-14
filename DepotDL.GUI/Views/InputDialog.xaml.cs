@@ -1,55 +1,47 @@
 // This file is subject to the terms and conditions defined
 // in file 'LICENSE', which is part of this source code package.
 
-using System.ComponentModel;
-using System.Windows;
-using System.Windows.Input;
+using Avalonia.Controls;
+using Avalonia.Input;
+using Avalonia.Interactivity;
 
 namespace DepotDL.GUI.Views
 {
-    public partial class InputDialog : Window, INotifyPropertyChanged
+    public partial class InputDialog : Window
     {
         public string DialogTitle { get; }
-
-        private string _inputText = string.Empty;
-        public string InputText
-        {
-            get => _inputText;
-            set { _inputText = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(InputText))); }
-        }
-
-        public event PropertyChangedEventHandler? PropertyChanged;
-
+        public string InputText { get; set; } = string.Empty;
         public string? Result { get; private set; }
+
+        public InputDialog() : this("Input") { }
 
         public InputDialog(string title, string initialValue = "")
         {
-            InitializeComponent();
-            DataContext = this;
             DialogTitle = title;
             InputText = initialValue;
+            InitializeComponent();
+            DataContext = this;
         }
 
-        protected override void OnSourceInitialized(System.EventArgs e)
+        protected override void OnOpened(EventArgs e)
         {
-            base.OnSourceInitialized(e);
-            if (Owner != null)
+            base.OnOpened(e);
+            if (Owner is Window owner)
             {
-                Left = Owner.Left;
-                Top = Owner.Top;
-                Width = Owner.ActualWidth;
-                Height = Owner.ActualHeight;
+                Position = owner.Position;
+                Width = owner.Bounds.Width;
+                Height = owner.Bounds.Height;
             }
             InputBox.Focus();
             InputBox.SelectAll();
         }
 
-        private void OkButton_Click(object sender, RoutedEventArgs e) => Confirm();
-        private void CancelButton_Click(object sender, RoutedEventArgs e) => Close();
+        private void OkButton_Click(object? sender, RoutedEventArgs e) => Confirm();
+        private void CancelButton_Click(object? sender, RoutedEventArgs e) => Close();
 
-        private void InputBox_KeyDown(object sender, KeyEventArgs e)
+        private void InputBox_KeyDown(object? sender, KeyEventArgs e)
         {
-            if (e.Key == Key.Enter) Confirm();
+            if (e.Key == Key.Return) Confirm();
             else if (e.Key == Key.Escape) Close();
         }
 

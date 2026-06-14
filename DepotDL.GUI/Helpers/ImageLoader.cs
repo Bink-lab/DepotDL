@@ -3,7 +3,8 @@
 
 using System.IO;
 using System.Net.Http;
-using System.Windows.Media.Imaging;
+using Avalonia.Media.Imaging;
+using Avalonia.Threading;
 using DepotDL.GUI.ViewModels;
 
 namespace DepotDL.GUI.Helpers
@@ -27,7 +28,7 @@ namespace DepotDL.GUI.Helpers
             Http.DefaultRequestHeaders.UserAgent.ParseAdd("DepotDL/1.0");
         }
 
-        public static async Task<BitmapImage?> LoadAsync(string url, int appId, CancellationToken ct = default)
+        public static async Task<Bitmap?> LoadAsync(string url, int appId, CancellationToken ct = default)
         {
             try
             {
@@ -47,13 +48,7 @@ namespace DepotDL.GUI.Helpers
                 }
 
                 using var ms = new MemoryStream(data);
-                var bmp = new BitmapImage();
-                bmp.BeginInit();
-                bmp.CacheOption = BitmapCacheOption.OnLoad;
-                bmp.StreamSource = ms;
-                bmp.EndInit();
-                bmp.Freeze();
-                return bmp;
+                return new Bitmap(ms);
             }
             catch (OperationCanceledException) { throw; }
             catch
@@ -93,7 +88,7 @@ namespace DepotDL.GUI.Helpers
             try
             {
                 var bmp = await LoadAsync(url, appId, ct);
-                await System.Windows.Application.Current.Dispatcher.InvokeAsync(() =>
+                await Dispatcher.UIThread.InvokeAsync(() =>
                 {
                     vm.HeaderImage = bmp;
                     vm.IsImageLoading = false;
@@ -102,7 +97,7 @@ namespace DepotDL.GUI.Helpers
             catch (OperationCanceledException) { throw; }
             catch
             {
-                await System.Windows.Application.Current.Dispatcher.InvokeAsync(() => vm.IsImageLoading = false);
+                await Dispatcher.UIThread.InvokeAsync(() => vm.IsImageLoading = false);
             }
         }
     }

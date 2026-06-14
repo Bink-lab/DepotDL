@@ -1,7 +1,6 @@
 <UserControl x:Class="DepotDL.GUI.Views.SettingsView"
-             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             FontFamily="Segoe UI">
+             xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
     <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="0,42,6,0">
         <Grid Margin="32,0,32,28">
@@ -26,64 +25,56 @@
             </Grid.RowDefinitions>
 
             <StackPanel Grid.Row="0">
-                <TextBlock Style="{StaticResource TextH1}" Text="Settings"/>
-                <TextBlock Style="{StaticResource BodyText}" Margin="0,4,0,0"
+                <TextBlock Classes="H1" Text="Settings"/>
+                <TextBlock Classes="BodyText" Margin="0,4,0,0"
                            Text="Configure default paths and preferences."/>
             </StackPanel>
 
-            <Border Grid.Row="2" Style="{StaticResource Card}" Padding="20">
+            <!-- Paths -->
+            <Border Grid.Row="2" Classes="Card" Padding="20">
                 <StackPanel>
-                    <TextBlock Text="PATHS" Style="{StaticResource TextLabel}" Margin="0,0,0,16"/>
+                    <TextBlock Text="PATHS" Classes="Label" Margin="0,0,0,16"/>
 
-                    <TextBlock Text="Manifests Cache Directory"
-                               Style="{StaticResource TextH3}" Margin="0,0,0,4"/>
+                    <TextBlock Text="Manifests Cache Directory" Classes="H3" Margin="0,0,0,4"/>
                     <TextBlock Text="Folder containing .manifest files for offline installation."
-                               Style="{StaticResource BodyText}" Margin="0,0,0,8"/>
+                               Classes="BodyText" Margin="0,0,0,8"/>
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="8"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
-                        <TextBox Grid.Column="0"
-                                 Text="{Binding ManifestsDir, UpdateSourceTrigger=PropertyChanged}"
-                                 />
-                        <Button Grid.Column="2"
-                                Style="{StaticResource BtnGhost}"
-                                Command="{Binding BrowseManifestsDirCommand}"
-                                Padding="12,8">
+                        <TextBox Grid.Column="0" Text="{Binding ManifestsDir}"/>
+                        <Button Grid.Column="2" Theme="{StaticResource BtnGhost}"
+                                Command="{Binding BrowseManifestsDirCommand}" Padding="12,8">
                             <TextBlock Text="Browse" FontSize="12"/>
                         </Button>
                     </Grid>
 
                     <Separator Margin="0,20"/>
 
-                    <TextBlock Text="Default Download Base Directory"
-                               Style="{StaticResource TextH3}" Margin="0,0,0,4"/>
+                    <TextBlock Text="Default Download Base Directory" Classes="H3" Margin="0,0,0,4"/>
                     <TextBlock Text="Game output folders are created as subfolders here (e.g. 480)."
-                               Style="{StaticResource BodyText}" Margin="0,0,0,8"/>
+                               Classes="BodyText" Margin="0,0,0,8"/>
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="8"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
-                        <TextBox Grid.Column="0"
-                                 Text="{Binding DownloadBaseDir, UpdateSourceTrigger=PropertyChanged}"
-                                 />
-                        <Button Grid.Column="2"
-                                Style="{StaticResource BtnGhost}"
-                                Command="{Binding BrowseDownloadBaseDirCommand}"
-                                Padding="12,8">
+                        <TextBox Grid.Column="0" Text="{Binding DownloadBaseDir}"/>
+                        <Button Grid.Column="2" Theme="{StaticResource BtnGhost}"
+                                Command="{Binding BrowseDownloadBaseDirCommand}" Padding="12,8">
                             <TextBlock Text="Browse" FontSize="12"/>
                         </Button>
                     </Grid>
                 </StackPanel>
             </Border>
 
-            <Border Grid.Row="4" Style="{StaticResource Card}" Padding="20">
+            <!-- Download -->
+            <Border Grid.Row="4" Classes="Card" Padding="20">
                 <StackPanel>
-                    <TextBlock Text="DOWNLOAD" Style="{StaticResource TextLabel}" Margin="0,0,0,16"/>
+                    <TextBlock Text="DOWNLOAD" Classes="Label" Margin="0,0,0,16"/>
 
                     <Grid>
                         <Grid.ColumnDefinitions>
@@ -91,25 +82,20 @@
                             <ColumnDefinition Width="200"/>
                         </Grid.ColumnDefinitions>
                         <StackPanel Grid.Column="0">
-                            <TextBlock Text="Parallel Depots"
-                                       Style="{StaticResource TextH3}" Margin="0,0,0,4"/>
+                            <TextBlock Text="Parallel Depots" Classes="H3" Margin="0,0,0,4"/>
                             <TextBlock Text="Number of depots downloaded simultaneously (1–8)."
-                                       Style="{StaticResource BodyText}"/>
+                                       Classes="BodyText"/>
                         </StackPanel>
-                        <Border Grid.Column="1" Style="{StaticResource CardSmall}"
-                                Padding="16,12" VerticalAlignment="Center">
+                        <Border Grid.Column="1" Classes="CardSmall" Padding="16,12" VerticalAlignment="Center">
                             <StackPanel>
                                 <Grid Margin="0,0,0,8">
-                                    <TextBlock Text="Workers"
-                                               FontSize="11" Foreground="{StaticResource TextMuted}"/>
+                                    <TextBlock Text="Workers" FontSize="11" Foreground="{StaticResource TextMuted}"/>
                                     <TextBlock HorizontalAlignment="Right"
                                                Text="{Binding MaxParallelDepots}"
                                                FontSize="16" FontWeight="Bold"
                                                Foreground="{StaticResource Accent}"/>
                                 </Grid>
-                                <Slider Minimum="1" Maximum="8"
-                                        TickFrequency="1"
-                                        IsSnapToTickEnabled="True"
+                                <Slider Minimum="1" Maximum="8" TickFrequency="1"
                                         Value="{Binding MaxParallelDepots}"/>
                             </StackPanel>
                         </Border>
@@ -123,9 +109,8 @@
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
                         <StackPanel Grid.Column="0" VerticalAlignment="Center">
-                            <TextBlock Text="Auto-select depots by OS"
-                                       Style="{StaticResource TextH3}" Margin="0,0,0,4"/>
-                            <TextBlock Style="{StaticResource BodyText}" TextWrapping="Wrap"
+                            <TextBlock Text="Auto-select depots by OS" Classes="H3" Margin="0,0,0,4"/>
+                            <TextBlock Classes="BodyText" TextWrapping="Wrap"
                                        Text="When loading a config, automatically deselect depots for other operating systems. Depots with no OS tag are always kept selected."/>
                         </StackPanel>
                         <CheckBox Grid.Column="1"
@@ -136,34 +121,29 @@
                 </StackPanel>
             </Border>
 
-            <Border Grid.Row="6" Style="{StaticResource Card}" Padding="20">
+            <!-- API Keys -->
+            <Border Grid.Row="6" Classes="Card" Padding="20">
                 <StackPanel>
-                    <TextBlock Text="API KEYS" Style="{StaticResource TextLabel}" Margin="0,0,0,16"/>
+                    <TextBlock Text="API KEYS" Classes="Label" Margin="0,0,0,16"/>
 
-                    <TextBlock Text="Ryuu API Key"
-                               Style="{StaticResource TextH3}" Margin="0,0,0,4"/>
+                    <TextBlock Text="Ryuu API Key" Classes="H3" Margin="0,0,0,4"/>
                     <TextBlock Text="Required for downloading game configurations via the Ryuu service."
-                               Style="{StaticResource BodyText}" Margin="0,0,0,8"/>
-                    <TextBox Text="{Binding RyuuApiKey, UpdateSourceTrigger=PropertyChanged}"
-                             />
+                               Classes="BodyText" Margin="0,0,0,8"/>
+                    <TextBox Text="{Binding RyuuApiKey}"/>
 
                     <Separator Margin="0,20"/>
 
-                    <TextBlock Text="Hubcap API Key"
-                               Style="{StaticResource TextH3}" Margin="0,0,0,4"/>
+                    <TextBlock Text="Hubcap API Key" Classes="H3" Margin="0,0,0,4"/>
                     <TextBlock Text="Required for downloading game configurations via the Hubcap service."
-                               Style="{StaticResource BodyText}" Margin="0,0,0,8"/>
-                    <TextBox Text="{Binding HubcapApiKey, UpdateSourceTrigger=PropertyChanged}"
-                             />
+                               Classes="BodyText" Margin="0,0,0,8"/>
+                    <TextBox Text="{Binding HubcapApiKey}"/>
 
                     <Separator Margin="0,20"/>
 
-                    <TextBlock Text="Steam Web API Key"
-                               Style="{StaticResource TextH3}" Margin="0,0,0,4"/>
+                    <TextBlock Text="Steam Web API Key" Classes="H3" Margin="0,0,0,4"/>
                     <TextBlock Text="Used for downloading achievements and stats configuration from the Steam Web API."
-                               Style="{StaticResource BodyText}" Margin="0,0,0,8"/>
-                    <TextBox Text="{Binding SteamWebApiKey, UpdateSourceTrigger=PropertyChanged}"
-                             />
+                               Classes="BodyText" Margin="0,0,0,8"/>
+                    <TextBox Text="{Binding SteamWebApiKey}"/>
 
                     <Separator Margin="0,20"/>
 
@@ -173,9 +153,8 @@
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
                         <StackPanel Grid.Column="0" VerticalAlignment="Center">
-                            <TextBlock Text="Download achievement images"
-                                       Style="{StaticResource TextH3}" Margin="0,0,0,4"/>
-                            <TextBlock Style="{StaticResource BodyText}" TextWrapping="Wrap"
+                            <TextBlock Text="Download achievement images" Classes="H3" Margin="0,0,0,4"/>
+                            <TextBlock Classes="BodyText" TextWrapping="Wrap"
                                        Text="When applying the Goldberg emulator, download achievement icons (normal and grayscale) to the local steam_settings/achievement_images folder and use those paths in achievements.json. Requires a Steam Web API Key."/>
                         </StackPanel>
                         <CheckBox Grid.Column="1"
@@ -186,37 +165,28 @@
                 </StackPanel>
             </Border>
 
-            <!-- Store & Cache Settings -->
-            <Border Grid.Row="8" Style="{StaticResource Card}" Padding="20">
+            <!-- Store & Cache -->
+            <Border Grid.Row="8" Classes="Card" Padding="20">
                 <StackPanel>
-                    <TextBlock Text="STORE &amp; CACHE" Style="{StaticResource TextLabel}" Margin="0,0,0,16"/>
+                    <TextBlock Text="STORE &amp; CACHE" Classes="Label" Margin="0,0,0,16"/>
 
-                    <!-- Store Page Size -->
                     <Grid Margin="0,0,0,16">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="200"/>
                         </Grid.ColumnDefinitions>
                         <StackPanel Grid.Column="0" VerticalAlignment="Center">
-                            <TextBlock Text="Store Page Size"
-                                       Style="{StaticResource TextH3}" Margin="0,0,0,4"/>
-                            <TextBlock Text="Number of game cards displayed per page (12–120)."
-                                       Style="{StaticResource BodyText}"/>
+                            <TextBlock Text="Store Page Size" Classes="H3" Margin="0,0,0,4"/>
+                            <TextBlock Text="Number of game cards displayed per page (12–120)." Classes="BodyText"/>
                         </StackPanel>
-                        <Border Grid.Column="1" Style="{StaticResource CardSmall}"
-                                Padding="16,12" VerticalAlignment="Center">
+                        <Border Grid.Column="1" Classes="CardSmall" Padding="16,12" VerticalAlignment="Center">
                             <StackPanel>
                                 <Grid Margin="0,0,0,8">
-                                    <TextBlock Text="Games"
-                                               FontSize="11" Foreground="{StaticResource TextMuted}"/>
-                                    <TextBlock HorizontalAlignment="Right"
-                                               Text="{Binding StorePageSize}"
-                                               FontSize="16" FontWeight="Bold"
-                                               Foreground="{StaticResource Accent}"/>
+                                    <TextBlock Text="Games" FontSize="11" Foreground="{StaticResource TextMuted}"/>
+                                    <TextBlock HorizontalAlignment="Right" Text="{Binding StorePageSize}"
+                                               FontSize="16" FontWeight="Bold" Foreground="{StaticResource Accent}"/>
                                 </Grid>
-                                <Slider Minimum="12" Maximum="120"
-                                        TickFrequency="6"
-                                        IsSnapToTickEnabled="True"
+                                <Slider Minimum="12" Maximum="120" TickFrequency="6"
                                         Value="{Binding StorePageSize}"/>
                             </StackPanel>
                         </Border>
@@ -224,34 +194,26 @@
 
                     <Separator Margin="0,12"/>
 
-                    <!-- Search Debounce -->
                     <Grid Margin="0,12,0,16">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="200"/>
                         </Grid.ColumnDefinitions>
                         <StackPanel Grid.Column="0" VerticalAlignment="Center">
-                            <TextBlock Text="Search Debounce Delay"
-                                       Style="{StaticResource TextH3}" Margin="0,0,0,4"/>
-                            <TextBlock Text="Delay after typing before searching begins (0–2000ms)."
-                                       Style="{StaticResource BodyText}"/>
+                            <TextBlock Text="Search Debounce Delay" Classes="H3" Margin="0,0,0,4"/>
+                            <TextBlock Text="Delay after typing before searching begins (0–2000ms)." Classes="BodyText"/>
                         </StackPanel>
-                        <Border Grid.Column="1" Style="{StaticResource CardSmall}"
-                                Padding="16,12" VerticalAlignment="Center">
+                        <Border Grid.Column="1" Classes="CardSmall" Padding="16,12" VerticalAlignment="Center">
                             <StackPanel>
                                 <Grid Margin="0,0,0,8">
-                                    <TextBlock Text="Delay"
-                                               FontSize="11" Foreground="{StaticResource TextMuted}"/>
-                                    <TextBlock HorizontalAlignment="Right"
-                                               FontSize="16" FontWeight="Bold"
+                                    <TextBlock Text="Delay" FontSize="11" Foreground="{StaticResource TextMuted}"/>
+                                    <TextBlock HorizontalAlignment="Right" FontSize="16" FontWeight="Bold"
                                                Foreground="{StaticResource Accent}">
                                         <Run Text="{Binding SearchDebounceMs}"/>
                                         <Run Text=" ms" FontSize="11" Foreground="{StaticResource TextMuted}"/>
                                     </TextBlock>
                                 </Grid>
-                                <Slider Minimum="0" Maximum="2000"
-                                        TickFrequency="50"
-                                        IsSnapToTickEnabled="True"
+                                <Slider Minimum="0" Maximum="2000" TickFrequency="50"
                                         Value="{Binding SearchDebounceMs}"/>
                             </StackPanel>
                         </Border>
@@ -259,34 +221,26 @@
 
                     <Separator Margin="0,12"/>
 
-                    <!-- Store Cache Hours -->
                     <Grid Margin="0,12,0,16">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="200"/>
                         </Grid.ColumnDefinitions>
                         <StackPanel Grid.Column="0" VerticalAlignment="Center">
-                            <TextBlock Text="Store Cache Lifetime"
-                                       Style="{StaticResource TextH3}" Margin="0,0,0,4"/>
-                            <TextBlock Text="Hours to cache store data locally before re-fetching (1–168h)."
-                                       Style="{StaticResource BodyText}"/>
+                            <TextBlock Text="Store Cache Lifetime" Classes="H3" Margin="0,0,0,4"/>
+                            <TextBlock Text="Hours to cache store data locally before re-fetching (1–168h)." Classes="BodyText"/>
                         </StackPanel>
-                        <Border Grid.Column="1" Style="{StaticResource CardSmall}"
-                                Padding="16,12" VerticalAlignment="Center">
+                        <Border Grid.Column="1" Classes="CardSmall" Padding="16,12" VerticalAlignment="Center">
                             <StackPanel>
                                 <Grid Margin="0,0,0,8">
-                                    <TextBlock Text="Lifetime"
-                                               FontSize="11" Foreground="{StaticResource TextMuted}"/>
-                                    <TextBlock HorizontalAlignment="Right"
-                                               FontSize="16" FontWeight="Bold"
+                                    <TextBlock Text="Lifetime" FontSize="11" Foreground="{StaticResource TextMuted}"/>
+                                    <TextBlock HorizontalAlignment="Right" FontSize="16" FontWeight="Bold"
                                                Foreground="{StaticResource Accent}">
                                         <Run Text="{Binding StoreCacheHours}"/>
                                         <Run Text=" hours" FontSize="11" Foreground="{StaticResource TextMuted}"/>
                                     </TextBlock>
                                 </Grid>
-                                <Slider Minimum="1" Maximum="168"
-                                        TickFrequency="1"
-                                        IsSnapToTickEnabled="True"
+                                <Slider Minimum="1" Maximum="168" TickFrequency="1"
                                         Value="{Binding StoreCacheHours}"/>
                             </StackPanel>
                         </Border>
@@ -294,34 +248,26 @@
 
                     <Separator Margin="0,12"/>
 
-                    <!-- GPU Cache Days -->
                     <Grid Margin="0,12,0,0">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="200"/>
                         </Grid.ColumnDefinitions>
                         <StackPanel Grid.Column="0" VerticalAlignment="Center">
-                            <TextBlock Text="GPU Specs Cache Lifetime"
-                                       Style="{StaticResource TextH3}" Margin="0,0,0,4"/>
-                            <TextBlock Text="Days to cache GPU benchmark details locally (1–30d)."
-                                       Style="{StaticResource BodyText}"/>
+                            <TextBlock Text="GPU Specs Cache Lifetime" Classes="H3" Margin="0,0,0,4"/>
+                            <TextBlock Text="Days to cache GPU benchmark details locally (1–30d)." Classes="BodyText"/>
                         </StackPanel>
-                        <Border Grid.Column="1" Style="{StaticResource CardSmall}"
-                                Padding="16,12" VerticalAlignment="Center">
+                        <Border Grid.Column="1" Classes="CardSmall" Padding="16,12" VerticalAlignment="Center">
                             <StackPanel>
                                 <Grid Margin="0,0,0,8">
-                                    <TextBlock Text="Lifetime"
-                                               FontSize="11" Foreground="{StaticResource TextMuted}"/>
-                                    <TextBlock HorizontalAlignment="Right"
-                                               FontSize="16" FontWeight="Bold"
+                                    <TextBlock Text="Lifetime" FontSize="11" Foreground="{StaticResource TextMuted}"/>
+                                    <TextBlock HorizontalAlignment="Right" FontSize="16" FontWeight="Bold"
                                                Foreground="{StaticResource Accent}">
                                         <Run Text="{Binding GpuCacheDays}"/>
                                         <Run Text=" days" FontSize="11" Foreground="{StaticResource TextMuted}"/>
                                     </TextBlock>
                                 </Grid>
-                                <Slider Minimum="1" Maximum="30"
-                                        TickFrequency="1"
-                                        IsSnapToTickEnabled="True"
+                                <Slider Minimum="1" Maximum="30" TickFrequency="1"
                                         Value="{Binding GpuCacheDays}"/>
                             </StackPanel>
                         </Border>
@@ -329,37 +275,30 @@
                 </StackPanel>
             </Border>
 
-            <!-- Smooth Scrolling Settings -->
-            <Border Grid.Row="10" Style="{StaticResource Card}" Padding="20">
+            <!-- Smooth Scrolling -->
+            <Border Grid.Row="10" Classes="Card" Padding="20">
                 <StackPanel>
-                    <TextBlock Text="SMOOTH SCROLLING" Style="{StaticResource TextLabel}" Margin="0,0,0,16"/>
+                    <TextBlock Text="SMOOTH SCROLLING" Classes="Label" Margin="0,0,0,16"/>
 
-                    <!-- Scroll Sensitivity -->
                     <Grid Margin="0,0,0,16">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="200"/>
                         </Grid.ColumnDefinitions>
                         <StackPanel Grid.Column="0" VerticalAlignment="Center">
-                            <TextBlock Text="Scroll Sensitivity"
-                                       Style="{StaticResource TextH3}" Margin="0,0,0,4"/>
-                            <TextBlock Text="Multiplier applied to mouse wheel ticks (0.1–5.0)."
-                                       Style="{StaticResource BodyText}"/>
+                            <TextBlock Text="Scroll Sensitivity" Classes="H3" Margin="0,0,0,4"/>
+                            <TextBlock Text="Multiplier applied to mouse wheel ticks (0.1–5.0)." Classes="BodyText"/>
                         </StackPanel>
-                        <Border Grid.Column="1" Style="{StaticResource CardSmall}"
-                                Padding="16,12" VerticalAlignment="Center">
+                        <Border Grid.Column="1" Classes="CardSmall" Padding="16,12" VerticalAlignment="Center">
                             <StackPanel>
                                 <Grid Margin="0,0,0,8">
-                                    <TextBlock Text="Sensitivity"
-                                               FontSize="11" Foreground="{StaticResource TextMuted}"/>
+                                    <TextBlock Text="Sensitivity" FontSize="11" Foreground="{StaticResource TextMuted}"/>
                                     <TextBlock HorizontalAlignment="Right"
-                                               Text="{Binding ScrollSensitivity, StringFormat={}{0:F1}}"
+                                               Text="{Binding ScrollSensitivity, StringFormat='{}{0:F1}'}"
                                                FontSize="16" FontWeight="Bold"
                                                Foreground="{StaticResource Accent}"/>
                                 </Grid>
-                                <Slider Minimum="0.1" Maximum="5.0"
-                                        TickFrequency="0.1"
-                                        IsSnapToTickEnabled="True"
+                                <Slider Minimum="0.1" Maximum="5.0" TickFrequency="0.1"
                                         Value="{Binding ScrollSensitivity}"/>
                             </StackPanel>
                         </Border>
@@ -367,34 +306,26 @@
 
                     <Separator Margin="0,12"/>
 
-                    <!-- Scroll Duration -->
                     <Grid Margin="0,12,0,0">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="200"/>
                         </Grid.ColumnDefinitions>
                         <StackPanel Grid.Column="0" VerticalAlignment="Center">
-                            <TextBlock Text="Scroll Duration"
-                                       Style="{StaticResource TextH3}" Margin="0,0,0,4"/>
-                            <TextBlock Text="Duration of the scrolling slide animation (50–1000ms)."
-                                       Style="{StaticResource BodyText}"/>
+                            <TextBlock Text="Scroll Duration" Classes="H3" Margin="0,0,0,4"/>
+                            <TextBlock Text="Duration of the scrolling slide animation (50–1000ms)." Classes="BodyText"/>
                         </StackPanel>
-                        <Border Grid.Column="1" Style="{StaticResource CardSmall}"
-                                Padding="16,12" VerticalAlignment="Center">
+                        <Border Grid.Column="1" Classes="CardSmall" Padding="16,12" VerticalAlignment="Center">
                             <StackPanel>
                                 <Grid Margin="0,0,0,8">
-                                    <TextBlock Text="Duration"
-                                               FontSize="11" Foreground="{StaticResource TextMuted}"/>
-                                    <TextBlock HorizontalAlignment="Right"
-                                               FontSize="16" FontWeight="Bold"
+                                    <TextBlock Text="Duration" FontSize="11" Foreground="{StaticResource TextMuted}"/>
+                                    <TextBlock HorizontalAlignment="Right" FontSize="16" FontWeight="Bold"
                                                Foreground="{StaticResource Accent}">
                                         <Run Text="{Binding ScrollDurationMs}"/>
                                         <Run Text=" ms" FontSize="11" Foreground="{StaticResource TextMuted}"/>
                                     </TextBlock>
                                 </Grid>
-                                <Slider Minimum="50" Maximum="1000"
-                                        TickFrequency="25"
-                                        IsSnapToTickEnabled="True"
+                                <Slider Minimum="50" Maximum="1000" TickFrequency="25"
                                         Value="{Binding ScrollDurationMs}"/>
                             </StackPanel>
                         </Border>
@@ -403,15 +334,12 @@
             </Border>
 
             <!-- Update Channel -->
-            <Border Grid.Row="12" Style="{StaticResource Card}" Padding="20">
+            <Border Grid.Row="12" Classes="Card" Padding="20">
                 <StackPanel>
-                    <TextBlock Text="UPDATES" Style="{StaticResource TextLabel}" Margin="0,0,0,16"/>
-
-                    <TextBlock Text="Release Channel"
-                               Style="{StaticResource TextH3}" Margin="0,0,0,4"/>
-                    <TextBlock Style="{StaticResource BodyText}" Margin="0,0,0,16"
+                    <TextBlock Text="UPDATES" Classes="Label" Margin="0,0,0,16"/>
+                    <TextBlock Text="Release Channel" Classes="H3" Margin="0,0,0,4"/>
+                    <TextBlock Classes="BodyText" Margin="0,0,0,16"
                                Text="Nightly receives automated builds on every commit."/>
-
                     <StackPanel Orientation="Horizontal">
                         <RadioButton Content="Nightly"
                                      IsChecked="{Binding UpdateChannel, Converter={StaticResource EqToBool}, ConverterParameter=Nightly}"
@@ -421,27 +349,26 @@
                 </StackPanel>
             </Border>
 
-            <Border Grid.Row="14" Style="{StaticResource Card}" Padding="20">
+            <!-- OnlineFix -->
+            <Border Grid.Row="14" Classes="Card" Padding="20">
                 <StackPanel>
-                    <TextBlock Text="ONLINEFIX" Style="{StaticResource TextLabel}" Margin="0,0,0,16"/>
+                    <TextBlock Text="ONLINEFIX" Classes="Label" Margin="0,0,0,16"/>
 
-                    <TextBlock Text="online-fix.me Username"
-                               Style="{StaticResource TextH3}" Margin="0,0,0,4"/>
+                    <TextBlock Text="online-fix.me Username" Classes="H3" Margin="0,0,0,4"/>
                     <TextBlock Text="Your account username for online-fix.me."
-                               Style="{StaticResource BodyText}" Margin="0,0,0,8"/>
-                    <TextBox Text="{Binding OnlineFixUser, UpdateSourceTrigger=PropertyChanged}"/>
+                               Classes="BodyText" Margin="0,0,0,8"/>
+                    <TextBox Text="{Binding OnlineFixUser}"/>
 
                     <Separator Margin="0,20"/>
 
-                    <TextBlock Text="online-fix.me Password"
-                               Style="{StaticResource TextH3}" Margin="0,0,0,4"/>
+                    <TextBlock Text="online-fix.me Password" Classes="H3" Margin="0,0,0,4"/>
                     <TextBlock Text="Your account password. Stored encrypted locally."
-                               Style="{StaticResource BodyText}" Margin="0,0,0,8"/>
-                    <PasswordBox x:Name="OnlineFixPasswordBox"
-                                 PasswordChanged="OnlineFixPasswordBox_PasswordChanged"/>
+                               Classes="BodyText" Margin="0,0,0,8"/>
+                    <TextBox Text="{Binding OnlineFixPass}" PasswordChar="•"/>
                 </StackPanel>
             </Border>
 
+            <!-- Save row -->
             <Grid Grid.Row="16">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
@@ -453,21 +380,21 @@
                 <Border Grid.Column="1"
                         Background="{StaticResource SuccessLight}"
                         CornerRadius="8" Padding="14,10"
-                        Visibility="{Binding SaveSuccess, Converter={StaticResource BoolToVis}}">
+                        IsVisible="{Binding SaveSuccess}">
                     <TextBlock Text="✓  Settings saved"
                                Foreground="{StaticResource Success}"
                                FontSize="13"/>
                 </Border>
 
                 <Button Grid.Column="3"
-                        Style="{StaticResource BtnPrimary}"
+                        Theme="{StaticResource BtnPrimary}"
                         Command="{Binding SaveCommand}"
                         Padding="24,12">
                     <StackPanel Orientation="Horizontal">
                         <Path Data="{StaticResource LucideSave}"
                               Width="14" Height="14" Stretch="Uniform" Margin="0,0,7,0"
                               Stroke="White" StrokeThickness="1.7" Fill="Transparent"
-                              StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"/>
+                              StrokeLineCap="Round" StrokeJoin="Round"/>
                         <TextBlock Text="Save Settings" FontSize="13" FontWeight="SemiBold"/>
                     </StackPanel>
                 </Button>

@@ -1,199 +1,122 @@
 <Window x:Class="DepotDL.GUI.MainWindow"
-        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:views="clr-namespace:DepotDL.GUI.Views"
+        xmlns:views="using:DepotDL.GUI.Views"
         Title="DepotDL"
-        Width="1080" Height="780"
-        MinWidth="860" MinHeight="620"
+        Width="1280" Height="780"
+        MinWidth="960" MinHeight="620"
         WindowStartupLocation="CenterScreen"
-        WindowStyle="None"
-        AllowsTransparency="True"
-        ResizeMode="CanResizeWithGrip"
+        SystemDecorations="None"
+        TransparencyLevelHint="Transparent"
         Background="Transparent"
-        FontFamily="Segoe UI"
-        TextOptions.TextFormattingMode="Display"
-        TextOptions.TextRenderingMode="ClearType"
+        FontFamily="Inter,Segoe UI"
         UseLayoutRounding="True">
 
     <Window.Resources>
-        <Style x:Key="NavItem" TargetType="Button">
+        <!-- NavItem ControlTheme -->
+        <ControlTheme x:Key="NavItem" TargetType="Button">
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="Margin" Value="0,1"/>
             <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
             <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border x:Name="bg" Background="{TemplateBinding Background}"
-                                CornerRadius="10" Padding="12,9">
-                            <Grid>
-                                <Border x:Name="hoverBg" Background="{StaticResource Border}"
-                                        CornerRadius="10" Margin="-12,-9" Opacity="0"/>
-                                <ContentPresenter Panel.ZIndex="1"/>
-                            </Grid>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Trigger.EnterActions>
-                                    <BeginStoryboard>
-                                        <Storyboard>
-                                            <DoubleAnimation Storyboard.TargetName="hoverBg"
-                                                             Storyboard.TargetProperty="Opacity"
-                                                             To="1" Duration="0:0:0.15"/>
-                                        </Storyboard>
-                                    </BeginStoryboard>
-                                </Trigger.EnterActions>
-                                <Trigger.ExitActions>
-                                    <BeginStoryboard>
-                                        <Storyboard>
-                                            <DoubleAnimation Storyboard.TargetName="hoverBg"
-                                                             Storyboard.TargetProperty="Opacity"
-                                                             To="0" Duration="0:0:0.15"/>
-                                        </Storyboard>
-                                    </BeginStoryboard>
-                                </Trigger.ExitActions>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border Name="bg" Background="{TemplateBinding Background}"
+                            CornerRadius="10" Padding="12,9">
+                        <Border.Transitions>
+                            <Transitions>
+                                <BrushTransition Property="Background" Duration="0:0:0.15"/>
+                            </Transitions>
+                        </Border.Transitions>
+                        <ContentPresenter Name="PART_ContentPresenter"
+                                          Content="{TemplateBinding Content}"
+                                          ContentTemplate="{TemplateBinding ContentTemplate}"
+                                          HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                          VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                    </Border>
+                </ControlTemplate>
             </Setter>
-        </Style>
-
-        <Style x:Key="ChromeBtn" TargetType="Button">
+            <Style Selector="^:pointerover /template/ Border#bg">
+                <Setter Property="Background" Value="{StaticResource Border}"/>
+            </Style>
+        </ControlTheme>
+        <!-- ChromeBtn ControlTheme -->
+        <ControlTheme x:Key="ChromeBtn" TargetType="Button">
             <Setter Property="Width" Value="28"/>
             <Setter Property="Height" Value="28"/>
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border x:Name="bg" Background="{TemplateBinding Background}" CornerRadius="8">
-                            <Grid>
-                                <Border x:Name="hoverBg" Background="{StaticResource Border}" CornerRadius="8" Opacity="0"/>
-                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" Panel.ZIndex="1"/>
-                            </Grid>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Trigger.EnterActions>
-                                    <BeginStoryboard>
-                                        <Storyboard>
-                                            <DoubleAnimation Storyboard.TargetName="hoverBg"
-                                                             Storyboard.TargetProperty="Opacity"
-                                                             To="1" Duration="0:0:0.15"/>
-                                        </Storyboard>
-                                    </BeginStoryboard>
-                                </Trigger.EnterActions>
-                                <Trigger.ExitActions>
-                                    <BeginStoryboard>
-                                        <Storyboard>
-                                            <DoubleAnimation Storyboard.TargetName="hoverBg"
-                                                             Storyboard.TargetProperty="Opacity"
-                                                             To="0" Duration="0:0:0.15"/>
-                                        </Storyboard>
-                                    </BeginStoryboard>
-                                </Trigger.ExitActions>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border Name="bg" Background="{TemplateBinding Background}" CornerRadius="8">
+                        <Border.Transitions>
+                            <Transitions>
+                                <BrushTransition Property="Background" Duration="0:0:0.15"/>
+                            </Transitions>
+                        </Border.Transitions>
+                        <ContentPresenter Name="PART_ContentPresenter"
+                                          Content="{TemplateBinding Content}"
+                                          ContentTemplate="{TemplateBinding ContentTemplate}"
+                                          HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                </ControlTemplate>
             </Setter>
-        </Style>
-
-        <Style x:Key="FadeInSlideUp" TargetType="FrameworkElement">
-            <Setter Property="RenderTransform">
-                <Setter.Value>
-                    <TranslateTransform Y="0"/>
-                </Setter.Value>
-            </Setter>
-            <Style.Triggers>
-                <Trigger Property="Visibility" Value="Visible">
-                    <Trigger.EnterActions>
-                        <BeginStoryboard>
-                            <Storyboard>
-                                <DoubleAnimation Storyboard.TargetProperty="Opacity"
-                                                 From="0" To="1" Duration="0:0:0.35">
-                                    <DoubleAnimation.EasingFunction>
-                                        <CubicEase EasingMode="EaseOut"/>
-                                    </DoubleAnimation.EasingFunction>
-                                </DoubleAnimation>
-                                <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.Y)"
-                                                 From="20" To="0" Duration="0:0:0.35">
-                                    <DoubleAnimation.EasingFunction>
-                                        <CubicEase EasingMode="EaseOut"/>
-                                    </DoubleAnimation.EasingFunction>
-                                </DoubleAnimation>
-                            </Storyboard>
-                        </BeginStoryboard>
-                    </Trigger.EnterActions>
-                </Trigger>
-            </Style.Triggers>
-        </Style>
-
-
+            <Style Selector="^:pointerover /template/ Border#bg">
+                <Setter Property="Background" Value="{StaticResource Border}"/>
+            </Style>
+        </ControlTheme>
     </Window.Resources>
 
-    <Window.Triggers>
-        <EventTrigger RoutedEvent="Window.Loaded">
-            <BeginStoryboard>
-                <Storyboard>
-                    <DoubleAnimation Storyboard.TargetName="RootBorder"
-                                     Storyboard.TargetProperty="Opacity"
-                                     From="0" To="1" Duration="0:0:0.55">
-                        <DoubleAnimation.EasingFunction>
-                            <CubicEase EasingMode="EaseOut"/>
-                        </DoubleAnimation.EasingFunction>
-                    </DoubleAnimation>
-                    
-                    <DoubleAnimation Storyboard.TargetName="RootBorder"
-                                     Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleX)"
-                                     From="0.95" To="1" Duration="0:0:0.6">
-                        <DoubleAnimation.EasingFunction>
-                            <CubicEase EasingMode="EaseOut"/>
-                        </DoubleAnimation.EasingFunction>
-                    </DoubleAnimation>
-                    
-                    <DoubleAnimation Storyboard.TargetName="RootBorder"
-                                     Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleY)"
-                                     From="0.95" To="1" Duration="0:0:0.6">
-                        <DoubleAnimation.EasingFunction>
-                            <CubicEase EasingMode="EaseOut"/>
-                        </DoubleAnimation.EasingFunction>
-                    </DoubleAnimation>
-                    
-                    <DoubleAnimation Storyboard.TargetName="RootBorder"
-                                     Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[1].(TranslateTransform.Y)"
-                                     From="30" To="0" Duration="0:0:0.55">
-                        <DoubleAnimation.EasingFunction>
-                            <CubicEase EasingMode="EaseOut"/>
-                        </DoubleAnimation.EasingFunction>
-                    </DoubleAnimation>
-                </Storyboard>
-            </BeginStoryboard>
-        </EventTrigger>
-    </Window.Triggers>
+    <Window.Styles>
+        <Style Selector="Button.navActive /template/ Border#bg">
+            <Setter Property="Background" Value="{StaticResource AccentLight}"/>
+        </Style>
 
-    <Border x:Name="RootBorder"
+        <!-- Default/Inactive styling -->
+        <Style Selector="Border.navIndicator">
+            <Setter Property="Background" Value="Transparent"/>
+        </Style>
+        <Style Selector="Path.navIcon">
+            <Setter Property="Stroke" Value="{StaticResource TextMuted}"/>
+        </Style>
+        <Style Selector="Path.navIconFill">
+            <Setter Property="Fill" Value="{StaticResource TextMuted}"/>
+        </Style>
+        <Style Selector="TextBlock.navText">
+            <Setter Property="Foreground" Value="{StaticResource TextBody}"/>
+            <Setter Property="FontWeight" Value="Normal"/>
+        </Style>
+
+        <!-- Active styling -->
+        <Style Selector="Button.navActive Border.navIndicator">
+            <Setter Property="Background" Value="{StaticResource Accent}"/>
+        </Style>
+        <Style Selector="Button.navActive Path.navIcon">
+            <Setter Property="Stroke" Value="{StaticResource Accent}"/>
+        </Style>
+        <Style Selector="Button.navActive Path.navIconFill">
+            <Setter Property="Fill" Value="{StaticResource Accent}"/>
+        </Style>
+        <Style Selector="Button.navActive TextBlock.navText">
+            <Setter Property="Foreground" Value="{StaticResource Accent}"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+        </Style>
+    </Window.Styles>
+
+    <Border Name="RootBorder"
             CornerRadius="14"
             Background="{StaticResource BgPage}"
             BorderBrush="{StaticResource Border}"
-            BorderThickness="1"
-            RenderTransformOrigin="0.5,0.5"
-            Opacity="0">
-        <Border.RenderTransform>
-            <TransformGroup>
-                <ScaleTransform ScaleX="0.95" ScaleY="0.95"/>
-                <TranslateTransform Y="30"/>
-            </TransformGroup>
-        </Border.RenderTransform>
-        <Grid x:Name="ContentGrid">
+            BorderThickness="1">
+        <Grid Name="ContentGrid">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="210"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
+            <!-- ── Sidebar ─────────────────────────────────────────── -->
             <Border Grid.Column="0"
                     Background="{StaticResource BgSidebar}"
                     CornerRadius="14,0,0,14"
@@ -206,12 +129,10 @@
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
 
+                    <!-- Titlebar drag area + logo -->
                     <Border Grid.Row="0" Background="Transparent"
-                            MouseLeftButtonDown="TitleBar_MouseDown"
-                            MouseLeftButtonUp="TitleBar_MouseUp"
-                            MouseMove="TitleBar_MouseMove">
-                        <StackPanel Orientation="Horizontal"
-                                    VerticalAlignment="Center" Margin="16,0">
+                            PointerPressed="TitleBar_PointerPressed">
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="16,0">
                             <Border Width="32" Height="32" CornerRadius="9"
                                     Background="{StaticResource Accent}" Margin="0,0,10,0">
                                 <TextBlock Text="D" FontSize="16" FontWeight="Bold"
@@ -220,302 +141,156 @@
                                            VerticalAlignment="Center"/>
                             </Border>
                             <StackPanel VerticalAlignment="Center">
-                                <TextBlock Text="DepotDL"
-                                           FontSize="14" FontWeight="SemiBold"
+                                <TextBlock Text="DepotDL" FontSize="14" FontWeight="SemiBold"
                                            Foreground="{StaticResource TextH}"/>
-                                <TextBlock Text="Game Downloader"
-                                           FontSize="9.5"
+                                <TextBlock Text="Game Downloader" FontSize="9.5"
                                            Foreground="{StaticResource TextMuted}"/>
                             </StackPanel>
                         </StackPanel>
                     </Border>
 
+                    <!-- Nav items -->
                     <StackPanel Grid.Row="1" Margin="10,6,10,0">
 
-                        <Button Command="{Binding NavigateStoreCommand}">
-                            <Button.Style>
-                                <Style TargetType="Button" BasedOn="{StaticResource NavItem}">
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding IsStorePage}" Value="True">
-                                            <Setter Property="Background" Value="{StaticResource AccentLight}"/>
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </Button.Style>
+                        <Button Theme="{StaticResource NavItem}"
+                                Command="{Binding NavigateStoreCommand}"
+                                Classes.navActive="{Binding IsStorePage}">
                             <StackPanel Orientation="Horizontal">
-                                <Border Width="3" Height="18" CornerRadius="2" Margin="0,0,10,0">
-                                    <Border.Style>
-                                        <Style TargetType="Border">
-                                            <Setter Property="Background" Value="Transparent"/>
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding IsStorePage}" Value="True">
-                                                    <Setter Property="Background" Value="{StaticResource Accent}"/>
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </Border.Style>
-                                </Border>
-                                <Path Data="{StaticResource LucideShoppingBag}"
+                                <Border Classes="navIndicator" Width="3" Height="18" CornerRadius="2" Margin="0,0,10,0"/>
+                                <Path Classes="navIcon" Data="{StaticResource LucideShoppingBag}"
                                       Width="16" Height="16" Stretch="Uniform" Margin="0,0,10,0"
-                                      StrokeThickness="1.7" StrokeStartLineCap="Round"
-                                      StrokeEndLineCap="Round" StrokeLineJoin="Round"
-                                      Fill="Transparent">
-                                    <Path.Style>
-                                        <Style TargetType="Path">
-                                            <Setter Property="Stroke" Value="{StaticResource TextMuted}"/>
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding IsStorePage}" Value="True">
-                                                    <Setter Property="Stroke" Value="{StaticResource Accent}"/>
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </Path.Style>
-                                </Path>
-                                <TextBlock Text="Store" FontSize="13" VerticalAlignment="Center">
-                                    <TextBlock.Style>
-                                        <Style TargetType="TextBlock">
-                                            <Setter Property="Foreground" Value="{StaticResource TextBody}"/>
-                                            <Setter Property="FontWeight" Value="Normal"/>
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding IsStorePage}" Value="True">
-                                                    <Setter Property="Foreground" Value="{StaticResource Accent}"/>
-                                                    <Setter Property="FontWeight" Value="SemiBold"/>
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </TextBlock.Style>
-                                </TextBlock>
+                                      StrokeThickness="1.7" StrokeLineCap="Round"
+                                      StrokeJoin="Round" Fill="Transparent"/>
+                                <TextBlock Classes="navText" Text="Store" FontSize="13" VerticalAlignment="Center"/>
                             </StackPanel>
                         </Button>
 
-                        <Button Command="{Binding NavigateLibraryCommand}">
-                            <Button.Style>
-                                <Style TargetType="Button" BasedOn="{StaticResource NavItem}">
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding IsLibraryPage}" Value="True">
-                                            <Setter Property="Background" Value="{StaticResource AccentLight}"/>
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </Button.Style>
+                        <Button Theme="{StaticResource NavItem}"
+                                Command="{Binding NavigateLibraryCommand}"
+                                Classes.navActive="{Binding IsLibraryPage}">
                             <StackPanel Orientation="Horizontal">
-                                <Border Width="3" Height="18" CornerRadius="2" Margin="0,0,10,0">
-                                    <Border.Style>
-                                        <Style TargetType="Border">
-                                            <Setter Property="Background" Value="Transparent"/>
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding IsLibraryPage}" Value="True">
-                                                    <Setter Property="Background" Value="{StaticResource Accent}"/>
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </Border.Style>
-                                </Border>
-                                <Path Data="{StaticResource LucideLayoutGrid}"
+                                <Border Classes="navIndicator" Width="3" Height="18" CornerRadius="2" Margin="0,0,10,0"/>
+                                <Path Classes="navIconFill" Data="{StaticResource LucideLayoutGrid}"
                                       Width="16" Height="16" Stretch="Uniform" Margin="0,0,10,0"
-                                      StrokeThickness="0">
-                                    <Path.Style>
-                                        <Style TargetType="Path">
-                                            <Setter Property="Fill" Value="{StaticResource TextMuted}"/>
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding IsLibraryPage}" Value="True">
-                                                    <Setter Property="Fill" Value="{StaticResource Accent}"/>
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </Path.Style>
-                                </Path>
-                                <TextBlock Text="Library" FontSize="13" VerticalAlignment="Center">
-                                    <TextBlock.Style>
-                                        <Style TargetType="TextBlock">
-                                            <Setter Property="Foreground" Value="{StaticResource TextBody}"/>
-                                            <Setter Property="FontWeight" Value="Normal"/>
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding IsLibraryPage}" Value="True">
-                                                    <Setter Property="Foreground" Value="{StaticResource Accent}"/>
-                                                    <Setter Property="FontWeight" Value="SemiBold"/>
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </TextBlock.Style>
-                                </TextBlock>
+                                      StrokeThickness="0"/>
+                                <TextBlock Classes="navText" Text="Library" FontSize="13" VerticalAlignment="Center"/>
                             </StackPanel>
                         </Button>
 
-                        <Button Command="{Binding NavigateDownloadCommand}">
-                            <Button.Style>
-                                <Style TargetType="Button" BasedOn="{StaticResource NavItem}">
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding IsDownloadPage}" Value="True">
-                                            <Setter Property="Background" Value="{StaticResource AccentLight}"/>
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </Button.Style>
+                        <Button Theme="{StaticResource NavItem}"
+                                Command="{Binding NavigateDownloadCommand}"
+                                Classes.navActive="{Binding IsDownloadPage}">
                             <StackPanel Orientation="Horizontal">
-                                <Border Width="3" Height="18" CornerRadius="2" Margin="0,0,10,0">
-                                    <Border.Style>
-                                        <Style TargetType="Border">
-                                            <Setter Property="Background" Value="Transparent"/>
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding IsDownloadPage}" Value="True">
-                                                    <Setter Property="Background" Value="{StaticResource Accent}"/>
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </Border.Style>
-                                </Border>
-                                <Path Data="{StaticResource LucideDownload}"
+                                <Border Classes="navIndicator" Width="3" Height="18" CornerRadius="2" Margin="0,0,10,0"/>
+                                <Path Classes="navIcon" Data="{StaticResource LucideDownload}"
                                       Width="16" Height="16" Stretch="Uniform" Margin="0,0,10,0"
-                                      StrokeThickness="1.7" StrokeStartLineCap="Round"
-                                      StrokeEndLineCap="Round" StrokeLineJoin="Round"
-                                      Fill="Transparent">
-                                    <Path.Style>
-                                        <Style TargetType="Path">
-                                            <Setter Property="Stroke" Value="{StaticResource TextMuted}"/>
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding IsDownloadPage}" Value="True">
-                                                    <Setter Property="Stroke" Value="{StaticResource Accent}"/>
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </Path.Style>
-                                </Path>
-                                <TextBlock Text="Download" FontSize="13" VerticalAlignment="Center">
-                                    <TextBlock.Style>
-                                        <Style TargetType="TextBlock">
-                                            <Setter Property="Foreground" Value="{StaticResource TextBody}"/>
-                                            <Setter Property="FontWeight" Value="Normal"/>
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding IsDownloadPage}" Value="True">
-                                                    <Setter Property="Foreground" Value="{StaticResource Accent}"/>
-                                                    <Setter Property="FontWeight" Value="SemiBold"/>
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </TextBlock.Style>
-                                </TextBlock>
+                                      StrokeThickness="1.7" StrokeLineCap="Round"
+                                      StrokeJoin="Round" Fill="Transparent"/>
+                                <TextBlock Classes="navText" Text="Download" FontSize="13" VerticalAlignment="Center"/>
                                 <Border Width="8" Height="8" CornerRadius="4"
                                         Background="{StaticResource Accent}"
-                                        Margin="7,0,0,0"
-                                        VerticalAlignment="Center"
-                                        Visibility="{Binding Download.IsDownloading, Converter={StaticResource BoolToVis}}">
-                                    <Border.Triggers>
-                                        <EventTrigger RoutedEvent="FrameworkElement.Loaded">
-                                            <BeginStoryboard>
-                                                <Storyboard RepeatBehavior="Forever" AutoReverse="True">
-                                                    <DoubleAnimation Storyboard.TargetProperty="Opacity"
-                                                                     From="1" To="0.25" Duration="0:0:0.85"/>
-                                                </Storyboard>
-                                            </BeginStoryboard>
-                                        </EventTrigger>
-                                    </Border.Triggers>
+                                        Margin="7,0,0,0" VerticalAlignment="Center"
+                                        IsVisible="{Binding Download.IsDownloading}">
+                                    <Border.Styles>
+                                        <Style Selector="Border">
+                                            <Style.Animations>
+                                                <Animation IterationCount="INFINITE" PlaybackDirection="Alternate" Duration="0:0:0.85">
+                                                    <KeyFrame Cue="0%"><Setter Property="Opacity" Value="1"/></KeyFrame>
+                                                    <KeyFrame Cue="100%"><Setter Property="Opacity" Value="0.25"/></KeyFrame>
+                                                </Animation>
+                                            </Style.Animations>
+                                        </Style>
+                                    </Border.Styles>
                                 </Border>
                             </StackPanel>
                         </Button>
 
                     </StackPanel>
 
+                    <!-- Settings nav (bottom) -->
                     <StackPanel Grid.Row="2" Margin="10,0,10,14">
-
-                        <Button Command="{Binding NavigateSettingsCommand}" Margin="0,0,0,0">
-                            <Button.Style>
-                                <Style TargetType="Button" BasedOn="{StaticResource NavItem}">
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding IsSettingsPage}" Value="True">
-                                            <Setter Property="Background" Value="{StaticResource AccentLight}"/>
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </Button.Style>
+                        <Button Theme="{StaticResource NavItem}"
+                                Command="{Binding NavigateSettingsCommand}"
+                                Classes.navActive="{Binding IsSettingsPage}">
                             <StackPanel Orientation="Horizontal">
-                                <Border Width="3" Height="18" CornerRadius="2" Margin="0,0,10,0">
-                                    <Border.Style>
-                                        <Style TargetType="Border">
-                                            <Setter Property="Background" Value="Transparent"/>
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding IsSettingsPage}" Value="True">
-                                                    <Setter Property="Background" Value="{StaticResource Accent}"/>
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </Border.Style>
-                                </Border>
-                                <Path Data="{StaticResource LucideSettings}"
+                                <Border Classes="navIndicator" Width="3" Height="18" CornerRadius="2" Margin="0,0,10,0"/>
+                                <Path Classes="navIcon" Data="{StaticResource LucideSettings}"
                                       Width="16" Height="16" Stretch="Uniform" Margin="0,0,10,0"
-                                      StrokeThickness="1.5" StrokeStartLineCap="Round"
-                                      StrokeEndLineCap="Round" StrokeLineJoin="Round"
-                                      Fill="Transparent">
-                                    <Path.Style>
-                                        <Style TargetType="Path">
-                                            <Setter Property="Stroke" Value="{StaticResource TextMuted}"/>
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding IsSettingsPage}" Value="True">
-                                                    <Setter Property="Stroke" Value="{StaticResource Accent}"/>
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </Path.Style>
-                                </Path>
-                                <TextBlock Text="Settings" FontSize="13" VerticalAlignment="Center">
-                                    <TextBlock.Style>
-                                        <Style TargetType="TextBlock">
-                                            <Setter Property="Foreground" Value="{StaticResource TextBody}"/>
-                                            <Setter Property="FontWeight" Value="Normal"/>
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding IsSettingsPage}" Value="True">
-                                                    <Setter Property="Foreground" Value="{StaticResource Accent}"/>
-                                                    <Setter Property="FontWeight" Value="SemiBold"/>
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </TextBlock.Style>
-                                </TextBlock>
+                                      StrokeThickness="1.5" StrokeLineCap="Round"
+                                      StrokeJoin="Round" Fill="Transparent"/>
+                                <TextBlock Classes="navText" Text="Settings" FontSize="13" VerticalAlignment="Center"/>
                             </StackPanel>
                         </Button>
                     </StackPanel>
                 </Grid>
             </Border>
 
+            <!-- ── Content area ────────────────────────────────────── -->
             <Border Grid.Column="1" Background="{StaticResource BgPage}" CornerRadius="0,14,14,0">
                 <Grid ClipToBounds="True">
-                    <Border Height="40" Background="Transparent" VerticalAlignment="Top"
-                            MouseLeftButtonDown="TitleBar_MouseDown"
-                            MouseLeftButtonUp="TitleBar_MouseUp"
-                            MouseMove="TitleBar_MouseMove"/>
 
+                    <!-- Titlebar drag strip (right side) -->
+                    <Border Height="40" Background="Transparent" VerticalAlignment="Top"
+                            PointerPressed="TitleBar_PointerPressed"/>
+
+                    <!-- Chrome buttons -->
                     <StackPanel Orientation="Horizontal"
                                 HorizontalAlignment="Right"
                                 VerticalAlignment="Top"
                                 Margin="0,10,14,0"
-                                Panel.ZIndex="10">
-                        <Button Style="{StaticResource ChromeBtn}" Click="MinimizeBtn_Click">
+                                ZIndex="10">
+                        <Button Theme="{StaticResource ChromeBtn}" Click="MinimizeBtn_Click">
                             <Path Data="{StaticResource LucideMinus}" Width="10" Height="10" Stretch="Uniform"
                                   Stroke="{StaticResource TextMuted}" StrokeThickness="1.5"
-                                  StrokeStartLineCap="Round" StrokeEndLineCap="Round" Fill="Transparent"/>
+                                  StrokeLineCap="Round" StrokeJoin="Round" Fill="Transparent"/>
                         </Button>
-                        <Button Style="{StaticResource ChromeBtn}" Click="MaximizeBtn_Click" Margin="4,0">
+                        <Button Theme="{StaticResource ChromeBtn}" Click="MaximizeBtn_Click" Margin="4,0">
                             <Path Data="{StaticResource LucideSquare}" Width="10" Height="10" Stretch="Uniform"
                                   Stroke="{StaticResource TextMuted}" StrokeThickness="1.5" Fill="Transparent"/>
                         </Button>
-                        <Button Style="{StaticResource ChromeBtn}" Click="CloseBtn_Click">
+                        <Button Theme="{StaticResource ChromeBtn}" Click="CloseBtn_Click">
                             <Path Data="{StaticResource LucideX}" Width="10" Height="10" Stretch="Uniform"
                                   Stroke="{StaticResource TextMuted}" StrokeThickness="1.5"
-                                  StrokeStartLineCap="Round" StrokeEndLineCap="Round" Fill="Transparent"/>
+                                  StrokeLineCap="Round" StrokeJoin="Round" Fill="Transparent"/>
                         </Button>
                     </StackPanel>
 
-                    <views:StoreView    x:Name="StoreViewEl"    DataContext="{Binding Store}"    Visibility="Collapsed" Opacity="0"/>
-                    <views:LibraryView  x:Name="LibraryViewEl"  DataContext="{Binding Library}"  Visibility="Visible"   Opacity="1"/>
-                    <views:DownloadView x:Name="DownloadViewEl" DataContext="{Binding Download}" Visibility="Collapsed" Opacity="0"/>
-                    <views:SettingsView x:Name="SettingsViewEl" DataContext="{Binding Settings}" Visibility="Collapsed" Opacity="0"/>
+                    <!-- Page views -->
+                    <views:StoreView    Name="StoreViewEl"    DataContext="{Binding Store}"    IsVisible="False" Opacity="0">
+                        <views:StoreView.Transitions>
+                            <Transitions>
+                                <DoubleTransition Property="Opacity" Duration="0:0:0.15"/>
+                            </Transitions>
+                        </views:StoreView.Transitions>
+                    </views:StoreView>
+                    <views:LibraryView  Name="LibraryViewEl"  DataContext="{Binding Library}"  IsVisible="True"  Opacity="1">
+                        <views:LibraryView.Transitions>
+                            <Transitions>
+                                <DoubleTransition Property="Opacity" Duration="0:0:0.15"/>
+                            </Transitions>
+                        </views:LibraryView.Transitions>
+                    </views:LibraryView>
+                    <views:DownloadView Name="DownloadViewEl" DataContext="{Binding Download}" IsVisible="False" Opacity="0">
+                        <views:DownloadView.Transitions>
+                            <Transitions>
+                                <DoubleTransition Property="Opacity" Duration="0:0:0.15"/>
+                            </Transitions>
+                        </views:DownloadView.Transitions>
+                    </views:DownloadView>
+                    <views:SettingsView Name="SettingsViewEl" DataContext="{Binding Settings}" IsVisible="False" Opacity="0">
+                        <views:SettingsView.Transitions>
+                            <Transitions>
+                                <DoubleTransition Property="Opacity" Duration="0:0:0.15"/>
+                            </Transitions>
+                        </views:SettingsView.Transitions>
+                    </views:SettingsView>
 
                     <!-- Update notification banner -->
                     <Border VerticalAlignment="Bottom" HorizontalAlignment="Left"
-                            Margin="16,0,0,16" Panel.ZIndex="6" CornerRadius="12"
+                            Margin="16,0,0,16" ZIndex="6" CornerRadius="12"
                             BorderThickness="1" BorderBrush="#DDB060" Background="#FEF3E2"
                             MaxWidth="420" Padding="14,10"
-                            Visibility="{Binding UpdateAvailable, Converter={StaticResource BoolToVis}}">
+                            IsVisible="{Binding UpdateAvailable}">
                         <StackPanel>
                             <Grid>
                                 <Grid.ColumnDefinitions>
@@ -532,7 +307,7 @@
                                 <Path Grid.Column="0" Data="{StaticResource LucideAlertTriangle}"
                                       Width="15" Height="15" Stretch="Uniform" Margin="0,0,10,0"
                                       Stroke="#C07012" StrokeThickness="1.8" Fill="Transparent"
-                                      StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"/>
+                                      StrokeLineCap="Round" StrokeJoin="Round"/>
 
                                 <TextBlock Grid.Column="1"
                                            Text="{Binding UpdateBannerText}"
@@ -545,19 +320,17 @@
                                         Background="Transparent" BorderThickness="0"
                                         Cursor="Hand" Padding="0"
                                         IsEnabled="{Binding IsUpdating, Converter={StaticResource InvBool}}"
-                                        Visibility="{Binding CanInstallUpdate, Converter={StaticResource BoolToVis}}">
+                                        IsVisible="{Binding CanInstallUpdate}">
                                     <TextBlock FontSize="12" Foreground="#1A73E8"
-                                               TextDecorations="Underline" VerticalAlignment="Center">
-                                        <TextBlock.Style>
-                                            <Style TargetType="TextBlock">
-                                                <Setter Property="Text" Value="Install update"/>
-                                                <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding IsUpdating}" Value="True">
-                                                        <Setter Property="Text" Value="{Binding UpdateProgress, StringFormat='Downloading… {0}%'}"/>
-                                                    </DataTrigger>
-                                                </Style.Triggers>
+                                               TextDecorations="Underline" VerticalAlignment="Center"
+                                               Text="{Binding IsUpdating, Converter={StaticResource BoolToVis}}"
+                                               Classes.updating="{Binding IsUpdating}">
+                                        <TextBlock.Styles>
+                                            <Style Selector="TextBlock"><Setter Property="Text" Value="Install update"/></Style>
+                                            <Style Selector="TextBlock.updating">
+                                                <Setter Property="Text" Value="{Binding UpdateProgress, StringFormat='Downloading… {0}%'}"/>
                                             </Style>
-                                        </TextBlock.Style>
+                                        </TextBlock.Styles>
                                     </TextBlock>
                                 </Button>
 
@@ -579,27 +352,25 @@
                                     <Path Data="{StaticResource LucideX}"
                                           Width="8" Height="8" Stretch="Uniform"
                                           Stroke="#9C8E82" StrokeThickness="1.5"
-                                          StrokeStartLineCap="Round" StrokeEndLineCap="Round" Fill="Transparent"/>
+                                          StrokeLineCap="Round" StrokeJoin="Round" Fill="Transparent"/>
                                 </Button>
                             </Grid>
 
                             <ProgressBar Height="3" Margin="0,6,0,0" Minimum="0" Maximum="100"
                                          Value="{Binding UpdateProgress}"
-                                         Background="#F5E0B0" Foreground="#C07012" BorderThickness="0"
-                                         Visibility="{Binding IsUpdating, Converter={StaticResource BoolToVis}}"/>
+                                         Foreground="#C07012" Background="#F5E0B0" BorderThickness="0"
+                                         CornerRadius="1.5"
+                                         IsVisible="{Binding IsUpdating}"/>
                         </StackPanel>
                     </Border>
 
                     <!-- Floating widgets (bottom-right) -->
-                    <StackPanel HorizontalAlignment="Right"
-                                VerticalAlignment="Bottom"
-                                Margin="0,0,24,24"
-                                Panel.ZIndex="5">
+                    <StackPanel HorizontalAlignment="Right" VerticalAlignment="Bottom"
+                                Margin="0,0,24,24" ZIndex="5">
 
                         <!-- Pack progress widget -->
-                        <Border Style="{StaticResource FadeInSlideUp}"
-                                Margin="0,0,0,10"
-                                Visibility="{Binding ShowPackWidget, Converter={StaticResource BoolToVis}}">
+                        <Border Margin="0,0,0,10"
+                                IsVisible="{Binding ShowPackWidget}">
                             <Border Width="280" CornerRadius="14"
                                     Background="{StaticResource BgCard}"
                                     BorderBrush="{StaticResource Border}"
@@ -613,15 +384,13 @@
                                         <RowDefinition Height="10"/>
                                         <RowDefinition Height="Auto"/>
                                     </Grid.RowDefinitions>
-
-                                    <!-- Title + percent + cancel -->
                                     <Grid Grid.Row="0">
                                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                             <Path Data="{StaticResource LucidePackage}"
                                                   Width="13" Height="13" Stretch="Uniform" Margin="0,0,7,0"
                                                   Stroke="{StaticResource Accent}" StrokeThickness="1.7"
-                                                  Fill="Transparent" StrokeStartLineCap="Round"
-                                                  StrokeEndLineCap="Round" StrokeLineJoin="Round"/>
+                                                  Fill="Transparent" StrokeLineCap="Round"
+                                                  StrokeJoin="Round"/>
                                             <TextBlock FontSize="12.5" FontWeight="SemiBold"
                                                        Foreground="{StaticResource TextPrimary}"
                                                        VerticalAlignment="Center"
@@ -633,58 +402,37 @@
                                             <TextBlock FontSize="13" FontWeight="Bold"
                                                        Foreground="{StaticResource Accent}" VerticalAlignment="Center"
                                                        Margin="0,0,6,0">
-                                                <Run Text="{Binding Library.PackPercent, StringFormat={}{0:F0}}"/>
+                                                <Run Text="{Binding Library.PackPercent, StringFormat='{}{0:F0}'}"/>
                                                 <Run Text="%"/>
                                             </TextBlock>
                                             <Button Command="{Binding Library.CancelPackCommand}"
-                                                    Width="18" Height="18"
-                                                    Padding="0"
-                                                    Background="Transparent"
-                                                    BorderThickness="0"
-                                                    Cursor="Hand"
-                                                    ToolTip="Cancel and delete unfinished pack">
+                                                    Width="18" Height="18" Padding="0"
+                                                    Background="Transparent" BorderThickness="0"
+                                                    Cursor="Hand" ToolTip.Tip="Cancel and delete unfinished pack">
                                                 <Path Data="{StaticResource LucideX}"
                                                       Width="10" Height="10" Stretch="Uniform"
                                                       Stroke="{StaticResource TextMuted}" StrokeThickness="2"
-                                                      Fill="Transparent" StrokeStartLineCap="Round"
-                                                      StrokeEndLineCap="Round" StrokeLineJoin="Round"/>
+                                                      Fill="Transparent" StrokeLineCap="Round"
+                                                      StrokeJoin="Round"/>
                                             </Button>
                                         </StackPanel>
                                     </Grid>
-
-                                    <!-- Status text -->
                                     <TextBlock Grid.Row="2"
                                                Text="{Binding Library.PackStatus}"
-                                               FontSize="10.5"
-                                               Foreground="{StaticResource TextMuted}"
+                                               FontSize="10.5" Foreground="{StaticResource TextMuted}"
                                                TextTrimming="CharacterEllipsis"/>
-
-                                    <!-- Mini progress bar -->
-                                    <Border Grid.Row="4" Height="6" CornerRadius="3"
-                                            Background="{StaticResource AccentVeryLight}">
-                                        <Border HorizontalAlignment="Left" CornerRadius="3"
-                                                Background="{StaticResource Accent}">
-                                            <Border.Width>
-                                                <MultiBinding Converter="{StaticResource PctToWidth}">
-                                                    <Binding Path="Library.PackPercent"/>
-                                                    <Binding Path="ActualWidth"
-                                                             RelativeSource="{RelativeSource AncestorType=Border, AncestorLevel=1}"/>
-                                                </MultiBinding>
-                                            </Border.Width>
-                                            <Border.Effect>
-                                                <DropShadowEffect BlurRadius="8" ShadowDepth="0" Opacity="0.4"
-                                                                  Color="{StaticResource AccentColor}"/>
-                                            </Border.Effect>
-                                        </Border>
-                                    </Border>
+                                    <ProgressBar Grid.Row="4" Height="6" Minimum="0" Maximum="100"
+                                                 Value="{Binding Library.PackPercent}"
+                                                 Foreground="{StaticResource Accent}"
+                                                 Background="{StaticResource AccentVeryLight}"
+                                                 CornerRadius="3" BorderThickness="0"/>
                                 </Grid>
                             </Border>
                         </Border>
 
                         <!-- OnlineFix progress widget -->
-                        <Border Style="{StaticResource FadeInSlideUp}"
-                                Margin="0,0,0,10"
-                                Visibility="{Binding ShowOnlineFixWidget, Converter={StaticResource BoolToVis}}">
+                        <Border Margin="0,0,0,10"
+                                IsVisible="{Binding ShowOnlineFixWidget}">
                             <Border Width="280" CornerRadius="14"
                                     Background="{StaticResource BgCard}"
                                     BorderBrush="{StaticResource Border}"
@@ -696,45 +444,41 @@
                                         <RowDefinition Height="8"/>
                                         <RowDefinition Height="Auto"/>
                                     </Grid.RowDefinitions>
-
                                     <Grid Grid.Row="0">
                                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                             <Path Data="{StaticResource LucideDownload}"
                                                   Width="13" Height="13" Stretch="Uniform" Margin="0,0,7,0"
                                                   Stroke="{StaticResource Accent}" StrokeThickness="1.7"
-                                                  Fill="Transparent" StrokeStartLineCap="Round"
-                                                  StrokeEndLineCap="Round" StrokeLineJoin="Round"/>
+                                                  Fill="Transparent" StrokeLineCap="Round"
+                                                  StrokeJoin="Round"/>
                                             <TextBlock FontSize="12.5" FontWeight="SemiBold"
                                                        Foreground="{StaticResource TextPrimary}"
                                                        VerticalAlignment="Center"
                                                        Text="OnlineFix"/>
                                         </StackPanel>
                                         <TextBlock HorizontalAlignment="Right" FontSize="11.5"
-                                                   Foreground="{StaticResource Accent}"
-                                                   VerticalAlignment="Center"
+                                                   Foreground="{StaticResource Accent}" VerticalAlignment="Center"
                                                    Text="{Binding Library.OnlineFixGameName}"
-                                                   MaxWidth="100"
-                                                   TextTrimming="CharacterEllipsis"/>
+                                                   MaxWidth="100" TextTrimming="CharacterEllipsis"/>
                                     </Grid>
-
                                     <TextBlock Grid.Row="2"
                                                Text="{Binding Library.OnlineFixStatus}"
-                                               FontSize="10.5"
-                                               Foreground="{StaticResource TextMuted}"
+                                               FontSize="10.5" Foreground="{StaticResource TextMuted}"
                                                TextTrimming="CharacterEllipsis"/>
                                 </Grid>
                             </Border>
                         </Border>
 
                         <!-- Floating download widget -->
-                        <Border Style="{StaticResource FadeInSlideUp}"
-                                Visibility="{Binding ShowDownloadWidget, Converter={StaticResource BoolToVis}}">
+                        <Border IsVisible="{Binding ShowDownloadWidget}">
                             <Button Command="{Binding NavigateDownloadCommand}"
                                     BorderThickness="0" Background="Transparent"
                                     Padding="0" Cursor="Hand">
                                 <Button.Template>
                                     <ControlTemplate TargetType="Button">
-                                        <ContentPresenter/>
+                                        <ContentPresenter Name="PART_ContentPresenter"
+                                                          Content="{TemplateBinding Content}"
+                                                          ContentTemplate="{TemplateBinding ContentTemplate}"/>
                                     </ControlTemplate>
                                 </Button.Template>
                                 <Border Width="280" CornerRadius="14"
@@ -752,15 +496,13 @@
                                             <RowDefinition Height="8"/>
                                             <RowDefinition Height="Auto"/>
                                         </Grid.RowDefinitions>
-
-                                        <!-- Title + percent -->
                                         <Grid Grid.Row="0">
                                             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                                 <Path Data="{StaticResource LucideDownload}"
                                                       Width="13" Height="13" Stretch="Uniform" Margin="0,0,7,0"
                                                       Stroke="{StaticResource Accent}" StrokeThickness="1.7"
-                                                      Fill="Transparent" StrokeStartLineCap="Round"
-                                                      StrokeEndLineCap="Round" StrokeLineJoin="Round"/>
+                                                      Fill="Transparent" StrokeLineCap="Round"
+                                                      StrokeJoin="Round"/>
                                                 <TextBlock FontSize="12.5" FontWeight="SemiBold"
                                                            Foreground="{StaticResource TextPrimary}"
                                                            VerticalAlignment="Center">
@@ -770,55 +512,43 @@
                                             </StackPanel>
                                             <TextBlock HorizontalAlignment="Right" FontSize="13" FontWeight="Bold"
                                                        Foreground="{StaticResource Accent}" VerticalAlignment="Center">
-                                                <Run Text="{Binding Download.OverallDisplayPercent, StringFormat={}{0:F0}}"/>
+                                                <Run Text="{Binding Download.OverallDisplayPercent, StringFormat='{}{0:F0}'}"/>
                                                 <Run Text="%"/>
                                             </TextBlock>
                                         </Grid>
-
-                                        <!-- Status text -->
                                         <TextBlock Grid.Row="2"
                                                    Text="{Binding Download.OverallStatus}"
-                                                   FontSize="10.5"
-                                                   Foreground="{StaticResource TextMuted}"
+                                                   FontSize="10.5" Foreground="{StaticResource TextMuted}"
                                                    TextTrimming="CharacterEllipsis"/>
-
-                                        <!-- Mini progress bar -->
-                                        <Border Grid.Row="4" Height="6" CornerRadius="3"
-                                                Background="{StaticResource AccentVeryLight}">
-                                            <Border HorizontalAlignment="Left" CornerRadius="3"
-                                                    Background="{StaticResource Accent}">
-                                                <Border.Width>
-                                                    <MultiBinding Converter="{StaticResource PctToWidth}">
-                                                        <Binding Path="Download.OverallDisplayPercent"/>
-                                                        <Binding Path="ActualWidth"
-                                                                 RelativeSource="{RelativeSource AncestorType=Border, AncestorLevel=1}"/>
-                                                    </MultiBinding>
-                                                </Border.Width>
-                                                <Border.Effect>
-                                                    <DropShadowEffect BlurRadius="8" ShadowDepth="0" Opacity="0.4"
-                                                                      Color="{StaticResource AccentColor}"/>
-                                                </Border.Effect>
-                                            </Border>
-                                        </Border>
-
-                                        <!-- Tap hint -->
+                                        <ProgressBar Grid.Row="4" Height="6" Minimum="0" Maximum="100"
+                                                     Value="{Binding Download.OverallDisplayPercent}"
+                                                     Foreground="{StaticResource Accent}"
+                                                     Background="{StaticResource AccentVeryLight}"
+                                                     CornerRadius="3" BorderThickness="0"/>
                                         <TextBlock Grid.Row="6"
-                                                   Text="Click to view →"
-                                                   FontSize="10.5"
+                                                   Text="Click to view →" FontSize="10.5"
                                                    Foreground="{StaticResource TextMuted}"
                                                    HorizontalAlignment="Right"/>
                                     </Grid>
                                 </Border>
                             </Button>
                         </Border>
+
                     </StackPanel>
                 </Grid>
             </Border>
 
-            <Border x:Name="SplashOverlay" Grid.ColumnSpan="2" CornerRadius="14" Panel.ZIndex="100" RenderTransformOrigin="0.5,0.5">
+            <!-- ── Splash overlay ─────────────────────────────────── -->
+            <Border Name="SplashOverlay"
+                    Grid.ColumnSpan="2"
+                    CornerRadius="14"
+                    ZIndex="100"
+                    RenderTransformOrigin="0.5,0.5">
                 <Border.Background>
-                    <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                        <GradientStop Color="#FEFCF8" Offset="0"/>                        <GradientStop Color="#F5F0E8" Offset="1"/>                    </LinearGradientBrush>
+                    <LinearGradientBrush StartPoint="0%,0%" EndPoint="0%,100%">
+                        <GradientStop Color="#FEFCF8" Offset="0"/>
+                        <GradientStop Color="#F5F0E8" Offset="1"/>
+                    </LinearGradientBrush>
                 </Border.Background>
                 <Border.RenderTransform>
                     <TransformGroup>
@@ -826,28 +556,32 @@
                         <TranslateTransform Y="0"/>
                     </TransformGroup>
                 </Border.RenderTransform>
-                
                 <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
-                    <Border Width="80" Height="80" CornerRadius="40" Background="{StaticResource Accent}" HorizontalAlignment="Center" Margin="0,0,0,24">
-                        <Border.Effect>
-                            <DropShadowEffect Color="#C07840" BlurRadius="25" ShadowDepth="3" Opacity="0.3"/>
-                        </Border.Effect>
-                        <TextBlock Text="D" FontSize="36" FontWeight="Bold" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    <Border Width="80" Height="80" CornerRadius="40"
+                            Background="{StaticResource Accent}"
+                            HorizontalAlignment="Center" Margin="0,0,0,24"
+                            BoxShadow="0 3 25 3 #4DC07840">
+                        <TextBlock Text="D" FontSize="36" FontWeight="Bold" Foreground="White"
+                                   HorizontalAlignment="Center" VerticalAlignment="Center"/>
                     </Border>
-                    
-                    <TextBlock Text="DepotDL" FontSize="24" FontWeight="Bold" Foreground="{StaticResource TextH}" HorizontalAlignment="Center" Margin="0,0,0,6"/>
-                    
-                    <TextBlock x:Name="SplashStatus" Text="Booting download engine..." FontSize="12" Foreground="{StaticResource TextSecondary}" HorizontalAlignment="Center" Margin="0,0,0,32"/>
-                    
-                    <Border Width="200" Height="3" CornerRadius="1.5" Background="{StaticResource AccentLight}" HorizontalAlignment="Center">
-                        <Border x:Name="SplashProgressBar" Width="0" Height="3" CornerRadius="1.5" Background="{StaticResource Accent}" HorizontalAlignment="Left">
-                            <Border.Effect>
-                                <DropShadowEffect Color="#C07840" BlurRadius="8" ShadowDepth="0" Opacity="0.4"/>
-                            </Border.Effect>
-                        </Border>
+                    <TextBlock Text="DepotDL" FontSize="24" FontWeight="Bold"
+                               Foreground="{StaticResource TextH}" HorizontalAlignment="Center"
+                               Margin="0,0,0,6"/>
+                    <TextBlock Name="SplashStatus"
+                               Text="Booting download engine..."
+                               FontSize="12" Foreground="{StaticResource TextSecondary}"
+                               HorizontalAlignment="Center" Margin="0,0,0,32"/>
+                    <Border Width="200" Height="3" CornerRadius="1.5"
+                            Background="{StaticResource AccentLight}"
+                            HorizontalAlignment="Center">
+                        <Border Name="SplashProgressBar"
+                                Width="0" Height="3" CornerRadius="1.5"
+                                Background="{StaticResource Accent}"
+                                HorizontalAlignment="Left"/>
                     </Border>
                 </StackPanel>
             </Border>
+
         </Grid>
     </Border>
 </Window>
