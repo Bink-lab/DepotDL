@@ -101,6 +101,21 @@
 
     </UserControl.Resources>
 
+    <UserControl.Styles>
+        <Style Selector="Grid.overlayGrid">
+            <Setter Property="Opacity" Value="0"/>
+        </Style>
+        <Style Selector="Grid.overlayGrid.overlayVisible">
+            <Setter Property="Opacity" Value="1"/>
+        </Style>
+        <Style Selector="Border.overlayCard">
+            <Setter Property="RenderTransform" Value="translateY(16px)"/>
+        </Style>
+        <Style Selector="Border.overlayCard.overlayVisible">
+            <Setter Property="RenderTransform" Value="translateY(0px)"/>
+        </Style>
+    </UserControl.Styles>
+
     <Grid>
 
         <!-- ══ Main content ════════════════════════════════════════════════════ -->
@@ -408,7 +423,7 @@
         </Grid>
 
         <!-- ══ Redownload confirmation overlay ══════════════════════════════════ -->
-        <Grid ZIndex="50" Opacity="0"
+        <Grid Classes="overlayGrid" ZIndex="50"
               IsHitTestVisible="{Binding IsRedownloadOverlayVisible}"
               Classes.overlayVisible="{Binding IsRedownloadOverlayVisible}">
             <Grid.Transitions>
@@ -416,31 +431,23 @@
                     <DoubleTransition Property="Opacity" Duration="0:0:0.18"/>
                 </Transitions>
             </Grid.Transitions>
-            <Grid.Styles>
-                <Style Selector="Grid.overlayVisible">
-                    <Setter Property="Opacity" Value="1"/>
-                </Style>
-            </Grid.Styles>
+
+            <Rectangle Fill="#1C1610" Opacity="0.72"/>
 
             <Border Width="420"
+                    Classes="overlayCard"
                     HorizontalAlignment="Center" VerticalAlignment="Center"
                     Background="{StaticResource BgCard}"
                     BorderBrush="{StaticResource Border}"
                     BorderThickness="1"
                     CornerRadius="16"
                     Padding="28"
-                    RenderTransform="translateY(16px)"
-                    Classes.overlaySlide="{Binding IsRedownloadOverlayVisible}">
+                    Classes.overlayVisible="{Binding IsRedownloadOverlayVisible}">
                 <Border.Transitions>
                     <Transitions>
                         <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.22"/>
                     </Transitions>
                 </Border.Transitions>
-                <Border.Styles>
-                    <Style Selector="Border.overlaySlide">
-                        <Setter Property="RenderTransform" Value="translateY(0px)"/>
-                    </Style>
-                </Border.Styles>
 
                 <StackPanel>
                     <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
@@ -490,7 +497,7 @@
         </Grid>
 
         <!-- ══ Remove-game confirmation overlay ══════════════════════════════════ -->
-        <Grid ZIndex="50" Opacity="0"
+        <Grid Classes="overlayGrid" ZIndex="50"
               IsHitTestVisible="{Binding IsRemoveOverlayVisible}"
               Classes.overlayVisible="{Binding IsRemoveOverlayVisible}">
             <Grid.Transitions>
@@ -498,31 +505,23 @@
                     <DoubleTransition Property="Opacity" Duration="0:0:0.18"/>
                 </Transitions>
             </Grid.Transitions>
-            <Grid.Styles>
-                <Style Selector="Grid.overlayVisible">
-                    <Setter Property="Opacity" Value="1"/>
-                </Style>
-            </Grid.Styles>
+
+            <Rectangle Fill="#1C1610" Opacity="0.72"/>
 
             <Border Width="420"
+                    Classes="overlayCard"
                     HorizontalAlignment="Center" VerticalAlignment="Center"
                     Background="{StaticResource BgCard}"
                     BorderBrush="{StaticResource Border}"
                     BorderThickness="1"
                     CornerRadius="16"
                     Padding="28"
-                    RenderTransform="translateY(16px)"
-                    Classes.overlaySlide="{Binding IsRemoveOverlayVisible}">
+                    Classes.overlayVisible="{Binding IsRemoveOverlayVisible}">
                 <Border.Transitions>
                     <Transitions>
                         <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.22"/>
                     </Transitions>
                 </Border.Transitions>
-                <Border.Styles>
-                    <Style Selector="Border.overlaySlide">
-                        <Setter Property="RenderTransform" Value="translateY(0px)"/>
-                    </Style>
-                </Border.Styles>
 
                 <StackPanel>
                     <!-- Icon + title -->
