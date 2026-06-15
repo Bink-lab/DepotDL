@@ -74,7 +74,7 @@ namespace DepotDL.GUI.Services
 
                     var zipPath = Path.Combine(Path.GetTempPath(), $"ryuu_{SanitizeFileName(appId)}_{Guid.NewGuid():N}.zip");
                     using (var stream = await response.Content.ReadAsStreamAsync())
-                    using (var fileStream = new FileStream(zipPath, FileMode.Create, FileAccess.Write, FileShare.None))
+                    using (var fileStream = new FileStream(zipPath, FileMode.Create, FileAccess.Write, FileShare.ReadWrite))
                     {
                         await stream.CopyToAsync(fileStream);
                     }

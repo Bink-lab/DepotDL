@@ -447,7 +447,7 @@ namespace DepotDL.GUI.Services
 
                 var total = dlResp!.Content.Headers.ContentLength ?? 0;
                 long downloaded = 0;
-                await using var fs = File.Create(tempFile);
+                await using var fs = new FileStream(tempFile, FileMode.Create, FileAccess.Write, FileShare.ReadWrite);
                 await using var stream = await dlResp.Content.ReadAsStreamAsync(ct);
                 var buf = new byte[1024 * 1024];
                 int read;

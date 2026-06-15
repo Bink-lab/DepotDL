@@ -403,7 +403,7 @@ namespace DepotDownloader
             Directory.CreateDirectory(Path.GetDirectoryName(fileFinalPath));
             Directory.CreateDirectory(Path.GetDirectoryName(fileStagingPath));
 
-            using (var file = File.OpenWrite(fileStagingPath))
+            using (var file = new FileStream(fileStagingPath, FileMode.OpenOrCreate, FileAccess.Write, FileShare.ReadWrite))
             using (var client = HttpClientFactory.CreateHttpClient())
             {
                 Console.WriteLine("Downloading {0}", fileName);
@@ -1074,7 +1074,7 @@ namespace DepotDownloader
                 Console.WriteLine("Pre-allocating {0}", fileFinalPath);
 
                 // create new file. need all chunks
-                using var fs = File.Create(fileFinalPath);
+                using var fs = new FileStream(fileFinalPath, FileMode.Create, FileAccess.ReadWrite, FileShare.ReadWrite);
                 try
                 {
                     fs.SetLength((long)file.TotalSize);
@@ -1122,7 +1122,7 @@ namespace DepotDownloader
 
                         var copyChunks = new List<ChunkMatch>();
 
-                        using (var fsOld = File.Open(fileFinalPath, FileMode.Open))
+                        using (var fsOld = new FileStream(fileFinalPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
                         {
                             foreach (var match in orderedChunks)
                             {
@@ -1144,9 +1144,9 @@ namespace DepotDownloader
                         {
                             File.Move(fileFinalPath, fileStagingPath);
 
-                            using (var fsOld = File.Open(fileStagingPath, FileMode.Open))
+                            using (var fsOld = new FileStream(fileStagingPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
                             {
-                                using var fs = File.Open(fileFinalPath, FileMode.Create);
+                                using var fs = new FileStream(fileFinalPath, FileMode.Create, FileAccess.ReadWrite, FileShare.ReadWrite);
                                 try
                                 {
                                     fs.SetLength((long)file.TotalSize);
@@ -1176,7 +1176,7 @@ namespace DepotDownloader
                 {
                     // No old manifest or file not in old manifest. We must validate.
 
-                    using var fs = File.Open(fileFinalPath, FileMode.Open);
+                    using var fs = new FileStream(fileFinalPath, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite);
                     if ((ulong)fi.Length != file.TotalSize)
                     {
                         try
@@ -1351,7 +1351,7 @@ namespace DepotDownloader
                     if (fileStreamData.fileStream == null)
                     {
                         var fileFinalPath = Path.Combine(depot.InstallDir, file.FileName);
-                        fileStreamData.fileStream = File.Open(fileFinalPath, FileMode.Open);
+                        fileStreamData.fileStream = new FileStream(fileFinalPath, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite);
                     }
 
                     fileStreamData.fileStream.Seek((long)chunk.Offset, SeekOrigin.Begin);

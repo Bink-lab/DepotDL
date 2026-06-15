@@ -64,7 +64,7 @@ namespace DepotDL.CLI.Services
 
             var zipPath = Path.Combine(Path.GetTempPath(), $"ryuu_{sanitizedAppId}_{Guid.NewGuid():N}.zip");
             using (var stream = response.Content.ReadAsStreamAsync().GetAwaiter().GetResult())
-            using (var fileStream = new FileStream(zipPath, FileMode.Create, FileAccess.Write, FileShare.None))
+            using (var fileStream = new FileStream(zipPath, FileMode.Create, FileAccess.Write, FileShare.ReadWrite))
             {
                 stream.CopyTo(fileStream);
             }
