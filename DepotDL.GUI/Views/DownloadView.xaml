@@ -128,7 +128,7 @@
                                        FontWeight="Bold" FontSize="13" VerticalAlignment="Center" Margin="0,0,6,0"/>
                             <TextBlock Text="{Binding RyuuError}"
                                        Foreground="{StaticResource Error}"
-                                       FontSize="11.5" TextWrapping="Wrap" VerticalAlignment="Center"/>
+                                       FontSize="11.5" VerticalAlignment="Center"/>
                         </StackPanel>
                     </Border>
                 </StackPanel>
@@ -207,7 +207,7 @@
                                        FontWeight="Bold" FontSize="13" VerticalAlignment="Center" Margin="0,0,6,0"/>
                             <TextBlock Text="{Binding HubcapError}"
                                        Foreground="{StaticResource Error}"
-                                       FontSize="11.5" TextWrapping="Wrap" VerticalAlignment="Center"/>
+                                       FontSize="11.5" VerticalAlignment="Center"/>
                         </StackPanel>
                     </Border>
                 </StackPanel>
@@ -261,7 +261,7 @@
                             <TextBlock Text="⚠ " Foreground="{StaticResource Error}"
                                        FontWeight="Bold" FontSize="13" VerticalAlignment="Center" Margin="0,0,6,0"/>
                             <TextBlock Text="{Binding ZipError}" Foreground="{StaticResource Error}"
-                                       FontSize="11.5" TextWrapping="Wrap" VerticalAlignment="Center"/>
+                                       FontSize="11.5" VerticalAlignment="Center"/>
                         </StackPanel>
                     </Border>
 
@@ -272,7 +272,7 @@
                             <TextBlock Text="⚠ " Foreground="{StaticResource Error}"
                                        FontWeight="Bold" FontSize="13" VerticalAlignment="Center" Margin="0,0,6,0"/>
                             <TextBlock Text="{Binding ParseError}" Foreground="{StaticResource Error}"
-                                       FontSize="11.5" TextWrapping="Wrap" VerticalAlignment="Center"/>
+                                       FontSize="11.5" VerticalAlignment="Center"/>
                         </StackPanel>
                     </Border>
                 </StackPanel>
@@ -718,10 +718,10 @@
 
                                         <StackPanel Grid.Column="0">
                                             <TextBlock FontSize="10.5" Foreground="{StaticResource TextMuted}"
-                                                       TextWrapping="Wrap" Text="{Binding ActiveFile}"
+                                                       Text="{Binding ActiveFile}"
                                                        IsVisible="{Binding ErrorMessage, Converter={StaticResource EmptyToVis}}"/>
                                             <TextBlock FontSize="10.5" Foreground="#E05555"
-                                                       TextWrapping="Wrap" Text="{Binding ErrorMessage}"
+                                                       Text="{Binding ErrorMessage}"
                                                        IsVisible="{Binding ErrorMessage, Converter={StaticResource NotEmptyToVis}}"/>
                                         </StackPanel>
 
