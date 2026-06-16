@@ -642,13 +642,13 @@ namespace DepotDL.GUI.ViewModels
                     hubcapApiKey: string.IsNullOrWhiteSpace(HubcapApiKey) ? null : HubcapApiKey.Trim());
 
                 var anyFailed = states.Any(s => s.Status == DepotStatus.Failed);
-                DownloadComplete = !anyFailed;
-                DownloadFailed = anyFailed;
                 OverallPercent = anyFailed ? OverallPercent : 100;
                 OverallStatus = anyFailed ? "Completed with errors" : "All depots downloaded!";
                 CompletionMessage = anyFailed
                     ? $"{states.Count(s => s.Status == DepotStatus.Failed)} depot(s) failed."
                     : $"{states.Count(s => s.Status is DepotStatus.Done or DepotStatus.Skipped)} depot(s) complete.";
+                DownloadComplete = !anyFailed;
+                DownloadFailed = anyFailed;
 
                 if (!anyFailed)
                 {
@@ -668,7 +668,8 @@ namespace DepotDL.GUI.ViewModels
                         BuildId = SteamMetadataService.GetBuildId(AppId, depots.Select(d => d.ManifestId).ToList()),
                         DepotSizes = states
                             .Where(s => s.DownloadedUncompressedBytes > 0)
-                            .ToDictionary(s => s.DepotId, s => s.DownloadedUncompressedBytes)
+                            .GroupBy(s => s.DepotId)
+                            .ToDictionary(g => g.Key, g => g.First().DownloadedUncompressedBytes)
                     };
                     _library.AddOrUpdate(game);
                 }
@@ -680,9 +681,9 @@ namespace DepotDL.GUI.ViewModels
             }
             catch (Exception ex)
             {
-                DownloadFailed = true;
                 OverallStatus = "Download failed";
                 CompletionMessage = ex.Message;
+                DownloadFailed = true;
             }
             finally
             {
