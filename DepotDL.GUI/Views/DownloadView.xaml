@@ -618,7 +618,7 @@
                     </Button>
                 </StackPanel>
                 <TextBlock Text="{Binding OverallStatus}"
-                           Classes="BodyText" Foreground="{StaticResource TextMuted}" Margin="0,4,0,0"/>
+                           Classes="BodyText" Foreground="{StaticResource TextBody}" Margin="0,4,0,0"/>
             </StackPanel>
 
             <!-- Overall progress card -->
@@ -719,9 +719,11 @@
                                         <StackPanel Grid.Column="0">
                                             <TextBlock FontSize="10.5" Foreground="{StaticResource TextMuted}"
                                                        Text="{Binding ActiveFile}"
+                                                       TextTrimming="CharacterEllipsis"
                                                        IsVisible="{Binding ErrorMessage, Converter={StaticResource EmptyToVis}}"/>
-                                            <TextBlock FontSize="10.5" Foreground="#E05555"
+                                            <TextBlock FontSize="10.5" Foreground="{StaticResource Error}"
                                                        Text="{Binding ErrorMessage}"
+                                                       TextTrimming="CharacterEllipsis"
                                                        IsVisible="{Binding ErrorMessage, Converter={StaticResource NotEmptyToVis}}"/>
                                         </StackPanel>
 
@@ -760,7 +762,7 @@
                         <TextBlock Text="✓ " Foreground="{StaticResource Success}"
                                    FontWeight="Bold" FontSize="16" VerticalAlignment="Center"/>
                         <TextBlock Text="{Binding CompletionMessage}"
-                                   Foreground="{StaticResource Success}"
+                                   Foreground="{StaticResource TextPrimary}"
                                    FontSize="13" FontWeight="SemiBold" VerticalAlignment="Center"/>
                     </StackPanel>
                     <Button Grid.Column="1" Theme="{StaticResource BtnSecondary}"
@@ -785,7 +787,7 @@
                         <TextBlock Text="⚠ " Foreground="{StaticResource Error}"
                                    FontWeight="Bold" FontSize="16" VerticalAlignment="Center" Margin="0,0,6,0"/>
                         <TextBlock Text="{Binding CompletionMessage}"
-                                   Foreground="{StaticResource Error}"
+                                   Foreground="{StaticResource TextPrimary}"
                                    FontSize="13" FontWeight="SemiBold" VerticalAlignment="Center"/>
                     </StackPanel>
                     <StackPanel Grid.Column="1" Orientation="Horizontal">
