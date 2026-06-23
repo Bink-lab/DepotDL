@@ -747,30 +747,21 @@
                 </ItemsControl>
             </ScrollViewer>
 
-            <!-- Success banner -->
-            <Border Grid.Row="6"
-                    CornerRadius="12" Padding="20,14"
-                    Background="{StaticResource SuccessBg}"
-                    BorderBrush="#C5E1D4" BorderThickness="1"
-                    IsVisible="{Binding DownloadComplete}">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
-                    <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
-                        <TextBlock Text="✓ " Foreground="{StaticResource Success}"
-                                   FontWeight="Bold" FontSize="16" VerticalAlignment="Center"/>
-                        <TextBlock Text="{Binding CompletionMessage}"
-                                   Foreground="{StaticResource TextPrimary}"
-                                   FontSize="13" FontWeight="SemiBold" VerticalAlignment="Center"/>
+            <!-- Start new download -->
+            <Grid Grid.Row="6" Height="46" IsVisible="{Binding DownloadComplete}">
+                <Button Theme="{StaticResource BtnPrimary}"
+                        Command="{Binding StartNewCommand}"
+                        Background="{StaticResource Success}"
+                        HorizontalAlignment="Stretch">
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <Path Data="{StaticResource LucidePlay}"
+                              Width="16" Height="16" Stretch="Uniform" Margin="0,0,10,0"
+                              Fill="White" Stroke="White" StrokeThickness="1"
+                              StrokeJoin="Round" StrokeLineCap="Round"/>
+                        <TextBlock Text="Start New Download" FontSize="13.5" FontWeight="SemiBold" VerticalAlignment="Center"/>
                     </StackPanel>
-                    <Button Grid.Column="1" Theme="{StaticResource BtnSecondary}"
-                            Command="{Binding StartNewCommand}" Padding="18,8" Height="36">
-                        <TextBlock Text="New Download" FontSize="12" FontWeight="SemiBold"/>
-                    </Button>
-                </Grid>
-            </Border>
+                </Button>
+            </Grid>
 
             <!-- Failure banner -->
             <Border Grid.Row="6"
