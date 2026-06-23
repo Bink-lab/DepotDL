@@ -183,10 +183,10 @@ namespace DepotDL.GUI.ViewModels
                 var loadedSettings = _settings.Load();
                 var webApiKey = loadedSettings.SteamWebApiKey;
                 var downloadAchievementIcons = loadedSettings.DownloadAchievementIcons;
-                var (fixSuccess, fixError) = await Task.Run(() => GameLauncher.EnsureGbeApplied(vm.Game.AppId, vm.Game.OutputDir, vm.Game.LuaPath, webApiKey, downloadAchievementIcons));
+                var (fixSuccess, fixError) = await Task.Run(() => GameLauncher.EnsureStarApplied(vm.Game.AppId, vm.Game.OutputDir, vm.Game.LuaPath, webApiKey, downloadAchievementIcons));
                 if (!fixSuccess)
                 {
-                    var errorMsg = "Failed to apply Goldberg Steam Emulator fix to the game.";
+                    var errorMsg = "Failed to apply STAR Steam Emulator fix to the game.";
                     if (!string.IsNullOrEmpty(fixError))
                         errorMsg += "\n\nDetails:\n" + fixError;
                     await DialogService.ShowErrorAsync("Fix Game Failed", errorMsg);

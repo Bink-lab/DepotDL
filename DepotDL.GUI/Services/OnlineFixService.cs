@@ -43,39 +43,50 @@ namespace DepotDL.GUI.Services
             progress?.Report("Browser engine ready.");
         }
 
-        public static bool IsGoldbergApplied(string gameDir)
+        public static bool IsStarApplied(string gameDir)
         {
             try
             {
-                return Directory.GetFiles(gameDir, "OG_*.dll", SearchOption.AllDirectories).Any()
-                    || Directory.GetFiles(gameDir, "OG_*.so", SearchOption.AllDirectories).Any();
+                return Directory.GetFiles(gameDir, "steam_api.dll.bak", SearchOption.AllDirectories).Any()
+                    || Directory.GetFiles(gameDir, "steam_api64.dll.bak", SearchOption.AllDirectories).Any()
+                    || Directory.GetFiles(gameDir, "libsteam_api.so.bak", SearchOption.AllDirectories).Any();
             }
             catch { return false; }
         }
 
-        public static void RemoveGoldberg(string gameDir)
+        public static void RemoveStar(string gameDir)
         {
-            var ogFiles = new List<string>();
-            try { ogFiles.AddRange(Directory.GetFiles(gameDir, "OG_*.dll", SearchOption.AllDirectories)); } catch { }
-            try { ogFiles.AddRange(Directory.GetFiles(gameDir, "OG_*.so", SearchOption.AllDirectories)); } catch { }
-
-            foreach (var og in ogFiles)
+            var clearedDirs = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            string[] bakNames = { "steam_api.dll.bak", "steam_api64.dll.bak", "libsteam_api.so.bak", "libsteam_api.dylib.bak" };
+            foreach (var bakName in bakNames)
             {
-                var dir = Path.GetDirectoryName(og)!;
-                var orig = Path.Combine(dir, Path.GetFileName(og)[3..]);
-                try { File.Copy(og, orig, true); File.Delete(og); } catch { }
+                try
+                {
+                    foreach (var bak in Directory.GetFiles(gameDir, bakName, SearchOption.AllDirectories))
+                    {
+                        clearedDirs.Add(Path.GetDirectoryName(bak)!);
+                        var orig = bak[..^4];
+                        try { File.Copy(bak, orig, true); File.Delete(bak); } catch { }
+                    }
+                }
+                catch { }
             }
 
-            var settingsDir = Path.Combine(gameDir, "steam_settings");
-            if (Directory.Exists(settingsDir))
-                try { Directory.Delete(settingsDir, true); } catch { }
+            try
+            {
+                foreach (var starDir in Directory.GetDirectories(gameDir, "STAR", SearchOption.AllDirectories))
+                    try { Directory.Delete(starDir, true); } catch { }
+            }
+            catch { }
 
-            string[] artifacts = {
-                "steamclient.dll", "steamclient64.dll",
-                "steamclient_loader_x32.exe", "steamclient_loader_x64.exe",
-                "Launch.bat", "launch.sh"
-            };
-            foreach (var name in artifacts)
+            foreach (var dir in clearedDirs)
+            {
+                var appIdFile = Path.Combine(dir, "steam_appid.txt");
+                try { if (File.Exists(appIdFile)) File.Delete(appIdFile); } catch { }
+            }
+
+            string[] scripts = { "Launch.bat", "launch.sh" };
+            foreach (var name in scripts)
             {
                 try
                 {
@@ -102,10 +113,10 @@ namespace DepotDL.GUI.Services
 
             ct.ThrowIfCancellationRequested();
 
-            if (IsGoldbergApplied(gameDir))
+            if (IsStarApplied(gameDir))
             {
-                progress?.Report("Removing Goldberg emulator...");
-                RemoveGoldberg(gameDir);
+                progress?.Report("Removing STAR emulator...");
+                RemoveStar(gameDir);
             }
 
             Log($"=== ApplyAsync START: game=\"{gameName}\" dir=\"{gameDir}\" ===");
