@@ -101,10 +101,14 @@ jobs:
           CI: true
 
       - name: Package CLI (Linux)
-        run: zip -j cli-linux.zip DepotDL.CLI/bin/Release/net9.0/linux-x64/publish/*
+        run: |
+          chmod +x DepotDL.CLI/bin/Release/net9.0/linux-x64/publish/DepotDL.CLI
+          zip -j cli-linux.zip DepotDL.CLI/bin/Release/net9.0/linux-x64/publish/*
 
       - name: Package GUI (Linux)
-        run: zip -j gui-linux.zip DepotDL.GUI/bin/Release/net9.0/linux-x64/publish/*
+        run: |
+          chmod +x DepotDL.GUI/bin/Release/net9.0/linux-x64/publish/DepotDL.GUI
+          zip -j gui-linux.zip DepotDL.GUI/bin/Release/net9.0/linux-x64/publish/*
 
       - name: Upload CLI (Linux)
         uses: actions/upload-artifact@6f51ac03b9356f520e9adb1b1b7802705f340c2b # v4.6.0
@@ -170,10 +174,14 @@ jobs:
           CI: true
 
       - name: Package CLI (macOS)
-        run: zip -j cli-macos.zip DepotDL.CLI/bin/Release/net9.0/osx-arm64/publish/*
+        run: |
+          chmod +x DepotDL.CLI/bin/Release/net9.0/osx-arm64/publish/DepotDL.CLI
+          zip -j cli-macos.zip DepotDL.CLI/bin/Release/net9.0/osx-arm64/publish/*
 
       - name: Package GUI (macOS)
-        run: zip -j gui-macos.zip DepotDL.GUI/bin/Release/net9.0/osx-arm64/publish/*
+        run: |
+          chmod +x DepotDL.GUI/bin/Release/net9.0/osx-arm64/publish/DepotDL.GUI
+          zip -j gui-macos.zip DepotDL.GUI/bin/Release/net9.0/osx-arm64/publish/*
 
       - name: Upload CLI (macOS)
         uses: actions/upload-artifact@6f51ac03b9356f520e9adb1b1b7802705f340c2b # v4.6.0
