@@ -551,11 +551,26 @@ namespace DepotDL.GUI.ViewModels
         {
             if (!CanStart) return;
 
-            if (!_downloader.Initialize())
+            _downloader.Initialize();
+            if (_downloader.DotnetPath == null && _downloader.DDModPath == null)
             {
                 await DialogService.ShowErrorAsync("Missing Dependencies",
-                    "Could not find .NET 9 runtime or DepotDownloaderMod.dll.\n" +
+                    "Could not find .NET 9 runtime and DepotDownloaderMod.dll.\n" +
                     "Make sure .NET 9 is installed and DepotDownloaderMod.dll is adjacent to this application.");
+                return;
+            }
+            if (_downloader.DotnetPath == null)
+            {
+                await DialogService.ShowErrorAsync("Missing .NET Runtime",
+                    "Could not find .NET 9 runtime.\n" +
+                    "Please ensure the .NET 9 Runtime or SDK is installed on your system.");
+                return;
+            }
+            if (_downloader.DDModPath == null)
+            {
+                await DialogService.ShowErrorAsync("Missing Library File",
+                    "Could not find DepotDownloaderMod.dll.\n" +
+                    "Make sure DepotDownloaderMod.dll is located adjacent to this application executable.");
                 return;
             }
 
