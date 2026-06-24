@@ -289,7 +289,7 @@ namespace DepotDL.GUI.Services
             psi.ArgumentList.Add("-depot"); psi.ArgumentList.Add(depot.DepotId);
             psi.ArgumentList.Add("-depotkeys"); psi.ArgumentList.Add(keysFile);
             psi.ArgumentList.Add("-max-downloads"); psi.ArgumentList.Add(DepotDL.CLI.Models.DepotDownloadDefaults.MaxDownloads.ToString());
-            psi.ArgumentList.Add("-os"); psi.ArgumentList.Add("windows");
+            psi.ArgumentList.Add("-os"); psi.ArgumentList.Add(OperatingSystem.IsWindows() ? "windows" : OperatingSystem.IsMacOS() ? "macos" : "linux");
             psi.ArgumentList.Add("-validate");
             psi.ArgumentList.Add("-dir"); psi.ArgumentList.Add(outputDir);
 

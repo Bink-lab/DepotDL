@@ -44,6 +44,17 @@ namespace DepotDL.Shared
             {
                 var unixPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".dotnet", "dotnet");
                 if (File.Exists(unixPath)) return unixPath;
+
+                if (OperatingSystem.IsMacOS())
+                {
+                    var macPath = "/usr/local/share/dotnet/dotnet";
+                    if (File.Exists(macPath)) return macPath;
+                }
+                else
+                {
+                    var linuxPath = "/usr/share/dotnet/dotnet";
+                    if (File.Exists(linuxPath)) return linuxPath;
+                }
             }
 
             return null;
@@ -56,6 +67,26 @@ namespace DepotDL.Shared
 
             var candidate = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "DepotDownloaderMod.dll");
             return File.Exists(candidate) ? Path.GetFullPath(candidate) : null;
+        }
+
+        public static string GetAppDataFolder()
+        {
+            if (OperatingSystem.IsMacOS())
+            {
+                var home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+                return Path.Combine(home, "Library", "Application Support", "DepotDL");
+            }
+            return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "DepotDL");
+        }
+
+        public static string GetLocalAppDataFolder()
+        {
+            if (OperatingSystem.IsMacOS())
+            {
+                var home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+                return Path.Combine(home, "Library", "Application Support", "DepotDL");
+            }
+            return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "DepotDL");
         }
     }
 }

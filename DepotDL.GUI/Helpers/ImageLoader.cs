@@ -12,8 +12,10 @@ namespace DepotDL.GUI.Helpers
     public static class ImageLoader
     {
         private static readonly string CacheDir = Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-            "DepotDL.GUI", "imagecache");
+            OperatingSystem.IsMacOS()
+                ? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Library", "Application Support", "DepotDL")
+                : Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "DepotDL.GUI"),
+            "imagecache");
 
         private const int MaxCacheFiles = 500;
         private static readonly object _evictLock = new();

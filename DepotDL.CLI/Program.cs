@@ -308,7 +308,8 @@ namespace DepotDL.CLI
                     {
                         gameName = appId;
                     }
-                    outputPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "downloads", LibraryManager.SanitizeFolderName(gameName));
+                    outputPath = Path.Combine(
+                        DepotDL.Shared.RuntimeResolver.GetAppDataFolder(), "downloads", LibraryManager.SanitizeFolderName(gameName));
                 }
                 outputPath = Path.GetFullPath(outputPath);
 
@@ -492,7 +493,7 @@ namespace DepotDL.CLI
                                 "-depot", depot.DepotId,
                                 "-depotkeys", tempKeysPath,
                                 "-max-downloads", DepotDownloadDefaults.NormalizeMaxDownloads(maxDownloads).ToString(CultureInfo.InvariantCulture),
-                                "-os", "windows",
+                                "-os", (OperatingSystem.IsWindows() ? "windows" : OperatingSystem.IsMacOS() ? "macos" : "linux"),
                                 "-validate",
                                 "-dir", outputPath
                             };
@@ -642,7 +643,8 @@ namespace DepotDL.CLI
                                             ddmodPath, "-app", appId, "-depot", depot.DepotId,
                                             "-depotkeys", tempKeysPath,
                                             "-max-downloads", DepotDownloadDefaults.NormalizeMaxDownloads(maxDownloads).ToString(CultureInfo.InvariantCulture),
-                                            "-os", "windows", "-validate", "-dir", outputPath
+                                            "-os", (OperatingSystem.IsWindows() ? "windows" : OperatingSystem.IsMacOS() ? "macos" : "linux"),
+                                            "-validate", "-dir", outputPath
                                         };
                                         if (!string.IsNullOrEmpty(depot.ManifestId))
                                         {

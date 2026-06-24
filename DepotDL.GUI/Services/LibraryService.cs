@@ -10,7 +10,7 @@ namespace DepotDL.GUI.Services
     public class LibraryService
     {
         private static readonly string LibraryFilePath = Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "DepotDL", "library.json");
+            DepotDL.Shared.RuntimeResolver.GetAppDataFolder(), "library.json");
 
         private static readonly JsonSerializerOptions JsonOpts = new() { WriteIndented = true };
 

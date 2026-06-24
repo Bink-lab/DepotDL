@@ -26,7 +26,7 @@ namespace DepotDL.CLI
     public static class LibraryManager
     {
         private static readonly string LibraryFilePath = Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "DepotDL", "library.json");
+            DepotDL.Shared.RuntimeResolver.GetAppDataFolder(), "library.json");
 
         public static List<LibraryGame> LoadLibrary()
         {

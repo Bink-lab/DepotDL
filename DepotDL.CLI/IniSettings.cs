@@ -9,8 +9,9 @@ namespace DepotDL.CLI
     public static class IniSettings
     {
         private static readonly string IniPath = Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-            "DepotDL.CLI",
+            OperatingSystem.IsMacOS()
+                ? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Library", "Application Support", "DepotDL")
+                : Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "DepotDL.CLI"),
             "DepotDL.CLI.ini");
 
         public static void LoadInto(TuiSession session)

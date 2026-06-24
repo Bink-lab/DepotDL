@@ -13,8 +13,10 @@ namespace DepotDL.GUI.Services
     public class SteamStoreService
     {
         private static readonly string CacheDir = Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-            "DepotDL.GUI", "cache");
+            OperatingSystem.IsMacOS()
+                ? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Library", "Application Support", "DepotDL")
+                : Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "DepotDL.GUI"),
+            "cache");
 
         private static readonly string AllGamesPath = Path.Combine(CacheDir, "applist.json");
         private static readonly string MetaPath = Path.Combine(CacheDir, "applist_meta.json");

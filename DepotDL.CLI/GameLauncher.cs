@@ -24,14 +24,14 @@ namespace DepotDL.CLI
         private static readonly HttpClient _apiClient = new() { Timeout = TimeSpan.FromSeconds(5) };
         private static readonly HttpClient _dlClient = new() { Timeout = TimeSpan.FromSeconds(30) };
 
-        private static readonly string[] LinuxSkipPatterns = new[]
+        private static readonly string[] NativeSkipPatterns = new[]
         {
             "unins", "setup", "install", "crash", "report", "update", "patch", "helper", "tool"
         };
 
-        private static readonly string[] LinuxSkipExtensions = new[]
+        private static readonly string[] NativeSkipExtensions = new[]
         {
-            ".so", ".py", ".sh", ".txt", ".ini", ".json", ".cfg", ".pak", ".dll", ".png", ".jpg", ".jpeg", ".zip", ".tar", ".gz"
+            ".so", ".dylib", ".py", ".sh", ".txt", ".ini", ".json", ".cfg", ".pak", ".dll", ".png", ".jpg", ".jpeg", ".zip", ".tar", ".gz", ".class", ".jar", ".xml"
         };
 
         public static string? FindLaunchTarget(string gameDir)
@@ -75,7 +75,7 @@ namespace DepotDL.CLI
             }
             else
             {
-                var native = FindMainLinuxBinary(gameDir);
+                var native = FindMainNativeBinary(gameDir);
                 if (native != null) return native;
 
                 return FindMainExe(gameDir);
@@ -126,7 +126,7 @@ namespace DepotDL.CLI
             return bestPath;
         }
 
-        public static string? FindMainLinuxBinary(string gameDir)
+        public static string? FindMainNativeBinary(string gameDir)
         {
             string? bestPath = null;
             long bestSize = 0;
@@ -138,7 +138,7 @@ namespace DepotDL.CLI
                 {
                     var ext = Path.GetExtension(file).ToLowerInvariant();
                     var skipExt = false;
-                    foreach (var skip in LinuxSkipExtensions)
+                    foreach (var skip in NativeSkipExtensions)
                     {
                         if (ext == skip) { skipExt = true; break; }
                     }
@@ -146,7 +146,7 @@ namespace DepotDL.CLI
 
                     var nameLower = Path.GetFileName(file).ToLowerInvariant();
                     var skipName = false;
-                    foreach (var skip in LinuxSkipPatterns)
+                    foreach (var skip in NativeSkipPatterns)
                     {
                         if (nameLower.Contains(skip)) { skipName = true; break; }
                     }
@@ -160,7 +160,13 @@ namespace DepotDL.CLI
                             var magic = new byte[4];
                             if (fs.Read(magic, 0, 4) == 4)
                             {
-                                if (magic[0] == 0x7f && magic[1] == 0x45 && magic[2] == 0x4c && magic[3] == 0x46)
+                                var isElf = magic[0] == 0x7f && magic[1] == 0x45 && magic[2] == 0x4c && magic[3] == 0x46;
+                                var isMachO = (magic[0] == 0xFE && magic[1] == 0xED && magic[2] == 0xFA && (magic[3] == 0xCE || magic[3] == 0xCF)) ||
+                                              ((magic[0] == 0xCE || magic[0] == 0xCF) && magic[1] == 0xFA && magic[2] == 0xED && magic[3] == 0xFE) ||
+                                              (magic[0] == 0xCA && magic[1] == 0xFE && magic[2] == 0xBA && magic[3] == 0xBE) ||
+                                              (magic[0] == 0xBE && magic[1] == 0xBA && magic[2] == 0xFE && magic[3] == 0xCA);
+
+                                if (isElf || isMachO)
                                 {
                                     if (info.Length > bestSize)
                                     {
@@ -203,7 +209,7 @@ namespace DepotDL.CLI
                 {
                     FileName = target,
                     WorkingDirectory = workingDir,
-                    UseShellExecute = true
+                    UseShellExecute = OperatingSystem.IsWindows()
                 });
                 return null;
             }
@@ -495,13 +501,13 @@ namespace DepotDL.CLI
                         }
                         else
                         {
-                            AppLogger.Error("GameLauncher", $"STAR does not ship a replacement for {nameLower} on this platform; skipping DLL replacement.");
+                            AppLogger.Error("GameLauncher", $"STAR does not ship a replacement for {nameLower} on this platform; skipping library replacement.");
                         }
                     }
 
                     if (!replaced && steamApiFiles.Count > 0)
                     {
-                        AppLogger.Error("GameLauncher", "STAR has no replacement .so for this platform; configs written but no DLL swapped.");
+                        AppLogger.Error("GameLauncher", "STAR has no replacement library (.dylib/.so) for this platform; configs written but no library swapped.");
                         replaced = true;
                     }
                 }

@@ -88,7 +88,8 @@ namespace DepotDL.GUI.Services
                 folderName = "import";
             }
 
-            var importsRoot = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "imports") + Path.DirectorySeparatorChar);
+            var importsRoot = Path.GetFullPath(Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "DepotDL", "imports") + Path.DirectorySeparatorChar);
             var importDir = Path.GetFullPath(Path.Combine(importsRoot, folderName));
             if (!importDir.StartsWith(importsRoot, StringComparison.OrdinalIgnoreCase))
             {

@@ -43,8 +43,8 @@ namespace DepotDL.GUI.Services
             catch { return TimeSpan.FromDays(7); }
         }
         private static readonly string GpuCachePath = Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-            "DepotDL", "dbgpu_cache.json");
+            DepotDL.Shared.RuntimeResolver.GetAppDataFolder(),
+            "dbgpu_cache.json");
 
         static BenchmarkService()
         {

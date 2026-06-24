@@ -1887,7 +1887,7 @@ namespace DepotDL.CLI.Tui
         private static string BuildOutputDir(TuiSession session, string gameName)
         {
             var baseDir = string.IsNullOrEmpty(session.DownloadBaseDir)
-                ? Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "downloads")
+                ? Path.Combine(DepotDL.Shared.RuntimeResolver.GetAppDataFolder(), "downloads")
                 : session.DownloadBaseDir;
 
             return Path.Combine(baseDir, gameName);
@@ -2256,7 +2256,8 @@ namespace DepotDL.CLI.Tui
                     files.AddRange(Directory.GetFiles(sub, "*.lua", SearchOption.TopDirectoryOnly));
                 }
 
-                var importsDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "imports");
+                var importsDir = Path.Combine(
+                    DepotDL.Shared.RuntimeResolver.GetAppDataFolder(), "imports");
                 if (Directory.Exists(importsDir))
                 {
                     foreach (var gameDir in Directory.GetDirectories(importsDir))

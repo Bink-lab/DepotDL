@@ -8,7 +8,7 @@ namespace DepotDL.CLI
     internal static class AppLogger
     {
         private static readonly string LogPath =
-            Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "depotdl.log");
+            Path.Combine(DepotDL.Shared.RuntimeResolver.GetAppDataFolder(), "depotdl.log");
         private static readonly object _lock = new();
         private const long MaxLogBytes = 2 * 1024 * 1024;
 
@@ -32,7 +32,12 @@ namespace DepotDL.CLI
             var line = $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss.fff}] [{level}] [{category}] {message}";
             lock (_lock)
             {
-                try { File.AppendAllText(LogPath, line + Environment.NewLine); }
+                try 
+                { 
+                    var dir = Path.GetDirectoryName(LogPath);
+                    if (dir != null) Directory.CreateDirectory(dir);
+                    File.AppendAllText(LogPath, line + Environment.NewLine); 
+                }
                 catch { }
             }
         }

@@ -9,8 +9,7 @@ namespace DepotDL.CLI.Services
     internal static class StoreApiClient
     {
         private static readonly string CacheDir = Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-            "DepotDL", "cache");
+            DepotDL.Shared.RuntimeResolver.GetLocalAppDataFolder(), "cache");
 
         private static readonly HttpClient Http = new() { Timeout = TimeSpan.FromSeconds(30) };
         private static readonly JsonSerializerOptions Opts = new() { PropertyNameCaseInsensitive = true };

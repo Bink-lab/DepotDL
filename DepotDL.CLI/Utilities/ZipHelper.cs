@@ -101,7 +101,8 @@ namespace DepotDL.CLI.Utilities
                 folderName = "import";
             }
 
-            return Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "imports", folderName));
+            return Path.GetFullPath(Path.Combine(
+                DepotDL.Shared.RuntimeResolver.GetAppDataFolder(), "imports", folderName));
         }
 
         private static string SanitizeFolderName(string value) =>

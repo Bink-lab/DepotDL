@@ -148,11 +148,18 @@ namespace DepotDL.GUI.ViewModels
             if (string.IsNullOrEmpty(UpdateHtmlUrl)) return;
             try
             {
-                Process.Start(new ProcessStartInfo
+                if (OperatingSystem.IsWindows())
                 {
-                    FileName = UpdateHtmlUrl,
-                    UseShellExecute = true
-                });
+                    Process.Start(new ProcessStartInfo { FileName = UpdateHtmlUrl, UseShellExecute = true });
+                }
+                else if (OperatingSystem.IsMacOS())
+                {
+                    Process.Start("open", UpdateHtmlUrl);
+                }
+                else
+                {
+                    Process.Start("xdg-open", UpdateHtmlUrl);
+                }
             }
             catch { }
         }
