@@ -6,6 +6,8 @@ using Avalonia.Animation;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using Avalonia.Media;
+using Avalonia.Styling;
+using Avalonia.Threading;
 using DepotDL.GUI.Helpers;
 
 namespace DepotDL.GUI
@@ -30,6 +32,16 @@ namespace DepotDL.GUI
             if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
                 desktop.MainWindow = new MainWindow();
             base.OnFrameworkInitializationCompleted();
+
+            Dispatcher.UIThread.Post(() =>
+            {
+                if (Current == null) return;
+                var variant = Current.RequestedThemeVariant;
+                Current.RequestedThemeVariant = variant == ThemeVariant.Dark
+                    ? ThemeVariant.Light
+                    : ThemeVariant.Dark;
+                Current.RequestedThemeVariant = variant;
+            }, DispatcherPriority.Loaded);
         }
 
         public static void ApplyTheme(string? theme)
