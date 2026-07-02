@@ -20,6 +20,8 @@
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="20"/>
                 <RowDefinition Height="Auto"/>
+                <RowDefinition Height="20"/>
+                <RowDefinition Height="Auto"/>
                 <RowDefinition Height="24"/>
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
@@ -71,8 +73,32 @@
                 </StackPanel>
             </Border>
 
-            <!-- Download -->
+                        <!-- Appearance -->
             <Border Grid.Row="4" Classes="Card" Padding="20">
+                <StackPanel>
+                    <TextBlock Text="APPEARANCE" Classes="Label" Margin="0,0,0,16"/>
+
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="200"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                            <TextBlock Text="Theme Mode" Classes="H3" Margin="0,0,0,4"/>
+                            <TextBlock Text="Choose between Light, Dark, or System default mode."
+                                       Classes="BodyText"/>
+                        </StackPanel>
+                        <ComboBox Grid.Column="1"
+                                  ItemsSource="{Binding Themes}"
+                                  SelectedItem="{Binding Theme}"
+                                  HorizontalAlignment="Stretch"
+                                  VerticalAlignment="Center"/>
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+<!-- Download -->
+            <Border Grid.Row="6" Classes="Card" Padding="20">
                 <StackPanel>
                     <TextBlock Text="DOWNLOAD" Classes="Label" Margin="0,0,0,16"/>
 
@@ -89,11 +115,11 @@
                         <Border Grid.Column="1" Classes="CardSmall" Padding="16,12" VerticalAlignment="Center">
                             <StackPanel>
                                 <Grid Margin="0,0,0,8">
-                                    <TextBlock Text="Workers" FontSize="11" Foreground="{StaticResource TextMuted}"/>
+                                    <TextBlock Text="Workers" FontSize="11" Foreground="{DynamicResource TextMuted}"/>
                                     <TextBlock HorizontalAlignment="Right"
                                                Text="{Binding MaxParallelDepots}"
                                                FontSize="16" FontWeight="Bold"
-                                               Foreground="{StaticResource Accent}"/>
+                                               Foreground="{DynamicResource Accent}"/>
                                 </Grid>
                                 <Slider Minimum="1" Maximum="8" TickFrequency="1"
                                         Value="{Binding MaxParallelDepots}"/>
@@ -122,7 +148,7 @@
             </Border>
 
             <!-- API Keys -->
-            <Border Grid.Row="6" Classes="Card" Padding="20">
+            <Border Grid.Row="8" Classes="Card" Padding="20">
                 <StackPanel>
                     <TextBlock Text="API KEYS" Classes="Label" Margin="0,0,0,16"/>
 
@@ -166,7 +192,7 @@
             </Border>
 
             <!-- Store & Cache -->
-            <Border Grid.Row="8" Classes="Card" Padding="20">
+            <Border Grid.Row="10" Classes="Card" Padding="20">
                 <StackPanel>
                     <TextBlock Text="STORE &amp; CACHE" Classes="Label" Margin="0,0,0,16"/>
 
@@ -182,9 +208,9 @@
                         <Border Grid.Column="1" Classes="CardSmall" Padding="16,12" VerticalAlignment="Center">
                             <StackPanel>
                                 <Grid Margin="0,0,0,8">
-                                    <TextBlock Text="Games" FontSize="11" Foreground="{StaticResource TextMuted}"/>
+                                    <TextBlock Text="Games" FontSize="11" Foreground="{DynamicResource TextMuted}"/>
                                     <TextBlock HorizontalAlignment="Right" Text="{Binding StorePageSize}"
-                                               FontSize="16" FontWeight="Bold" Foreground="{StaticResource Accent}"/>
+                                               FontSize="16" FontWeight="Bold" Foreground="{DynamicResource Accent}"/>
                                 </Grid>
                                 <Slider Minimum="12" Maximum="120" TickFrequency="6"
                                         Value="{Binding StorePageSize}"/>
@@ -206,11 +232,11 @@
                         <Border Grid.Column="1" Classes="CardSmall" Padding="16,12" VerticalAlignment="Center">
                             <StackPanel>
                                 <Grid Margin="0,0,0,8">
-                                    <TextBlock Text="Delay" FontSize="11" Foreground="{StaticResource TextMuted}"/>
+                                    <TextBlock Text="Delay" FontSize="11" Foreground="{DynamicResource TextMuted}"/>
                                     <TextBlock HorizontalAlignment="Right" FontSize="16" FontWeight="Bold"
-                                               Foreground="{StaticResource Accent}">
+                                               Foreground="{DynamicResource Accent}">
                                         <Run Text="{Binding SearchDebounceMs}"/>
-                                        <Run Text=" ms" FontSize="11" Foreground="{StaticResource TextMuted}"/>
+                                        <Run Text=" ms" FontSize="11" Foreground="{DynamicResource TextMuted}"/>
                                     </TextBlock>
                                 </Grid>
                                 <Slider Minimum="0" Maximum="2000" TickFrequency="50"
@@ -233,11 +259,11 @@
                         <Border Grid.Column="1" Classes="CardSmall" Padding="16,12" VerticalAlignment="Center">
                             <StackPanel>
                                 <Grid Margin="0,0,0,8">
-                                    <TextBlock Text="Lifetime" FontSize="11" Foreground="{StaticResource TextMuted}"/>
+                                    <TextBlock Text="Lifetime" FontSize="11" Foreground="{DynamicResource TextMuted}"/>
                                     <TextBlock HorizontalAlignment="Right" FontSize="16" FontWeight="Bold"
-                                               Foreground="{StaticResource Accent}">
+                                               Foreground="{DynamicResource Accent}">
                                         <Run Text="{Binding StoreCacheHours}"/>
-                                        <Run Text=" hours" FontSize="11" Foreground="{StaticResource TextMuted}"/>
+                                        <Run Text=" hours" FontSize="11" Foreground="{DynamicResource TextMuted}"/>
                                     </TextBlock>
                                 </Grid>
                                 <Slider Minimum="1" Maximum="168" TickFrequency="1"
@@ -260,11 +286,11 @@
                         <Border Grid.Column="1" Classes="CardSmall" Padding="16,12" VerticalAlignment="Center">
                             <StackPanel>
                                 <Grid Margin="0,0,0,8">
-                                    <TextBlock Text="Lifetime" FontSize="11" Foreground="{StaticResource TextMuted}"/>
+                                    <TextBlock Text="Lifetime" FontSize="11" Foreground="{DynamicResource TextMuted}"/>
                                     <TextBlock HorizontalAlignment="Right" FontSize="16" FontWeight="Bold"
-                                               Foreground="{StaticResource Accent}">
+                                               Foreground="{DynamicResource Accent}">
                                         <Run Text="{Binding GpuCacheDays}"/>
-                                        <Run Text=" days" FontSize="11" Foreground="{StaticResource TextMuted}"/>
+                                        <Run Text=" days" FontSize="11" Foreground="{DynamicResource TextMuted}"/>
                                     </TextBlock>
                                 </Grid>
                                 <Slider Minimum="1" Maximum="30" TickFrequency="1"
@@ -276,7 +302,7 @@
             </Border>
 
             <!-- Smooth Scrolling -->
-            <Border Grid.Row="10" Classes="Card" Padding="20">
+            <Border Grid.Row="12" Classes="Card" Padding="20">
                 <StackPanel>
                     <TextBlock Text="SMOOTH SCROLLING" Classes="Label" Margin="0,0,0,16"/>
 
@@ -292,11 +318,11 @@
                         <Border Grid.Column="1" Classes="CardSmall" Padding="16,12" VerticalAlignment="Center">
                             <StackPanel>
                                 <Grid Margin="0,0,0,8">
-                                    <TextBlock Text="Sensitivity" FontSize="11" Foreground="{StaticResource TextMuted}"/>
+                                    <TextBlock Text="Sensitivity" FontSize="11" Foreground="{DynamicResource TextMuted}"/>
                                     <TextBlock HorizontalAlignment="Right"
                                                Text="{Binding ScrollSensitivity, StringFormat='{}{0:F1}'}"
                                                FontSize="16" FontWeight="Bold"
-                                               Foreground="{StaticResource Accent}"/>
+                                               Foreground="{DynamicResource Accent}"/>
                                 </Grid>
                                 <Slider Minimum="0.1" Maximum="5.0" TickFrequency="0.1"
                                         Value="{Binding ScrollSensitivity}"/>
@@ -318,11 +344,11 @@
                         <Border Grid.Column="1" Classes="CardSmall" Padding="16,12" VerticalAlignment="Center">
                             <StackPanel>
                                 <Grid Margin="0,0,0,8">
-                                    <TextBlock Text="Duration" FontSize="11" Foreground="{StaticResource TextMuted}"/>
+                                    <TextBlock Text="Duration" FontSize="11" Foreground="{DynamicResource TextMuted}"/>
                                     <TextBlock HorizontalAlignment="Right" FontSize="16" FontWeight="Bold"
-                                               Foreground="{StaticResource Accent}">
+                                               Foreground="{DynamicResource Accent}">
                                         <Run Text="{Binding ScrollDurationMs}"/>
-                                        <Run Text=" ms" FontSize="11" Foreground="{StaticResource TextMuted}"/>
+                                        <Run Text=" ms" FontSize="11" Foreground="{DynamicResource TextMuted}"/>
                                     </TextBlock>
                                 </Grid>
                                 <Slider Minimum="50" Maximum="1000" TickFrequency="25"
@@ -334,7 +360,7 @@
             </Border>
 
             <!-- Update Channel -->
-            <Border Grid.Row="12" Classes="Card" Padding="20">
+            <Border Grid.Row="14" Classes="Card" Padding="20">
                 <StackPanel>
                     <TextBlock Text="UPDATES" Classes="Label" Margin="0,0,0,16"/>
                     <TextBlock Text="Release Channel" Classes="H3" Margin="0,0,0,4"/>
@@ -344,7 +370,7 @@
             </Border>
 
             <!-- OnlineFix -->
-            <Border Grid.Row="14" Classes="Card" Padding="20">
+            <Border Grid.Row="16" Classes="Card" Padding="20">
                 <StackPanel>
                     <TextBlock Text="ONLINEFIX" Classes="Label" Margin="0,0,0,16"/>
 
@@ -363,7 +389,7 @@
             </Border>
 
             <!-- Save row -->
-            <Grid Grid.Row="16">
+            <Grid Grid.Row="18">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
@@ -372,11 +398,11 @@
                 </Grid.ColumnDefinitions>
 
                 <Border Grid.Column="1"
-                        Background="{StaticResource SuccessLight}"
+                        Background="{DynamicResource SuccessLight}"
                         CornerRadius="8" Padding="14,10"
                         IsVisible="{Binding SaveSuccess}">
                     <TextBlock Text="✓  Settings saved"
-                               Foreground="{StaticResource Success}"
+                               Foreground="{DynamicResource Success}"
                                FontSize="13"/>
                 </Border>
 

@@ -38,7 +38,7 @@
                 </ControlTemplate>
             </Setter>
             <Style Selector="^:pointerover /template/ Border#bg">
-                <Setter Property="Background" Value="{StaticResource Border}"/>
+                <Setter Property="Background" Value="{DynamicResource Border}"/>
             </Style>
         </ControlTheme>
         <!-- ChromeBtn ControlTheme -->
@@ -64,14 +64,14 @@
                 </ControlTemplate>
             </Setter>
             <Style Selector="^:pointerover /template/ Border#bg">
-                <Setter Property="Background" Value="{StaticResource Border}"/>
+                <Setter Property="Background" Value="{DynamicResource Border}"/>
             </Style>
         </ControlTheme>
     </Window.Resources>
 
     <Window.Styles>
         <Style Selector="Button.navActive /template/ Border#bg">
-            <Setter Property="Background" Value="{StaticResource AccentLight}"/>
+            <Setter Property="Background" Value="{DynamicResource AccentLight}"/>
         </Style>
 
         <!-- Default/Inactive styling -->
@@ -79,36 +79,36 @@
             <Setter Property="Background" Value="Transparent"/>
         </Style>
         <Style Selector="Path.navIcon">
-            <Setter Property="Stroke" Value="{StaticResource TextMuted}"/>
+            <Setter Property="Stroke" Value="{DynamicResource TextMuted}"/>
         </Style>
         <Style Selector="Path.navIconFill">
-            <Setter Property="Fill" Value="{StaticResource TextMuted}"/>
+            <Setter Property="Fill" Value="{DynamicResource TextMuted}"/>
         </Style>
         <Style Selector="TextBlock.navText">
-            <Setter Property="Foreground" Value="{StaticResource TextBody}"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextBody}"/>
             <Setter Property="FontWeight" Value="Normal"/>
         </Style>
 
         <!-- Active styling -->
         <Style Selector="Button.navActive Border.navIndicator">
-            <Setter Property="Background" Value="{StaticResource Accent}"/>
+            <Setter Property="Background" Value="{DynamicResource Accent}"/>
         </Style>
         <Style Selector="Button.navActive Path.navIcon">
-            <Setter Property="Stroke" Value="{StaticResource Accent}"/>
+            <Setter Property="Stroke" Value="{DynamicResource Accent}"/>
         </Style>
         <Style Selector="Button.navActive Path.navIconFill">
-            <Setter Property="Fill" Value="{StaticResource Accent}"/>
+            <Setter Property="Fill" Value="{DynamicResource Accent}"/>
         </Style>
         <Style Selector="Button.navActive TextBlock.navText">
-            <Setter Property="Foreground" Value="{StaticResource Accent}"/>
+            <Setter Property="Foreground" Value="{DynamicResource Accent}"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
         </Style>
     </Window.Styles>
 
     <Border Name="RootBorder"
             CornerRadius="14"
-            Background="{StaticResource BgPage}"
-            BorderBrush="{StaticResource Border}"
+            Background="{DynamicResource BgPage}"
+            BorderBrush="{DynamicResource Border}"
             BorderThickness="1">
         <Grid Name="ContentGrid">
             <Grid.ColumnDefinitions>
@@ -118,10 +118,10 @@
 
             <!-- ── Sidebar ─────────────────────────────────────────── -->
             <Border Grid.Column="0"
-                    Background="{StaticResource BgSidebar}"
+                    Background="{DynamicResource BgSidebar}"
                     CornerRadius="14,0,0,14"
                     BorderThickness="0,0,1,0"
-                    BorderBrush="{StaticResource Border}">
+                    BorderBrush="{DynamicResource Border}">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="54"/>
@@ -134,7 +134,7 @@
                             PointerPressed="TitleBar_PointerPressed">
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="16,0">
                             <Border Width="32" Height="32" CornerRadius="9"
-                                    Background="{StaticResource Accent}" Margin="0,0,10,0">
+                                    Background="{DynamicResource Accent}" Margin="0,0,10,0">
                                 <TextBlock Text="D" FontSize="16" FontWeight="Bold"
                                            Foreground="White"
                                            HorizontalAlignment="Center"
@@ -142,9 +142,9 @@
                             </Border>
                             <StackPanel VerticalAlignment="Center">
                                 <TextBlock Text="DepotDL" FontSize="14" FontWeight="SemiBold"
-                                           Foreground="{StaticResource TextH}"/>
+                                           Foreground="{DynamicResource TextH}"/>
                                 <TextBlock Text="Game Downloader" FontSize="9.5"
-                                           Foreground="{StaticResource TextMuted}"/>
+                                           Foreground="{DynamicResource TextMuted}"/>
                             </StackPanel>
                         </StackPanel>
                     </Border>
@@ -188,7 +188,7 @@
                                       StrokeJoin="Round" Fill="Transparent"/>
                                 <TextBlock Classes="navText" Text="Download" FontSize="13" VerticalAlignment="Center"/>
                                 <Border Width="8" Height="8" CornerRadius="4"
-                                        Background="{StaticResource Accent}"
+                                        Background="{DynamicResource Accent}"
                                         Margin="7,0,0,0" VerticalAlignment="Center"
                                         IsVisible="{Binding Download.IsDownloading}">
                                     <Border.Styles>
@@ -226,7 +226,7 @@
             </Border>
 
             <!-- ── Content area ────────────────────────────────────── -->
-            <Border Grid.Column="1" Background="{StaticResource BgPage}" CornerRadius="0,14,14,0">
+            <Border Grid.Column="1" Background="{DynamicResource BgPage}" CornerRadius="0,14,14,0">
                 <Grid ClipToBounds="True">
 
                     <!-- Titlebar drag strip (right side) -->
@@ -239,17 +239,32 @@
                                 VerticalAlignment="Top"
                                 Margin="0,10,14,0"
                                 ZIndex="10">
+                        <Button Theme="{StaticResource ChromeBtn}" Command="{Binding ToggleThemeCommand}" ToolTip.Tip="Toggle theme" Margin="0,0,4,0">
+                            <Path Name="themeIcon" Width="13" Height="13" Stretch="Uniform"
+                                  Stroke="{DynamicResource TextMuted}" StrokeThickness="1.7" Fill="Transparent"
+                                  StrokeLineCap="Round" StrokeJoin="Round"
+                                  Tag="{Binding IsDarkTheme}">
+                                <Path.Styles>
+                                    <Style Selector="Path">
+                                        <Setter Property="Data" Value="{DynamicResource LucideMoon}"/>
+                                    </Style>
+                                    <Style Selector="Path[Tag=True]">
+                                        <Setter Property="Data" Value="{DynamicResource LucideSun}"/>
+                                    </Style>
+                                </Path.Styles>
+                            </Path>
+                        </Button>
                         <Button Theme="{StaticResource ChromeBtn}" Click="MinimizeBtn_Click">
-                            <Rectangle Width="10" Height="1.5" Fill="{StaticResource TextMuted}"
+                            <Rectangle Width="10" Height="1.5" Fill="{DynamicResource TextMuted}"
                                        HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Button>
                         <Button Theme="{StaticResource ChromeBtn}" Click="MaximizeBtn_Click" Margin="4,0">
-                            <Path Data="{StaticResource LucideSquare}" Width="10" Height="10" Stretch="Uniform"
-                                  Stroke="{StaticResource TextMuted}" StrokeThickness="1.5" Fill="Transparent"/>
+                            <Path Data="{DynamicResource LucideSquare}" Width="10" Height="10" Stretch="Uniform"
+                                  Stroke="{DynamicResource TextMuted}" StrokeThickness="1.5" Fill="Transparent"/>
                         </Button>
                         <Button Theme="{StaticResource ChromeBtn}" Click="CloseBtn_Click">
-                            <Path Data="{StaticResource LucideX}" Width="10" Height="10" Stretch="Uniform"
-                                  Stroke="{StaticResource TextMuted}" StrokeThickness="1.5"
+                            <Path Data="{DynamicResource LucideX}" Width="10" Height="10" Stretch="Uniform"
+                                  Stroke="{DynamicResource TextMuted}" StrokeThickness="1.5"
                                   StrokeLineCap="Round" StrokeJoin="Round" Fill="Transparent"/>
                         </Button>
                     </StackPanel>
@@ -371,8 +386,8 @@
                         <Border Margin="0,0,0,10"
                                 IsVisible="{Binding ShowPackWidget}">
                             <Border Width="280" CornerRadius="14"
-                                    Background="{StaticResource BgCard}"
-                                    BorderBrush="{StaticResource Border}"
+                                    Background="{DynamicResource BgCard}"
+                                    BorderBrush="{DynamicResource Border}"
                                     BorderThickness="1"
                                     Padding="16,14">
                                 <Grid>
@@ -387,11 +402,11 @@
                                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                             <Path Data="{StaticResource LucidePackage}"
                                                   Width="13" Height="13" Stretch="Uniform" Margin="0,0,7,0"
-                                                  Stroke="{StaticResource Accent}" StrokeThickness="1.7"
+                                                  Stroke="{DynamicResource Accent}" StrokeThickness="1.7"
                                                   Fill="Transparent" StrokeLineCap="Round"
                                                   StrokeJoin="Round"/>
                                             <TextBlock FontSize="12.5" FontWeight="SemiBold"
-                                                       Foreground="{StaticResource TextPrimary}"
+                                                       Foreground="{DynamicResource TextPrimary}"
                                                        VerticalAlignment="Center"
                                                        Text="{Binding Library.PackGameName}"
                                                        MaxWidth="150"
@@ -399,7 +414,7 @@
                                         </StackPanel>
                                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
                                             <TextBlock FontSize="13" FontWeight="Bold"
-                                                       Foreground="{StaticResource Accent}" VerticalAlignment="Center"
+                                                       Foreground="{DynamicResource Accent}" VerticalAlignment="Center"
                                                        Margin="0,0,6,0">
                                                 <Run Text="{Binding Library.PackPercent, StringFormat='{}{0:F0}'}"/>
                                                 <Run Text="%"/>
@@ -410,7 +425,7 @@
                                                     Cursor="Hand" ToolTip.Tip="Cancel and delete unfinished pack">
                                                 <Path Data="{StaticResource LucideX}"
                                                       Width="10" Height="10" Stretch="Uniform"
-                                                      Stroke="{StaticResource TextMuted}" StrokeThickness="2"
+                                                      Stroke="{DynamicResource TextMuted}" StrokeThickness="2"
                                                       Fill="Transparent" StrokeLineCap="Round"
                                                       StrokeJoin="Round"/>
                                             </Button>
@@ -418,12 +433,12 @@
                                     </Grid>
                                     <TextBlock Grid.Row="2"
                                                Text="{Binding Library.PackStatus}"
-                                               FontSize="10.5" Foreground="{StaticResource TextMuted}"
+                                               FontSize="10.5" Foreground="{DynamicResource TextMuted}"
                                                TextTrimming="CharacterEllipsis"/>
                                     <ProgressBar Grid.Row="4" Height="6" Minimum="0" Maximum="100"
                                                  Value="{Binding Library.PackPercent}"
-                                                 Foreground="{StaticResource Accent}"
-                                                 Background="{StaticResource AccentVeryLight}"
+                                                 Foreground="{DynamicResource Accent}"
+                                                 Background="{DynamicResource AccentVeryLight}"
                                                  CornerRadius="3" BorderThickness="0"/>
                                 </Grid>
                             </Border>
@@ -433,8 +448,8 @@
                         <Border Margin="0,0,0,10"
                                 IsVisible="{Binding ShowOnlineFixWidget}">
                             <Border Width="280" CornerRadius="14"
-                                    Background="{StaticResource BgCard}"
-                                    BorderBrush="{StaticResource Border}"
+                                    Background="{DynamicResource BgCard}"
+                                    BorderBrush="{DynamicResource Border}"
                                     BorderThickness="1"
                                     Padding="16,14">
                                 <Grid>
@@ -447,22 +462,22 @@
                                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                             <Path Data="{StaticResource LucideDownload}"
                                                   Width="13" Height="13" Stretch="Uniform" Margin="0,0,7,0"
-                                                  Stroke="{StaticResource Accent}" StrokeThickness="1.7"
+                                                  Stroke="{DynamicResource Accent}" StrokeThickness="1.7"
                                                   Fill="Transparent" StrokeLineCap="Round"
                                                   StrokeJoin="Round"/>
                                             <TextBlock FontSize="12.5" FontWeight="SemiBold"
-                                                       Foreground="{StaticResource TextPrimary}"
+                                                       Foreground="{DynamicResource TextPrimary}"
                                                        VerticalAlignment="Center"
                                                        Text="OnlineFix"/>
                                         </StackPanel>
                                         <TextBlock HorizontalAlignment="Right" FontSize="11.5"
-                                                   Foreground="{StaticResource Accent}" VerticalAlignment="Center"
+                                                   Foreground="{DynamicResource Accent}" VerticalAlignment="Center"
                                                    Text="{Binding Library.OnlineFixGameName}"
                                                    MaxWidth="100" TextTrimming="CharacterEllipsis"/>
                                     </Grid>
                                     <TextBlock Grid.Row="2"
                                                Text="{Binding Library.OnlineFixStatus}"
-                                               FontSize="10.5" Foreground="{StaticResource TextMuted}"
+                                               FontSize="10.5" Foreground="{DynamicResource TextMuted}"
                                                TextTrimming="CharacterEllipsis"/>
                                 </Grid>
                             </Border>
@@ -481,8 +496,8 @@
                                     </ControlTemplate>
                                 </Button.Template>
                                 <Border Width="280" CornerRadius="14"
-                                        Background="{StaticResource BgCard}"
-                                        BorderBrush="{StaticResource Border}"
+                                        Background="{DynamicResource BgCard}"
+                                        BorderBrush="{DynamicResource Border}"
                                         BorderThickness="1"
                                         Padding="16,14">
                                     <Grid>
@@ -499,34 +514,34 @@
                                             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                                 <Path Data="{StaticResource LucideDownload}"
                                                       Width="13" Height="13" Stretch="Uniform" Margin="0,0,7,0"
-                                                      Stroke="{StaticResource Accent}" StrokeThickness="1.7"
+                                                      Stroke="{DynamicResource Accent}" StrokeThickness="1.7"
                                                       Fill="Transparent" StrokeLineCap="Round"
                                                       StrokeJoin="Round"/>
                                                 <TextBlock FontSize="12.5" FontWeight="SemiBold"
-                                                           Foreground="{StaticResource TextPrimary}"
+                                                           Foreground="{DynamicResource TextPrimary}"
                                                            VerticalAlignment="Center">
                                                     <Run Text="App "/>
-                                                    <Run Text="{Binding Download.AppId}" Foreground="{StaticResource Accent}"/>
+                                                    <Run Text="{Binding Download.AppId}" Foreground="{DynamicResource Accent}"/>
                                                 </TextBlock>
                                             </StackPanel>
                                             <TextBlock HorizontalAlignment="Right" FontSize="13" FontWeight="Bold"
-                                                       Foreground="{StaticResource Accent}" VerticalAlignment="Center">
+                                                       Foreground="{DynamicResource Accent}" VerticalAlignment="Center">
                                                 <Run Text="{Binding Download.OverallDisplayPercent, StringFormat='{}{0:F0}'}"/>
                                                 <Run Text="%"/>
                                             </TextBlock>
                                         </Grid>
                                         <TextBlock Grid.Row="2"
                                                    Text="{Binding Download.OverallStatus}"
-                                                   FontSize="10.5" Foreground="{StaticResource TextMuted}"
+                                                   FontSize="10.5" Foreground="{DynamicResource TextMuted}"
                                                    TextTrimming="CharacterEllipsis"/>
                                         <ProgressBar Grid.Row="4" Height="6" Minimum="0" Maximum="100"
                                                      Value="{Binding Download.OverallDisplayPercent}"
-                                                     Foreground="{StaticResource Accent}"
-                                                     Background="{StaticResource AccentVeryLight}"
+                                                     Foreground="{DynamicResource Accent}"
+                                                     Background="{DynamicResource AccentVeryLight}"
                                                      CornerRadius="3" BorderThickness="0"/>
                                         <TextBlock Grid.Row="6"
                                                    Text="Click to view →" FontSize="10.5"
-                                                   Foreground="{StaticResource TextMuted}"
+                                                   Foreground="{DynamicResource TextMuted}"
                                                    HorizontalAlignment="Right"/>
                                     </Grid>
                                 </Border>
@@ -557,25 +572,25 @@
                 </Border.RenderTransform>
                 <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
                     <Border Width="80" Height="80" CornerRadius="40"
-                            Background="{StaticResource Accent}"
+                            Background="{DynamicResource Accent}"
                             HorizontalAlignment="Center" Margin="0,0,0,24"
                             BoxShadow="0 3 25 3 #4DC07840">
                         <TextBlock Text="D" FontSize="36" FontWeight="Bold" Foreground="White"
                                    HorizontalAlignment="Center" VerticalAlignment="Center"/>
                     </Border>
                     <TextBlock Text="DepotDL" FontSize="24" FontWeight="Bold"
-                               Foreground="{StaticResource TextH}" HorizontalAlignment="Center"
+                               Foreground="{DynamicResource TextH}" HorizontalAlignment="Center"
                                Margin="0,0,0,6"/>
                     <TextBlock Name="SplashStatus"
                                Text="Booting download engine..."
-                               FontSize="12" Foreground="{StaticResource TextSecondary}"
+                               FontSize="12" Foreground="{DynamicResource TextSecondary}"
                                HorizontalAlignment="Center" Margin="0,0,0,32"/>
                     <Border Width="200" Height="3" CornerRadius="1.5"
-                            Background="{StaticResource AccentLight}"
+                            Background="{DynamicResource AccentLight}"
                             HorizontalAlignment="Center">
                         <Border Name="SplashProgressBar"
                                 Width="0" Height="3" CornerRadius="1.5"
-                                Background="{StaticResource Accent}"
+                                Background="{DynamicResource Accent}"
                                 HorizontalAlignment="Left"/>
                     </Border>
                 </StackPanel>

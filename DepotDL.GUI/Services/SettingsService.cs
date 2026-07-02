@@ -74,6 +74,7 @@ namespace DepotDL.GUI.Services
                 s.LastUpdateCheckUtc = luc;
 
             s.LastKnownReleaseTag = Get(values, "settings.last_known_release_tag");
+            s.Theme = Get(values, "settings.theme") ?? "System";
 
             s.OnlineFixUser = Get(values, "onlinefix.user");
             s.OnlineFixPass = UnprotectString(Get(values, "onlinefix.pass"));
@@ -110,6 +111,7 @@ namespace DepotDL.GUI.Services
             w.WriteLine($"scroll_duration_ms={s.ScrollDurationMs}");
             w.WriteLine($"last_update_check={Escape(s.LastUpdateCheckUtc?.ToString("O") ?? "")}");
             w.WriteLine($"last_known_release_tag={Escape(s.LastKnownReleaseTag ?? "")}");
+            w.WriteLine($"theme={Escape(s.Theme ?? "System")}");
             w.WriteLine();
             w.WriteLine("[onlinefix]");
             w.WriteLine($"user={Escape(s.OnlineFixUser ?? "")}");

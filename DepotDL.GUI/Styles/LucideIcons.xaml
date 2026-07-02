@@ -30,5 +30,7 @@
     <StreamGeometry x:Key="LucideChevronUp">M18 15l-6-6-6 6</StreamGeometry>
     <StreamGeometry x:Key="LucideChevronLeft">M15 18l-6-6 6-6</StreamGeometry>
     <StreamGeometry x:Key="LucideChevronRight">M9 18l6-6-6-6</StreamGeometry>
+    <StreamGeometry x:Key="LucideSun">M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8z M12 2v2 M12 20v2 M4.93 4.93l1.41 1.41 M17.66 17.66l1.41 1.41 M2 12h2 M20 12h2 M6.34 17.66l-1.41 1.41 M19.07 4.93l-1.41 1.41</StreamGeometry>
+    <StreamGeometry x:Key="LucideMoon">M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z</StreamGeometry>
 
 </ResourceDictionary>

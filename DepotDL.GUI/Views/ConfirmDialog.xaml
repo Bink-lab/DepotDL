@@ -12,9 +12,9 @@
         <!-- Card -->
         <Border HorizontalAlignment="Center" VerticalAlignment="Center"
                 MinWidth="360" MaxWidth="480"
-                Background="{StaticResource BgCard}"
+                Background="{DynamicResource BgCard}"
                 CornerRadius="14"
-                BorderBrush="{StaticResource Border}"
+                BorderBrush="{DynamicResource Border}"
                 BorderThickness="1"
                 Padding="28,24"
                 BoxShadow="0 8 40 0 #33000000">

@@ -23,5 +23,6 @@ namespace DepotDL.GUI.Models
         public string? LastKnownReleaseTag { get; set; }
         public string? OnlineFixUser { get; set; }
         public string? OnlineFixPass { get; set; }
+        public string Theme { get; set; } = "System";
     }
 }

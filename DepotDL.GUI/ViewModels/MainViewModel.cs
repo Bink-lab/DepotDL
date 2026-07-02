@@ -193,6 +193,25 @@ namespace DepotDL.GUI.ViewModels
         [RelayCommand] private void NavigateSettings() { CurrentPage = NavPage.Settings; Settings.Load(); }
         [RelayCommand] private void NavigateStore() { CurrentPage = NavPage.Store; Store.EnsureLoaded(); }
 
+        public bool IsDarkTheme => Avalonia.Application.Current?.ActualThemeVariant == Avalonia.Styling.ThemeVariant.Dark;
+
+        [RelayCommand]
+        private void ToggleTheme()
+        {
+            if (Avalonia.Application.Current == null) return;
+            var currentTheme = Avalonia.Application.Current.ActualThemeVariant;
+            var newTheme = currentTheme == Avalonia.Styling.ThemeVariant.Dark ? "Light" : "Dark";
+
+            App.ApplyTheme(newTheme);
+
+            var s = _settingsService.Load();
+            s.Theme = newTheme;
+            _settingsService.Save(s);
+
+            Settings.Theme = newTheme;
+            OnPropertyChanged(nameof(IsDarkTheme));
+        }
+
         public bool IsLibraryPage => CurrentPage == NavPage.Library;
         public bool IsDownloadPage => CurrentPage == NavPage.Download;
         public bool IsSettingsPage => CurrentPage == NavPage.Settings;

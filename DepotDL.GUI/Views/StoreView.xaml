@@ -11,12 +11,12 @@
             <Setter Property="Padding" Value="13,8"/>
             <Setter Property="FontSize" Value="12.5"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="Foreground" Value="{StaticResource TextSecondary}"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextSecondary}"/>
             <Setter Property="Template">
                 <ControlTemplate>
                     <Border Name="bd"
-                            Background="White"
-                            BorderBrush="{StaticResource Border}"
+                            Background="{DynamicResource BgInput}"
+                            BorderBrush="{DynamicResource Border}"
                             BorderThickness="1.5"
                             CornerRadius="7"
                             Padding="{TemplateBinding Padding}">
@@ -35,31 +35,31 @@
                                   Data="{StaticResource LucideChevronDown}"
                                   Width="10" Height="10" Stretch="Uniform" Margin="6,1,0,0"
                                   VerticalAlignment="Center"
-                                  Stroke="{StaticResource TextSecondary}" StrokeThickness="2"
+                                  Stroke="{DynamicResource TextSecondary}" StrokeThickness="2"
                                   StrokeLineCap="Round"                                  StrokeJoin="Round" Fill="Transparent"/>
                         </StackPanel>
                     </Border>
                 </ControlTemplate>
             </Setter>
             <Style Selector="^:pointerover /template/ Border#bd">
-                <Setter Property="Background" Value="{StaticResource AccentVeryLight}"/>
-                <Setter Property="BorderBrush" Value="{StaticResource Accent}"/>
+                <Setter Property="Background" Value="{DynamicResource AccentVeryLight}"/>
+                <Setter Property="BorderBrush" Value="{DynamicResource Accent}"/>
             </Style>
             <Style Selector="^:pointerover">
-                <Setter Property="Foreground" Value="{StaticResource Accent}"/>
+                <Setter Property="Foreground" Value="{DynamicResource Accent}"/>
             </Style>
             <Style Selector="^:pointerover /template/ Path#chevron">
-                <Setter Property="Stroke" Value="{StaticResource Accent}"/>
+                <Setter Property="Stroke" Value="{DynamicResource Accent}"/>
             </Style>
             <Style Selector="^:checked /template/ Border#bd">
-                <Setter Property="Background" Value="{StaticResource AccentLight}"/>
-                <Setter Property="BorderBrush" Value="{StaticResource Accent}"/>
+                <Setter Property="Background" Value="{DynamicResource AccentLight}"/>
+                <Setter Property="BorderBrush" Value="{DynamicResource Accent}"/>
             </Style>
             <Style Selector="^:checked">
-                <Setter Property="Foreground" Value="{StaticResource Accent}"/>
+                <Setter Property="Foreground" Value="{DynamicResource Accent}"/>
             </Style>
             <Style Selector="^:checked /template/ Path#chevron">
-                <Setter Property="Stroke" Value="{StaticResource Accent}"/>
+                <Setter Property="Stroke" Value="{DynamicResource Accent}"/>
                 <Setter Property="Data" Value="{StaticResource LucideChevronUp}"/>
             </Style>
         </ControlTheme>
@@ -67,7 +67,7 @@
         <ControlTheme x:Key="ProviderDropItem" TargetType="Button">
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="Foreground" Value="{StaticResource TextPrimary}"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimary}"/>
             <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
             <Setter Property="Template">
                 <ControlTemplate>
@@ -89,13 +89,13 @@
                 </ControlTemplate>
             </Setter>
             <Style Selector="^:pointerover /template/ Border#bd">
-                <Setter Property="Background" Value="{StaticResource AccentVeryLight}"/>
+                <Setter Property="Background" Value="{DynamicResource AccentVeryLight}"/>
             </Style>
             <Style Selector="^:pointerover">
-                <Setter Property="Foreground" Value="{StaticResource Accent}"/>
+                <Setter Property="Foreground" Value="{DynamicResource Accent}"/>
             </Style>
             <Style Selector="^:disabled">
-                <Setter Property="Foreground" Value="{StaticResource TextMuted}"/>
+                <Setter Property="Foreground" Value="{DynamicResource TextMuted}"/>
                 <Setter Property="Cursor" Value="Arrow"/>
             </Style>
         </ControlTheme>
@@ -194,8 +194,8 @@
 
             <!-- Search bar -->
             <Border Grid.Row="2"
-                    Background="{StaticResource BgCard}"
-                    BorderBrush="{StaticResource Border}"
+                    Background="{DynamicResource BgCard}"
+                    BorderBrush="{DynamicResource Border}"
                     BorderThickness="1"
                     CornerRadius="10">
                 <Grid Margin="12,0">
@@ -205,7 +205,7 @@
                     </Grid.ColumnDefinitions>
                     <Path Grid.Column="0" Data="{StaticResource LucideSearch}"
                           Width="15" Height="15" Stretch="Uniform" Margin="0,0,10,0"
-                          Stroke="{StaticResource TextMuted}" StrokeThickness="1.7"
+                          Stroke="{DynamicResource TextMuted}" StrokeThickness="1.7"
                           StrokeLineCap="Round" StrokeJoin="Round"
                           Fill="Transparent"/>
                     <TextBox Grid.Column="1"
@@ -213,9 +213,9 @@
                              Background="Transparent"
                              Padding="0,10"
                              FontSize="13"
-                             Foreground="{StaticResource TextPrimary}"
+                             Foreground="{DynamicResource TextPrimary}"
                              Text="{Binding SearchText}"
-                             CaretBrush="{StaticResource Accent}"/>
+                             CaretBrush="{DynamicResource Accent}"/>
                 </Grid>
             </Border>
 
@@ -226,13 +226,13 @@
                 <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center"
                             IsVisible="{Binding ShowLoadingSpinner}">
                     <Grid Width="52" Height="52" HorizontalAlignment="Center" Margin="0,0,0,18">
-                        <Ellipse Stroke="{StaticResource AccentLight}" StrokeThickness="4"/>
+                        <Ellipse Stroke="{DynamicResource AccentLight}" StrokeThickness="4"/>
                         <Ellipse Classes="spinner"
-                                 Stroke="{StaticResource Accent}" StrokeThickness="4"
+                                 Stroke="{DynamicResource Accent}" StrokeThickness="4"
                                  StrokeDashArray="35,1000"/>
                     </Grid>
                     <TextBlock Text="{Binding LoadingStatus}"
-                               FontSize="13" Foreground="{StaticResource TextMuted}"
+                               FontSize="13" Foreground="{DynamicResource TextMuted}"
                                HorizontalAlignment="Center"/>
                 </StackPanel>
 
@@ -240,11 +240,11 @@
                 <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center"
                             IsVisible="{Binding ShowEmptyState}">
                     <Border Width="64" Height="64" CornerRadius="16"
-                            Background="{StaticResource AccentVeryLight}"
+                            Background="{DynamicResource AccentVeryLight}"
                             HorizontalAlignment="Center" Margin="0,0,0,16">
                         <Path Data="{StaticResource LucideFileText}"
                               Width="28" Height="28" Stretch="Uniform"
-                              Stroke="{StaticResource Accent}" StrokeThickness="1.7" Fill="Transparent"
+                              Stroke="{DynamicResource Accent}" StrokeThickness="1.7" Fill="Transparent"
                               StrokeLineCap="Round" StrokeJoin="Round"/>
                     </Border>
                     <TextBlock Text="No games found" Classes="H3"
@@ -296,7 +296,7 @@
                                             <!-- Shimmer placeholder -->
                                             <Border Height="96" VerticalAlignment="Top"
                                                     CornerRadius="13,13,0,0"
-                                                    Background="{StaticResource AccentLight}"
+                                                    Background="{DynamicResource AccentLight}"
                                                     IsVisible="{Binding IsImageLoading}"
                                                     Classes.storeShimmer="{Binding IsImageLoading}"/>
 
@@ -304,7 +304,7 @@
                                             <Border Margin="0,96,0,0" Padding="10,8,10,10">
                                                 <TextBlock Text="{Binding Game.Name}"
                                                            FontSize="12.5" FontWeight="SemiBold"
-                                                           Foreground="{StaticResource TextPrimary}"
+                                                           Foreground="{DynamicResource TextPrimary}"
                                                            TextTrimming="CharacterEllipsis"/>
                                             </Border>
                                         </Grid>
@@ -325,7 +325,7 @@
                 </Grid.ColumnDefinitions>
 
                 <TextBlock Grid.Column="0" Text="{Binding GamesInfo}"
-                           FontSize="12" Foreground="{StaticResource TextMuted}"
+                           FontSize="12" Foreground="{DynamicResource TextMuted}"
                            VerticalAlignment="Center"/>
 
                 <StackPanel Grid.Column="1" Orientation="Horizontal">
@@ -336,15 +336,15 @@
                         <StackPanel Orientation="Horizontal">
                             <Path Data="{StaticResource LucideChevronLeft}"
                                   Width="12" Height="12" Stretch="Uniform" Margin="0,0,5,0"
-                                  Stroke="{StaticResource TextBody}" StrokeThickness="1.7"
+                                  Stroke="{DynamicResource TextBody}" StrokeThickness="1.7"
                                   StrokeLineCap="Round" StrokeJoin="Round"
                                   Fill="Transparent"/>
-                            <TextBlock Text="Prev" Foreground="{StaticResource TextBody}"/>
+                            <TextBlock Text="Prev" Foreground="{DynamicResource TextBody}"/>
                         </StackPanel>
                     </Button>
 
                     <TextBlock Text="{Binding PageInfo}"
-                               FontSize="12" Foreground="{StaticResource TextSecondary}"
+                               FontSize="12" Foreground="{DynamicResource TextSecondary}"
                                VerticalAlignment="Center" Margin="14,0"/>
 
                     <Button Theme="{StaticResource BtnSecondary}"
@@ -352,10 +352,10 @@
                             Command="{Binding NextPageCommand}"
                             IsEnabled="{Binding HasNext}">
                         <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="Next" Foreground="{StaticResource TextBody}"/>
+                            <TextBlock Text="Next" Foreground="{DynamicResource TextBody}"/>
                             <Path Data="{StaticResource LucideChevronRight}"
                                   Width="12" Height="12" Stretch="Uniform" Margin="5,0,0,0"
-                                  Stroke="{StaticResource TextBody}" StrokeThickness="1.7"
+                                  Stroke="{DynamicResource TextBody}" StrokeThickness="1.7"
                                   StrokeLineCap="Round" StrokeJoin="Round"
                                   Fill="Transparent"/>
                         </StackPanel>
@@ -385,9 +385,9 @@
             <Border Classes="overlayCard" Margin="80,50"
                     MaxWidth="1000" MaxHeight="820"
                     HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
-                    Background="{StaticResource BgCard}"
+                    Background="{DynamicResource BgCard}"
                     CornerRadius="16"
-                    BorderBrush="{StaticResource Border}"
+                    BorderBrush="{DynamicResource Border}"
                     BorderThickness="1"
                     ClipToBounds="True"
                     Classes.overlayVisible="{Binding OverlayVisible}">
@@ -467,7 +467,7 @@
                         <StackPanel>
                             <!-- Loading -->
                             <TextBlock Text="Loading details..."
-                                       FontSize="13" Foreground="{StaticResource TextMuted}"
+                                       FontSize="13" Foreground="{DynamicResource TextMuted}"
                                        HorizontalAlignment="Center" Margin="0,20"
                                        IsVisible="{Binding IsDetailLoading}"/>
 
@@ -477,7 +477,7 @@
 
                                 <!-- Short description -->
                                 <TextBlock Text="{Binding SelectedDetail.ShortDescription}"
-                                           FontSize="13" Foreground="{StaticResource TextBody}"
+                                           FontSize="13" Foreground="{DynamicResource TextBody}"
                                            TextWrapping="Wrap" LineHeight="20"
                                            Margin="0,0,0,14"/>
 
@@ -491,12 +491,12 @@
                                     </ItemsControl.ItemsPanel>
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate>
-                                            <Border Background="{StaticResource AccentSubtle}"
-                                                    BorderBrush="{StaticResource AccentLight}"
+                                            <Border Background="{DynamicResource AccentSubtle}"
+                                                    BorderBrush="{DynamicResource AccentLight}"
                                                     BorderThickness="1"
                                                     CornerRadius="6" Padding="8,3" Margin="0,0,6,6">
                                                 <TextBlock Text="{Binding}" FontSize="11"
-                                                           Foreground="{StaticResource Accent}"
+                                                           Foreground="{DynamicResource Accent}"
                                                            FontWeight="SemiBold"/>
                                             </Border>
                                         </DataTemplate>
@@ -514,27 +514,27 @@
                                         <TextBlock Text="REVIEWS" Classes="Label"/>
                                         <TextBlock Text="{Binding SelectedGame.ReviewRatio}"
                                                    FontSize="12" FontWeight="SemiBold"
-                                                   Foreground="{StaticResource TextPrimary}"
+                                                   Foreground="{DynamicResource TextPrimary}"
                                                    TextWrapping="Wrap"/>
                                     </StackPanel>
                                     <StackPanel Grid.Column="1">
                                         <TextBlock Text="DEVELOPER" Classes="Label"/>
                                         <TextBlock Text="{Binding SelectedDetail.Developer}"
                                                    FontSize="12" FontWeight="SemiBold"
-                                                   Foreground="{StaticResource TextPrimary}"
+                                                   Foreground="{DynamicResource TextPrimary}"
                                                    TextTrimming="CharacterEllipsis"/>
                                     </StackPanel>
                                     <StackPanel Grid.Column="2">
                                         <TextBlock Text="PUBLISHER" Classes="Label"/>
                                         <TextBlock Text="{Binding SelectedDetail.Publisher}"
                                                    FontSize="12" FontWeight="SemiBold"
-                                                   Foreground="{StaticResource TextPrimary}"
+                                                   Foreground="{DynamicResource TextPrimary}"
                                                    TextTrimming="CharacterEllipsis"/>
                                     </StackPanel>
                                 </Grid>
 
                                 <!-- PC Requirements section -->
-                                <Border BorderBrush="{StaticResource Border}" BorderThickness="0,1,0,0"
+                                <Border BorderBrush="{DynamicResource Border}" BorderThickness="0,1,0,0"
                                         Padding="0,12,0,0">
                                     <StackPanel>
                                         <Button Theme="{StaticResource PassthroughBtn}"
@@ -549,7 +549,7 @@
                                                            Classes="Label" Margin="0"/>
                                                 <Path Grid.Column="1" Data="{StaticResource LucideChevronDown}"
                                                       Width="12" Height="12" Stretch="Uniform"
-                                                      Stroke="{StaticResource TextMuted}" StrokeThickness="1.7"
+                                                      Stroke="{DynamicResource TextMuted}" StrokeThickness="1.7"
                                                       StrokeLineCap="Round"                                                      StrokeJoin="Round" Fill="Transparent"/>
                                             </Grid>
                                         </Button>
@@ -564,20 +564,20 @@
                                                     <ColumnDefinition Width="*"/>
                                                 </Grid.ColumnDefinitions>
                                                 <TextBlock Grid.Column="0" Text="" FontSize="10"
-                                                           Foreground="{StaticResource TextMuted}"/>
+                                                           Foreground="{DynamicResource TextMuted}"/>
                                                 <TextBlock Grid.Column="1" Text="MINIMUM" FontSize="10"
-                                                           FontWeight="SemiBold" Foreground="{StaticResource TextMuted}"/>
+                                                           FontWeight="SemiBold" Foreground="{DynamicResource TextMuted}"/>
                                                 <TextBlock Grid.Column="2" Text="RECOMMENDED" FontSize="10"
-                                                           FontWeight="SemiBold" Foreground="{StaticResource TextMuted}"/>
+                                                           FontWeight="SemiBold" Foreground="{DynamicResource TextMuted}"/>
                                                 <TextBlock Grid.Column="3" Text="YOUR PC" FontSize="10"
-                                                           FontWeight="SemiBold" Foreground="{StaticResource TextMuted}"/>
+                                                           FontWeight="SemiBold" Foreground="{DynamicResource TextMuted}"/>
                                             </Grid>
 
                                             <!-- Benchmark loading -->
                                             <TextBlock Text="Fetching benchmark scores..."
                                                        FontSize="10" Margin="0,0,0,6"
                                                        HorizontalAlignment="Right"
-                                                       Foreground="{StaticResource TextMuted}"
+                                                       Foreground="{DynamicResource TextMuted}"
                                                        IsVisible="{Binding IsSpecsLoading}"/>
 
                                             <!-- Spec rows -->
@@ -593,14 +593,14 @@
                                                             </Grid.ColumnDefinitions>
                                                             <TextBlock Grid.Column="0" Text="{Binding Label}"
                                                                        FontSize="11" FontWeight="SemiBold"
-                                                                       Foreground="{StaticResource TextSecondary}"
+                                                                       Foreground="{DynamicResource TextSecondary}"
                                                                        VerticalAlignment="Top"/>
                                                             <TextBlock Grid.Column="1" Text="{Binding MinValue}"
-                                                                       FontSize="11" Foreground="{StaticResource TextBody}"
+                                                                       FontSize="11" Foreground="{DynamicResource TextBody}"
                                                                        TextWrapping="Wrap" Margin="0,0,8,0"
                                                                        VerticalAlignment="Top"/>
                                                             <TextBlock Grid.Column="2" Text="{Binding RecValue}"
-                                                                       FontSize="11" Foreground="{StaticResource TextBody}"
+                                                                       FontSize="11" Foreground="{DynamicResource TextBody}"
                                                                        TextWrapping="Wrap" Margin="0,0,8,0"
                                                                        VerticalAlignment="Top"/>
                                                             <StackPanel Grid.Column="3" Orientation="Horizontal"
@@ -624,7 +624,7 @@
                                 </Border>
 
                                 <!-- Full Description section -->
-                                <Border BorderBrush="{StaticResource Border}" BorderThickness="0,1,0,0"
+                                <Border BorderBrush="{DynamicResource Border}" BorderThickness="0,1,0,0"
                                         Margin="0,0,0,12" Padding="0,12,0,0">
                                     <StackPanel>
                                         <Button Theme="{StaticResource PassthroughBtn}"
@@ -639,7 +639,7 @@
                                                            Classes="Label" Margin="0"/>
                                                 <Path Grid.Column="1" Data="{StaticResource LucideChevronDown}"
                                                       Width="12" Height="12" Stretch="Uniform"
-                                                      Stroke="{StaticResource TextMuted}" StrokeThickness="1.7"
+                                                      Stroke="{DynamicResource TextMuted}" StrokeThickness="1.7"
                                                       StrokeLineCap="Round"                                                      StrokeJoin="Round" Fill="Transparent"/>
                                             </Grid>
                                         </Button>
@@ -678,7 +678,7 @@
 
                                             <!-- Full description text -->
                                             <TextBlock Text="{Binding SelectedDetail.DetailedDescription}"
-                                                       FontSize="12.5" Foreground="{StaticResource TextBody}"
+                                                       FontSize="12.5" Foreground="{DynamicResource TextBody}"
                                                        TextWrapping="Wrap" LineHeight="20"
                                                        Margin="0,0,0,8"/>
                                         </StackPanel>
@@ -691,7 +691,7 @@
 
                     <!-- Footer -->
                     <Border Grid.Row="2"
-                            BorderBrush="{StaticResource Border}" BorderThickness="0,1,0,0"
+                            BorderBrush="{DynamicResource Border}" BorderThickness="0,1,0,0"
                             Padding="20,14">
                         <Grid>
                             <Grid.ColumnDefinitions>
@@ -704,7 +704,7 @@
                             <StackPanel Grid.Column="0" VerticalAlignment="Center">
                                 <TextBlock Text="App ID" Classes="Label" Margin="0"/>
                                 <TextBlock FontFamily="Consolas" FontSize="13"
-                                           Foreground="{StaticResource TextSecondary}"
+                                           Foreground="{DynamicResource TextSecondary}"
                                            Text="{Binding SelectedGame.Game.AppId}"/>
                             </StackPanel>
 
@@ -721,9 +721,9 @@
                                        Placement="Bottom"
                                        PlacementTarget="{Binding #providerToggle}"
                                        VerticalOffset="5">
-                                    <Border Background="White"
+                                    <Border Background="{DynamicResource BgCard}"
                                             CornerRadius="9"
-                                            BorderBrush="{StaticResource Border}"
+                                            BorderBrush="{DynamicResource Border}"
                                             BorderThickness="1"
                                             Padding="4"
                                             MinWidth="170">
@@ -741,7 +741,7 @@
                                                         <TextBlock Text="Ryuu" FontWeight="SemiBold" FontSize="13"/>
                                                         <TextBlock Text="No API key configured"
                                                                    FontSize="10.5" Margin="0,1,0,0"
-                                                                   Foreground="{StaticResource TextMuted}"
+                                                                   Foreground="{DynamicResource TextMuted}"
                                                                    IsVisible="{Binding CanUseRyuu,
                                                                        Converter={StaticResource InvBoolToVis}}"/>
                                                     </StackPanel>
@@ -749,7 +749,7 @@
                                                           Width="13" Height="13" Stretch="Uniform"
                                                           Margin="14,0,2,0" VerticalAlignment="Center"
                                                           IsVisible="{Binding IsRyuuSelected}"
-                                                          Stroke="{StaticResource Accent}" StrokeThickness="2"
+                                                          Stroke="{DynamicResource Accent}" StrokeThickness="2"
                                                           Fill="Transparent" StrokeLineCap="Round"
                                                           StrokeJoin="Round"/>
                                                 </Grid>
@@ -768,7 +768,7 @@
                                                         <TextBlock Text="Hubcap" FontWeight="SemiBold" FontSize="13"/>
                                                         <TextBlock Text="No API key configured"
                                                                    FontSize="10.5" Margin="0,1,0,0"
-                                                                   Foreground="{StaticResource TextMuted}"
+                                                                   Foreground="{DynamicResource TextMuted}"
                                                                    IsVisible="{Binding CanUseHubcap,
                                                                        Converter={StaticResource InvBoolToVis}}"/>
                                                     </StackPanel>
@@ -776,7 +776,7 @@
                                                           Width="13" Height="13" Stretch="Uniform"
                                                           Margin="14,0,2,0" VerticalAlignment="Center"
                                                           IsVisible="{Binding IsHubcapSelected}"
-                                                          Stroke="{StaticResource Accent}" StrokeThickness="2"
+                                                          Stroke="{DynamicResource Accent}" StrokeThickness="2"
                                                           Fill="Transparent" StrokeLineCap="Round"
                                                           StrokeJoin="Round"/>
                                                 </Grid>

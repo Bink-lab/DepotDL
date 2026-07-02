@@ -30,6 +30,9 @@ namespace DepotDL.GUI.ViewModels
         [ObservableProperty] private bool _saveSuccess;
         [ObservableProperty] private string _onlineFixUser = string.Empty;
         [ObservableProperty] private string _onlineFixPass = string.Empty;
+        [ObservableProperty] private string _theme = "System";
+
+        public List<string> Themes { get; } = new() { "System", "Light", "Dark" };
 
         private DateTime? _lastUpdateCheckUtc;
         private string? _lastKnownReleaseTag;
@@ -55,6 +58,7 @@ namespace DepotDL.GUI.ViewModels
             _lastKnownReleaseTag = s.LastKnownReleaseTag;
             OnlineFixUser = s.OnlineFixUser ?? string.Empty;
             OnlineFixPass = s.OnlineFixPass ?? string.Empty;
+            Theme = s.Theme ?? "System";
         }
 
         [RelayCommand]
@@ -96,7 +100,10 @@ namespace DepotDL.GUI.ViewModels
                 LastKnownReleaseTag = _lastKnownReleaseTag,
                 OnlineFixUser = string.IsNullOrWhiteSpace(OnlineFixUser) ? null : OnlineFixUser,
                 OnlineFixPass = string.IsNullOrWhiteSpace(OnlineFixPass) ? null : OnlineFixPass,
+                Theme = Theme ?? "System"
             });
+
+            App.ApplyTheme(Theme);
 
             SaveSuccess = true;
 

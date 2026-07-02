@@ -6,9 +6,9 @@
     <UserControl.Resources>
 
         <ControlTheme x:Key="PremiumRefreshBtn" TargetType="Button">
-            <Setter Property="Background"    Value="{StaticResource AccentSubtle}"/>
-            <Setter Property="Foreground"    Value="{StaticResource Accent}"/>
-            <Setter Property="BorderBrush"   Value="{StaticResource Accent}"/>
+            <Setter Property="Background"    Value="{DynamicResource AccentSubtle}"/>
+            <Setter Property="Foreground"    Value="{DynamicResource Accent}"/>
+            <Setter Property="BorderBrush"   Value="{DynamicResource Accent}"/>
             <Setter Property="BorderThickness" Value="1.2"/>
             <Setter Property="Cursor"        Value="Hand"/>
             <Setter Property="Template">
@@ -32,18 +32,18 @@
                                 </Border.RenderTransform>
                                 <Path Data="{StaticResource LucideRotateCw}"
                                       Width="14" Height="14" Stretch="Uniform"
-                                      Stroke="{StaticResource Accent}" StrokeThickness="1.7"
+                                      Stroke="{DynamicResource Accent}" StrokeThickness="1.7"
                                       StrokeLineCap="Round" StrokeJoin="Round"
                                       Fill="Transparent"/>
                             </Border>
                             <TextBlock Text="Refresh Sizes" FontSize="11.5" FontWeight="SemiBold"
-                                       Foreground="{StaticResource Accent}" VerticalAlignment="Center"/>
+                                       Foreground="{DynamicResource Accent}" VerticalAlignment="Center"/>
                         </StackPanel>
                     </Border>
                 </ControlTemplate>
             </Setter>
             <Style Selector="^:pointerover /template/ Border#border">
-                <Setter Property="Background" Value="#F2D5BF"/>
+                <Setter Property="Background" Value="{DynamicResource AccentLight}"/>
             </Style>
             <Style Selector="^:pointerover /template/ Border#iconBox">
                 <Style.Animations>
@@ -63,8 +63,8 @@
         </ControlTheme>
 
         <ControlTheme x:Key="ModernContextMenu" TargetType="ContextMenu">
-            <Setter Property="Background"      Value="#FEFCF8"/>
-            <Setter Property="BorderBrush"     Value="#DDD0C2"/>
+            <Setter Property="Background"      Value="{DynamicResource BgCard}"/>
+            <Setter Property="BorderBrush"     Value="{DynamicResource Border}"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="Padding"         Value="4"/>
             <Setter Property="Template">
@@ -85,7 +85,7 @@
             <Setter Property="FontSize"        Value="12"/>
             <Setter Property="FontWeight"      Value="SemiBold"/>
             <Setter Property="Background"      Value="Transparent"/>
-            <Setter Property="Foreground"      Value="{StaticResource TextPrimary}"/>
+            <Setter Property="Foreground"      Value="{DynamicResource TextPrimary}"/>
             <Setter Property="Template">
                 <ControlTemplate>
                     <Border x:Name="Bg" Background="{TemplateBinding Background}" CornerRadius="5" Margin="2,1">
@@ -102,7 +102,7 @@
                 </ControlTemplate>
             </Setter>
             <Style Selector="^:pointerover /template/ Border#Bg">
-                <Setter Property="Background" Value="#F0E0CE"/>
+                <Setter Property="Background" Value="{DynamicResource AccentLight}"/>
             </Style>
         </ControlTheme>
 
@@ -150,7 +150,7 @@
                                    Text="{Binding GameCount, StringFormat='{}{0} game(s)'}"/>
                         <TextBlock Classes="BodyText"
                                    Margin="8,0,0,0"
-                                   Foreground="{StaticResource TextMuted}"
+                                   Foreground="{DynamicResource TextMuted}"
                                    IsVisible="{Binding TotalSizeText, Converter={StaticResource NotEmptyToVis}}"
                                    Text="{Binding TotalSizeText}"/>
                     </StackPanel>
@@ -164,8 +164,8 @@
 
             <!-- Search box -->
             <Border Grid.Row="2"
-                    Background="{StaticResource BgCard}"
-                    BorderBrush="{StaticResource Border}"
+                    Background="{DynamicResource BgCard}"
+                    BorderBrush="{DynamicResource Border}"
                     BorderThickness="1"
                     CornerRadius="10">
                 <Grid Margin="12,0">
@@ -176,7 +176,7 @@
                     <Path Grid.Column="0"
                           Data="{StaticResource LucideSearch}"
                           Width="15" Height="15" Stretch="Uniform" Margin="0,0,10,0"
-                          Stroke="{StaticResource TextMuted}" StrokeThickness="1.7"
+                          Stroke="{DynamicResource TextMuted}" StrokeThickness="1.7"
                           StrokeLineCap="Round" StrokeJoin="Round"
                           Fill="Transparent"/>
                     <TextBox Grid.Column="1"
@@ -184,9 +184,9 @@
                              Background="Transparent"
                              Padding="0,10"
                              FontSize="13"
-                             Foreground="{StaticResource TextPrimary}"
+                             Foreground="{DynamicResource TextPrimary}"
                              Text="{Binding SearchText}"
-                             CaretBrush="{StaticResource Accent}"/>
+                             CaretBrush="{DynamicResource Accent}"/>
                 </Grid>
             </Border>
 
@@ -198,12 +198,12 @@
                             IsVisible="{Binding IsEmpty}">
                     <Border Width="64" Height="64"
                             CornerRadius="16"
-                            Background="{StaticResource AccentVeryLight}"
+                            Background="{DynamicResource AccentVeryLight}"
                             HorizontalAlignment="Center"
                             Margin="0,0,0,16">
                         <Path Data="{StaticResource LucideAlignLeft}"
                               Width="28" Height="28" Stretch="Uniform"
-                              Stroke="{StaticResource Accent}" StrokeThickness="1.7"
+                              Stroke="{DynamicResource Accent}" StrokeThickness="1.7"
                               StrokeLineCap="Round" StrokeJoin="Round"
                               Fill="Transparent"/>
                     </Border>
@@ -319,7 +319,7 @@
                                             <!-- Shimmer placeholder -->
                                             <Border Height="103" VerticalAlignment="Top"
                                                     CornerRadius="13,13,0,0"
-                                                    Background="{StaticResource AccentLight}"
+                                                    Background="{DynamicResource AccentLight}"
                                                     IsVisible="{Binding IsImageLoading}"
                                                     Classes.shimmer="{Binding IsImageLoading}">
                                                 <Border.Styles>
@@ -347,38 +347,38 @@
                                                         <TextBlock Grid.Column="0"
                                                                    Text="{Binding GameName}"
                                                                    FontSize="13.5" FontWeight="SemiBold"
-                                                                   Foreground="{StaticResource TextPrimary}"
+                                                                   Foreground="{DynamicResource TextPrimary}"
                                                                    TextTrimming="CharacterEllipsis"/>
 
                                                         <Border Grid.Column="1"
                                                                 Classes="StatusPill"
-                                                                Background="{StaticResource SuccessLight}"
+                                                                Background="{DynamicResource SuccessLight}"
                                                                 IsVisible="{Binding Game.IsVerified}">
                                                             <TextBlock Text="✓" FontSize="10"
-                                                                       Foreground="{StaticResource Success}"
+                                                                       Foreground="{DynamicResource Success}"
                                                                        FontWeight="SemiBold"/>
                                                         </Border>
                                                         <Border Grid.Column="1"
                                                                 Classes="StatusPill"
-                                                                Background="{StaticResource ErrorLight}"
+                                                                Background="{DynamicResource ErrorLight}"
                                                                 IsVisible="{Binding Game.IsVerified, Converter={StaticResource InvBoolToVis}}">
                                                             <TextBlock Text="Missing" FontSize="10"
-                                                                       Foreground="{StaticResource Error}"/>
+                                                                       Foreground="{DynamicResource Error}"/>
                                                         </Border>
                                                     </Grid>
 
                                                     <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
                                                         <TextBlock Text="AppID " FontSize="11"
-                                                                   Foreground="{StaticResource TextMuted}"
+                                                                   Foreground="{DynamicResource TextMuted}"
                                                                    VerticalAlignment="Center"/>
                                                         <TextBlock Text="{Binding Game.AppId}" FontFamily="Consolas"
-                                                                   FontSize="11" Foreground="{StaticResource TextMuted}"
+                                                                   FontSize="11" Foreground="{DynamicResource TextMuted}"
                                                                    VerticalAlignment="Center"/>
                                                         <TextBlock Text="{Binding BuildIdLabel}" FontSize="11"
-                                                                   Foreground="{StaticResource TextMuted}"
+                                                                   Foreground="{DynamicResource TextMuted}"
                                                                    VerticalAlignment="Center"/>
                                                         <TextBlock Text="{Binding Game.BuildId}" FontFamily="Consolas"
-                                                                   FontSize="11" Foreground="{StaticResource TextMuted}"
+                                                                   FontSize="11" Foreground="{DynamicResource TextMuted}"
                                                                    VerticalAlignment="Center"/>
                                                     </StackPanel>
 
@@ -392,7 +392,7 @@
                                                             <TextBlock Text="SIZE" Classes="Label"/>
                                                             <TextBlock Text="{Binding SizeText}"
                                                                        FontSize="12" FontWeight="SemiBold"
-                                                                       Foreground="{StaticResource TextPrimary}"
+                                                                       Foreground="{DynamicResource TextPrimary}"
                                                                        Margin="0,2,0,0"/>
                                                         </StackPanel>
 
@@ -400,7 +400,7 @@
                                                             <TextBlock Text="ADDED" Classes="Label"/>
                                                             <TextBlock Text="{Binding InstallDateText}"
                                                                        FontSize="11.5" FontWeight="SemiBold"
-                                                                       Foreground="{StaticResource TextPrimary}"
+                                                                       Foreground="{DynamicResource TextPrimary}"
                                                                        Margin="0,2,0,0"/>
                                                         </StackPanel>
                                                     </Grid>
@@ -450,8 +450,8 @@
             <Border Width="420"
                     Classes="overlayCard"
                     HorizontalAlignment="Center" VerticalAlignment="Center"
-                    Background="{StaticResource BgCard}"
-                    BorderBrush="{StaticResource Border}"
+                    Background="{DynamicResource BgCard}"
+                    BorderBrush="{DynamicResource Border}"
                     BorderThickness="1"
                     CornerRadius="16"
                     Padding="28"
@@ -465,27 +465,27 @@
                 <StackPanel>
                     <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
                         <Border Width="36" Height="36" CornerRadius="10"
-                                Background="{StaticResource AccentSubtle}"
+                                Background="{DynamicResource AccentSubtle}"
                                 Margin="0,0,12,0">
                             <Path Data="{StaticResource LucideRotateCw}"
                                   Width="16" Height="16" Stretch="Uniform"
-                                  Stroke="{StaticResource Accent}" StrokeThickness="1.8" Fill="Transparent"
+                                  Stroke="{DynamicResource Accent}" StrokeThickness="1.8" Fill="Transparent"
                                   StrokeLineCap="Round" StrokeJoin="Round"/>
                         </Border>
                         <TextBlock Text="Redownload Game"
                                    FontSize="17" FontWeight="SemiBold"
-                                   Foreground="{StaticResource TextPrimary}"
+                                   Foreground="{DynamicResource TextPrimary}"
                                    VerticalAlignment="Center"/>
                     </StackPanel>
 
                     <TextBlock Text="{Binding GameToRedownload.Game.GameName}"
                                FontSize="13" FontWeight="SemiBold"
-                               Foreground="{StaticResource Accent}"
+                               Foreground="{DynamicResource Accent}"
                                Margin="0,0,0,6"
                                TextTrimming="CharacterEllipsis"/>
 
                     <TextBlock Text="All existing game files will be deleted and the game will be re-downloaded from scratch."
-                               FontSize="13" Foreground="{StaticResource TextBody}"
+                               FontSize="13" Foreground="{DynamicResource TextBody}"
                                TextWrapping="Wrap" Margin="0,0,0,20"/>
 
                     <Grid>
@@ -524,8 +524,8 @@
             <Border Width="420"
                     Classes="overlayCard"
                     HorizontalAlignment="Center" VerticalAlignment="Center"
-                    Background="{StaticResource BgCard}"
-                    BorderBrush="{StaticResource Border}"
+                    Background="{DynamicResource BgCard}"
+                    BorderBrush="{DynamicResource Border}"
                     BorderThickness="1"
                     CornerRadius="16"
                     Padding="28"
@@ -540,43 +540,43 @@
                     <!-- Icon + title -->
                     <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
                         <Border Width="36" Height="36" CornerRadius="10"
-                                Background="{StaticResource ErrorLight}"
+                                Background="{DynamicResource ErrorLight}"
                                 Margin="0,0,12,0">
                             <Path Data="{StaticResource LucideTrash2}"
                                   Width="16" Height="16" Stretch="Uniform"
-                                  Stroke="{StaticResource Error}" StrokeThickness="1.8" Fill="Transparent"
+                                  Stroke="{DynamicResource Error}" StrokeThickness="1.8" Fill="Transparent"
                                   StrokeLineCap="Round" StrokeJoin="Round"/>
                         </Border>
                         <TextBlock Text="Remove Game"
                                    FontSize="17" FontWeight="SemiBold"
-                                   Foreground="{StaticResource TextPrimary}"
+                                   Foreground="{DynamicResource TextPrimary}"
                                    VerticalAlignment="Center"/>
                     </StackPanel>
 
                     <!-- Game name -->
                     <TextBlock Text="{Binding GameToRemove.Game.GameName}"
                                FontSize="13" FontWeight="SemiBold"
-                               Foreground="{StaticResource Accent}"
+                               Foreground="{DynamicResource Accent}"
                                Margin="0,0,0,6"
                                TextTrimming="CharacterEllipsis"/>
 
                     <!-- Message -->
                     <TextBlock Text="Remove this game from your library?"
-                               FontSize="13" Foreground="{StaticResource TextBody}"
+                               FontSize="13" Foreground="{DynamicResource TextBody}"
                                TextWrapping="Wrap" Margin="0,0,0,16"/>
 
                     <!-- Delete files checkbox -->
-                    <Border Background="{StaticResource BgInput}"
-                            BorderBrush="{StaticResource Border}"
+                    <Border Background="{DynamicResource BgInput}"
+                            BorderBrush="{DynamicResource Border}"
                             BorderThickness="1" CornerRadius="8"
                             Padding="12,10" Margin="0,0,0,20">
                         <CheckBox IsChecked="{Binding DeleteFiles}" Cursor="Hand">
                             <StackPanel VerticalAlignment="Center">
                                 <TextBlock Text="Also delete all game files"
                                            FontSize="13" FontWeight="SemiBold"
-                                           Foreground="{StaticResource TextPrimary}"/>
+                                           Foreground="{DynamicResource TextPrimary}"/>
                                 <TextBlock Text="This cannot be undone"
-                                           FontSize="11" Foreground="{StaticResource TextMuted}"
+                                           FontSize="11" Foreground="{DynamicResource TextMuted}"
                                            Margin="0,2,0,0"/>
                             </StackPanel>
                         </CheckBox>

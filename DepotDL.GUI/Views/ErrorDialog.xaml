@@ -14,8 +14,8 @@
         <!-- Card -->
         <Border Width="420" MaxHeight="520"
                 HorizontalAlignment="Center" VerticalAlignment="Center"
-                Background="{StaticResource BgCard}"
-                BorderBrush="{StaticResource Border}"
+                Background="{DynamicResource BgCard}"
+                BorderBrush="{DynamicResource Border}"
                 BorderThickness="1"
                 CornerRadius="16"
                 Padding="24"
@@ -23,12 +23,12 @@
             <StackPanel>
                 <TextBlock Text="{Binding DialogTitle}"
                            FontSize="18" FontWeight="SemiBold"
-                           Foreground="{StaticResource TextPrimary}"
+                           Foreground="{DynamicResource TextPrimary}"
                            Margin="0,0,0,12"/>
 
                 <ScrollViewer MaxHeight="320" VerticalScrollBarVisibility="Auto" Margin="0,0,0,20">
                     <TextBlock Text="{Binding Message}"
-                               FontSize="13" Foreground="{StaticResource TextBody}"
+                               FontSize="13" Foreground="{DynamicResource TextBody}"
                                TextWrapping="Wrap"/>
                 </ScrollViewer>
 

@@ -19,6 +19,8 @@ namespace DepotDL.GUI.Views
         {
             DialogTitle = title;
             InputText = initialValue;
+            if (Avalonia.Application.Current != null)
+                RequestedThemeVariant = Avalonia.Application.Current.RequestedThemeVariant;
             InitializeComponent();
             DataContext = this;
         }

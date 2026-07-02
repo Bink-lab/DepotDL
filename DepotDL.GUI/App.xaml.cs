@@ -20,9 +20,27 @@ namespace DepotDL.GUI
 
         public override void OnFrameworkInitializationCompleted()
         {
+            try
+            {
+                var settings = new Services.SettingsService().Load();
+                ApplyTheme(settings.Theme);
+            }
+            catch {}
+
             if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
                 desktop.MainWindow = new MainWindow();
             base.OnFrameworkInitializationCompleted();
+        }
+
+        public static void ApplyTheme(string? theme)
+        {
+            if (Current == null) return;
+            Current.RequestedThemeVariant = (theme ?? "System") switch
+            {
+                "Light" => Avalonia.Styling.ThemeVariant.Light,
+                "Dark" => Avalonia.Styling.ThemeVariant.Dark,
+                _ => Avalonia.Styling.ThemeVariant.Default
+            };
         }
     }
 }
