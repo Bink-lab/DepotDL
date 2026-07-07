@@ -417,7 +417,8 @@ namespace DepotDL.GUI.Services
             line.Contains("unable to download", StringComparison.OrdinalIgnoreCase) ||
             line.Contains("missing public subsection", StringComparison.OrdinalIgnoreCase) ||
             line.Contains("used by another process", StringComparison.OrdinalIgnoreCase) ||
-            line.Contains("Permanently failed", StringComparison.OrdinalIgnoreCase);
+            line.Contains("Permanently failed", StringComparison.OrdinalIgnoreCase) ||
+            line.Contains("Failed to resolve depot", StringComparison.OrdinalIgnoreCase);
 
         private static void ProcessLine(string line, DepotDownloadState state)
         {

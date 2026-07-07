@@ -1,6 +1,7 @@
 // This file is subject to the terms and conditions defined
 // in file 'LICENSE', which is part of this source code package.
 
+using System;
 using System.IO;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -18,7 +19,10 @@ namespace DepotDownloader
         {
             var client = new HttpClient(new SocketsHttpHandler
             {
-                ConnectCallback = IPv4ConnectAsync
+                ConnectCallback = IPv4ConnectAsync,
+                PooledConnectionLifetime = TimeSpan.FromMinutes(5),
+                PooledConnectionIdleTimeout = TimeSpan.FromMinutes(2),
+                ConnectTimeout = TimeSpan.FromSeconds(30)
             });
 
             var assemblyVersion = typeof(HttpClientFactory).Assembly.GetName().Version.ToString(fieldCount: 3);

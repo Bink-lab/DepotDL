@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using SteamKit2;
@@ -25,6 +26,16 @@ namespace DepotDownloader
         public const uint INVALID_DEPOT_ID = uint.MaxValue;
         public const ulong INVALID_MANIFEST_ID = ulong.MaxValue;
         public const string DEFAULT_BRANCH = "public";
+
+        private const int MaxTransientRetries = 15;
+        private static readonly Random RetryJitter = new();
+
+        private static async Task DelayWithBackoffAsync(int attempt, CancellationToken cancellationToken)
+        {
+            var backoffMs = Math.Min(1000 * (1 << Math.Min(attempt, 6)), 30000);
+            var jitterMs = RetryJitter.Next(0, 1000);
+            await Task.Delay(backoffMs + jitterMs, cancellationToken).ConfigureAwait(false);
+        }
 
         public static DownloadConfig Config = new();
 
@@ -403,12 +414,71 @@ namespace DepotDownloader
             Directory.CreateDirectory(Path.GetDirectoryName(fileFinalPath));
             Directory.CreateDirectory(Path.GetDirectoryName(fileStagingPath));
 
-            using (var file = new FileStream(fileStagingPath, FileMode.OpenOrCreate, FileAccess.Write, FileShare.ReadWrite))
-            using (var client = HttpClientFactory.CreateHttpClient())
+            if (File.Exists(fileStagingPath))
             {
-                Console.WriteLine("Downloading {0}", fileName);
-                var responseStream = await client.GetStreamAsync(url);
-                await responseStream.CopyToAsync(file);
+                File.Delete(fileStagingPath);
+            }
+
+            var attempt = 0;
+            var resumeFrom = 0L;
+            while (true)
+            {
+                attempt++;
+                try
+                {
+                    using var client = HttpClientFactory.CreateHttpClient();
+                    using var request = new HttpRequestMessage(HttpMethod.Get, url);
+                    if (resumeFrom > 0)
+                    {
+                        request.Headers.Range = new System.Net.Http.Headers.RangeHeaderValue(resumeFrom, null);
+                    }
+
+                    using var response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead).ConfigureAwait(false);
+                    response.EnsureSuccessStatusCode();
+
+                    var resuming = resumeFrom > 0 && response.StatusCode == HttpStatusCode.PartialContent;
+                    if (resumeFrom > 0 && !resuming)
+                    {
+                        resumeFrom = 0;
+                    }
+
+                    var totalBytes = (response.Content.Headers.ContentLength ?? 0) + resumeFrom;
+                    var downloadedBytes = resumeFrom;
+                    var buffer = new byte[81920];
+                    var lastReportTicks = DateTime.UtcNow.Ticks;
+
+                    using (var file = new FileStream(fileStagingPath, resuming ? FileMode.Append : FileMode.Create, FileAccess.Write, FileShare.None))
+                    using (var responseStream = await response.Content.ReadAsStreamAsync().ConfigureAwait(false))
+                    {
+                        int read;
+                        while ((read = await responseStream.ReadAsync(buffer).ConfigureAwait(false)) > 0)
+                        {
+                            await file.WriteAsync(buffer.AsMemory(0, read)).ConfigureAwait(false);
+                            downloadedBytes += read;
+
+                            if (DateTime.UtcNow.Ticks - lastReportTicks > TimeSpan.TicksPerSecond)
+                            {
+                                var pct = totalBytes > 0 ? (downloadedBytes / (float)totalBytes) * 100.0f : 0f;
+                                Console.WriteLine("{0,6:#00.00}% {1}", pct, fileName);
+                                lastReportTicks = DateTime.UtcNow.Ticks;
+                            }
+                        }
+                    }
+
+                    Console.WriteLine("{0,6:#00.00}% {1}", 100.0f, fileName);
+                    break;
+                }
+                catch (Exception e) when (e is HttpRequestException or IOException or TaskCanceledException)
+                {
+                    if (attempt >= MaxTransientRetries)
+                    {
+                        throw new ContentDownloaderException($"Failed to download {fileName} after {attempt} attempts: {e.Message}");
+                    }
+
+                    resumeFrom = File.Exists(fileStagingPath) ? new FileInfo(fileStagingPath).Length : 0;
+                    Console.WriteLine("Error downloading {0}: {1}. Retrying from byte {2}.", fileName, e.Message, resumeFrom);
+                    await DelayWithBackoffAsync(attempt, CancellationToken.None).ConfigureAwait(false);
+                }
             }
 
             if (File.Exists(fileFinalPath))
@@ -545,6 +615,7 @@ namespace DepotDownloader
             }
 
             var infos = new List<DepotDownloadInfo>();
+            var skippedDepotIds = new List<uint>();
 
             foreach (var (depotId, manifestId) in depotManifestIds)
             {
@@ -553,8 +624,19 @@ namespace DepotDownloader
                 {
                     infos.Add(info);
                 }
+                else
+                {
+                    skippedDepotIds.Add(depotId);
+                }
             }
             Console.WriteLine();
+
+            if (hasSpecificDepots && skippedDepotIds.Count > 0)
+            {
+                throw new ContentDownloaderException(string.Format(
+                    "Failed to resolve depot(s) {0} for app {1} (missing key or manifest). Aborting.",
+                    string.Join(", ", skippedDepotIds), appId));
+            }
 
             try
             {
@@ -788,10 +870,23 @@ namespace DepotDownloader
 
                     ulong manifestRequestCode = 0;
                     var manifestRequestCodeExpiration = DateTime.MinValue;
+                    var manifestAttempt = 0;
 
                     do
                     {
                         cts.Token.ThrowIfCancellationRequested();
+
+                        if (manifestAttempt > 0)
+                        {
+                            if (manifestAttempt >= MaxTransientRetries)
+                            {
+                                Console.WriteLine("Giving up on depot manifest {0} {1} after {2} attempts.", depot.DepotId, depot.ManifestId, manifestAttempt);
+                                break;
+                            }
+
+                            await DelayWithBackoffAsync(manifestAttempt, cts.Token).ConfigureAwait(false);
+                        }
+                        manifestAttempt++;
 
                         Server connection = null;
 
@@ -1268,9 +1363,23 @@ namespace DepotDownloader
 
             try
             {
+                var chunkAttempt = 0;
+
                 do
                 {
                     cts.Token.ThrowIfCancellationRequested();
+
+                    if (chunkAttempt > 0)
+                    {
+                        if (chunkAttempt >= MaxTransientRetries)
+                        {
+                            Console.WriteLine("Giving up on chunk {0} for depot {1} after {2} attempts.", chunkID, depot.DepotId, chunkAttempt);
+                            break;
+                        }
+
+                        await DelayWithBackoffAsync(chunkAttempt, cts.Token).ConfigureAwait(false);
+                    }
+                    chunkAttempt++;
 
                     Server connection = null;
 

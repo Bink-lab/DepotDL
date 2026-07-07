@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using SteamKit2.CDN;
 
@@ -14,13 +15,16 @@ namespace DepotDownloader
     /// </summary>
     class CDNClientPool
     {
+        private const double PenaltyDecayFactor = 0.75;
+        private const int PenaltyDecayFloor = 5;
+
         private readonly Steam3Session steamSession;
         private readonly uint appId;
         public Client CDNClient { get; }
         public Server ProxyServer { get; private set; }
 
         private readonly List<Server> servers = [];
-        private int nextServer;
+        private int nextServer = -1;
         private readonly object _serverLock = new();
 
         public CDNClientPool(Steam3Session steamSession, uint appId)
@@ -32,6 +36,8 @@ namespace DepotDownloader
 
         public async Task UpdateServerList()
         {
+            DecayServerPenalties();
+
             var servers = await this.steamSession.steamContent.GetServersForSteamPipe();
 
             ProxyServer = servers.Where(x => x.UseAsProxy).FirstOrDefault();
@@ -64,12 +70,38 @@ namespace DepotDownloader
             }
         }
 
+        private static void DecayServerPenalties()
+        {
+            if (AccountSettingsStore.Instance == null) return;
+
+            foreach (var host in AccountSettingsStore.Instance.ContentServerPenalty.Keys.ToList())
+            {
+                AccountSettingsStore.Instance.ContentServerPenalty.AddOrUpdate(
+                    host,
+                    0,
+                    (_, penalty) => (int)(penalty * PenaltyDecayFactor));
+            }
+
+            foreach (var host in AccountSettingsStore.Instance.ContentServerPenalty
+                .Where(kv => kv.Value < PenaltyDecayFloor)
+                .Select(kv => kv.Key)
+                .ToList())
+            {
+                AccountSettingsStore.Instance.ContentServerPenalty.TryRemove(host, out _);
+            }
+        }
+
         public Server GetConnection()
         {
             lock (_serverLock)
             {
-                if (servers.Count == 0) return null;
-                return servers[nextServer % servers.Count];
+                if (servers.Count == 0)
+                {
+                    throw new InvalidOperationException("No download servers available. Call UpdateServerList() first.");
+                }
+
+                var index = Interlocked.Increment(ref nextServer);
+                return servers[(int)((uint)index % servers.Count)];
             }
         }
 
@@ -79,11 +111,6 @@ namespace DepotDownloader
 
             lock (_serverLock)
             {
-                if (servers.Count > 0 && servers[nextServer % servers.Count] == server)
-                {
-                    nextServer++;
-                }
-
                 AccountSettingsStore.Instance.ContentServerPenalty.TryGetValue(server.Host, out var penalty);
                 AccountSettingsStore.Instance.ContentServerPenalty[server.Host] = penalty + 100;
                 AccountSettingsStore.Save();

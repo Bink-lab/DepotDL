@@ -844,7 +844,8 @@ namespace DepotDL.CLI
                 line.Contains("unable to download", StringComparison.OrdinalIgnoreCase) ||
                 line.Contains("missing public subsection or manifest section", StringComparison.OrdinalIgnoreCase) ||
                 line.Contains("used by another process", StringComparison.OrdinalIgnoreCase) ||
-                line.Contains("Permanently failed", StringComparison.OrdinalIgnoreCase);
+                line.Contains("Permanently failed", StringComparison.OrdinalIgnoreCase) ||
+                line.Contains("Failed to resolve depot", StringComparison.OrdinalIgnoreCase);
         }
 
         private static void SafeCleanupKeys()
