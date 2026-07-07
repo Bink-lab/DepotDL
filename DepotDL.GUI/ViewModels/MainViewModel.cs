@@ -28,6 +28,8 @@ namespace DepotDL.GUI.ViewModels
 
         public StoreViewModel Store { get; }
 
+        public string AppVersionText => UpdateCheckerService.GetCurrentVersionString();
+
         public MainViewModel()
         {
             Store = new StoreViewModel(this);
@@ -124,19 +126,9 @@ namespace DepotDL.GUI.ViewModels
 
         private static string FormatUpdateBannerText(string? tag, string? sha)
         {
-            const string label = "Nightly update";
-            if (tag != null)
-            {
-                var p = tag.Split('-');
-                if (p.Length >= 4 && p[1].Length == 8)
-                {
-                    var d = p[1];
-                    var date = $"{d[..4]}-{d[4..6]}-{d[6..8]}";
-                    return $"{label} available  ·  {p[^1]}  ·  {date}";
-                }
-                return $"{label} available  ·  {tag}";
-            }
-            return sha != null ? $"{label} available  ·  {sha}" : $"{label} available";
+            const string label = "Update available";
+            if (tag != null) return $"{label}  ·  {tag}";
+            return sha != null ? $"{label}  ·  {sha}" : label;
         }
 
         [RelayCommand]

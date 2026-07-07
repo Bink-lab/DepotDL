@@ -9,6 +9,7 @@ namespace DepotDL.GUI.Services
     public static class UpdateCheckerService
     {
         public static string? GetCurrentSha() => UpdateCheckerCore.GetCurrentSha();
+        public static string GetCurrentVersionString() => UpdateCheckerCore.GetCurrentVersionString();
         public static string BuildReleaseUrl(string tagName) => UpdateCheckerCore.BuildReleaseUrl(tagName);
 
         public static bool IsUpdateAvailableFromCache(AppSettings settings)

@@ -223,7 +223,7 @@
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
                             
-                            <TextBlock Text="v2.1.0" VerticalAlignment="Center" FontSize="11.5"
+                            <TextBlock Text="{Binding AppVersionText}" VerticalAlignment="Center" FontSize="11.5"
                                        Foreground="{DynamicResource TextMuted}"/>
                             
                             <Button Grid.Column="1" Theme="{StaticResource ChromeBtn}" Command="{Binding ToggleThemeCommand}" ToolTip.Tip="Toggle theme">

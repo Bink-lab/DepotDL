@@ -53,6 +53,9 @@ namespace DepotDL.Shared
             return Version.TryParse(versionPart, out var v) ? v : null;
         }
 
+        public static string GetCurrentVersionString()
+            => $"v{GetCurrentVersion() ?? new Version(0, 0, 0)}";
+
         internal static Version? ParseTagVersion(string tag)
         {
             var text = tag.StartsWith('v') ? tag[1..] : tag;
