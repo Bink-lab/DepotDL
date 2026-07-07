@@ -57,7 +57,6 @@ namespace DepotDL.GUI.Helpers
             var s = GetSettings();
             var delta = e.Delta.Y * 40 * s.ScrollSensitivity;
 
-            // Chain from current target if animation in progress, otherwise from current offset
             var baseY = _active.TryGetValue(sv, out var existing) ? existing.TargetY : sv.Offset.Y;
             var targetY = Math.Clamp(baseY - delta, 0, sv.ScrollBarMaximum.Y);
 
@@ -67,7 +66,6 @@ namespace DepotDL.GUI.Helpers
 
         private static void AnimateScrollTo(ScrollViewer sv, double targetY, TimeSpan duration)
         {
-            // Cancel existing animation
             if (_active.TryGetValue(sv, out var existing))
                 existing.Timer.Stop();
 

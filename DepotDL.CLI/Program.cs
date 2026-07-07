@@ -40,7 +40,6 @@ namespace DepotDL.CLI
 
             if (args.Length == 0)
             {
-                // Start update check early so it runs concurrently with path resolution
                 var tempSession = new TuiSession();
                 IniSettings.LoadInto(tempSession);
                 using var updateCts = new CancellationTokenSource(TimeSpan.FromSeconds(3));
@@ -48,7 +47,6 @@ namespace DepotDL.CLI
                     ? UpdateChecker.CheckAsync(UpdateChecker.GetCurrentSha(), updateCts.Token)
                     : null;
 
-                // Resolve runtimes
                 var dotnetPath = DialogHelpers.ResolveDotnetPath(null);
                 var ddmodPath = DialogHelpers.ResolveDDModPath(null);
 
@@ -136,7 +134,6 @@ namespace DepotDL.CLI
                 return TuiDashboard.RunInteractiveTui(ddmodPath, dotnetPath);
             }
 
-            // Standard CLI Mode
             return RunCliMode(args);
         }
 
@@ -209,7 +206,6 @@ namespace DepotDL.CLI
                 return 1;
             }
 
-            // Resolve runtimes and libraries
             dotnetPath = DialogHelpers.ResolveDotnetPath(dotnetPath);
             if (dotnetPath == null)
             {
@@ -727,7 +723,6 @@ namespace DepotDL.CLI
                 foreach (var dir in providerExtractDirs)
                     try { Directory.Delete(dir, true); } catch { }
 
-                // Flush any remaining pending logs and clear the slot lines
                 lock (_drawLock)
                 {
                     if (_isTty && _slots != null)
@@ -916,7 +911,6 @@ namespace DepotDL.CLI
 
             try
             {
-                // Suppress noisy status messages from DepotDownloaderMod
                 if (line.StartsWith("Using depot keys from", StringComparison.OrdinalIgnoreCase) ||
                     line.StartsWith("No username given", StringComparison.OrdinalIgnoreCase) ||
                     line.StartsWith("Connecting to Steam3", StringComparison.OrdinalIgnoreCase) ||
@@ -933,7 +927,6 @@ namespace DepotDL.CLI
                     line.StartsWith("Pre-allocating", StringComparison.OrdinalIgnoreCase) ||
                     Regex.IsMatch(line, @"^Depot \d+ - Downloaded"))
                 {
-                    // Update slot status for connecting/pre-allocating states
                     if (line.StartsWith("Connecting to Steam3", StringComparison.OrdinalIgnoreCase) ||
                         line.StartsWith("Logging anonymously", StringComparison.OrdinalIgnoreCase))
                     {
@@ -1092,8 +1085,6 @@ namespace DepotDL.CLI
                         DrawSlots();
                     }
                 }
-                // All other stdout lines are silently ignored — errors come through stderr
-                // and are collected in depotOutputErrors for the final summary.
             }
             catch
             {
@@ -1285,10 +1276,6 @@ namespace DepotDL.CLI
             Console.ResetColor();
         }
 
-        /// <summary>
-        /// Clears the slot lines at the bottom (used before printing final results).
-        /// Must be called while holding _drawLock or when workers have finished.
-        /// </summary>
         private static void ClearSlotLines()
         {
             if (!_isTty || _slots == null) return;
@@ -1325,7 +1312,6 @@ namespace DepotDL.CLI
                         var startTop = Math.Max(0, Console.CursorTop - _slots.Length);
                         Console.SetCursorPosition(0, startTop);
 
-                        // Flush any pending permanent log lines (completion/failure messages)
                         while (_pendingLogs.Count > 0)
                         {
                             var logAction = _pendingLogs.Dequeue();
@@ -1343,7 +1329,6 @@ namespace DepotDL.CLI
                     }
                     catch
                     {
-                        // Fallback: just flush pending logs without cursor control
                         while (_pendingLogs.Count > 0)
                         {
                             _pendingLogs.Dequeue()();
@@ -1352,7 +1337,6 @@ namespace DepotDL.CLI
                 }
                 else
                 {
-                    // Non-TTY: just flush logs sequentially
                     while (_pendingLogs.Count > 0)
                     {
                         _pendingLogs.Dequeue()();
@@ -1465,7 +1449,7 @@ namespace DepotDL.CLI
             });
 
             try { await process.WaitForExitAsync(watchdogCts.Token); }
-            catch (OperationCanceledException) { /* Watchdog killed the process */ }
+            catch (OperationCanceledException) { }
             finally
             {
                 watchdogCts.Cancel();

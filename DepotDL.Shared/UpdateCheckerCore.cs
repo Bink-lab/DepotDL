@@ -42,6 +42,23 @@ namespace DepotDL.Shared
             return sha.Length > 7 ? sha[..7] : sha;
         }
 
+        private static Version? GetCurrentVersion()
+        {
+            var infoVer = Assembly.GetEntryAssembly()
+                ?.GetCustomAttribute<AssemblyInformationalVersionAttribute>()
+                ?.InformationalVersion;
+            if (infoVer == null) return null;
+            var idx = infoVer.IndexOf('+');
+            var versionPart = idx >= 0 ? infoVer[..idx] : infoVer;
+            return Version.TryParse(versionPart, out var v) ? v : null;
+        }
+
+        internal static Version? ParseTagVersion(string tag)
+        {
+            var text = tag.StartsWith('v') ? tag[1..] : tag;
+            return Version.TryParse(text, out var v) ? v : null;
+        }
+
         private static DateTime? ReadBuildTime()
         {
             var val = Assembly.GetEntryAssembly()
@@ -70,17 +87,19 @@ namespace DepotDL.Shared
 
         public static bool IsNewerThanBuild(string tag)
         {
+            var latestVersion = ParseTagVersion(tag);
+            if (latestVersion != null)
+                return IsUpdate(GetCurrentVersion(), latestVersion);
+
             var parts = tag.Split('-');
             var tagSha = ShortSha(parts.Length >= 4 ? parts[^1] : null);
-            return IsUpdate(ShortSha(GetCurrentSha()), tagSha, GetBuildTime(), ParseTagTime(tag));
+            return IsUpdateLegacy(ShortSha(GetCurrentSha()), tagSha, GetBuildTime(), ParseTagTime(tag));
         }
 
-        // SHA identity decides "same build" before time does, because the CI release
-        // job stamps a tag timestamp a few minutes AFTER the assembly's embedded
-        // BuildTime for the very same commit — comparing time first would nag about
-        // the build that is already installed. Time only resolves direction once the
-        // commit actually differs, so an older release never reads as an upgrade.
-        private static bool IsUpdate(string? currentSha, string? latestSha, DateTime? buildTime, DateTime? tagTime)
+        private static bool IsUpdate(Version? currentVersion, Version latestVersion)
+            => currentVersion == null || latestVersion > currentVersion;
+
+        private static bool IsUpdateLegacy(string? currentSha, string? latestSha, DateTime? buildTime, DateTime? tagTime)
         {
             if (!string.IsNullOrEmpty(currentSha) && !string.IsNullOrEmpty(latestSha))
             {
@@ -115,16 +134,27 @@ namespace DepotDL.Shared
                 if (arr == null || arr.Length == 0) return null;
 
                 var release = arr
-                    .OrderByDescending(r => ParseTagTime(r.TagName ?? "") ?? DateTime.MinValue)
+                    .OrderByDescending(r => ParseTagVersion(r.TagName ?? "") ?? new Version(0, 0, 0))
+                    .ThenByDescending(r => ParseTagTime(r.TagName ?? "") ?? DateTime.MinValue)
                     .FirstOrDefault();
 
                 if (release?.TagName == null) return null;
 
-                var parts = release.TagName.Split('-');
-                var latestSha = ShortSha(parts.Length >= 4 ? parts[^1] : null);
-
-                var updateAvailable = IsUpdate(ShortSha(currentSha), latestSha,
-                    GetBuildTime(), ParseTagTime(release.TagName));
+                var latestVersion = ParseTagVersion(release.TagName);
+                bool updateAvailable;
+                string? latestSha;
+                if (latestVersion != null)
+                {
+                    updateAvailable = IsUpdate(GetCurrentVersion(), latestVersion);
+                    latestSha = null;
+                }
+                else
+                {
+                    var parts = release.TagName.Split('-');
+                    latestSha = ShortSha(parts.Length >= 4 ? parts[^1] : null);
+                    updateAvailable = IsUpdateLegacy(ShortSha(currentSha), latestSha,
+                        GetBuildTime(), ParseTagTime(release.TagName));
+                }
 
                 return new UpdateInfo
                 {
@@ -141,10 +171,8 @@ namespace DepotDL.Shared
             }
         }
 
-        // The project publishes only prerelease (nightly) builds, so the Velopack
-        // feed must always be opened with prerelease support enabled.
         private static UpdateManager MakeManager()
-            => new(new GithubSource(GithubRepo, null, prerelease: true));
+            => new(new GithubSource(GithubRepo, null, prerelease: false));
 
         public static bool IsVelopackManaged()
         {
@@ -152,9 +180,6 @@ namespace DepotDL.Shared
             catch { return false; }
         }
 
-        // Returns false when Velopack has no applicable package for this platform
-        // (e.g. a GitHub tag exists but carries no Velopack assets for this OS/arch),
-        // so callers can fall back to a manual download instead of failing silently.
         public static async Task<bool> InstallUpdateAsync(Action<int>? onProgress = null, CancellationToken ct = default)
         {
             try

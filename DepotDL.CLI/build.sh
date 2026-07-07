@@ -21,10 +21,11 @@ if [ -z "$1" ]; then
 else
   RID="$1"
 fi
+VERSION="${DEPOTDL_VERSION:-0.0.0}"
 echo "Building DepotDownloaderMod..."
 dotnet build "../DepotDownloaderMod/DepotDownloaderMod.csproj" -c Release
 echo "Publishing DepotDL.CLI ($RID)..."
-dotnet publish -c Release -r "$RID" --self-contained true /p:PublishSingleFile=true
+dotnet publish -c Release -r "$RID" --self-contained true /p:PublishSingleFile=true /p:Version="$VERSION"
 find ../DepotDownloaderMod/bin/Release/net9.0/ -maxdepth 1 -type f ! -name "*.exe" \
     -exec cp {} "bin/Release/net9.0/$RID/publish/" \;
 echo "[SUCCESS] Publish succeeded!"

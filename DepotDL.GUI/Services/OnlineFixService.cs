@@ -148,7 +148,6 @@ namespace DepotDL.GUI.Services
                 }
                 catch { }
 
-                // Search
                 progress?.Report($"Searching online-fix.me for \"{gameName}\"...");
                 var encoded = Uri.EscapeDataString(gameName);
                 var searchUrl = $"{OnlineFixBase}/index.php?do=search&subaction=search&story={encoded}";
@@ -158,7 +157,6 @@ namespace DepotDL.GUI.Services
 
                 ct.ThrowIfCancellationRequested();
 
-                // Find best match in search results
                 string? bestHref = null;
                 double bestRatio = 0;
                 try
@@ -198,7 +196,6 @@ namespace DepotDL.GUI.Services
 
                 ct.ThrowIfCancellationRequested();
 
-                // Login if form is present
                 var loginPresent = false;
                 try
                 {
@@ -227,7 +224,6 @@ namespace DepotDL.GUI.Services
                     ct.ThrowIfCancellationRequested();
                 }
 
-                // Find download button href
                 progress?.Report("Finding download link...");
                 try
                 {
@@ -254,8 +250,6 @@ namespace DepotDL.GUI.Services
                 }
                 catch { }
 
-                // Navigate browser to uploads domain so Cloudflare issues a cf_clearance for that subdomain.
-                // The main-site cf_clearance is domain-specific and will not authenticate uploads.online-fix.me:2053.
                 progress?.Report("Authenticating with file server...");
                 Log($"Navigating browser to uploads domain: {btnHref}");
                 try
@@ -338,7 +332,6 @@ namespace DepotDL.GUI.Services
                     catch (Exception ex) { Log($"  attempt {attempt + 1} exception: {ex.Message}"); }
                 }
 
-                // Fallback: let the browser navigate so it can handle any JS or auth challenges
                 if (archiveUrl == null)
                 {
                     progress?.Report("Trying browser fallback for file server...");
@@ -420,7 +413,6 @@ namespace DepotDL.GUI.Services
 
             ct.ThrowIfCancellationRequested();
 
-            // Download archive — separate client so Timeout can be set freely
             var tempFile = Path.Combine(Path.GetTempPath(), $"onlinefix_{Guid.NewGuid():N}.rar");
             try
             {
@@ -483,7 +475,6 @@ namespace DepotDL.GUI.Services
 
             ct.ThrowIfCancellationRequested();
 
-            // Extract archive
             progress?.Report("Extracting fix...");
             var tempExtractDir = Path.Combine(Path.GetTempPath(), $"onlinefix_{Guid.NewGuid():N}");
             try
@@ -519,7 +510,6 @@ namespace DepotDL.GUI.Services
 
             ct.ThrowIfCancellationRequested();
 
-            // Copy files to game dir, backing up collisions
             progress?.Report("Applying fix to game folder...");
             try
             {
@@ -570,8 +560,6 @@ namespace DepotDL.GUI.Services
             TryDelete(markerPath);
         }
 
-        // ── helpers ──────────────────────────────────────────────────────────────
-
         private static string? FindBestArchive(string html, string baseUrl)
         {
             string? best = null;
@@ -621,23 +609,17 @@ namespace DepotDL.GUI.Services
         {
             if (string.IsNullOrEmpty(query) || string.IsNullOrEmpty(candidate)) return 0;
 
-            // Exact match
             if (candidate == query) return 1.0;
 
-            // Query is a prefix of candidate (e.g. "overcooked" in "overcooked! all you can eat по сети")
-            // Score scales with how much of the candidate the query covers
             if (candidate.StartsWith(query, StringComparison.Ordinal))
                 return 0.8 + 0.2 * ((double)query.Length / candidate.Length);
 
-            // Candidate is a prefix of query (game name is more specific than site title)
             if (query.StartsWith(candidate, StringComparison.Ordinal))
                 return 0.8 + 0.2 * ((double)candidate.Length / query.Length);
 
-            // Query appears anywhere in candidate
             if (candidate.Contains(query, StringComparison.Ordinal))
                 return 0.6 + 0.2 * ((double)query.Length / candidate.Length);
 
-            // Levenshtein fallback for fuzzy matches
             var dist = LevenshteinDistance(query, candidate);
             var maxLen = Math.Max(query.Length, candidate.Length);
             return maxLen == 0 ? 1.0 : 1.0 - (double)dist / maxLen;
@@ -661,7 +643,6 @@ namespace DepotDL.GUI.Services
             if (!resp.Headers.TryGetValues("Set-Cookie", out var setCookieHeaders)) return;
             foreach (var header in setCookieHeaders)
             {
-                // Set-Cookie: name=value; Path=/; ...
                 var nameValue = header.Split(';')[0].Trim();
                 var eq = nameValue.IndexOf('=');
                 if (eq <= 0) continue;

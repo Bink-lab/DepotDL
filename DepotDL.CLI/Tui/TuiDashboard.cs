@@ -272,7 +272,6 @@ namespace DepotDL.CLI.Tui
                         }
                         SaveSession(session);
 
-                        // Pre-download summary: manifest matches + resume status
                         {
                             var matchedManifests = 0;
                             var depotsWithManifestId = session.SelectedDepots.Count(d => !string.IsNullOrEmpty(d.ManifestId));
@@ -793,7 +792,6 @@ namespace DepotDL.CLI.Tui
                         session.LuaPath = game.LuaPath;
                         session.OutputDir = game.OutputDir;
 
-                        // Restore DownloadBaseDir from OutputDir so ParseLuaFileIntoSession recomputes correctly
                         var parentDir = Path.GetDirectoryName(game.OutputDir);
                         if (!string.IsNullOrEmpty(parentDir))
                         {
@@ -1086,7 +1084,6 @@ namespace DepotDL.CLI.Tui
                     HubcapApiKey = session.HubcapApiKey
                 };
 
-                // Restore DownloadBaseDir from OutputDir so ParseLuaFileIntoSession recomputes correctly
                 var parentDir = Path.GetDirectoryName(game.OutputDir);
                 if (!string.IsNullOrEmpty(parentDir))
                 {

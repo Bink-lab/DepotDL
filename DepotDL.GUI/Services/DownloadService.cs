@@ -338,10 +338,6 @@ namespace DepotDL.GUI.Services
             proc.BeginOutputReadLine();
             proc.BeginErrorReadLine();
 
-            // Watchdog: poll state.Percent and state.Status every 15 s.
-            // Reset the timer only when real progress is made (percent advances or
-            // status changes). This fires even when the process floods logs but
-            // the download itself is frozen.
             using var watchdogCts = CancellationTokenSource.CreateLinkedTokenSource(ct);
             var watchdog = Task.Run(async () =>
             {
@@ -468,7 +464,6 @@ namespace DepotDL.GUI.Services
                 var sm = SpeedRx().Match(line);
                 state.SpeedText = sm.Success ? sm.Groups[1].Value : string.Empty;
 
-                // Line format: "  5.40% path/to/file.dll (speed)"
                 var fileStart = pctMatch.Index + pctMatch.Length + 1;
                 var fileEnd = sm.Success ? sm.Index : line.Length;
                 if (fileStart < fileEnd)

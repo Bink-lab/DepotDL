@@ -150,7 +150,7 @@ namespace DepotDL.CLI
                 {
                     ClearReadOnlyAttributes(new DirectoryInfo(path));
                     Directory.Delete(path, recursive: true);
-                    return true; // Success!
+                    return true;
                 }
                 catch
                 {

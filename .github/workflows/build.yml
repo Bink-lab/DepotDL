@@ -3,6 +3,7 @@ name: Build and Package
 on:
   push:
     branches: [ main ]
+    tags: [ 'v*.*.*' ]
   workflow_dispatch:
 
 permissions:
@@ -19,6 +20,16 @@ jobs:
         uses: actions/setup-dotnet@3e891b0cb619bf60e2c25674b222b8940e2c1c25 # v4.2.0
         with:
           dotnet-version: '9.0.x'
+
+      - name: Compute version
+        shell: pwsh
+        run: |
+          if ("${{ github.ref }}".StartsWith("refs/tags/v")) {
+            $version = "${{ github.ref_name }}".TrimStart("v")
+          } else {
+            $version = "0.0.0"
+          }
+          "DEPOTDL_VERSION=$version" | Out-File -FilePath $env:GITHUB_ENV -Append
 
       - name: Build DepotDL CLI (Windows)
         working-directory: DepotDL.CLI
@@ -46,10 +57,9 @@ jobs:
       - name: Pack GUI with Velopack
         shell: pwsh
         run: |
-          $version = "1.0.${{ github.run_number }}"
           vpk pack `
             --packId DepotDL `
-            --packVersion $version `
+            --packVersion $env:DEPOTDL_VERSION `
             --packDir DepotDL.GUI/bin/Release/net9.0/win-x64/publish `
             --mainExe DepotDL.GUI.exe `
             --packTitle "DepotDL" `
@@ -83,6 +93,16 @@ jobs:
         uses: actions/setup-dotnet@3e891b0cb619bf60e2c25674b222b8940e2c1c25 # v4.2.0
         with:
           dotnet-version: '9.0.x'
+
+      - name: Compute version
+        run: |
+          if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
+            version="${{ github.ref_name }}"
+            version="${version#v}"
+          else
+            version="0.0.0"
+          fi
+          echo "DEPOTDL_VERSION=$version" >> "$GITHUB_ENV"
 
       - name: Build DepotDL CLI (Linux)
         working-directory: DepotDL.CLI
@@ -130,10 +150,9 @@ jobs:
         continue-on-error: true
         run: |
           export PATH="$PATH:$HOME/.dotnet/tools"
-          version="1.0.${{ github.run_number }}"
           vpk pack \
             --packId DepotDL \
-            --packVersion "$version" \
+            --packVersion "$DEPOTDL_VERSION" \
             --packDir DepotDL.GUI/bin/Release/net9.0/linux-x64/publish \
             --mainExe DepotDL.GUI \
             --packTitle "DepotDL" \
@@ -156,6 +175,16 @@ jobs:
         uses: actions/setup-dotnet@3e891b0cb619bf60e2c25674b222b8940e2c1c25 # v4.2.0
         with:
           dotnet-version: '9.0.x'
+
+      - name: Compute version
+        run: |
+          if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
+            version="${{ github.ref_name }}"
+            version="${version#v}"
+          else
+            version="0.0.0"
+          fi
+          echo "DEPOTDL_VERSION=$version" >> "$GITHUB_ENV"
 
       - name: Build DepotDL CLI (macOS)
         working-directory: DepotDL.CLI
@@ -203,10 +232,9 @@ jobs:
         continue-on-error: true
         run: |
           export PATH="$PATH:$HOME/.dotnet/tools"
-          version="1.0.${{ github.run_number }}"
           vpk pack \
             --packId DepotDL \
-            --packVersion "$version" \
+            --packVersion "$DEPOTDL_VERSION" \
             --packDir DepotDL.GUI/bin/Release/net9.0/osx-arm64/publish \
             --mainExe DepotDL.GUI \
             --packTitle "DepotDL" \
@@ -219,45 +247,34 @@ jobs:
           name: velopack-macos
           path: velopack_releases/
 
-  create-nightly:
-    name: Create Nightly Release
+  create-release:
+    name: Create Release
     needs: [build-windows, build-linux, build-macos]
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: startsWith(github.ref, 'refs/tags/v')
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Get Build Info
-        id: build_info
-        run: |
-          SHA=$(git rev-parse --short HEAD)
-          BUILD_TIME=$(date -u +'%Y%m%d-%H%M%S')
-          echo "SHA=$SHA" >> $GITHUB_OUTPUT
-          echo "TAG=nightly-$BUILD_TIME-$SHA" >> $GITHUB_OUTPUT
-
       - name: Generate Release Notes
         id: generate_notes
         run: |
-          PREVIOUS_TAG=$(git describe --tags --abbrev=0 2>/dev/null || git rev-list --max-parents=0 HEAD)
+          PREVIOUS_TAG=$(git describe --tags --abbrev=0 --exclude 'nightly-*' "${GITHUB_REF_NAME}^" 2>/dev/null || git rev-list --max-parents=0 HEAD)
           echo "Using $PREVIOUS_TAG as base for changelog"
 
           {
-            echo "## Nightly Build (${{ steps.build_info.outputs.SHA }})"
-            echo "Automated build from the latest commit on the \`main\` branch."
-            echo "Nightly builds may be unstable."
+            echo "## DepotDL ${GITHUB_REF_NAME}"
             echo ""
             CHANGES=$(git log "$PREVIOUS_TAG"..HEAD --pretty=format:"* %s (%h)")
             if [ -z "$CHANGES" ]; then
-              echo "No new changes since last build."
+              echo "No changes since $PREVIOUS_TAG."
             else
               echo "### Changes since $PREVIOUS_TAG"
               echo "$CHANGES"
             fi
             echo ""
-            echo ""
-            echo "**Compare:** https://github.com/${{ github.repository }}/compare/$PREVIOUS_TAG...main"
+            echo "**Compare:** https://github.com/${{ github.repository }}/compare/$PREVIOUS_TAG...${GITHUB_REF_NAME}"
           } > release_notes.md
 
       - name: Download Artifacts
@@ -267,55 +284,27 @@ jobs:
 
       - name: Prepare Assets
         run: |
-          SHA=${{ steps.build_info.outputs.SHA }}
+          VERSION="${GITHUB_REF_NAME#v}"
           mkdir release_assets
-          cp artifacts/cli-windows/cli-windows.zip release_assets/DepotDL.CLI-Windows-x64-$SHA.zip
-          cp artifacts/gui-windows/gui-windows.zip release_assets/DepotDL.GUI-Windows-x64-$SHA.zip
-          cp artifacts/cli-linux/cli-linux.zip     release_assets/DepotDL.CLI-Linux-x64-$SHA.zip
-          cp artifacts/gui-linux/gui-linux.zip     release_assets/DepotDL.GUI-Linux-x64-$SHA.zip
-          cp artifacts/cli-macos/cli-macos.zip     release_assets/DepotDL.CLI-macOS-arm64-$SHA.zip
-          cp artifacts/gui-macos/gui-macos.zip     release_assets/DepotDL.GUI-macOS-arm64-$SHA.zip
+          cp artifacts/cli-windows/cli-windows.zip release_assets/DepotDL.CLI-Windows-x64-$VERSION.zip
+          cp artifacts/gui-windows/gui-windows.zip release_assets/DepotDL.GUI-Windows-x64-$VERSION.zip
+          cp artifacts/cli-linux/cli-linux.zip     release_assets/DepotDL.CLI-Linux-x64-$VERSION.zip
+          cp artifacts/gui-linux/gui-linux.zip     release_assets/DepotDL.GUI-Linux-x64-$VERSION.zip
+          cp artifacts/cli-macos/cli-macos.zip     release_assets/DepotDL.CLI-macOS-arm64-$VERSION.zip
+          cp artifacts/gui-macos/gui-macos.zip     release_assets/DepotDL.GUI-macOS-arm64-$VERSION.zip
           cp -r artifacts/velopack/.               release_assets/
-          # Per-OS Velopack feeds are best-effort (continue-on-error in build jobs).
           [ -d artifacts/velopack-linux ] && cp -r artifacts/velopack-linux/. release_assets/ || true
           [ -d artifacts/velopack-macos ] && cp -r artifacts/velopack-macos/. release_assets/ || true
-
-      - name: Create Annotated Tag
-        run: |
-          TAG="${{ steps.build_info.outputs.TAG }}"
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          if ! git rev-parse "$TAG" >/dev/null 2>&1; then
-            git tag -a "$TAG" -m "Nightly Build (${{ steps.build_info.outputs.SHA }})"
-            git push origin "$TAG"
-          fi
 
       - name: Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ steps.build_info.outputs.TAG }}
-          name: Nightly Build (${{ steps.build_info.outputs.SHA }})
+          tag_name: ${{ github.ref_name }}
+          name: DepotDL ${{ github.ref_name }}
           body_path: release_notes.md
-          prerelease: true
+          prerelease: false
           files: release_assets/*
           generate_release_notes: false
-          make_latest: false
+          make_latest: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Prune old nightly releases
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          KEEP: 10
-        run: |
-          # Delete all but the newest $KEEP nightly prereleases (and their tags)
-          # so nightlies don't accumulate forever.
-          mapfile -t OLD < <(gh release list --limit 200 \
-            --json tagName,isPrerelease,createdAt \
-            --jq 'map(select(.isPrerelease and (.tagName | startswith("nightly-"))))
-                  | sort_by(.createdAt) | reverse | .['"$KEEP"':] | .[].tagName')
-          for tag in "${OLD[@]}"; do
-            [ -z "$tag" ] && continue
-            echo "Deleting old nightly: $tag"
-            gh release delete "$tag" --cleanup-tag --yes || true
-          done

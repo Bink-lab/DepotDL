@@ -1,5 +1,6 @@
 @echo off
 pushd "%~dp0"
+if "%DEPOTDL_VERSION%"=="" set DEPOTDL_VERSION=0.0.0
 echo Building DepotDownloaderMod...
 dotnet build "..\DepotDownloaderMod\DepotDownloaderMod.csproj" -c Release
 if %ERRORLEVEL% NEQ 0 (
@@ -9,7 +10,7 @@ if %ERRORLEVEL% NEQ 0 (
     exit /b %ERRORLEVEL%
 )
 echo Publishing DepotDL.GUI...
-dotnet publish -c Release -r win-x64 --self-contained true /p:PublishSingleFile=true
+dotnet publish -c Release -r win-x64 --self-contained true /p:PublishSingleFile=true /p:Version=%DEPOTDL_VERSION%
 if %ERRORLEVEL% NEQ 0 (
     echo [ERROR] Publish failed!
     popd
