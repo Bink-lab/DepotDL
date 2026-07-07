@@ -32,7 +32,11 @@ namespace DepotDL.GUI
             if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
                 desktop.MainWindow = new MainWindow();
             base.OnFrameworkInitializationCompleted();
+        }
 
+        public static void ReapplyThemeVariant()
+        {
+            if (Current == null) return;
             Dispatcher.UIThread.Post(() =>
             {
                 if (Current == null) return;
@@ -53,6 +57,7 @@ namespace DepotDL.GUI
                 "Dark" => Avalonia.Styling.ThemeVariant.Dark,
                 _ => Avalonia.Styling.ThemeVariant.Default
             };
+            ReapplyThemeVariant();
         }
     }
 }

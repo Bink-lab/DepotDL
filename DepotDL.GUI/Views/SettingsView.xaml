@@ -233,11 +233,10 @@
                             <StackPanel>
                                 <Grid Margin="0,0,0,8">
                                     <TextBlock Text="Delay" FontSize="11" Foreground="{DynamicResource TextMuted}"/>
-                                    <TextBlock HorizontalAlignment="Right" FontSize="16" FontWeight="Bold"
-                                               Foreground="{DynamicResource Accent}">
-                                        <Run Text="{Binding SearchDebounceMs}"/>
-                                        <Run Text=" ms" FontSize="11" Foreground="{DynamicResource TextMuted}"/>
-                                    </TextBlock>
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                        <TextBlock Text="{Binding SearchDebounceMs}" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource Accent}"/>
+                                        <TextBlock Text=" ms" FontSize="11" Foreground="{DynamicResource TextMuted}" VerticalAlignment="Bottom" Margin="0,0,0,2"/>
+                                    </StackPanel>
                                 </Grid>
                                 <Slider Minimum="0" Maximum="2000" TickFrequency="50"
                                         Value="{Binding SearchDebounceMs}"/>
@@ -260,11 +259,10 @@
                             <StackPanel>
                                 <Grid Margin="0,0,0,8">
                                     <TextBlock Text="Lifetime" FontSize="11" Foreground="{DynamicResource TextMuted}"/>
-                                    <TextBlock HorizontalAlignment="Right" FontSize="16" FontWeight="Bold"
-                                               Foreground="{DynamicResource Accent}">
-                                        <Run Text="{Binding StoreCacheHours}"/>
-                                        <Run Text=" hours" FontSize="11" Foreground="{DynamicResource TextMuted}"/>
-                                    </TextBlock>
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                        <TextBlock Text="{Binding StoreCacheHours}" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource Accent}"/>
+                                        <TextBlock Text=" hours" FontSize="11" Foreground="{DynamicResource TextMuted}" VerticalAlignment="Bottom" Margin="0,0,0,2"/>
+                                    </StackPanel>
                                 </Grid>
                                 <Slider Minimum="1" Maximum="168" TickFrequency="1"
                                         Value="{Binding StoreCacheHours}"/>
@@ -287,11 +285,10 @@
                             <StackPanel>
                                 <Grid Margin="0,0,0,8">
                                     <TextBlock Text="Lifetime" FontSize="11" Foreground="{DynamicResource TextMuted}"/>
-                                    <TextBlock HorizontalAlignment="Right" FontSize="16" FontWeight="Bold"
-                                               Foreground="{DynamicResource Accent}">
-                                        <Run Text="{Binding GpuCacheDays}"/>
-                                        <Run Text=" days" FontSize="11" Foreground="{DynamicResource TextMuted}"/>
-                                    </TextBlock>
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                        <TextBlock Text="{Binding GpuCacheDays}" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource Accent}"/>
+                                        <TextBlock Text=" days" FontSize="11" Foreground="{DynamicResource TextMuted}" VerticalAlignment="Bottom" Margin="0,0,0,2"/>
+                                    </StackPanel>
                                 </Grid>
                                 <Slider Minimum="1" Maximum="30" TickFrequency="1"
                                         Value="{Binding GpuCacheDays}"/>
@@ -345,11 +342,10 @@
                             <StackPanel>
                                 <Grid Margin="0,0,0,8">
                                     <TextBlock Text="Duration" FontSize="11" Foreground="{DynamicResource TextMuted}"/>
-                                    <TextBlock HorizontalAlignment="Right" FontSize="16" FontWeight="Bold"
-                                               Foreground="{DynamicResource Accent}">
-                                        <Run Text="{Binding ScrollDurationMs}"/>
-                                        <Run Text=" ms" FontSize="11" Foreground="{DynamicResource TextMuted}"/>
-                                    </TextBlock>
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                        <TextBlock Text="{Binding ScrollDurationMs}" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource Accent}"/>
+                                        <TextBlock Text=" ms" FontSize="11" Foreground="{DynamicResource TextMuted}" VerticalAlignment="Bottom" Margin="0,0,0,2"/>
+                                    </StackPanel>
                                 </Grid>
                                 <Slider Minimum="50" Maximum="1000" TickFrequency="25"
                                         Value="{Binding ScrollDurationMs}"/>
@@ -413,7 +409,7 @@
                     <StackPanel Orientation="Horizontal">
                         <Path Data="{StaticResource LucideSave}"
                               Width="14" Height="14" Stretch="Uniform" Margin="0,0,7,0"
-                              Stroke="White" StrokeThickness="1.7" Fill="Transparent"
+                              Stroke="{DynamicResource BtnPrimaryFg}" StrokeThickness="1.7" Fill="Transparent"
                               StrokeLineCap="Round" StrokeJoin="Round"/>
                         <TextBlock Text="Save Settings" FontSize="13" FontWeight="SemiBold"/>
                     </StackPanel>

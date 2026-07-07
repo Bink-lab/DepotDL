@@ -6,8 +6,11 @@
         Width="1280" Height="780"
         MinWidth="960" MinHeight="620"
         WindowStartupLocation="CenterScreen"
-        SystemDecorations="None"
-        TransparencyLevelHint="Transparent"
+        SystemDecorations="Full"
+        ExtendClientAreaToDecorationsHint="True"
+        ExtendClientAreaChromeHints="NoChrome"
+        ExtendClientAreaTitleBarHeightHint="-1"
+        TransparencyLevelHint="Mica, AcrylicBlur, Transparent"
         Background="Transparent"
         FontFamily="Inter,Segoe UI"
         UseLayoutRounding="True">
@@ -27,6 +30,7 @@
                         <Border.Transitions>
                             <Transitions>
                                 <BrushTransition Property="Background" Duration="0:0:0.15"/>
+                                <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.1"/>
                             </Transitions>
                         </Border.Transitions>
                         <ContentPresenter Name="PART_ContentPresenter"
@@ -39,6 +43,9 @@
             </Setter>
             <Style Selector="^:pointerover:not(.navActive) /template/ Border#bg">
                 <Setter Property="Background" Value="{DynamicResource Border}"/>
+            </Style>
+            <Style Selector="^:pressed /template/ Border#bg">
+                <Setter Property="RenderTransform" Value="scale(0.96)"/>
             </Style>
         </ControlTheme>
         <!-- ChromeBtn ControlTheme -->
@@ -54,6 +61,7 @@
                         <Border.Transitions>
                             <Transitions>
                                 <BrushTransition Property="Background" Duration="0:0:0.15"/>
+                                <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.1"/>
                             </Transitions>
                         </Border.Transitions>
                         <ContentPresenter Name="PART_ContentPresenter"
@@ -65,6 +73,9 @@
             </Setter>
             <Style Selector="^:pointerover /template/ Border#bg">
                 <Setter Property="Background" Value="{DynamicResource Border}"/>
+            </Style>
+            <Style Selector="^:pressed /template/ Border#bg">
+                <Setter Property="RenderTransform" Value="scale(0.9)"/>
             </Style>
         </ControlTheme>
     </Window.Resources>
@@ -105,55 +116,48 @@
             BorderBrush="{DynamicResource Border}"
             BorderThickness="1">
         <Grid Name="ContentGrid">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="60"/>
-                <RowDefinition Height="*"/>
-            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="230"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
 
-            <!-- ── Top bar ─────────────────────────────────────────── -->
-            <Border Grid.Row="0"
+            <Border Grid.Column="0"
                     Background="{DynamicResource BgSidebar}"
-                    CornerRadius="14,14,0,0"
-                    BorderThickness="0,0,0,1"
-                    BorderBrush="{DynamicResource Border}">
+                    CornerRadius="13,0,0,13"
+                    BorderThickness="0,0,1,0"
+                    BorderBrush="{DynamicResource Border}"
+                    PointerPressed="TitleBar_PointerPressed">
                 <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="70"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
 
-                    <!-- Titlebar drag strip spanning the whole bar -->
-                    <Border Grid.ColumnSpan="3" Background="Transparent"
-                            PointerPressed="TitleBar_PointerPressed"/>
-
-                    <!-- Logo -->
-                    <StackPanel Grid.Column="0" Orientation="Horizontal"
-                                VerticalAlignment="Center" Margin="18,0,20,0"
+                    <!-- Logo / Brand (not hit testable, so dragging works over it) -->
+                    <StackPanel Grid.Row="0" Orientation="Horizontal"
+                                VerticalAlignment="Center" Margin="20,0"
                                 IsHitTestVisible="False">
-                        <Border Width="30" Height="30" CornerRadius="8"
-                                Background="{DynamicResource Accent}" Margin="0,0,9,0">
+                        <Border Width="28" Height="28" CornerRadius="8"
+                                Background="{DynamicResource Accent}" Margin="0,0,10,0">
                             <TextBlock Text="D" FontSize="14" FontWeight="Bold"
-                                       Foreground="White"
+                                       Foreground="{DynamicResource BtnPrimaryFg}"
                                        HorizontalAlignment="Center"
                                        VerticalAlignment="Center"/>
                         </Border>
-                        <TextBlock Text="DepotDL" FontSize="14" FontWeight="SemiBold"
+                        <TextBlock Text="DepotDL" FontSize="15" FontWeight="SemiBold"
                                    Foreground="{DynamicResource TextH}"
                                    VerticalAlignment="Center"/>
                     </StackPanel>
 
-                    <!-- Nav pills (centered) -->
-                    <StackPanel Grid.Column="1" Orientation="Horizontal"
-                                HorizontalAlignment="Center" VerticalAlignment="Center"
-                                Spacing="4">
-
+                    <!-- Navigation stack (Needs to be hit testable) -->
+                    <StackPanel Grid.Row="1" Orientation="Vertical" Spacing="4" Margin="14,12" IsHitTestVisible="True">
                         <Button Theme="{StaticResource NavItem}"
                                 Command="{Binding NavigateStoreCommand}"
                                 Classes.navActive="{Binding IsStorePage}">
                             <StackPanel Orientation="Horizontal">
                                 <Path Classes="navIcon" Data="{StaticResource LucideShoppingBag}"
-                                      Width="15" Height="15" Stretch="Uniform" Margin="0,0,8,0"
+                                      Width="15" Height="15" Stretch="Uniform" Margin="0,0,10,0"
                                       StrokeThickness="1.7" StrokeLineCap="Round"
                                       StrokeJoin="Round" Fill="Transparent"/>
                                 <TextBlock Classes="navText" Text="Store" FontSize="13" VerticalAlignment="Center"/>
@@ -165,7 +169,7 @@
                                 Classes.navActive="{Binding IsLibraryPage}">
                             <StackPanel Orientation="Horizontal">
                                 <Path Classes="navIconFill" Data="{StaticResource LucideLayoutGrid}"
-                                      Width="15" Height="15" Stretch="Uniform" Margin="0,0,8,0"
+                                      Width="15" Height="15" Stretch="Uniform" Margin="0,0,10,0"
                                       StrokeThickness="0"/>
                                 <TextBlock Classes="navText" Text="Library" FontSize="13" VerticalAlignment="Center"/>
                             </StackPanel>
@@ -176,13 +180,13 @@
                                 Classes.navActive="{Binding IsDownloadPage}">
                             <StackPanel Orientation="Horizontal">
                                 <Path Classes="navIcon" Data="{StaticResource LucideDownload}"
-                                      Width="15" Height="15" Stretch="Uniform" Margin="0,0,8,0"
+                                      Width="15" Height="15" Stretch="Uniform" Margin="0,0,10,0"
                                       StrokeThickness="1.7" StrokeLineCap="Round"
                                       StrokeJoin="Round" Fill="Transparent"/>
                                 <TextBlock Classes="navText" Text="Download" FontSize="13" VerticalAlignment="Center"/>
                                 <Border Width="7" Height="7" CornerRadius="3.5"
                                         Background="{DynamicResource Accent}"
-                                        Margin="6,0,0,0" VerticalAlignment="Center"
+                                        Margin="8,0,0,0" VerticalAlignment="Center"
                                         IsVisible="{Binding Download.IsDownloading}">
                                     <Border.Styles>
                                         <Style Selector="Border">
@@ -203,7 +207,7 @@
                                 Classes.navActive="{Binding IsSettingsPage}">
                             <StackPanel Orientation="Horizontal">
                                 <Path Classes="navIcon" Data="{StaticResource LucideSettings}"
-                                      Width="15" Height="15" Stretch="Uniform" Margin="0,0,8,0"
+                                      Width="15" Height="15" Stretch="Uniform" Margin="0,0,10,0"
                                       StrokeThickness="1.5" StrokeLineCap="Round"
                                       StrokeJoin="Round" Fill="Transparent"/>
                                 <TextBlock Classes="navText" Text="Settings" FontSize="13" VerticalAlignment="Center"/>
@@ -211,271 +215,175 @@
                         </Button>
                     </StackPanel>
 
-                    <!-- Theme toggle + window chrome -->
-                    <StackPanel Grid.Column="2" Orientation="Horizontal"
-                                VerticalAlignment="Center" Margin="0,0,14,0">
-                        <Button Theme="{StaticResource ChromeBtn}" Command="{Binding ToggleThemeCommand}" ToolTip.Tip="Toggle theme" Margin="0,0,8,0">
-                            <Path Name="themeIcon" Width="13" Height="13" Stretch="Uniform"
-                                  Stroke="{DynamicResource TextMuted}" StrokeThickness="1.7" Fill="Transparent"
-                                  StrokeLineCap="Round" StrokeJoin="Round"
-                                  Tag="{Binding IsDarkTheme}">
-                                <Path.Styles>
-                                    <Style Selector="Path">
-                                        <Setter Property="Data" Value="{DynamicResource LucideMoon}"/>
-                                    </Style>
-                                    <Style Selector="Path[Tag=True]">
-                                        <Setter Property="Data" Value="{DynamicResource LucideSun}"/>
-                                    </Style>
-                                </Path.Styles>
-                            </Path>
-                        </Button>
-                        <Button Theme="{StaticResource ChromeBtn}" Click="MinimizeBtn_Click">
-                            <Rectangle Width="10" Height="1.5" Fill="{DynamicResource TextMuted}"
-                                       HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Button>
-                        <Button Theme="{StaticResource ChromeBtn}" Click="MaximizeBtn_Click" Margin="4,0">
-                            <Path Data="{DynamicResource LucideSquare}" Width="10" Height="10" Stretch="Uniform"
-                                  Stroke="{DynamicResource TextMuted}" StrokeThickness="1.5" Fill="Transparent"/>
-                        </Button>
-                        <Button Theme="{StaticResource ChromeBtn}" Click="CloseBtn_Click">
-                            <Path Data="{DynamicResource LucideX}" Width="10" Height="10" Stretch="Uniform"
-                                  Stroke="{DynamicResource TextMuted}" StrokeThickness="1.5"
-                                  StrokeLineCap="Round" StrokeJoin="Round" Fill="Transparent"/>
-                        </Button>
-                    </StackPanel>
+                    <Border Grid.Row="2" Padding="14,14" BorderThickness="0,1,0,0"
+                            BorderBrush="{DynamicResource Border}" IsHitTestVisible="True">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            
+                            <TextBlock Text="v2.1.0" VerticalAlignment="Center" FontSize="11.5"
+                                       Foreground="{DynamicResource TextMuted}"/>
+                            
+                            <Button Grid.Column="1" Theme="{StaticResource ChromeBtn}" Command="{Binding ToggleThemeCommand}" ToolTip.Tip="Toggle theme">
+                                <Path Name="themeIcon" Width="13" Height="13" Stretch="Uniform"
+                                      Stroke="{DynamicResource TextMuted}" StrokeThickness="1.7" Fill="Transparent"
+                                      StrokeLineCap="Round" StrokeJoin="Round"
+                                      Tag="{Binding IsDarkTheme}">
+                                    <Path.Styles>
+                                        <Style Selector="Path"><Setter Property="Data" Value="{DynamicResource LucideMoon}"/></Style>
+                                        <Style Selector="Path[Tag=True]"><Setter Property="Data" Value="{DynamicResource LucideSun}"/></Style>
+                                    </Path.Styles>
+                                </Path>
+                            </Button>
+                        </Grid>
+                    </Border>
                 </Grid>
             </Border>
 
-            <!-- ── Content area ────────────────────────────────────── -->
-            <Border Grid.Row="1" Background="{DynamicResource BgPage}" CornerRadius="0,0,14,14">
-                <Grid ClipToBounds="True">
+            <Border Grid.Column="1" Background="{DynamicResource BgPage}" CornerRadius="0,13,13,0">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="48"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
 
-                    <!-- Page views -->
-                    <views:StoreView    Name="StoreViewEl"    DataContext="{Binding Store}"    IsVisible="False" Opacity="0">
-                        <views:StoreView.Transitions>
-                            <Transitions>
-                                <DoubleTransition Property="Opacity" Duration="0:0:0.15"/>
-                            </Transitions>
-                        </views:StoreView.Transitions>
-                    </views:StoreView>
-                    <views:LibraryView  Name="LibraryViewEl"  DataContext="{Binding Library}"  IsVisible="True"  Opacity="1">
-                        <views:LibraryView.Transitions>
-                            <Transitions>
-                                <DoubleTransition Property="Opacity" Duration="0:0:0.15"/>
-                            </Transitions>
-                        </views:LibraryView.Transitions>
-                    </views:LibraryView>
-                    <views:DownloadView Name="DownloadViewEl" DataContext="{Binding Download}" IsVisible="False" Opacity="0">
-                        <views:DownloadView.Transitions>
-                            <Transitions>
-                                <DoubleTransition Property="Opacity" Duration="0:0:0.15"/>
-                            </Transitions>
-                        </views:DownloadView.Transitions>
-                    </views:DownloadView>
-                    <views:SettingsView Name="SettingsViewEl" DataContext="{Binding Settings}" IsVisible="False" Opacity="0">
-                        <views:SettingsView.Transitions>
-                            <Transitions>
-                                <DoubleTransition Property="Opacity" Duration="0:0:0.15"/>
-                            </Transitions>
-                        </views:SettingsView.Transitions>
-                    </views:SettingsView>
-
-                    <!-- Update notification banner -->
-                    <Border VerticalAlignment="Bottom" HorizontalAlignment="Left"
-                            Margin="16,0,0,16" ZIndex="6" CornerRadius="12"
-                            BorderThickness="1" BorderBrush="{DynamicResource Warning}" Background="{DynamicResource WarningBg}"
-                            MaxWidth="420" Padding="14,10"
-                            IsVisible="{Binding UpdateAvailable}">
-                        <StackPanel>
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto"/>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="8"/>
-                                    <ColumnDefinition Width="Auto"/>
-                                    <ColumnDefinition Width="8"/>
-                                    <ColumnDefinition Width="Auto"/>
-                                    <ColumnDefinition Width="8"/>
-                                    <ColumnDefinition Width="Auto"/>
-                                </Grid.ColumnDefinitions>
-
-                                <Path Grid.Column="0" Data="{StaticResource LucideAlertTriangle}"
-                                      Width="15" Height="15" Stretch="Uniform" Margin="0,0,10,0"
-                                      Stroke="{DynamicResource Warning}" StrokeThickness="1.8" Fill="Transparent"
-                                      StrokeLineCap="Round" StrokeJoin="Round"/>
-
-                                <TextBlock Grid.Column="1"
-                                           Text="{Binding UpdateBannerText}"
-                                           FontSize="12.5" Foreground="{DynamicResource TextBody}"
-                                           VerticalAlignment="Center"
-                                           TextTrimming="CharacterEllipsis"/>
-
-                                <Button Grid.Column="3"
-                                        Command="{Binding InstallUpdateCommand}"
-                                        Background="#00000000" BorderThickness="0"
-                                        Cursor="Hand" Padding="0"
-                                        IsEnabled="{Binding IsUpdating, Converter={StaticResource InvBool}}"
-                                        IsVisible="{Binding CanInstallUpdate}">
-                                    <TextBlock FontSize="12" Foreground="{DynamicResource Accent}"
-                                               TextDecorations="Underline" VerticalAlignment="Center"
-                                               Text="{Binding IsUpdating, Converter={StaticResource BoolToVis}}"
-                                               Classes.updating="{Binding IsUpdating}">
-                                        <TextBlock.Styles>
-                                            <Style Selector="TextBlock"><Setter Property="Text" Value="Install update"/></Style>
-                                            <Style Selector="TextBlock.updating">
-                                                <Setter Property="Text" Value="{Binding UpdateProgress, StringFormat='Downloading… {0}%'}"/>
-                                            </Style>
-                                        </TextBlock.Styles>
-                                    </TextBlock>
-                                </Button>
-
-                                <Button Grid.Column="5"
-                                        Command="{Binding OpenUpdateUrlCommand}"
-                                        Background="#00000000" BorderThickness="0"
-                                        Cursor="Hand" Padding="0">
-                                    <TextBlock Text="View release" FontSize="12"
-                                               Foreground="{DynamicResource Accent}"
-                                               TextDecorations="Underline"
-                                               VerticalAlignment="Center"/>
-                                </Button>
-
-                                <Button Grid.Column="7"
-                                        Command="{Binding DismissUpdateCommand}"
-                                        Background="#00000000" BorderThickness="0"
-                                        Cursor="Hand" Padding="2,0" VerticalAlignment="Center"
-                                        IsEnabled="{Binding IsUpdating, Converter={StaticResource InvBool}}">
-                                    <Path Data="{StaticResource LucideX}"
-                                          Width="8" Height="8" Stretch="Uniform"
-                                          Stroke="{DynamicResource TextMuted}" StrokeThickness="1.5"
-                                          StrokeLineCap="Round" StrokeJoin="Round" Fill="Transparent"/>
-                                </Button>
-                            </Grid>
-
-                            <ProgressBar Height="3" Margin="0,6,0,0" Minimum="0" Maximum="100"
-                                         Value="{Binding UpdateProgress}"
-                                         Foreground="{DynamicResource Warning}" Background="{DynamicResource AccentVeryLight}" BorderThickness="0"
-                                         CornerRadius="1.5"
-                                         IsVisible="{Binding IsUpdating}"/>
+                    <Border Grid.Row="0" Background="Transparent" PointerPressed="TitleBar_PointerPressed">
+                        <StackPanel HorizontalAlignment="Right" VerticalAlignment="Center" Orientation="Horizontal" Margin="0,0,16,0">
+                            <Button Theme="{StaticResource ChromeBtn}" Click="MinimizeBtn_Click">
+                                <Rectangle Width="10" Height="1.5" Fill="{DynamicResource TextMuted}"
+                                           HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Button>
+                            <Button Theme="{StaticResource ChromeBtn}" Click="MaximizeBtn_Click" Margin="4,0">
+                                <Path Data="{DynamicResource LucideSquare}" Width="10" Height="10" Stretch="Uniform"
+                                      Stroke="{DynamicResource TextMuted}" StrokeThickness="1.5" Fill="Transparent"/>
+                            </Button>
+                            <Button Theme="{StaticResource ChromeBtn}" Click="CloseBtn_Click">
+                                <Path Data="{DynamicResource LucideX}" Width="10" Height="10" Stretch="Uniform"
+                                      Stroke="{DynamicResource TextMuted}" StrokeThickness="1.5"
+                                      StrokeLineCap="Round" StrokeJoin="Round" Fill="Transparent"/>
+                            </Button>
                         </StackPanel>
                     </Border>
 
-                    <!-- Floating widgets (bottom-right) -->
-                    <StackPanel HorizontalAlignment="Right" VerticalAlignment="Bottom"
-                                Margin="0,0,24,24" ZIndex="5">
+                    <Grid Grid.Row="1" ClipToBounds="True">
+                        <views:StoreView    Name="StoreViewEl"    DataContext="{Binding Store}"    IsVisible="False" Opacity="0">
+                            <views:StoreView.Transitions>
+                                <Transitions>
+                                    <DoubleTransition Property="Opacity" Duration="0:0:0.18"/>
+                                    <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.18" Easing="CubicEaseOut"/>
+                                </Transitions>
+                            </views:StoreView.Transitions>
+                        </views:StoreView>
+                        <views:LibraryView  Name="LibraryViewEl"  DataContext="{Binding Library}"  IsVisible="True"  Opacity="1">
+                            <views:LibraryView.Transitions>
+                                <Transitions>
+                                    <DoubleTransition Property="Opacity" Duration="0:0:0.18"/>
+                                    <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.18" Easing="CubicEaseOut"/>
+                                </Transitions>
+                            </views:LibraryView.Transitions>
+                        </views:LibraryView>
+                        <views:DownloadView Name="DownloadViewEl" DataContext="{Binding Download}" IsVisible="False" Opacity="0">
+                            <views:DownloadView.Transitions>
+                                <Transitions>
+                                    <DoubleTransition Property="Opacity" Duration="0:0:0.18"/>
+                                    <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.18" Easing="CubicEaseOut"/>
+                                </Transitions>
+                            </views:DownloadView.Transitions>
+                        </views:DownloadView>
+                        <views:SettingsView Name="SettingsViewEl" DataContext="{Binding Settings}" IsVisible="False" Opacity="0">
+                            <views:SettingsView.Transitions>
+                                <Transitions>
+                                    <DoubleTransition Property="Opacity" Duration="0:0:0.18"/>
+                                    <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.18" Easing="CubicEaseOut"/>
+                                </Transitions>
+                            </views:SettingsView.Transitions>
+                        </views:SettingsView>
 
-                        <!-- Pack progress widget -->
-                        <Border Margin="0,0,0,10"
-                                IsVisible="{Binding ShowPackWidget}">
-                            <Border Width="280" CornerRadius="14"
-                                    Background="{DynamicResource BgCard}"
-                                    BorderBrush="{DynamicResource Border}"
-                                    BorderThickness="1"
-                                    Padding="16,14">
+                        <Border VerticalAlignment="Bottom" HorizontalAlignment="Left"
+                                Margin="16,0,0,16" ZIndex="6" CornerRadius="12"
+                                BorderThickness="1" BorderBrush="{DynamicResource Warning}" Background="{DynamicResource WarningBg}"
+                                MaxWidth="420" Padding="14,10"
+                                IsVisible="{Binding UpdateAvailable}">
+                            <StackPanel>
                                 <Grid>
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition Height="Auto"/>
-                                        <RowDefinition Height="3"/>
-                                        <RowDefinition Height="Auto"/>
-                                        <RowDefinition Height="10"/>
-                                        <RowDefinition Height="Auto"/>
-                                    </Grid.RowDefinitions>
-                                    <Grid Grid.Row="0">
-                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                            <Path Data="{StaticResource LucidePackage}"
-                                                  Width="13" Height="13" Stretch="Uniform" Margin="0,0,7,0"
-                                                  Stroke="{DynamicResource Accent}" StrokeThickness="1.7"
-                                                  Fill="Transparent" StrokeLineCap="Round"
-                                                  StrokeJoin="Round"/>
-                                            <TextBlock FontSize="12.5" FontWeight="SemiBold"
-                                                       Foreground="{DynamicResource TextPrimary}"
-                                                       VerticalAlignment="Center"
-                                                       Text="{Binding Library.PackGameName}"
-                                                       MaxWidth="150"
-                                                       TextTrimming="CharacterEllipsis"/>
-                                        </StackPanel>
-                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
-                                            <TextBlock FontSize="13" FontWeight="Bold"
-                                                       Foreground="{DynamicResource Accent}" VerticalAlignment="Center"
-                                                       Margin="0,0,6,0">
-                                                <Run Text="{Binding Library.PackPercent, StringFormat='{}{0:F0}'}"/>
-                                                <Run Text="%"/>
-                                            </TextBlock>
-                                            <Button Command="{Binding Library.CancelPackCommand}"
-                                                    Width="18" Height="18" Padding="0"
-                                                    Background="#00000000" BorderThickness="0"
-                                                    Cursor="Hand" ToolTip.Tip="Cancel and delete unfinished pack">
-                                                <Path Data="{StaticResource LucideX}"
-                                                      Width="10" Height="10" Stretch="Uniform"
-                                                      Stroke="{DynamicResource TextMuted}" StrokeThickness="2"
-                                                      Fill="Transparent" StrokeLineCap="Round"
-                                                      StrokeJoin="Round"/>
-                                            </Button>
-                                        </StackPanel>
-                                    </Grid>
-                                    <TextBlock Grid.Row="2"
-                                               Text="{Binding Library.PackStatus}"
-                                               FontSize="10.5" Foreground="{DynamicResource TextMuted}"
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="8"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="8"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="8"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <Path Grid.Column="0" Data="{StaticResource LucideAlertTriangle}"
+                                          Width="15" Height="15" Stretch="Uniform" Margin="0,0,10,0"
+                                          Stroke="{DynamicResource Warning}" StrokeThickness="1.8" Fill="Transparent"
+                                          StrokeLineCap="Round" StrokeJoin="Round"/>
+
+                                    <TextBlock Grid.Column="1"
+                                               Text="{Binding UpdateBannerText}"
+                                               FontSize="12.5" Foreground="{DynamicResource TextBody}"
+                                               VerticalAlignment="Center"
                                                TextTrimming="CharacterEllipsis"/>
-                                    <ProgressBar Grid.Row="4" Height="6" Minimum="0" Maximum="100"
-                                                 Value="{Binding Library.PackPercent}"
-                                                 Foreground="{DynamicResource Accent}"
-                                                 Background="{DynamicResource AccentVeryLight}"
-                                                 CornerRadius="3" BorderThickness="0"/>
+
+                                    <Button Grid.Column="3"
+                                            Command="{Binding InstallUpdateCommand}"
+                                            Background="#00000000" BorderThickness="0"
+                                            Cursor="Hand" Padding="0"
+                                            IsEnabled="{Binding IsUpdating, Converter={StaticResource InvBool}}"
+                                            IsVisible="{Binding CanInstallUpdate}">
+                                        <TextBlock FontSize="12" Foreground="{DynamicResource Accent}"
+                                                   TextDecorations="Underline" VerticalAlignment="Center"
+                                                   Text="{Binding IsUpdating, Converter={StaticResource BoolToVis}}"
+                                                   Classes.updating="{Binding IsUpdating}">
+                                            <TextBlock.Styles>
+                                                <Style Selector="TextBlock"><Setter Property="Text" Value="Install update"/></Style>
+                                                <Style Selector="TextBlock.updating">
+                                                    <Setter Property="Text" Value="{Binding UpdateProgress, StringFormat='Downloading… {0}%'}"/>
+                                                </Style>
+                                            </TextBlock.Styles>
+                                        </TextBlock>
+                                    </Button>
+
+                                    <Button Grid.Column="5"
+                                            Command="{Binding OpenUpdateUrlCommand}"
+                                            Background="#00000000" BorderThickness="0"
+                                            Cursor="Hand" Padding="0">
+                                        <TextBlock Text="View release" FontSize="12"
+                                                   Foreground="{DynamicResource Accent}"
+                                                   TextDecorations="Underline"
+                                                   VerticalAlignment="Center"/>
+                                    </Button>
+
+                                    <Button Grid.Column="7"
+                                            Command="{Binding DismissUpdateCommand}"
+                                            Background="#00000000" BorderThickness="0"
+                                            Cursor="Hand" Padding="2,0" VerticalAlignment="Center"
+                                            IsEnabled="{Binding IsUpdating, Converter={StaticResource InvBool}}">
+                                        <Path Data="{StaticResource LucideX}"
+                                              Width="8" Height="8" Stretch="Uniform"
+                                              Stroke="{DynamicResource TextMuted}" StrokeThickness="1.5"
+                                              StrokeLineCap="Round" StrokeJoin="Round" Fill="Transparent"/>
+                                    </Button>
                                 </Grid>
-                            </Border>
+
+                                <ProgressBar Height="3" Margin="0,6,0,0" Minimum="0" Maximum="100"
+                                             Value="{Binding UpdateProgress}"
+                                             Foreground="{DynamicResource Warning}" Background="{DynamicResource AccentVeryLight}" BorderThickness="0"
+                                             CornerRadius="1.5"
+                                             IsVisible="{Binding IsUpdating}"/>
+                            </StackPanel>
                         </Border>
 
-                        <!-- OnlineFix progress widget -->
-                        <Border Margin="0,0,0,10"
-                                IsVisible="{Binding ShowOnlineFixWidget}">
-                            <Border Width="280" CornerRadius="14"
-                                    Background="{DynamicResource BgCard}"
-                                    BorderBrush="{DynamicResource Border}"
-                                    BorderThickness="1"
-                                    Padding="16,14">
-                                <Grid>
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition Height="Auto"/>
-                                        <RowDefinition Height="8"/>
-                                        <RowDefinition Height="Auto"/>
-                                    </Grid.RowDefinitions>
-                                    <Grid Grid.Row="0">
-                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                            <Path Data="{StaticResource LucideDownload}"
-                                                  Width="13" Height="13" Stretch="Uniform" Margin="0,0,7,0"
-                                                  Stroke="{DynamicResource Accent}" StrokeThickness="1.7"
-                                                  Fill="Transparent" StrokeLineCap="Round"
-                                                  StrokeJoin="Round"/>
-                                            <TextBlock FontSize="12.5" FontWeight="SemiBold"
-                                                       Foreground="{DynamicResource TextPrimary}"
-                                                       VerticalAlignment="Center"
-                                                       Text="OnlineFix"/>
-                                        </StackPanel>
-                                        <TextBlock HorizontalAlignment="Right" FontSize="11.5"
-                                                   Foreground="{DynamicResource Accent}" VerticalAlignment="Center"
-                                                   Text="{Binding Library.OnlineFixGameName}"
-                                                   MaxWidth="100" TextTrimming="CharacterEllipsis"/>
-                                    </Grid>
-                                    <TextBlock Grid.Row="2"
-                                               Text="{Binding Library.OnlineFixStatus}"
-                                               FontSize="10.5" Foreground="{DynamicResource TextMuted}"
-                                               TextTrimming="CharacterEllipsis"/>
-                                </Grid>
-                            </Border>
-                        </Border>
+                        <StackPanel HorizontalAlignment="Right" VerticalAlignment="Bottom"
+                                    Margin="0,0,24,24" ZIndex="5">
 
-                        <!-- Floating download widget -->
-                        <Border IsVisible="{Binding ShowDownloadWidget}">
-                            <Button Command="{Binding NavigateDownloadCommand}"
-                                    BorderThickness="0" Background="Transparent"
-                                    Padding="0" Cursor="Hand">
-                                <Button.Template>
-                                    <ControlTemplate TargetType="Button">
-                                        <ContentPresenter Name="PART_ContentPresenter"
-                                                          Content="{TemplateBinding Content}"
-                                                          ContentTemplate="{TemplateBinding ContentTemplate}"/>
-                                    </ControlTemplate>
-                                </Button.Template>
+                            <Border Margin="0,0,0,10"
+                                    IsVisible="{Binding ShowPackWidget}">
                                 <Border Width="280" CornerRadius="14"
                                         Background="{DynamicResource BgCard}"
                                         BorderBrush="{DynamicResource Border}"
@@ -487,6 +395,61 @@
                                             <RowDefinition Height="3"/>
                                             <RowDefinition Height="Auto"/>
                                             <RowDefinition Height="10"/>
+                                            <RowDefinition Height="Auto"/>
+                                        </Grid.RowDefinitions>
+                                        <Grid Grid.Row="0">
+                                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                                <Path Data="{StaticResource LucidePackage}"
+                                                      Width="13" Height="13" Stretch="Uniform" Margin="0,0,7,0"
+                                                      Stroke="{DynamicResource Accent}" StrokeThickness="1.7"
+                                                      Fill="Transparent" StrokeLineCap="Round"
+                                                      StrokeJoin="Round"/>
+                                                <TextBlock FontSize="12.5" FontWeight="SemiBold"
+                                                           Foreground="{DynamicResource TextPrimary}"
+                                                           VerticalAlignment="Center"
+                                                           Text="{Binding Library.PackGameName}"
+                                                           MaxWidth="150"
+                                                           TextTrimming="CharacterEllipsis"/>
+                                            </StackPanel>
+                                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                                                <TextBlock FontSize="13" FontWeight="Bold"
+                                                           Foreground="{DynamicResource Accent}" VerticalAlignment="Center"
+                                                           Margin="0,0,6,0"
+                                                           Text="{Binding Library.PackPercent, StringFormat='{}{0:F0}%'}"/>
+                                                <Button Command="{Binding Library.CancelPackCommand}"
+                                                        Width="18" Height="18" Padding="0"
+                                                        Background="#00000000" BorderThickness="0"
+                                                        Cursor="Hand" ToolTip.Tip="Cancel and delete unfinished pack">
+                                                    <Path Data="{StaticResource LucideX}"
+                                                          Width="10" Height="10" Stretch="Uniform"
+                                                          Stroke="{DynamicResource TextMuted}" StrokeThickness="2"
+                                                          Fill="Transparent" StrokeLineCap="Round"
+                                                          StrokeJoin="Round"/>
+                                                </Button>
+                                            </StackPanel>
+                                        </Grid>
+                                        <TextBlock Grid.Row="2"
+                                                   Text="{Binding Library.PackStatus}"
+                                                   FontSize="10.5" Foreground="{DynamicResource TextMuted}"
+                                                   TextTrimming="CharacterEllipsis"/>
+                                        <ProgressBar Grid.Row="4" Height="6" Minimum="0" Maximum="100"
+                                                     Value="{Binding Library.PackPercent}"
+                                                     Foreground="{DynamicResource Accent}"
+                                                     Background="{DynamicResource AccentVeryLight}"
+                                                     CornerRadius="3" BorderThickness="0"/>
+                                    </Grid>
+                                </Border>
+                            </Border>
+
+                            <Border Margin="0,0,0,10"
+                                    IsVisible="{Binding ShowOnlineFixWidget}">
+                                <Border Width="280" CornerRadius="14"
+                                        Background="{DynamicResource BgCard}"
+                                        BorderBrush="{DynamicResource Border}"
+                                        BorderThickness="1"
+                                        Padding="16,14">
+                                    <Grid>
+                                        <Grid.RowDefinitions>
                                             <RowDefinition Height="Auto"/>
                                             <RowDefinition Height="8"/>
                                             <RowDefinition Height="Auto"/>
@@ -500,43 +463,92 @@
                                                       StrokeJoin="Round"/>
                                                 <TextBlock FontSize="12.5" FontWeight="SemiBold"
                                                            Foreground="{DynamicResource TextPrimary}"
-                                                           VerticalAlignment="Center">
-                                                    <Run Text="App "/>
-                                                    <Run Text="{Binding Download.AppId}" Foreground="{DynamicResource Accent}"/>
-                                                </TextBlock>
+                                                           VerticalAlignment="Center"
+                                                           Text="OnlineFix"/>
                                             </StackPanel>
-                                            <TextBlock HorizontalAlignment="Right" FontSize="13" FontWeight="Bold"
-                                                       Foreground="{DynamicResource Accent}" VerticalAlignment="Center">
-                                                <Run Text="{Binding Download.OverallDisplayPercent, StringFormat='{}{0:F0}'}"/>
-                                                <Run Text="%"/>
-                                            </TextBlock>
+                                            <TextBlock HorizontalAlignment="Right" FontSize="11.5"
+                                                       Foreground="{DynamicResource Accent}" VerticalAlignment="Center"
+                                                       Text="{Binding Library.OnlineFixGameName}"
+                                                       MaxWidth="100" TextTrimming="CharacterEllipsis"/>
                                         </Grid>
                                         <TextBlock Grid.Row="2"
-                                                   Text="{Binding Download.OverallStatus}"
+                                                   Text="{Binding Library.OnlineFixStatus}"
                                                    FontSize="10.5" Foreground="{DynamicResource TextMuted}"
                                                    TextTrimming="CharacterEllipsis"/>
-                                        <ProgressBar Grid.Row="4" Height="6" Minimum="0" Maximum="100"
-                                                     Value="{Binding Download.OverallDisplayPercent}"
-                                                     Foreground="{DynamicResource Accent}"
-                                                     Background="{DynamicResource AccentVeryLight}"
-                                                     CornerRadius="3" BorderThickness="0"/>
-                                        <TextBlock Grid.Row="6"
-                                                   Text="Click to view →" FontSize="10.5"
-                                                   Foreground="{DynamicResource TextMuted}"
-                                                   HorizontalAlignment="Right"/>
                                     </Grid>
                                 </Border>
-                            </Button>
-                        </Border>
+                            </Border>
 
-                    </StackPanel>
+                            <Border IsVisible="{Binding ShowDownloadWidget}">
+                                <Button Command="{Binding NavigateDownloadCommand}"
+                                        BorderThickness="0" Background="Transparent"
+                                        Padding="0" Cursor="Hand">
+                                    <Button.Template>
+                                        <ControlTemplate TargetType="Button">
+                                            <ContentPresenter Name="PART_ContentPresenter"
+                                                              Content="{TemplateBinding Content}"
+                                                              ContentTemplate="{TemplateBinding ContentTemplate}"/>
+                                        </ControlTemplate>
+                                    </Button.Template>
+                                    <Border Width="280" CornerRadius="14"
+                                            Background="{DynamicResource BgCard}"
+                                            BorderBrush="{DynamicResource Border}"
+                                            BorderThickness="1"
+                                            Padding="16,14">
+                                        <Grid>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="3"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="10"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="8"/>
+                                                <RowDefinition Height="Auto"/>
+                                            </Grid.RowDefinitions>
+                                            <Grid Grid.Row="0">
+                                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                                    <Path Data="{StaticResource LucideDownload}"
+                                                          Width="13" Height="13" Stretch="Uniform" Margin="0,0,7,0"
+                                                          Stroke="{DynamicResource Accent}" StrokeThickness="1.7"
+                                                          Fill="Transparent" StrokeLineCap="Round"
+                                                          StrokeJoin="Round"/>
+                                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                                        <TextBlock Text="App " FontSize="12.5" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}"/>
+                                                        <TextBlock Text="{Binding Download.AppId}" FontSize="12.5" FontWeight="SemiBold" Foreground="{DynamicResource Accent}"/>
+                                                    </StackPanel>
+                                                </StackPanel>
+                                                <TextBlock HorizontalAlignment="Right" FontSize="13" FontWeight="Bold"
+                                                           Foreground="{DynamicResource Accent}" VerticalAlignment="Center"
+                                                           Text="{Binding Download.OverallDisplayPercent, StringFormat='{}{0:F0}%'}"/>
+                                            </Grid>
+                                            <TextBlock Grid.Row="2"
+                                                       Text="{Binding Download.OverallStatus}"
+                                                       FontSize="10.5" Foreground="{DynamicResource TextMuted}"
+                                                       TextTrimming="CharacterEllipsis"/>
+                                            <ProgressBar Grid.Row="4" Height="6" Minimum="0" Maximum="100"
+                                                         Value="{Binding Download.OverallDisplayPercent}"
+                                                         Foreground="{DynamicResource Accent}"
+                                                         Background="{DynamicResource AccentVeryLight}"
+                                                         CornerRadius="3" BorderThickness="0"/>
+                                            <TextBlock Grid.Row="6"
+                                                       Text="Click to view →" FontSize="10.5"
+                                                       Foreground="{DynamicResource TextMuted}"
+                                                       HorizontalAlignment="Right"/>
+                                        </Grid>
+                                    </Border>
+                                </Button>
+                            </Border>
+
+                        </StackPanel>
+                    </Grid>
                 </Grid>
             </Border>
 
             <!-- ── Splash overlay ─────────────────────────────────── -->
             <Border Name="SplashOverlay"
+                    Grid.ColumnSpan="2"
                     Grid.RowSpan="2"
-                    CornerRadius="14"
+                    CornerRadius="13"
                     ZIndex="100"
                     RenderTransformOrigin="0.5,0.5">
                 <Border.Background>
@@ -555,8 +567,23 @@
                     <Border Width="80" Height="80" CornerRadius="40"
                             Background="{DynamicResource Accent}"
                             HorizontalAlignment="Center" Margin="0,0,0,24"
-                            BoxShadow="0 3 25 3 #4DDA667B">
-                        <TextBlock Text="D" FontSize="36" FontWeight="Bold" Foreground="White"
+                            BoxShadow="{DynamicResource SplashShadow}"
+                            RenderTransformOrigin="0.5,0.5">
+                        <Border.Styles>
+                            <Style Selector="Border">
+                                <Style.Animations>
+                                    <Animation IterationCount="INFINITE" PlaybackDirection="Alternate" Duration="0:0:1.1" Easing="SineEaseInOut">
+                                        <KeyFrame Cue="0%">
+                                            <Setter Property="RenderTransform" Value="scale(1)"/>
+                                        </KeyFrame>
+                                        <KeyFrame Cue="100%">
+                                            <Setter Property="RenderTransform" Value="scale(1.05)"/>
+                                        </KeyFrame>
+                                    </Animation>
+                                </Style.Animations>
+                            </Style>
+                        </Border.Styles>
+                        <TextBlock Text="D" FontSize="36" FontWeight="Bold" Foreground="{DynamicResource BtnPrimaryFg}"
                                    HorizontalAlignment="Center" VerticalAlignment="Center"/>
                     </Border>
                     <TextBlock Text="DepotDL" FontSize="24" FontWeight="Bold"
@@ -572,7 +599,13 @@
                         <Border Name="SplashProgressBar"
                                 Width="0" Height="3" CornerRadius="1.5"
                                 Background="{DynamicResource Accent}"
-                                HorizontalAlignment="Left"/>
+                                HorizontalAlignment="Left">
+                            <Border.Transitions>
+                                <Transitions>
+                                    <DoubleTransition Property="Width" Duration="0:0:0.25" Easing="CubicEaseOut"/>
+                                </Transitions>
+                            </Border.Transitions>
+                        </Border>
                     </Border>
                 </StackPanel>
             </Border>

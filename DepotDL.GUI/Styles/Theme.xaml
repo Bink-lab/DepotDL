@@ -23,70 +23,82 @@
 
             <ResourceDictionary.ThemeDictionaries>
                 <ResourceDictionary x:Key="Light">
-                    <Color x:Key="AccentColor">#DA667B</Color>
-                    <Color x:Key="BgCardColor">#FAF3E6</Color>
-                    <Color x:Key="BorderColor">#C9B79C</Color>
-                    <Color x:Key="BgPageColor">#F1E0C5</Color>
+                    <Color x:Key="AccentColor">#000000</Color>
+                    <Color x:Key="BgCardColor">#E6FFFFFF</Color>
+                    <Color x:Key="BorderColor">#26000000</Color>
+                    <Color x:Key="BgPageColor">#D6FFFFFF</Color>
 
-                    <SolidColorBrush x:Key="BgPage"          Color="#F1E0C5"/>
-                    <SolidColorBrush x:Key="BgSidebar"       Color="#E8D2AC"/>
-                    <SolidColorBrush x:Key="BgCard"          Color="#F3E7CC"/>
-                    <SolidColorBrush x:Key="BgInput"         Color="#F8EFD9"/>
-                    <SolidColorBrush x:Key="Accent"          Color="#DA667B"/>
-                    <SolidColorBrush x:Key="AccentDark"      Color="#C24F66"/>
-                    <SolidColorBrush x:Key="AccentLight"     Color="#F2DEE3"/>
-                    <SolidColorBrush x:Key="AccentSubtle"    Color="#F8ECEE"/>
-                    <SolidColorBrush x:Key="AccentVeryLight" Color="#F8ECEE"/>
-                    <SolidColorBrush x:Key="TextH"           Color="#262B21"/>
-                    <SolidColorBrush x:Key="TextPrimary"     Color="#262B21"/>
-                    <SolidColorBrush x:Key="TextBody"        Color="#59684F"/>
-                    <SolidColorBrush x:Key="TextSecondary"   Color="#59684F"/>
-                    <SolidColorBrush x:Key="TextMuted"       Color="#7B8874"/>
-                    <SolidColorBrush x:Key="Border"          Color="#C9B79C"/>
-                    <SolidColorBrush x:Key="BorderFocus"     Color="#DA667B"/>
-                    <SolidColorBrush x:Key="DlcBadgeBg"      Color="#EEE3EA"/>
-                    <SolidColorBrush x:Key="DlcBadgeFg"      Color="#8B6C82"/>
-                    <SolidColorBrush x:Key="Success"         Color="#5C8A5A"/>
-                    <SolidColorBrush x:Key="SuccessBg"       Color="#E7F0E3"/>
-                    <SolidColorBrush x:Key="SuccessLight"    Color="#E7F0E3"/>
-                    <SolidColorBrush x:Key="Error"           Color="#B23A50"/>
-                    <SolidColorBrush x:Key="ErrorBg"         Color="#F8E2E6"/>
-                    <SolidColorBrush x:Key="ErrorLight"      Color="#F8E2E6"/>
-                    <SolidColorBrush x:Key="Warning"         Color="#B9822E"/>
-                    <SolidColorBrush x:Key="WarningBg"       Color="#F6EAD3"/>
+                    <SolidColorBrush x:Key="BgPage"          Color="#CCFFFFFF"/>
+                    <SolidColorBrush x:Key="BgSidebar"       Color="#80F5F5F7"/>
+                    <SolidColorBrush x:Key="BgCard"          Color="#E6FFFFFF"/>
+                    <SolidColorBrush x:Key="BgInput"         Color="#FFF9F9FB"/>
+                    <SolidColorBrush x:Key="Accent"          Color="#000000"/>
+                    <SolidColorBrush x:Key="AccentDark"      Color="#333333"/>
+                    <SolidColorBrush x:Key="AccentLight"     Color="#FFE6E6E6"/>
+                    <SolidColorBrush x:Key="AccentSubtle"    Color="#FFF0F0F0"/>
+                    <SolidColorBrush x:Key="AccentVeryLight" Color="#FFF5F5F5"/>
+                    <SolidColorBrush x:Key="TextH"           Color="#000000"/>
+                    <SolidColorBrush x:Key="TextPrimary"     Color="#000000"/>
+                    <SolidColorBrush x:Key="TextBody"        Color="#333333"/>
+                    <SolidColorBrush x:Key="TextSecondary"   Color="#555555"/>
+                    <SolidColorBrush x:Key="TextMuted"       Color="#888888"/>
+                    <SolidColorBrush x:Key="Border"          Color="#26000000"/>
+                    <SolidColorBrush x:Key="BorderFocus"     Color="#000000"/>
+                    <SolidColorBrush x:Key="DlcBadgeBg"      Color="#FFEAEAEA"/>
+                    <SolidColorBrush x:Key="DlcBadgeFg"      Color="#444444"/>
+                    <SolidColorBrush x:Key="Success"         Color="#000000"/>
+                    <SolidColorBrush x:Key="SuccessBg"       Color="#FFF0F0F0"/>
+                    <SolidColorBrush x:Key="SuccessLight"    Color="#FFF0F0F0"/>
+                    <SolidColorBrush x:Key="Error"           Color="#000000"/>
+                    <SolidColorBrush x:Key="ErrorBg"         Color="#FFF0F0F0"/>
+                    <SolidColorBrush x:Key="ErrorLight"      Color="#FFF0F0F0"/>
+                    <SolidColorBrush x:Key="Warning"         Color="#333333"/>
+                    <SolidColorBrush x:Key="WarningBg"       Color="#FFF0F0F0"/>
+                    <SolidColorBrush x:Key="BtnPrimaryFg"    Color="#FFFFFF"/>
+                    <SolidColorBrush x:Key="BtnPillCheckedFg" Color="#FFFFFF"/>
+                    <SolidColorBrush x:Key="CheckedCheckBg" Color="#000000"/>
+                    <SolidColorBrush x:Key="CheckedCheckBorder" Color="#000000"/>
+                    <BoxShadows x:Key="ButtonShadow">0 3 14 0 #1A000000</BoxShadows>
+                    <BoxShadows x:Key="SplashShadow">0 3 25 3 #1A000000</BoxShadows>
                 </ResourceDictionary>
                 <ResourceDictionary x:Key="Dark">
-                    <Color x:Key="AccentColor">#E17A8E</Color>
-                    <Color x:Key="BgCardColor">#2F323C</Color>
-                    <Color x:Key="BorderColor">#3E414C</Color>
-                    <Color x:Key="BgPageColor">#272932</Color>
+                    <Color x:Key="AccentColor">#FFFFFF</Color>
+                    <Color x:Key="BgCardColor">#CC1C1C1E</Color>
+                    <Color x:Key="BorderColor">#33FFFFFF</Color>
+                    <Color x:Key="BgPageColor">#B3050505</Color>
 
-                    <SolidColorBrush x:Key="BgPage"          Color="#272932"/>
-                    <SolidColorBrush x:Key="BgSidebar"       Color="#20222A"/>
-                    <SolidColorBrush x:Key="BgCard"          Color="#2F323C"/>
-                    <SolidColorBrush x:Key="BgInput"         Color="#23252D"/>
-                    <SolidColorBrush x:Key="Accent"          Color="#E17A8E"/>
-                    <SolidColorBrush x:Key="AccentDark"      Color="#C24F66"/>
-                    <SolidColorBrush x:Key="AccentLight"     Color="#4A2E38"/>
-                    <SolidColorBrush x:Key="AccentSubtle"    Color="#3A2530"/>
-                    <SolidColorBrush x:Key="AccentVeryLight" Color="#3A2530"/>
-                    <SolidColorBrush x:Key="TextH"           Color="#E7ECF4"/>
-                    <SolidColorBrush x:Key="TextPrimary"     Color="#E7ECF4"/>
-                    <SolidColorBrush x:Key="TextBody"        Color="#B6C2D9"/>
-                    <SolidColorBrush x:Key="TextSecondary"   Color="#B6C2D9"/>
-                    <SolidColorBrush x:Key="TextMuted"       Color="#828489"/>
-                    <SolidColorBrush x:Key="Border"          Color="#3E414C"/>
-                    <SolidColorBrush x:Key="BorderFocus"     Color="#E17A8E"/>
-                    <SolidColorBrush x:Key="DlcBadgeBg"      Color="#362F3D"/>
-                    <SolidColorBrush x:Key="DlcBadgeFg"      Color="#9E90A2"/>
-                    <SolidColorBrush x:Key="Success"         Color="#7FAE7C"/>
-                    <SolidColorBrush x:Key="SuccessBg"       Color="#263329"/>
-                    <SolidColorBrush x:Key="SuccessLight"    Color="#263329"/>
-                    <SolidColorBrush x:Key="Error"           Color="#E08A93"/>
-                    <SolidColorBrush x:Key="ErrorBg"         Color="#3A262A"/>
-                    <SolidColorBrush x:Key="ErrorLight"      Color="#3A262A"/>
-                    <SolidColorBrush x:Key="Warning"         Color="#D8A85B"/>
-                    <SolidColorBrush x:Key="WarningBg"       Color="#3A3122"/>
+                    <SolidColorBrush x:Key="BgPage"          Color="#CC050505"/>
+                    <SolidColorBrush x:Key="BgSidebar"       Color="#80121212"/>
+                    <SolidColorBrush x:Key="BgCard"          Color="#CC1C1C1E"/>
+                    <SolidColorBrush x:Key="BgInput"         Color="#FF121214"/>
+                    <SolidColorBrush x:Key="Accent"          Color="#FFFFFF"/>
+                    <SolidColorBrush x:Key="AccentDark"      Color="#E0E0E0"/>
+                    <SolidColorBrush x:Key="AccentLight"     Color="#2D2D30"/>
+                    <SolidColorBrush x:Key="AccentSubtle"    Color="#1E1E1E"/>
+                    <SolidColorBrush x:Key="AccentVeryLight" Color="#121212"/>
+                    <SolidColorBrush x:Key="TextH"           Color="#FFFFFF"/>
+                    <SolidColorBrush x:Key="TextPrimary"     Color="#FFFFFF"/>
+                    <SolidColorBrush x:Key="TextBody"        Color="#E5E5E5"/>
+                    <SolidColorBrush x:Key="TextSecondary"   Color="#A3A3A3"/>
+                    <SolidColorBrush x:Key="TextMuted"       Color="#737373"/>
+                    <SolidColorBrush x:Key="Border"          Color="#26FFFFFF"/>
+                    <SolidColorBrush x:Key="BorderFocus"     Color="#FFFFFF"/>
+                    <SolidColorBrush x:Key="DlcBadgeBg"      Color="#2D2D30"/>
+                    <SolidColorBrush x:Key="DlcBadgeFg"      Color="#E0E0E0"/>
+                    <SolidColorBrush x:Key="Success"         Color="#FFFFFF"/>
+                    <SolidColorBrush x:Key="SuccessBg"       Color="#1E1E1E"/>
+                    <SolidColorBrush x:Key="SuccessLight"    Color="#1E1E1E"/>
+                    <SolidColorBrush x:Key="Error"           Color="#FFFFFF"/>
+                    <SolidColorBrush x:Key="ErrorBg"         Color="#2D2D30"/>
+                    <SolidColorBrush x:Key="ErrorLight"      Color="#2D2D30"/>
+                    <SolidColorBrush x:Key="Warning"         Color="#FFFFFF"/>
+                    <SolidColorBrush x:Key="WarningBg"       Color="#1E1E1E"/>
+                    <SolidColorBrush x:Key="BtnPrimaryFg"    Color="#000000"/>
+                    <SolidColorBrush x:Key="BtnPillCheckedFg" Color="#000000"/>
+                    <SolidColorBrush x:Key="CheckedCheckBg" Color="#2D2D30"/>
+                    <SolidColorBrush x:Key="CheckedCheckBorder" Color="#FFFFFF"/>
+                    <BoxShadows x:Key="ButtonShadow">0 0 0 0 #00000000</BoxShadows>
+                    <BoxShadows x:Key="SplashShadow">0 0 0 0 #00000000</BoxShadows>
                 </ResourceDictionary>
             </ResourceDictionary.ThemeDictionaries>
 
@@ -191,8 +203,8 @@
                     <Setter Property="RenderTransform" Value="scale(0,0)"/>
                 </Style>
                 <Style Selector="^:checked /template/ Border#boxBorder">
-                    <Setter Property="Background" Value="{DynamicResource Accent}"/>
-                    <Setter Property="BorderBrush" Value="{DynamicResource Accent}"/>
+                    <Setter Property="Background" Value="{DynamicResource CheckedCheckBg}"/>
+                    <Setter Property="BorderBrush" Value="{DynamicResource CheckedCheckBorder}"/>
                 </Style>
                 <Style Selector="^:checked /template/ Path#tick">
                     <Setter Property="Opacity" Value="1"/>
@@ -271,7 +283,7 @@
             <!-- ══ Button ControlThemes ════════════════════════════════════════ -->
             <ControlTheme x:Key="BtnPrimary" TargetType="Button">
                 <Setter Property="Background" Value="{DynamicResource Accent}"/>
-                <Setter Property="Foreground" Value="White"/>
+                <Setter Property="Foreground" Value="{DynamicResource BtnPrimaryFg}"/>
                 <Setter Property="BorderThickness" Value="0"/>
                 <Setter Property="Padding" Value="20,10"/>
                 <Setter Property="FontSize" Value="13"/>
@@ -284,7 +296,7 @@
                                 Background="{TemplateBinding Background}"
                                 CornerRadius="9"
                                 Padding="{TemplateBinding Padding}"
-                                BoxShadow="0 3 14 0 #38DA667B">
+                                BoxShadow="{DynamicResource ButtonShadow}">
                             <Border.Transitions>
                                 <Transitions>
                                     <BrushTransition Property="Background" Duration="0:0:0.12"/>
@@ -332,6 +344,7 @@
                                 <Transitions>
                                     <BrushTransition Property="Background" Duration="0:0:0.12"/>
                                     <BrushTransition Property="BorderBrush" Duration="0:0:0.12"/>
+                                    <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.1"/>
                                 </Transitions>
                             </Border.Transitions>
                             <ContentPresenter Name="PART_ContentPresenter"
@@ -344,6 +357,9 @@
                 <Style Selector="^:pointerover /template/ Border#bd">
                     <Setter Property="Background" Value="{DynamicResource BgCard}"/>
                     <Setter Property="BorderBrush" Value="{DynamicResource TextMuted}"/>
+                </Style>
+                <Style Selector="^:pressed /template/ Border#bd">
+                    <Setter Property="RenderTransform" Value="scale(0.97)"/>
                 </Style>
                 <Style Selector="^:disabled">
                     <Setter Property="Opacity" Value="0.4"/>
@@ -370,6 +386,7 @@
                             <Border.Transitions>
                                 <Transitions>
                                     <BrushTransition Property="Background" Duration="0:0:0.12"/>
+                                    <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.1"/>
                                 </Transitions>
                             </Border.Transitions>
                             <ContentPresenter Name="PART_ContentPresenter"
@@ -381,6 +398,9 @@
                 </Setter>
                 <Style Selector="^:pointerover /template/ Border#bd">
                     <Setter Property="Background" Value="{DynamicResource ErrorBg}"/>
+                </Style>
+                <Style Selector="^:pressed /template/ Border#bd">
+                    <Setter Property="RenderTransform" Value="scale(0.97)"/>
                 </Style>
             </ControlTheme>
 
@@ -401,6 +421,7 @@
                             <Border.Transitions>
                                 <Transitions>
                                     <BrushTransition Property="Background" Duration="0:0:0.12"/>
+                                    <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.1"/>
                                 </Transitions>
                             </Border.Transitions>
                             <ContentPresenter Name="PART_ContentPresenter"
@@ -412,6 +433,9 @@
                 </Setter>
                 <Style Selector="^:pointerover /template/ Border#bd">
                     <Setter Property="Background" Value="{DynamicResource Border}"/>
+                </Style>
+                <Style Selector="^:pressed /template/ Border#bd">
+                    <Setter Property="RenderTransform" Value="scale(0.97)"/>
                 </Style>
             </ControlTheme>
 
@@ -429,6 +453,7 @@
                             <Border.Transitions>
                                 <Transitions>
                                     <BrushTransition Property="Background" Duration="0:0:0.12"/>
+                                    <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.1"/>
                                 </Transitions>
                             </Border.Transitions>
                             <ContentPresenter Name="PART_ContentPresenter"
@@ -440,6 +465,9 @@
                 </Setter>
                 <Style Selector="^:pointerover /template/ Border#bd">
                     <Setter Property="Background" Value="{DynamicResource Border}"/>
+                </Style>
+                <Style Selector="^:pressed /template/ Border#bd">
+                    <Setter Property="RenderTransform" Value="scale(0.97)"/>
                 </Style>
                 <Style Selector="^:disabled">
                     <Setter Property="Opacity" Value="0.4"/>
@@ -470,6 +498,7 @@
                                 <Transitions>
                                     <BrushTransition Property="Background" Duration="0:0:0.12"/>
                                     <BrushTransition Property="BorderBrush" Duration="0:0:0.12"/>
+                                    <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.1"/>
                                 </Transitions>
                             </Border.Transitions>
                             <ContentPresenter Name="PART_ContentPresenter"
@@ -485,11 +514,14 @@
                     <Setter Property="BorderBrush" Value="{DynamicResource Accent}"/>
                 </Style>
                 <Style Selector="^:checked">
-                    <Setter Property="Foreground" Value="White"/>
+                    <Setter Property="Foreground" Value="{DynamicResource BtnPillCheckedFg}"/>
                 </Style>
                 <Style Selector="^:pointerover:not(:checked) /template/ Border#bd">
                     <Setter Property="Background" Value="{DynamicResource AccentVeryLight}"/>
                     <Setter Property="BorderBrush" Value="{DynamicResource Accent}"/>
+                </Style>
+                <Style Selector="^:pressed /template/ Border#bd">
+                    <Setter Property="RenderTransform" Value="scale(0.96)"/>
                 </Style>
             </ControlTheme>
 
@@ -601,7 +633,7 @@
         <Setter Property="Margin" Value="0,2"/>
     </Style>
     <Style Selector="Border.DepotListItem:not(:pointerover)">
-        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="Background" Value="#00000000"/>
     </Style>
 
     <!-- ══ ScrollViewer global style ════════════════════════════════════ -->

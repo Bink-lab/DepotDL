@@ -61,7 +61,7 @@
                     <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
                         <Border Width="40" Height="40" CornerRadius="20"
                                 Background="{DynamicResource AccentVeryLight}"
-                                BoxShadow="0 1 10 0 #33DA667B"
+                                BoxShadow="{DynamicResource ButtonShadow}"
                                 Margin="0,0,14,0">
                             <Path Data="{StaticResource LucideDownload}"
                                   Width="18" Height="18" Stretch="Uniform"
@@ -107,7 +107,7 @@
                                 <Path Data="{StaticResource LucideDownload}"
                                       Width="14" Height="14" Stretch="Uniform" Margin="0,0,8,0"
                                       IsVisible="{Binding IsRyuuBusy, Converter={StaticResource InvBoolToVis}}"
-                                      Stroke="White" StrokeThickness="1.7" Fill="Transparent"
+                                      Stroke="{DynamicResource BtnPrimaryFg}" StrokeThickness="1.7" Fill="Transparent"
                                       StrokeLineCap="Round" StrokeJoin="Round"/>
                                 <Grid>
                                     <TextBlock Text="Fetch Config" FontSize="12.5" FontWeight="SemiBold"
@@ -140,7 +140,7 @@
                     <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
                         <Border Width="40" Height="40" CornerRadius="20"
                                 Background="{DynamicResource AccentVeryLight}"
-                                BoxShadow="0 1 10 0 #33DA667B"
+                                BoxShadow="{DynamicResource ButtonShadow}"
                                 Margin="0,0,14,0">
                             <Path Data="{StaticResource LucideDownload}"
                                   Width="18" Height="18" Stretch="Uniform"
@@ -186,7 +186,7 @@
                                 <Path Data="{StaticResource LucideDownload}"
                                       Width="14" Height="14" Stretch="Uniform" Margin="0,0,8,0"
                                       IsVisible="{Binding IsHubcapBusy, Converter={StaticResource InvBoolToVis}}"
-                                      Stroke="White" StrokeThickness="1.7" Fill="Transparent"
+                                      Stroke="{DynamicResource BtnPrimaryFg}" StrokeThickness="1.7" Fill="Transparent"
                                       StrokeLineCap="Round" StrokeJoin="Round"/>
                                 <Grid>
                                     <TextBlock Text="Fetch Config" FontSize="12.5" FontWeight="SemiBold"
@@ -390,13 +390,12 @@
 
                         <Separator Margin="0,16"/>
 
-                        <TextBlock FontSize="12" Foreground="{DynamicResource TextMuted}">
-                            <Run Text="{Binding FilteredCount}"
-                                 FontWeight="Bold" Foreground="{DynamicResource Accent}"/>
-                            <Run Text=" of "/>
-                            <Run Text="{Binding Depots.Count}" FontWeight="Bold"/>
-                            <Run Text=" depots shown"/>
-                        </TextBlock>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="{Binding FilteredCount}" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource Accent}"/>
+                            <TextBlock Text=" of " FontSize="12" Foreground="{DynamicResource TextMuted}"/>
+                            <TextBlock Text="{Binding TotalCount}" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource TextMuted}"/>
+                            <TextBlock Text=" depots shown" FontSize="12" Foreground="{DynamicResource TextMuted}"/>
+                        </StackPanel>
 
                         <Separator Margin="0,16"/>
 
@@ -429,11 +428,11 @@
                             <TextBlock Text="AVAILABLE DEPOTS" Classes="Label" VerticalAlignment="Center" Margin="0"/>
                             <Border Margin="8,0,0,0" Padding="6,2" CornerRadius="10"
                                     Background="{DynamicResource AccentVeryLight}">
-                                <TextBlock FontSize="10.5" FontWeight="Bold" Foreground="{DynamicResource Accent}">
-                                    <Run Text="{Binding FilteredCount}"/>
-                                    <Run Text=" / "/>
-                                    <Run Text="{Binding Depots.Count}"/>
-                                </TextBlock>
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="{Binding FilteredCount}" FontSize="10.5" FontWeight="Bold" Foreground="{DynamicResource Accent}"/>
+                                    <TextBlock Text=" / " FontSize="10.5" FontWeight="Bold" Foreground="{DynamicResource Accent}"/>
+                                    <TextBlock Text="{Binding TotalCount}" FontSize="10.5" FontWeight="Bold" Foreground="{DynamicResource Accent}"/>
+                                </StackPanel>
                             </Border>
                         </StackPanel>
 
@@ -563,7 +562,7 @@
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                         <Path Data="{StaticResource LucidePlay}"
                               Width="16" Height="16" Stretch="Uniform" Margin="0,0,10,0"
-                              Fill="White" Stroke="White" StrokeThickness="1"
+                              Fill="{DynamicResource BtnPrimaryFg}" Stroke="{DynamicResource BtnPrimaryFg}" StrokeThickness="1"
                               StrokeJoin="Round" StrokeLineCap="Round"/>
                         <TextBlock Text="Start Downloading" FontSize="13.5" FontWeight="SemiBold" VerticalAlignment="Center"/>
                     </StackPanel>
@@ -634,10 +633,8 @@
                         <TextBlock HorizontalAlignment="Right"
                                    FontSize="15" FontWeight="Bold"
                                    Foreground="{DynamicResource Accent}"
-                                   VerticalAlignment="Center">
-                            <Run Text="{Binding OverallPercent, StringFormat='{}{0:F1}'}"/>
-                            <Run Text="%"/>
-                        </TextBlock>
+                                   VerticalAlignment="Center"
+                                   Text="{Binding OverallPercent, StringFormat='{}{0:F1}%'}"/>
                     </Grid>
                     <ProgressBar Grid.Row="2"
                                  Theme="{StaticResource RoundBar}"
@@ -734,10 +731,8 @@
                                                        IsVisible="{Binding SpeedText, Converter={StaticResource NotEmptyToVis}}"/>
                                             <TextBlock FontSize="11" FontWeight="Bold"
                                                        Foreground="{DynamicResource TextSecondary}"
-                                                       VerticalAlignment="Center">
-                                                <Run Text="{Binding Percent, StringFormat='{}{0:F1}'}"/>
-                                                <Run Text="%"/>
-                                            </TextBlock>
+                                                       VerticalAlignment="Center"
+                                                       Text="{Binding Percent, StringFormat='{}{0:F1}%'}"/>
                                         </StackPanel>
                                     </Grid>
                                 </Grid>
@@ -756,7 +751,7 @@
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                         <Path Data="{StaticResource LucidePlay}"
                               Width="16" Height="16" Stretch="Uniform" Margin="0,0,10,0"
-                              Fill="White" Stroke="White" StrokeThickness="1"
+                              Fill="{DynamicResource BtnPrimaryFg}" Stroke="{DynamicResource BtnPrimaryFg}" StrokeThickness="1"
                               StrokeJoin="Round" StrokeLineCap="Round"/>
                         <TextBlock Text="Start New Download" FontSize="13.5" FontWeight="SemiBold" VerticalAlignment="Center"/>
                     </StackPanel>

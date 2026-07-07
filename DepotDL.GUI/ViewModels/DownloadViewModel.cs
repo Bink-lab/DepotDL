@@ -51,7 +51,8 @@ namespace DepotDL.GUI.ViewModels
 
         private readonly ObservableCollection<DepotSelectionItem> _filteredDepots = new();
         public ObservableCollection<DepotSelectionItem> FilteredDepots => _filteredDepots;
-        public int FilteredCount => _filteredDepots.Count;
+        [ObservableProperty] private int _filteredCount;
+        [ObservableProperty] private int _totalCount;
 
         [ObservableProperty] private string _outputDir = string.Empty;
         [ObservableProperty] private string _manifestsDir = string.Empty;
@@ -155,7 +156,8 @@ namespace DepotDL.GUI.ViewModels
             _filteredDepots.Clear();
             foreach (var item in Depots.Where(d => DepotFilterPredicate(d)))
                 _filteredDepots.Add(item);
-            OnPropertyChanged(nameof(FilteredCount));
+            FilteredCount = _filteredDepots.Count;
+            TotalCount = Depots?.Count ?? 0;
         }
 
         private void RefreshFilter() => RebuildFilteredDepots();
@@ -175,6 +177,7 @@ namespace DepotDL.GUI.ViewModels
             if (e.NewItems != null)
                 foreach (DepotSelectionItem item in e.NewItems)
                     item.PropertyChanged += OnDepotItemPropertyChanged;
+            RebuildFilteredDepots();
             UpdateCanStart();
         }
 

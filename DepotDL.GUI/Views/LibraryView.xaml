@@ -415,11 +415,11 @@
                                                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                                                             <Path Data="{StaticResource LucidePlay}"
                                                                   Width="12" Height="12" Stretch="Uniform" Margin="0,0,6,0"
-                                                                  Fill="White" Stroke="White" StrokeThickness="1"
+                                                                  Fill="{DynamicResource BtnPrimaryFg}" Stroke="{DynamicResource BtnPrimaryFg}" StrokeThickness="1"
                                                                   StrokeJoin="Round"/>
                                                             <TextBlock Text="Play" FontSize="12.5"
                                                                        FontWeight="SemiBold"
-                                                                       Foreground="White"/>
+                                                                       Foreground="{DynamicResource BtnPrimaryFg}"/>
                                                         </StackPanel>
                                                     </Button>
 

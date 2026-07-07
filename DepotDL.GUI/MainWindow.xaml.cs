@@ -7,6 +7,7 @@ using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Media;
+using Avalonia.Media.Transformation;
 using Avalonia.Threading;
 using DepotDL.GUI.ViewModels;
 
@@ -96,16 +97,19 @@ namespace DepotDL.GUI
             if (oldPage != null)
             {
                 oldPage.Opacity = 0;
-                await Task.Delay(150);
+                oldPage.RenderTransform = TransformOperations.Parse("translateY(-8px)");
+                await Task.Delay(180);
                 if (_navVersion != myVersion) return;
                 oldPage.IsVisible = false;
             }
 
             newPage.Opacity = 0;
+            newPage.RenderTransform = TransformOperations.Parse("translateY(8px)");
             newPage.IsVisible = true;
             await Dispatcher.UIThread.InvokeAsync(() => { });
             if (_navVersion != myVersion) return;
             newPage.Opacity = 1;
+            newPage.RenderTransform = TransformOperations.Parse("translateY(0)");
         }
 
         private void UpdateContentClip()
@@ -113,8 +117,8 @@ namespace DepotDL.GUI
             ContentGrid.Clip = new RectangleGeometry
             {
                 Rect = new Rect(0, 0, ContentGrid.Bounds.Width, ContentGrid.Bounds.Height),
-                RadiusX = 14,
-                RadiusY = 14
+                RadiusX = 13,
+                RadiusY = 13
             };
         }
 

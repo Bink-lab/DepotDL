@@ -793,9 +793,9 @@
                                 <StackPanel Orientation="Horizontal">
                                     <Path Data="{StaticResource LucideDownload}"
                                           Width="15" Height="15" Stretch="Uniform" Margin="0,0,8,0"
-                                          Stroke="White" StrokeThickness="1.7" Fill="Transparent"
+                                          Stroke="{DynamicResource BtnPrimaryFg}" StrokeThickness="1.7" Fill="Transparent"
                                           StrokeLineCap="Round" StrokeJoin="Round"/>
-                                    <TextBlock Text="Download" FontSize="13" FontWeight="SemiBold" Foreground="White"/>
+                                    <TextBlock Text="Download" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource BtnPrimaryFg}"/>
                                 </StackPanel>
                             </Button>
                         </Grid>
