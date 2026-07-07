@@ -84,7 +84,7 @@
             <Setter Property="Padding"         Value="14,8"/>
             <Setter Property="FontSize"        Value="12"/>
             <Setter Property="FontWeight"      Value="SemiBold"/>
-            <Setter Property="Background"      Value="Transparent"/>
+            <Setter Property="Background"      Value="#00000000"/>
             <Setter Property="Foreground"      Value="{DynamicResource TextPrimary}"/>
             <Setter Property="Template">
                 <ControlTemplate>
@@ -239,7 +239,7 @@
                                             </Transitions>
                                         </Border.Transitions>
                                         <Border.Styles>
-                                            <Style Selector="Border.gameCard">
+                                            <Style Selector="Border.gameCard:not(:pointerover)">
                                                 <Setter Property="RenderTransform" Value="translateY(0px)"/>
                                             </Style>
                                             <Style Selector="Border.gameCard:pointerover">
@@ -283,7 +283,7 @@
                                                 <Separator/>
                                                 <MenuItem Header="Remove from Library"
                                                           Theme="{StaticResource ModernMenuItem}"
-                                                          Foreground="#B83B2A"
+                                                          Foreground="{DynamicResource Error}"
                                                           Command="{Binding LibVm.ConfirmRemoveCommand}"
                                                           CommandParameter="{Binding}"/>
                                             </ContextMenu>
@@ -299,7 +299,7 @@
 
                                             <!-- OnlineFix blink dot -->
                                             <Ellipse Width="10" Height="10"
-                                                     Fill="#2ECC71"
+                                                     Fill="{DynamicResource Success}"
                                                      HorizontalAlignment="Right" VerticalAlignment="Top"
                                                      Margin="0,8,8,0"
                                                      IsVisible="{Binding OnlineFixApplied}"
@@ -445,7 +445,7 @@
                 </Transitions>
             </Grid.Transitions>
 
-            <Rectangle Fill="#1C1610" Opacity="0.72"/>
+            <Rectangle Fill="{DynamicResource Scrim}" Opacity="0.72"/>
 
             <Border Width="420"
                     Classes="overlayCard"
@@ -519,7 +519,7 @@
                 </Transitions>
             </Grid.Transitions>
 
-            <Rectangle Fill="#1C1610" Opacity="0.72"/>
+            <Rectangle Fill="{DynamicResource Scrim}" Opacity="0.72"/>
 
             <Border Width="420"
                     Classes="overlayCard"

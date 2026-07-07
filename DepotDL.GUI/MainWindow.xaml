@@ -16,7 +16,7 @@
         <!-- NavItem ControlTheme -->
         <ControlTheme x:Key="NavItem" TargetType="Button">
             <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Background" Value="#00000000"/>
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="Margin" Value="0,1"/>
             <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
@@ -37,7 +37,7 @@
                     </Border>
                 </ControlTemplate>
             </Setter>
-            <Style Selector="^:pointerover /template/ Border#bg">
+            <Style Selector="^:pointerover:not(.navActive) /template/ Border#bg">
                 <Setter Property="Background" Value="{DynamicResource Border}"/>
             </Style>
         </ControlTheme>
@@ -45,7 +45,7 @@
         <ControlTheme x:Key="ChromeBtn" TargetType="Button">
             <Setter Property="Width" Value="28"/>
             <Setter Property="Height" Value="28"/>
-            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Background" Value="#00000000"/>
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="Template">
@@ -75,9 +75,6 @@
         </Style>
 
         <!-- Default/Inactive styling -->
-        <Style Selector="Border.navIndicator">
-            <Setter Property="Background" Value="Transparent"/>
-        </Style>
         <Style Selector="Path.navIcon">
             <Setter Property="Stroke" Value="{DynamicResource TextMuted}"/>
         </Style>
@@ -89,10 +86,7 @@
             <Setter Property="FontWeight" Value="Normal"/>
         </Style>
 
-        <!-- Active styling -->
-        <Style Selector="Button.navActive Border.navIndicator">
-            <Setter Property="Background" Value="{DynamicResource Accent}"/>
-        </Style>
+        <!-- Active styling: soft accent-tinted pill, accent-colored glyphs -->
         <Style Selector="Button.navActive Path.navIcon">
             <Setter Property="Stroke" Value="{DynamicResource Accent}"/>
         </Style>
@@ -111,54 +105,55 @@
             BorderBrush="{DynamicResource Border}"
             BorderThickness="1">
         <Grid Name="ContentGrid">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="210"/>
-                <ColumnDefinition Width="*"/>
-            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="60"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
 
-            <!-- ── Sidebar ─────────────────────────────────────────── -->
-            <Border Grid.Column="0"
+            <!-- ── Top bar ─────────────────────────────────────────── -->
+            <Border Grid.Row="0"
                     Background="{DynamicResource BgSidebar}"
-                    CornerRadius="14,0,0,14"
-                    BorderThickness="0,0,1,0"
+                    CornerRadius="14,14,0,0"
+                    BorderThickness="0,0,0,1"
                     BorderBrush="{DynamicResource Border}">
                 <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="54"/>
-                        <RowDefinition Height="*"/>
-                        <RowDefinition Height="Auto"/>
-                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
 
-                    <!-- Titlebar drag area + logo -->
-                    <Border Grid.Row="0" Background="Transparent"
-                            PointerPressed="TitleBar_PointerPressed">
-                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="16,0">
-                            <Border Width="32" Height="32" CornerRadius="9"
-                                    Background="{DynamicResource Accent}" Margin="0,0,10,0">
-                                <TextBlock Text="D" FontSize="16" FontWeight="Bold"
-                                           Foreground="White"
-                                           HorizontalAlignment="Center"
-                                           VerticalAlignment="Center"/>
-                            </Border>
-                            <StackPanel VerticalAlignment="Center">
-                                <TextBlock Text="DepotDL" FontSize="14" FontWeight="SemiBold"
-                                           Foreground="{DynamicResource TextH}"/>
-                                <TextBlock Text="Game Downloader" FontSize="9.5"
-                                           Foreground="{DynamicResource TextMuted}"/>
-                            </StackPanel>
-                        </StackPanel>
-                    </Border>
+                    <!-- Titlebar drag strip spanning the whole bar -->
+                    <Border Grid.ColumnSpan="3" Background="Transparent"
+                            PointerPressed="TitleBar_PointerPressed"/>
 
-                    <!-- Nav items -->
-                    <StackPanel Grid.Row="1" Margin="10,6,10,0">
+                    <!-- Logo -->
+                    <StackPanel Grid.Column="0" Orientation="Horizontal"
+                                VerticalAlignment="Center" Margin="18,0,20,0"
+                                IsHitTestVisible="False">
+                        <Border Width="30" Height="30" CornerRadius="8"
+                                Background="{DynamicResource Accent}" Margin="0,0,9,0">
+                            <TextBlock Text="D" FontSize="14" FontWeight="Bold"
+                                       Foreground="White"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center"/>
+                        </Border>
+                        <TextBlock Text="DepotDL" FontSize="14" FontWeight="SemiBold"
+                                   Foreground="{DynamicResource TextH}"
+                                   VerticalAlignment="Center"/>
+                    </StackPanel>
+
+                    <!-- Nav pills (centered) -->
+                    <StackPanel Grid.Column="1" Orientation="Horizontal"
+                                HorizontalAlignment="Center" VerticalAlignment="Center"
+                                Spacing="4">
 
                         <Button Theme="{StaticResource NavItem}"
                                 Command="{Binding NavigateStoreCommand}"
                                 Classes.navActive="{Binding IsStorePage}">
                             <StackPanel Orientation="Horizontal">
-                                <Border Classes="navIndicator" Width="3" Height="18" CornerRadius="2" Margin="0,0,10,0"/>
                                 <Path Classes="navIcon" Data="{StaticResource LucideShoppingBag}"
-                                      Width="16" Height="16" Stretch="Uniform" Margin="0,0,10,0"
+                                      Width="15" Height="15" Stretch="Uniform" Margin="0,0,8,0"
                                       StrokeThickness="1.7" StrokeLineCap="Round"
                                       StrokeJoin="Round" Fill="Transparent"/>
                                 <TextBlock Classes="navText" Text="Store" FontSize="13" VerticalAlignment="Center"/>
@@ -169,9 +164,8 @@
                                 Command="{Binding NavigateLibraryCommand}"
                                 Classes.navActive="{Binding IsLibraryPage}">
                             <StackPanel Orientation="Horizontal">
-                                <Border Classes="navIndicator" Width="3" Height="18" CornerRadius="2" Margin="0,0,10,0"/>
                                 <Path Classes="navIconFill" Data="{StaticResource LucideLayoutGrid}"
-                                      Width="16" Height="16" Stretch="Uniform" Margin="0,0,10,0"
+                                      Width="15" Height="15" Stretch="Uniform" Margin="0,0,8,0"
                                       StrokeThickness="0"/>
                                 <TextBlock Classes="navText" Text="Library" FontSize="13" VerticalAlignment="Center"/>
                             </StackPanel>
@@ -181,15 +175,14 @@
                                 Command="{Binding NavigateDownloadCommand}"
                                 Classes.navActive="{Binding IsDownloadPage}">
                             <StackPanel Orientation="Horizontal">
-                                <Border Classes="navIndicator" Width="3" Height="18" CornerRadius="2" Margin="0,0,10,0"/>
                                 <Path Classes="navIcon" Data="{StaticResource LucideDownload}"
-                                      Width="16" Height="16" Stretch="Uniform" Margin="0,0,10,0"
+                                      Width="15" Height="15" Stretch="Uniform" Margin="0,0,8,0"
                                       StrokeThickness="1.7" StrokeLineCap="Round"
                                       StrokeJoin="Round" Fill="Transparent"/>
                                 <TextBlock Classes="navText" Text="Download" FontSize="13" VerticalAlignment="Center"/>
-                                <Border Width="8" Height="8" CornerRadius="4"
+                                <Border Width="7" Height="7" CornerRadius="3.5"
                                         Background="{DynamicResource Accent}"
-                                        Margin="7,0,0,0" VerticalAlignment="Center"
+                                        Margin="6,0,0,0" VerticalAlignment="Center"
                                         IsVisible="{Binding Download.IsDownloading}">
                                     <Border.Styles>
                                         <Style Selector="Border">
@@ -205,41 +198,23 @@
                             </StackPanel>
                         </Button>
 
-                    </StackPanel>
-
-                    <!-- Settings nav (bottom) -->
-                    <StackPanel Grid.Row="2" Margin="10,0,10,14">
                         <Button Theme="{StaticResource NavItem}"
                                 Command="{Binding NavigateSettingsCommand}"
                                 Classes.navActive="{Binding IsSettingsPage}">
                             <StackPanel Orientation="Horizontal">
-                                <Border Classes="navIndicator" Width="3" Height="18" CornerRadius="2" Margin="0,0,10,0"/>
                                 <Path Classes="navIcon" Data="{StaticResource LucideSettings}"
-                                      Width="16" Height="16" Stretch="Uniform" Margin="0,0,10,0"
+                                      Width="15" Height="15" Stretch="Uniform" Margin="0,0,8,0"
                                       StrokeThickness="1.5" StrokeLineCap="Round"
                                       StrokeJoin="Round" Fill="Transparent"/>
                                 <TextBlock Classes="navText" Text="Settings" FontSize="13" VerticalAlignment="Center"/>
                             </StackPanel>
                         </Button>
                     </StackPanel>
-                </Grid>
-            </Border>
 
-            <!-- ── Content area ────────────────────────────────────── -->
-            <Border Grid.Column="1" Background="{DynamicResource BgPage}" CornerRadius="0,14,14,0">
-                <Grid ClipToBounds="True">
-
-                    <!-- Titlebar drag strip (right side) -->
-                    <Border Height="40" Background="Transparent" VerticalAlignment="Top"
-                            PointerPressed="TitleBar_PointerPressed"/>
-
-                    <!-- Chrome buttons -->
-                    <StackPanel Orientation="Horizontal"
-                                HorizontalAlignment="Right"
-                                VerticalAlignment="Top"
-                                Margin="0,10,14,0"
-                                ZIndex="10">
-                        <Button Theme="{StaticResource ChromeBtn}" Command="{Binding ToggleThemeCommand}" ToolTip.Tip="Toggle theme" Margin="0,0,4,0">
+                    <!-- Theme toggle + window chrome -->
+                    <StackPanel Grid.Column="2" Orientation="Horizontal"
+                                VerticalAlignment="Center" Margin="0,0,14,0">
+                        <Button Theme="{StaticResource ChromeBtn}" Command="{Binding ToggleThemeCommand}" ToolTip.Tip="Toggle theme" Margin="0,0,8,0">
                             <Path Name="themeIcon" Width="13" Height="13" Stretch="Uniform"
                                   Stroke="{DynamicResource TextMuted}" StrokeThickness="1.7" Fill="Transparent"
                                   StrokeLineCap="Round" StrokeJoin="Round"
@@ -268,6 +243,12 @@
                                   StrokeLineCap="Round" StrokeJoin="Round" Fill="Transparent"/>
                         </Button>
                     </StackPanel>
+                </Grid>
+            </Border>
+
+            <!-- ── Content area ────────────────────────────────────── -->
+            <Border Grid.Row="1" Background="{DynamicResource BgPage}" CornerRadius="0,0,14,14">
+                <Grid ClipToBounds="True">
 
                     <!-- Page views -->
                     <views:StoreView    Name="StoreViewEl"    DataContext="{Binding Store}"    IsVisible="False" Opacity="0">
@@ -302,7 +283,7 @@
                     <!-- Update notification banner -->
                     <Border VerticalAlignment="Bottom" HorizontalAlignment="Left"
                             Margin="16,0,0,16" ZIndex="6" CornerRadius="12"
-                            BorderThickness="1" BorderBrush="#DDB060" Background="#FEF3E2"
+                            BorderThickness="1" BorderBrush="{DynamicResource Warning}" Background="{DynamicResource WarningBg}"
                             MaxWidth="420" Padding="14,10"
                             IsVisible="{Binding UpdateAvailable}">
                         <StackPanel>
@@ -320,22 +301,22 @@
 
                                 <Path Grid.Column="0" Data="{StaticResource LucideAlertTriangle}"
                                       Width="15" Height="15" Stretch="Uniform" Margin="0,0,10,0"
-                                      Stroke="#C07012" StrokeThickness="1.8" Fill="Transparent"
+                                      Stroke="{DynamicResource Warning}" StrokeThickness="1.8" Fill="Transparent"
                                       StrokeLineCap="Round" StrokeJoin="Round"/>
 
                                 <TextBlock Grid.Column="1"
                                            Text="{Binding UpdateBannerText}"
-                                           FontSize="12.5" Foreground="#7A5500"
+                                           FontSize="12.5" Foreground="{DynamicResource TextBody}"
                                            VerticalAlignment="Center"
                                            TextTrimming="CharacterEllipsis"/>
 
                                 <Button Grid.Column="3"
                                         Command="{Binding InstallUpdateCommand}"
-                                        Background="Transparent" BorderThickness="0"
+                                        Background="#00000000" BorderThickness="0"
                                         Cursor="Hand" Padding="0"
                                         IsEnabled="{Binding IsUpdating, Converter={StaticResource InvBool}}"
                                         IsVisible="{Binding CanInstallUpdate}">
-                                    <TextBlock FontSize="12" Foreground="#1A73E8"
+                                    <TextBlock FontSize="12" Foreground="{DynamicResource Accent}"
                                                TextDecorations="Underline" VerticalAlignment="Center"
                                                Text="{Binding IsUpdating, Converter={StaticResource BoolToVis}}"
                                                Classes.updating="{Binding IsUpdating}">
@@ -350,29 +331,29 @@
 
                                 <Button Grid.Column="5"
                                         Command="{Binding OpenUpdateUrlCommand}"
-                                        Background="Transparent" BorderThickness="0"
+                                        Background="#00000000" BorderThickness="0"
                                         Cursor="Hand" Padding="0">
                                     <TextBlock Text="View release" FontSize="12"
-                                               Foreground="#1A73E8"
+                                               Foreground="{DynamicResource Accent}"
                                                TextDecorations="Underline"
                                                VerticalAlignment="Center"/>
                                 </Button>
 
                                 <Button Grid.Column="7"
                                         Command="{Binding DismissUpdateCommand}"
-                                        Background="Transparent" BorderThickness="0"
+                                        Background="#00000000" BorderThickness="0"
                                         Cursor="Hand" Padding="2,0" VerticalAlignment="Center"
                                         IsEnabled="{Binding IsUpdating, Converter={StaticResource InvBool}}">
                                     <Path Data="{StaticResource LucideX}"
                                           Width="8" Height="8" Stretch="Uniform"
-                                          Stroke="#9C8E82" StrokeThickness="1.5"
+                                          Stroke="{DynamicResource TextMuted}" StrokeThickness="1.5"
                                           StrokeLineCap="Round" StrokeJoin="Round" Fill="Transparent"/>
                                 </Button>
                             </Grid>
 
                             <ProgressBar Height="3" Margin="0,6,0,0" Minimum="0" Maximum="100"
                                          Value="{Binding UpdateProgress}"
-                                         Foreground="#C07012" Background="#F5E0B0" BorderThickness="0"
+                                         Foreground="{DynamicResource Warning}" Background="{DynamicResource AccentVeryLight}" BorderThickness="0"
                                          CornerRadius="1.5"
                                          IsVisible="{Binding IsUpdating}"/>
                         </StackPanel>
@@ -421,7 +402,7 @@
                                             </TextBlock>
                                             <Button Command="{Binding Library.CancelPackCommand}"
                                                     Width="18" Height="18" Padding="0"
-                                                    Background="Transparent" BorderThickness="0"
+                                                    Background="#00000000" BorderThickness="0"
                                                     Cursor="Hand" ToolTip.Tip="Cancel and delete unfinished pack">
                                                 <Path Data="{StaticResource LucideX}"
                                                       Width="10" Height="10" Stretch="Uniform"
@@ -554,14 +535,14 @@
 
             <!-- ── Splash overlay ─────────────────────────────────── -->
             <Border Name="SplashOverlay"
-                    Grid.ColumnSpan="2"
+                    Grid.RowSpan="2"
                     CornerRadius="14"
                     ZIndex="100"
                     RenderTransformOrigin="0.5,0.5">
                 <Border.Background>
                     <LinearGradientBrush StartPoint="0%,0%" EndPoint="0%,100%">
-                        <GradientStop Color="#FEFCF8" Offset="0"/>
-                        <GradientStop Color="#F5F0E8" Offset="1"/>
+                        <GradientStop Color="{DynamicResource BgCardColor}" Offset="0"/>
+                        <GradientStop Color="{DynamicResource BgPageColor}" Offset="1"/>
                     </LinearGradientBrush>
                 </Border.Background>
                 <Border.RenderTransform>
@@ -574,7 +555,7 @@
                     <Border Width="80" Height="80" CornerRadius="40"
                             Background="{DynamicResource Accent}"
                             HorizontalAlignment="Center" Margin="0,0,0,24"
-                            BoxShadow="0 3 25 3 #4DC07840">
+                            BoxShadow="0 3 25 3 #4DDA667B">
                         <TextBlock Text="D" FontSize="36" FontWeight="Bold" Foreground="White"
                                    HorizontalAlignment="Center" VerticalAlignment="Center"/>
                     </Border>

@@ -4,6 +4,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using Avalonia;
+using Avalonia.Controls;
 using Avalonia.Data.Converters;
 using Avalonia.Media;
 using DepotDL.GUI.Models;
@@ -32,24 +33,34 @@ namespace DepotDL.GUI.Converters
             => v is bool b && !b;
     }
 
+    internal static class ThemeResource
+    {
+        public static IBrush Resolve(string key)
+        {
+            var app = Application.Current;
+            if (app != null && app.TryFindResource(key, app.ActualThemeVariant, out var res) && res is IBrush brush)
+                return brush;
+            return Brushes.Gray;
+        }
+    }
+
     public class DepotStatusToColorConverter : IValueConverter
     {
         public object? Convert(object? v, Type t, object? p, CultureInfo c)
         {
-            if (v is DepotStatus s)
-            {
-                return s switch
+            var key = v is DepotStatus s
+                ? s switch
                 {
-                    DepotStatus.Done => new SolidColorBrush(Color.FromRgb(92, 139, 92)),
-                    DepotStatus.Failed => new SolidColorBrush(Color.FromRgb(192, 57, 43)),
-                    DepotStatus.Downloading => new SolidColorBrush(Color.FromRgb(200, 151, 90)),
-                    DepotStatus.Validating => new SolidColorBrush(Color.FromRgb(107, 93, 79)),
-                    DepotStatus.Cancelled => new SolidColorBrush(Color.FromRgb(160, 144, 128)),
-                    DepotStatus.Skipped => new SolidColorBrush(Color.FromRgb(160, 144, 128)),
-                    _ => new SolidColorBrush(Color.FromRgb(160, 144, 128))
-                };
-            }
-            return new SolidColorBrush(Color.FromRgb(160, 144, 128));
+                    DepotStatus.Done => "Success",
+                    DepotStatus.Failed => "Error",
+                    DepotStatus.Downloading => "Accent",
+                    DepotStatus.Validating => "TextBody",
+                    DepotStatus.Cancelled => "TextMuted",
+                    DepotStatus.Skipped => "TextMuted",
+                    _ => "TextMuted"
+                }
+                : "TextMuted";
+            return ThemeResource.Resolve(key);
         }
         public object? ConvertBack(object? v, Type t, object? p, CultureInfo c)
             => AvaloniaProperty.UnsetValue;
@@ -135,17 +146,16 @@ namespace DepotDL.GUI.Converters
     {
         public object? Convert(object? v, Type t, object? p, CultureInfo c)
         {
-            if (v is SpecStatus s)
-            {
-                return s switch
+            var key = v is SpecStatus s
+                ? s switch
                 {
-                    SpecStatus.MeetsRecommended => new SolidColorBrush(Color.Parse("#4CAF50")),
-                    SpecStatus.MeetsMinimum => new SolidColorBrush(Color.Parse("#FF9800")),
-                    SpecStatus.BelowMinimum => new SolidColorBrush(Color.Parse("#F44336")),
-                    _ => new SolidColorBrush(Color.Parse("#888888"))
-                };
-            }
-            return new SolidColorBrush(Color.Parse("#888888"));
+                    SpecStatus.MeetsRecommended => "Success",
+                    SpecStatus.MeetsMinimum => "Warning",
+                    SpecStatus.BelowMinimum => "Error",
+                    _ => "TextMuted"
+                }
+                : "TextMuted";
+            return ThemeResource.Resolve(key);
         }
         public object? ConvertBack(object? v, Type t, object? p, CultureInfo c)
             => AvaloniaProperty.UnsetValue;

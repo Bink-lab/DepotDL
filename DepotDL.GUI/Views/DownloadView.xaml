@@ -61,7 +61,7 @@
                     <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
                         <Border Width="40" Height="40" CornerRadius="20"
                                 Background="{DynamicResource AccentVeryLight}"
-                                BoxShadow="0 1 10 0 #33C07840"
+                                BoxShadow="0 1 10 0 #33DA667B"
                                 Margin="0,0,14,0">
                             <Path Data="{StaticResource LucideDownload}"
                                   Width="18" Height="18" Stretch="Uniform"
@@ -121,7 +121,7 @@
 
                     <Border Background="{DynamicResource ErrorBg}"
                             CornerRadius="8" Padding="14,10" Margin="0,14,0,0"
-                            BorderBrush="#EBC5C1" BorderThickness="1"
+                            BorderBrush="{DynamicResource Error}" BorderThickness="1"
                             IsVisible="{Binding RyuuError, Converter={StaticResource NotEmptyToVis}}">
                         <StackPanel Orientation="Horizontal">
                             <TextBlock Text="⚠ " Foreground="{DynamicResource Error}"
@@ -140,7 +140,7 @@
                     <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
                         <Border Width="40" Height="40" CornerRadius="20"
                                 Background="{DynamicResource AccentVeryLight}"
-                                BoxShadow="0 1 10 0 #33C07840"
+                                BoxShadow="0 1 10 0 #33DA667B"
                                 Margin="0,0,14,0">
                             <Path Data="{StaticResource LucideDownload}"
                                   Width="18" Height="18" Stretch="Uniform"
@@ -200,7 +200,7 @@
 
                     <Border Background="{DynamicResource ErrorBg}"
                             CornerRadius="8" Padding="14,10" Margin="0,14,0,0"
-                            BorderBrush="#EBC5C1" BorderThickness="1"
+                            BorderBrush="{DynamicResource Error}" BorderThickness="1"
                             IsVisible="{Binding HubcapError, Converter={StaticResource NotEmptyToVis}}">
                         <StackPanel Orientation="Horizontal">
                             <TextBlock Text="⚠ " Foreground="{DynamicResource Error}"
@@ -255,7 +255,7 @@
                     </Grid>
 
                     <Border Background="{DynamicResource ErrorBg}" CornerRadius="8" Padding="14,10" Margin="0,12,0,0"
-                            BorderBrush="#EBC5C1" BorderThickness="1"
+                            BorderBrush="{DynamicResource Error}" BorderThickness="1"
                             IsVisible="{Binding ZipError, Converter={StaticResource NotEmptyToVis}}">
                         <StackPanel Orientation="Horizontal">
                             <TextBlock Text="⚠ " Foreground="{DynamicResource Error}"
@@ -266,7 +266,7 @@
                     </Border>
 
                     <Border Background="{DynamicResource ErrorBg}" CornerRadius="8" Padding="14,10" Margin="0,12,0,0"
-                            BorderBrush="#EBC5C1" BorderThickness="1"
+                            BorderBrush="{DynamicResource Error}" BorderThickness="1"
                             IsVisible="{Binding ParseError, Converter={StaticResource NotEmptyToVis}}">
                         <StackPanel Orientation="Horizontal">
                             <TextBlock Text="⚠ " Foreground="{DynamicResource Error}"
@@ -570,7 +570,7 @@
                 </Button>
 
                 <Border Background="{DynamicResource ErrorBg}" CornerRadius="8" Padding="14,9"
-                        BorderBrush="#EBC5C1" BorderThickness="1"
+                        BorderBrush="{DynamicResource Error}" BorderThickness="1"
                         IsVisible="{Binding StartBlockReason, Converter={StaticResource NotEmptyToVis}}">
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
                         <TextBlock Text="⚠ " Foreground="{DynamicResource Error}"
@@ -767,7 +767,7 @@
             <Border Grid.Row="6"
                     CornerRadius="12" Padding="20,14"
                     Background="{DynamicResource ErrorBg}"
-                    BorderBrush="#EBC5C1" BorderThickness="1"
+                    BorderBrush="{DynamicResource Error}" BorderThickness="1"
                     IsVisible="{Binding DownloadFailed}">
                 <Grid>
                     <Grid.ColumnDefinitions>

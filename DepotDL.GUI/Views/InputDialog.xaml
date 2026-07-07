@@ -9,7 +9,7 @@
 
     <Grid>
         <!-- Backdrop -->
-        <Rectangle Fill="#1C1610" Opacity="0.6"/>
+        <Rectangle Fill="{DynamicResource Scrim}" Opacity="0.6"/>
 
         <!-- Card -->
         <Border Width="420"

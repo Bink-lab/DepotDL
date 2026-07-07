@@ -23,70 +23,74 @@
 
             <ResourceDictionary.ThemeDictionaries>
                 <ResourceDictionary x:Key="Light">
-                    <Color x:Key="AccentColor">#C07840</Color>
-                    <Color x:Key="BgCardColor">#FEFCF8</Color>
-                    <Color x:Key="BorderColor">#DDD0C2</Color>
+                    <Color x:Key="AccentColor">#DA667B</Color>
+                    <Color x:Key="BgCardColor">#FAF3E6</Color>
+                    <Color x:Key="BorderColor">#C9B79C</Color>
+                    <Color x:Key="BgPageColor">#F1E0C5</Color>
 
-                    <SolidColorBrush x:Key="BgPage"          Color="#F5F0E8"/>
-                    <SolidColorBrush x:Key="BgSidebar"       Color="#EDE6DB"/>
-                    <SolidColorBrush x:Key="BgCard"          Color="#FEFCF8"/>
-                    <SolidColorBrush x:Key="BgInput"         Color="#FFFFFF"/>
-                    <SolidColorBrush x:Key="Accent"          Color="#C07840"/>
-                    <SolidColorBrush x:Key="AccentDark"      Color="#A86332"/>
-                    <SolidColorBrush x:Key="AccentLight"     Color="#F0E0CE"/>
-                    <SolidColorBrush x:Key="AccentSubtle"    Color="#FAF0E6"/>
-                    <SolidColorBrush x:Key="AccentVeryLight" Color="#FAF0E6"/>
-                    <SolidColorBrush x:Key="TextH"           Color="#1C1610"/>
-                    <SolidColorBrush x:Key="TextPrimary"     Color="#1C1610"/>
-                    <SolidColorBrush x:Key="TextBody"        Color="#5A4E42"/>
-                    <SolidColorBrush x:Key="TextSecondary"   Color="#5A4E42"/>
-                    <SolidColorBrush x:Key="TextMuted"       Color="#9C8E82"/>
-                    <SolidColorBrush x:Key="Border"          Color="#DDD0C2"/>
-                    <SolidColorBrush x:Key="BorderFocus"     Color="#C07840"/>
-                    <SolidColorBrush x:Key="DlcBadgeBg"      Color="#EDE8F5"/>
-                    <SolidColorBrush x:Key="DlcBadgeFg"      Color="#6B4FA0"/>
-                    <SolidColorBrush x:Key="Success"         Color="#4A7C59"/>
-                    <SolidColorBrush x:Key="SuccessBg"       Color="#EAF4EE"/>
-                    <SolidColorBrush x:Key="SuccessLight"    Color="#EAF4EE"/>
-                    <SolidColorBrush x:Key="Error"           Color="#B83B2A"/>
-                    <SolidColorBrush x:Key="ErrorBg"         Color="#FDECEA"/>
-                    <SolidColorBrush x:Key="ErrorLight"      Color="#FDECEA"/>
-                    <SolidColorBrush x:Key="Warning"         Color="#C07012"/>
-                    <SolidColorBrush x:Key="WarningBg"       Color="#FEF3E2"/>
+                    <SolidColorBrush x:Key="BgPage"          Color="#F1E0C5"/>
+                    <SolidColorBrush x:Key="BgSidebar"       Color="#E8D2AC"/>
+                    <SolidColorBrush x:Key="BgCard"          Color="#F3E7CC"/>
+                    <SolidColorBrush x:Key="BgInput"         Color="#F8EFD9"/>
+                    <SolidColorBrush x:Key="Accent"          Color="#DA667B"/>
+                    <SolidColorBrush x:Key="AccentDark"      Color="#C24F66"/>
+                    <SolidColorBrush x:Key="AccentLight"     Color="#F2DEE3"/>
+                    <SolidColorBrush x:Key="AccentSubtle"    Color="#F8ECEE"/>
+                    <SolidColorBrush x:Key="AccentVeryLight" Color="#F8ECEE"/>
+                    <SolidColorBrush x:Key="TextH"           Color="#262B21"/>
+                    <SolidColorBrush x:Key="TextPrimary"     Color="#262B21"/>
+                    <SolidColorBrush x:Key="TextBody"        Color="#59684F"/>
+                    <SolidColorBrush x:Key="TextSecondary"   Color="#59684F"/>
+                    <SolidColorBrush x:Key="TextMuted"       Color="#7B8874"/>
+                    <SolidColorBrush x:Key="Border"          Color="#C9B79C"/>
+                    <SolidColorBrush x:Key="BorderFocus"     Color="#DA667B"/>
+                    <SolidColorBrush x:Key="DlcBadgeBg"      Color="#EEE3EA"/>
+                    <SolidColorBrush x:Key="DlcBadgeFg"      Color="#8B6C82"/>
+                    <SolidColorBrush x:Key="Success"         Color="#5C8A5A"/>
+                    <SolidColorBrush x:Key="SuccessBg"       Color="#E7F0E3"/>
+                    <SolidColorBrush x:Key="SuccessLight"    Color="#E7F0E3"/>
+                    <SolidColorBrush x:Key="Error"           Color="#B23A50"/>
+                    <SolidColorBrush x:Key="ErrorBg"         Color="#F8E2E6"/>
+                    <SolidColorBrush x:Key="ErrorLight"      Color="#F8E2E6"/>
+                    <SolidColorBrush x:Key="Warning"         Color="#B9822E"/>
+                    <SolidColorBrush x:Key="WarningBg"       Color="#F6EAD3"/>
                 </ResourceDictionary>
                 <ResourceDictionary x:Key="Dark">
-                    <Color x:Key="AccentColor">#D38C53</Color>
-                    <Color x:Key="BgCardColor">#2D2520</Color>
-                    <Color x:Key="BorderColor">#4D3E35</Color>
+                    <Color x:Key="AccentColor">#E17A8E</Color>
+                    <Color x:Key="BgCardColor">#2F323C</Color>
+                    <Color x:Key="BorderColor">#3E414C</Color>
+                    <Color x:Key="BgPageColor">#272932</Color>
 
-                    <SolidColorBrush x:Key="BgPage"          Color="#1A1612"/>
-                    <SolidColorBrush x:Key="BgSidebar"       Color="#221C18"/>
-                    <SolidColorBrush x:Key="BgCard"          Color="#2D2520"/>
-                    <SolidColorBrush x:Key="BgInput"         Color="#1E1915"/>
-                    <SolidColorBrush x:Key="Accent"          Color="#D38C53"/>
-                    <SolidColorBrush x:Key="AccentDark"      Color="#B8743C"/>
-                    <SolidColorBrush x:Key="AccentLight"     Color="#4D3A2B"/>
-                    <SolidColorBrush x:Key="AccentSubtle"    Color="#3A2D22"/>
-                    <SolidColorBrush x:Key="AccentVeryLight" Color="#3A2D22"/>
-                    <SolidColorBrush x:Key="TextH"           Color="#F5EBE0"/>
-                    <SolidColorBrush x:Key="TextPrimary"     Color="#F5EBE0"/>
-                    <SolidColorBrush x:Key="TextBody"        Color="#D2C4B4"/>
-                    <SolidColorBrush x:Key="TextSecondary"   Color="#D2C4B4"/>
-                    <SolidColorBrush x:Key="TextMuted"       Color="#8A7B6E"/>
-                    <SolidColorBrush x:Key="Border"          Color="#4D3E35"/>
-                    <SolidColorBrush x:Key="BorderFocus"     Color="#D38C53"/>
-                    <SolidColorBrush x:Key="DlcBadgeBg"      Color="#352C42"/>
-                    <SolidColorBrush x:Key="DlcBadgeFg"      Color="#B099D4"/>
-                    <SolidColorBrush x:Key="Success"         Color="#5E9C6E"/>
-                    <SolidColorBrush x:Key="SuccessBg"       Color="#223326"/>
-                    <SolidColorBrush x:Key="SuccessLight"    Color="#223326"/>
-                    <SolidColorBrush x:Key="Error"           Color="#D9534F"/>
-                    <SolidColorBrush x:Key="ErrorBg"         Color="#3D211F"/>
-                    <SolidColorBrush x:Key="ErrorLight"      Color="#3D211F"/>
-                    <SolidColorBrush x:Key="Warning"         Color="#E59833"/>
-                    <SolidColorBrush x:Key="WarningBg"       Color="#3D2C1A"/>
+                    <SolidColorBrush x:Key="BgPage"          Color="#272932"/>
+                    <SolidColorBrush x:Key="BgSidebar"       Color="#20222A"/>
+                    <SolidColorBrush x:Key="BgCard"          Color="#2F323C"/>
+                    <SolidColorBrush x:Key="BgInput"         Color="#23252D"/>
+                    <SolidColorBrush x:Key="Accent"          Color="#E17A8E"/>
+                    <SolidColorBrush x:Key="AccentDark"      Color="#C24F66"/>
+                    <SolidColorBrush x:Key="AccentLight"     Color="#4A2E38"/>
+                    <SolidColorBrush x:Key="AccentSubtle"    Color="#3A2530"/>
+                    <SolidColorBrush x:Key="AccentVeryLight" Color="#3A2530"/>
+                    <SolidColorBrush x:Key="TextH"           Color="#E7ECF4"/>
+                    <SolidColorBrush x:Key="TextPrimary"     Color="#E7ECF4"/>
+                    <SolidColorBrush x:Key="TextBody"        Color="#B6C2D9"/>
+                    <SolidColorBrush x:Key="TextSecondary"   Color="#B6C2D9"/>
+                    <SolidColorBrush x:Key="TextMuted"       Color="#828489"/>
+                    <SolidColorBrush x:Key="Border"          Color="#3E414C"/>
+                    <SolidColorBrush x:Key="BorderFocus"     Color="#E17A8E"/>
+                    <SolidColorBrush x:Key="DlcBadgeBg"      Color="#362F3D"/>
+                    <SolidColorBrush x:Key="DlcBadgeFg"      Color="#9E90A2"/>
+                    <SolidColorBrush x:Key="Success"         Color="#7FAE7C"/>
+                    <SolidColorBrush x:Key="SuccessBg"       Color="#263329"/>
+                    <SolidColorBrush x:Key="SuccessLight"    Color="#263329"/>
+                    <SolidColorBrush x:Key="Error"           Color="#E08A93"/>
+                    <SolidColorBrush x:Key="ErrorBg"         Color="#3A262A"/>
+                    <SolidColorBrush x:Key="ErrorLight"      Color="#3A262A"/>
+                    <SolidColorBrush x:Key="Warning"         Color="#D8A85B"/>
+                    <SolidColorBrush x:Key="WarningBg"       Color="#3A3122"/>
                 </ResourceDictionary>
             </ResourceDictionary.ThemeDictionaries>
+
+            <SolidColorBrush x:Key="Scrim" Color="#000000"/>
 
             <!-- ══ ScrollBar ════════════════════════════════════════════════════ -->
             <ControlTheme x:Key="{x:Type ScrollBar}" TargetType="ScrollBar">
@@ -280,7 +284,7 @@
                                 Background="{TemplateBinding Background}"
                                 CornerRadius="9"
                                 Padding="{TemplateBinding Padding}"
-                                BoxShadow="0 3 14 0 #38C07840">
+                                BoxShadow="0 3 14 0 #38DA667B">
                             <Border.Transitions>
                                 <Transitions>
                                     <BrushTransition Property="Background" Duration="0:0:0.12"/>
@@ -308,7 +312,7 @@
             </ControlTheme>
 
             <ControlTheme x:Key="BtnSecondary" TargetType="Button">
-                <Setter Property="Background" Value="Transparent"/>
+                <Setter Property="Background" Value="#00000000"/>
                 <Setter Property="Foreground" Value="{DynamicResource TextBody}"/>
                 <Setter Property="BorderBrush" Value="{DynamicResource Border}"/>
                 <Setter Property="BorderThickness" Value="1.5"/>
@@ -347,9 +351,9 @@
             </ControlTheme>
 
             <ControlTheme x:Key="BtnDanger" TargetType="Button">
-                <Setter Property="Background" Value="Transparent"/>
+                <Setter Property="Background" Value="#00000000"/>
                 <Setter Property="Foreground" Value="{DynamicResource Error}"/>
-                <Setter Property="BorderBrush" Value="#EBC5C1"/>
+                <Setter Property="BorderBrush" Value="#E3A9B5"/>
                 <Setter Property="BorderThickness" Value="1.5"/>
                 <Setter Property="Padding" Value="14,7"/>
                 <Setter Property="FontSize" Value="12"/>
@@ -381,7 +385,7 @@
             </ControlTheme>
 
             <ControlTheme x:Key="BtnGhost" TargetType="Button">
-                <Setter Property="Background" Value="Transparent"/>
+                <Setter Property="Background" Value="#00000000"/>
                 <Setter Property="Foreground" Value="{DynamicResource TextBody}"/>
                 <Setter Property="BorderThickness" Value="0"/>
                 <Setter Property="Padding" Value="10,6"/>
@@ -411,9 +415,40 @@
                 </Style>
             </ControlTheme>
 
+            <ControlTheme x:Key="{x:Type Button}" TargetType="Button">
+                <Setter Property="Background" Value="#00000000"/>
+                <Setter Property="Foreground" Value="{DynamicResource TextBody}"/>
+                <Setter Property="BorderThickness" Value="0"/>
+                <Setter Property="Cursor" Value="Hand"/>
+                <Setter Property="Template">
+                    <ControlTemplate TargetType="Button">
+                        <Border Name="bd"
+                                Background="{TemplateBinding Background}"
+                                CornerRadius="6"
+                                Padding="{TemplateBinding Padding}">
+                            <Border.Transitions>
+                                <Transitions>
+                                    <BrushTransition Property="Background" Duration="0:0:0.12"/>
+                                </Transitions>
+                            </Border.Transitions>
+                            <ContentPresenter Name="PART_ContentPresenter"
+                                              Content="{TemplateBinding Content}"
+                                              ContentTemplate="{TemplateBinding ContentTemplate}"
+                                              HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter>
+                <Style Selector="^:pointerover /template/ Border#bd">
+                    <Setter Property="Background" Value="{DynamicResource Border}"/>
+                </Style>
+                <Style Selector="^:disabled">
+                    <Setter Property="Opacity" Value="0.4"/>
+                </Style>
+            </ControlTheme>
+
             <!-- ══ BtnPill (ToggleButton) ════════════════════════════════════ -->
             <ControlTheme x:Key="BtnPill" TargetType="ToggleButton">
-                <Setter Property="Background" Value="Transparent"/>
+                <Setter Property="Background" Value="#00000000"/>
                 <Setter Property="Foreground" Value="{DynamicResource TextSecondary}"/>
                 <Setter Property="BorderBrush" Value="{DynamicResource Border}"/>
                 <Setter Property="BorderThickness" Value="1.5"/>
@@ -460,6 +495,13 @@
 
         </ResourceDictionary>
     </Styles.Resources>
+
+    <Style Selector="Button:pointerover /template/ ContentPresenter">
+        <Setter Property="Background" Value="#00000000"/>
+    </Style>
+    <Style Selector="Button:pressed /template/ ContentPresenter">
+        <Setter Property="Background" Value="#00000000"/>
+    </Style>
 
     <!-- ══ TextBlock class-based styles ════════════════════════════════════ -->
     <Style Selector="TextBlock.TextH1">
@@ -554,10 +596,12 @@
         <Setter Property="Padding" Value="8,3"/>
     </Style>
     <Style Selector="Border.DepotListItem">
-        <Setter Property="Background" Value="Transparent"/>
         <Setter Property="CornerRadius" Value="8"/>
         <Setter Property="Padding" Value="10,8"/>
         <Setter Property="Margin" Value="0,2"/>
+    </Style>
+    <Style Selector="Border.DepotListItem:not(:pointerover)">
+        <Setter Property="Background" Value="Transparent"/>
     </Style>
 
     <!-- ══ ScrollViewer global style ════════════════════════════════════ -->
